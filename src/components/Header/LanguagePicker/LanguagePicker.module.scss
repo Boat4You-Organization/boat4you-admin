@@ -1,0 +1,17 @@
+@use '@/styles/settings/variables' as *;
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/mixins/breakpoints' as *;
+
+.iconButtonRoot {
+  &.iconButton {
+    background-color: $blue-500;
+    width: rem-calc(40);
+    height: rem-calc(40);
+    border-radius: rem-calc(8);
+    transition: background-color $animation-duration-normal $timing-function;
+
+    &:hover {
+      background-color: $blue-600;
+    }
+  }
+}

@@ -1,0 +1,15 @@
+@use '@/styles/settings/variables' as *;
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/mixins/breakpoints' as *;
+
+.countryWrapper {
+  position: relative;
+  width: rem-calc(24);
+  height: rem-calc(24);
+
+  .country {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}

@@ -1,0 +1,20 @@
+@use '@/styles/settings/variables' as *;
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/mixins/breakpoints' as *;
+
+.dataDesktop {
+  display: block;
+
+  @include media(0, 'md') {
+    display: none;
+  }
+}
+
+.dataMobile {
+  display: none;
+
+  @include media(0, 'md') {
+    display: flex;
+    flex-direction: column;
+  }
+}

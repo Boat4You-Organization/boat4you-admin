@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.paths.json",
+  "compilerOptions": {
+    "target": "es6",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "strictNullChecks": true,
+    "jsx": "react-jsx",
+    "experimentalDecorators": true,
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["react", "node"],
+    "baseUrl": "src",
+    "noFallthroughCasesInSwitch": true,
+    "typeRoots": ["./typings.d.ts", "node_modules/@types"]
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.vite.json" }],
+  "exclude": ["node_modules", "build", "dist"]
+}

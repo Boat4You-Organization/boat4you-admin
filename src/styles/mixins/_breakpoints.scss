@@ -1,0 +1,30 @@
+@use 'sass:map';
+@use '../settings/variables' as *;
+
+@mixin media($fromBr: 0, $toBr: 0) {
+  $from: $fromBr;
+  @if map.has-key($breakpoints, $fromBr) {
+    $from: map.get($breakpoints, $fromBr);
+  }
+
+  $to: $toBr;
+  @if map.has-key($breakpoints, $toBr) {
+    $to: map.get($breakpoints, $toBr);
+  }
+
+  @if $from != 0 and $to != 0 {
+    @media screen and (min-width: $from) and (max-width: $to) {
+      @content;
+    }
+  } @else if $from != 0 and $to == 0 {
+    @media screen and (min-width: $from) {
+      @content;
+    }
+  } @else if $from == 0 and $to != 0 {
+    @media screen and (max-width: $to) {
+      @content;
+    }
+  } @else {
+    @error 'Required parameter $from or $to is missing.';
+  }
+}

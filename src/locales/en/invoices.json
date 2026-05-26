@@ -1,0 +1,33 @@
+{
+  "invoice-details": {
+    "title": "Invoice Details",
+    "invoice-number": "Invoice number",
+    "invoice-date": "Date",
+    "invoice-language": "Language",
+    "invoice-vat": "VAT",
+    "included": "Included"
+  },
+  "recipient-details": {
+    "title": "Recipient Details",
+    "recipient-name": "Name",
+    "recipient-type": "Type",
+    "recipient-city": "City",
+    "recipient-street": "Street",
+    "recipient-country": "Country",
+    "recipient-zip": "Zip code",
+    "recipient-vat-code": "VAT Code"
+  },
+  "booking-details": {
+    "title": "Booking Details",
+    "booking-number": "Booking number",
+    "client-name": "Client name",
+    "client-email": "Client email",
+    "client-phone": "Client phone number",
+    "invoice-item": "Item Description"
+  },
+  "pricing-details": {
+    "title": "Pricing",
+    "price-without-vat": "Price without VAT",
+    "total": "Total"
+  }
+}

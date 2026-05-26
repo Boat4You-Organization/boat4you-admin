@@ -1,0 +1,25 @@
+{
+  "dashboard": "Nadzorna ploča",
+  "offers": "Ponude",
+  "customBoats": "Prilagođeni brodovi",
+  "bookings": "Rezervacije",
+  "invoices": "Računi",
+  "inquiries": "Upiti",
+  "extras": "Dodaci",
+  "agencies": "Agencije",
+  "users": "Korisnici",
+  "profileSettings": "Profil",
+  "logout": "Odjavi se",
+  "languagePicker": {
+    "title": "Odaberi jezik",
+    "savePreferences": "Sačuvaj promijene",
+    "languageLabel": "Jezik"
+  },
+  "about": {
+    "title": "O nama"
+  },
+  "preferences": {
+    "title": "Postavke i profil",
+    "language": "Jezik"
+  }
+}

@@ -1,0 +1,30 @@
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/settings/variables' as *;
+@use '@/styles/mixins/breakpoints' as *;
+
+.container {
+  padding-block: rem-calc(24);
+  border-bottom: rem-calc(1) solid $black-200;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    .editButton {
+      text-decoration: underline;
+      color: $black-950;
+    }
+  }
+
+  .action {
+    margin-top: rem-calc(32);
+    display: flex;
+    flex-direction: column;
+    gap: rem-calc(16);
+  }
+}

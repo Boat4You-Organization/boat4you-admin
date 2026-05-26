@@ -1,0 +1,25 @@
+{
+  "dashboard": "Dashboard",
+  "offers": "Offers",
+  "customBoats": "Custom boats",
+  "bookings": "Bookings",
+  "invoices": "Invoices",
+  "inquiries": "Inquiries",
+  "extras": "Extras",
+  "agencies": "Agencies",
+  "users": "Users",
+  "profileSettings": "Profile Settings",
+  "logout": "Logout",
+  "languagePicker": {
+    "title": "Select Language",
+    "savePreferences": "Save Preferences",
+    "languageLabel": "Language"
+  },
+  "about": {
+    "title": "About"
+  },
+  "preferences": {
+    "title": "Preferences and profile",
+    "language": "Language"
+  }
+}

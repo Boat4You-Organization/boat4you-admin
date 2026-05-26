@@ -1,0 +1,136 @@
+{
+  "skipper": "Skipper service",
+  "skipper-description": "Professional crew member who operates and navigates the yacht",
+
+  "hostess": "Hostess",
+  "hostess-description": "Crew member responsible for guest services and cabin maintenance",
+
+  "cook": "Cook / Chef",
+  "cook-description": "Professional chef to prepare meals during your charter",
+
+  "towels": "Towels",
+  "towels-description": "Clean towels provided for your comfort during the charter",
+
+  "pets-onboard": "Pets onboard",
+  "pets-onboard-description": "Permission and accommodation for your pets during the charter",
+
+  "safety-net": "Safety net",
+  "safety-net-description": "Safety nets installed around the yacht for enhanced security",
+
+  "beach-towels": "Beach towels",
+  "beach-towels-description": "Special towels for beach and water activities",
+
+  "dinghy-outboard-engine": "Dinghy with outboard engine",
+  "dinghy-outboard-engine-description": "Motorized tender for easy transportation to shore",
+
+  "stand-up-paddle-SUP": "Stand up paddle (SUP)",
+  "stand-up-paddle-SUP-description": "Paddleboard equipment for water sports and recreation",
+
+  "kayak": "Kayak",
+  "kayak-description": "Single or double kayak for exploring coastlines and coves",
+
+  "tourist-tax": "Tourist tax",
+  "tourist-tax-description": "Local government fees required for visiting certain destinations",
+
+  "transit-log": "Transit log / Final cleaning",
+  "transit-log-description": "Charter pack including final cleaning and transit documentation",
+
+  "refundable-security-deposit": "Refundable security deposit",
+  "refundable-security-deposit-description": "Security deposit that will be returned if no damages occur",
+
+  "deposit-insurance": "Deposit insurance",
+  "deposit-insurance-description": "Insurance coverage to protect your security deposit",
+
+  "early-boarding": "Early boarding / Check-in",
+  "early-boarding-description": "Board the yacht before standard check-in time",
+
+  "late-boarding": "Late boarding / Check-in",
+  "late-boarding-description": "Flexible check-out time beyond standard hours",
+
+  "wi-fi": "Wi-Fi / Internet pack",
+  "wi-fi-description": "Internet connectivity during your charter",
+
+  "vip-pack": "VIP pack",
+  "vip-pack-description": "Premium service package with exclusive amenities",
+
+  "grill": "Grill / Barbecue",
+  "grill-description": "Outdoor cooking equipment for grilling and barbecuing",
+
+  "coffee-machine": "Coffee Machine",
+  "coffee-machine-description": "Professional coffee machine for fresh coffee during your trip",
+
+  "fishing-equipment": "Fishing equipment",
+  "fishing-equipment-description": "Complete fishing gear including rods, reels, and tackle",
+
+  "underwater-scooter": "Underwater scooter",
+  "underwater-scooter-description": "Motorized device for underwater exploration and fun",
+
+  "family-pack": "Family pack",
+  "family-pack-description": "Special package designed for families with children",
+
+  "adrenalin-pack": "Adrenaline pack",
+  "adrenalin-pack-description": "High-energy water sports equipment package",
+
+  "apa": "APA (advance provisioning allowance)",
+  "apa-description": "Advance payment for fuel, food, drinks, and port fees",
+
+  "permit-for-montenegro": "Permit for Montenegro",
+  "permit-for-montenegro-description": "Required documentation for sailing in Montenegrin waters",
+
+  "inflatable-lifejacket": "Inflatable lifejacket",
+  "inflatable-lifejacket-description": "Additional safety equipment for water activities",
+
+  "donut": "Donut tube",
+  "donut-description": "Inflatable ring for fun water activities and relaxation",
+
+  "water-skies": "Water skis",
+  "water-skies-description": "Equipment for water skiing behind the yacht or tender",
+
+  "larger-rib": "Larger RIB / Dinghy",
+  "larger-rib-description": "Bigger tender with more capacity and better performance",
+
+  "snorkeling-equipment": "Snorkeling equipment",
+  "snorkeling-equipment-description": "Masks, fins, and snorkels for underwater exploration",
+
+  "wakeboard": "Wakeboard",
+  "wakeboard-description": "Board and equipment for wakeboarding water sports",
+
+  "seabob": "Seabob",
+  "seabob-description": "High-tech underwater scooter for diving and surface riding",
+
+  "water-tube": "Water tube",
+  "water-tube-description": "Inflatable tube for towing behind the yacht or tender",
+
+  "mono-skis": "Mono skis",
+  "mono-skis-description": "Single water ski for advanced water skiing",
+
+  "kneeboard": "Kneeboard",
+  "kneeboard-description": "Board for kneeboarding water sports activities",
+
+  "floating-mats": "Floating mats",
+  "floating-mats-description": "Large floating platforms for relaxation on water",
+
+  "banana-boat": "Banana boat",
+  "banana-boat-description": "Fun inflatable ride for multiple passengers",
+
+  "towing-air-tube-ring": "Towing air tube ring",
+  "towing-air-tube-ring-description": "Inflatable ring for exciting towing activities",
+
+  "diving-equipment": "Diving equipment",
+  "diving-equipment-description": "Complete scuba diving gear including tanks and regulators",
+
+  "subwing": "Subwing board",
+  "subwing-description": "Underwater wings for gliding beneath the surface",
+
+  "inflatable-swimming-platform": "Inflatable swimming platform",
+  "inflatable-swimming-platform-description": "Additional floating platform for swimming and relaxation",
+
+  "jet-ski": "Jet ski",
+  "jet-ski-description": "Personal watercraft for high-speed water adventures",
+
+  "efoil": "E-foil board",
+  "efoil-description": "Electric hydrofoil board for surfing above the water",
+
+  "airstream-towable": "Airstream towable",
+  "airstream-towable-description": "Premium inflatable for high-speed towing activities"
+}

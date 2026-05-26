@@ -1,0 +1,38 @@
+{
+  "title": "Prijava u admin panel",
+  "email-address": "Email",
+  "password": "Lozinka",
+  "logging-in": "Prijava...",
+  "log-in": "Prijavi se",
+  "toggle-password-visibility": "Prikaži/sakrij lozinku",
+  "remember-me": "Zapamti me",
+  "forgotten-password": "Zaboravljena lozinka?",
+  "back-to-login": "Povratak na prijavu",
+  "reset-password": {
+    "title": "Resetiranje lozinke",
+    "button": "Pošalji aktivacijski kod",
+    "check-mailbox": "Provjeri svoj pretinac!",
+    "check-mailbox-description": "Kod je poslan na email <strong>{{name}}</strong>"
+  },
+  "setup-password": {
+    "title": "Postavi novu lozinku",
+    "description": "Unesi svoju novu lozinku.",
+    "repeat-password": "Ponovi lozinku",
+    "reset-password": "Resetiraj lozinku",
+    "glad-you-back": "Drago nam je što si se vratio!",
+    "resetted-successfully": "Lozinka je uspješno postavljena. Prijavite se u nastavku.",
+    "password-reset-failed": "Resetiranje lozinke nije uspjelo",
+    "password-reset-failed-description": "Nažalost, vaš kod za resetiranje lozinke je nevažeći ili je istekao. Provjerite poveznicu ili zatražite novo resetiranje lozinke."
+  },
+  "signup": {
+    "title": "Postavite svoj račun.",
+    "description": "Pozvani ste da koristite Boat4You. Molimo dovršite svoj profil u nastavku.",
+    "repeat-password": "Ponovite lozinku",
+    "sign-up": "Registriraj se",
+    "signing-up": "Registracija u tijeku...",
+    "invite-failed": "Pozivni kod nije ispravan",
+    "invite-failed-description": "Žao nam je, ali vaš poziv je nevažeći ili je istekao. Provjerite poveznicu ili zatražite novi poziv.",
+    "sign-up-successfully": "Registracija uspješna",
+    "sign-up-failed": "Registracija nije uspjela"
+  }
+}

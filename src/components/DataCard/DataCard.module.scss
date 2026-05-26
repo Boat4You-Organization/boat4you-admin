@@ -1,0 +1,8 @@
+@use '@/styles/settings/variables' as *;
+@use '@/styles/utils/rem-calc' as *;
+
+.container {
+  border-radius: rem-calc(12);
+  padding: rem-calc(16);
+  background-color: $white;
+}

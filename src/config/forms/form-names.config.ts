@@ -1,0 +1,16 @@
+export const CREATE_CUSTOM_BOAT_FORM = 'create-custom-boat-form';
+export const UPDATE_CUSTOM_BOAT_FORM = 'update-custom-boat-form';
+export const LOGIN_FORM = 'login-form';
+export const FORGOT_PASSWORD_FORM = 'forgot-password-form';
+export const RESET_PASSWORD_FORM = 'reset-password-form';
+export const PROFILE_FORM = 'profile-form';
+export const CREATE_USER_FORM = 'create-user-form';
+export const UPDATE_USER_FORM = 'update-user-form';
+export const UPDATE_GENERAL_AGENCY_FORM = 'update-general-agency-form';
+export const UPDATE_YACHTS_AGENCY_FORM = 'update-yachts-agency-form';
+export const SIGNUP_FORM = 'signup-form';
+export const CHANGE_INQUIRY_STATUS_FORM = 'change-inquiry-status-form';
+export const CONFIRM_RESERVATION_FORM = 'confirm-reservation-form';
+export const MARK_PAID_RESERVATION_FORM = 'mark-paid-reservation-form';
+export const CREATE_INVOICE = 'create-invoice';
+export const UPDATE_INVOICE = 'update-invoice';

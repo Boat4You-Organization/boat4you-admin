@@ -1,0 +1,77 @@
+@use 'sass:map';
+
+// Colors
+$blue-950: #141857;
+$blue-900: #19238f;
+$blue-800: #1722b6;
+$blue-700: #1428e1;
+$blue-600: #1b3bf5;
+$blue-500: #2856ff;
+$blue-400: #5988ff;
+$blue-300: #8eb2ff;
+$blue-200: #bcd0ff;
+$blue-100: #d9e4ff;
+$blue-50: #eef3ff;
+$black-950: #292929;
+$black-900: #3d3d3d;
+$black-800: #464646;
+$black-700: #525252;
+$black-600: #656565;
+$black-500: #7c7c7c;
+$black-400: #989898;
+$black-350: #979797;
+$black-300: #bdbdbd;
+$black-200: #dcdcdc;
+$black-100: #efefef;
+$red-950: #4b0404;
+$red-900: #881414;
+$red-800: #a50f0f;
+$red-700: #c80d0d;
+$red-600: #ed1515;
+$red-500: #ff2828;
+$red-400: #ff6464;
+$red-300: #ff9d9d;
+$red-200: #ffc5c5;
+$red-100: #ffdfdf;
+$red-50: #fff1f1;
+$mandalay-950: #442704;
+$mandalay-900: #754a0e;
+$mandalay-800: #8a5b09;
+$mandalay-700: #ab7801;
+$mandalay-600: #d2a400;
+$mandalay-500: #f3d300;
+$mandalay-400: #ffec0c;
+$mandalay-300: #fffa40;
+$mandalay-200: #feff85;
+$mandalay-100: #fcffc1;
+$mandalay-50: #feffe7;
+$yellow-500: #ab7801;
+$yellow-50: #fff7e5;
+$green-500: #309a49;
+$green-50: #f1ffe0;
+$white: #fff;
+$black: #111;
+
+// Fonts
+$primary-font-family: 'Raleway', sans-serif;
+
+// Shadows
+$box-shadow-caledar: 0px 4px 14px 0px rgb(0 0 0 / 15%);
+$box-shadow-caledar: 0px 1px 11px 0px rgb(0 0 0 / 10%);
+$box-shadow-caledar-navigation: 0px -4px 24px 0px rgb(0 0 0 / 7%);
+$box-shadow-booking-navigation: 0 -4px 24px 0 rgb(0 0 0 / 7%);
+
+// Transitions
+$timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+$animation-duration-fast: 300ms;
+$animation-duration-normal: 500ms;
+
+// Breakpoints and sizes
+$breakpoints: (
+  xs: 0,
+  sm: 640px,
+  md: 768px,
+  lg: 1024px,
+  xl: 1280px,
+);
+$max-width: map.get($breakpoints, 'xl');

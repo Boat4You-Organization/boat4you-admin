@@ -1,0 +1,30 @@
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/settings/variables' as *;
+
+.container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: rem-calc(8);
+  border-radius: rem-calc(10);
+  color: $black-950;
+  margin-bottom: rem-calc(4);
+  cursor: pointer;
+  transition: background-color $animation-duration-fast ease;
+
+  &:hover {
+    background-color: $black-100;
+  }
+
+  &:active {
+    background-color: $black-200;
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &.active {
+    background-color: $blue-50;
+  }
+}

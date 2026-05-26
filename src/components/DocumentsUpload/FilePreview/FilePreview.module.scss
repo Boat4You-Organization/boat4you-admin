@@ -1,0 +1,35 @@
+@use '@/styles/settings/variables' as *;
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/mixins/breakpoints' as *;
+
+.container {
+  height: rem-calc(189);
+  width: 100%;
+  background-color: $blue-50;
+  border-radius: rem-calc(4);
+  overflow: hidden;
+
+  .chip {
+    position: absolute;
+    top: rem-calc(8);
+    left: rem-calc(8);
+    border-radius: rem-calc(40);
+    padding: rem-calc(8 12);
+    background-color: $white;
+    box-shadow: $box-shadow-caledar;
+  }
+
+  .imagePreview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .progressBarWrapper {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgb(0 0 0 / 40%) 0%, rgb(0 0 0 / 40%) 100%);
+    height: 100%;
+    width: 100%;
+  }
+}

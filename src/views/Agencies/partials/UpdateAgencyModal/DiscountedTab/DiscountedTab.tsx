@@ -1,0 +1,97 @@
+import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { Box, CircularProgress, Stack, Typography } from '@mui/material';
+
+import Checkbox from '@/components/Checkbox';
+import { AgencyModel, AgencyYachtModel } from '@/models/agencies.model';
+import AgenciesService from '@/services/agencies.service';
+import colors from '@/styles/themes/colors';
+
+interface DiscountedTabProps {
+  agency: AgencyModel;
+  onYachtsChange?: (yachts: AgencyYachtModel[]) => void;
+}
+
+const DiscountedTab = ({ agency, onYachtsChange }: DiscountedTabProps) => {
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [agenciesYachts, setAgenciesYachts] = useState<AgencyYachtModel[]>([]);
+  const { t } = useTranslation();
+
+  const handleSelect = (yachts: AgencyYachtModel[]) => {
+    setAgenciesYachts(yachts);
+
+    if (onYachtsChange) {
+      onYachtsChange(yachts);
+    }
+  };
+
+  const handleCheckboxChange = (id: number, checked: boolean) => {
+    const updatedYachts = agenciesYachts.map(yacht =>
+      yacht.id === id ? { ...yacht, excludeDiscount: checked } : yacht
+    );
+
+    handleSelect(updatedYachts);
+  };
+
+  useEffect(() => {
+    if (agency.id) {
+      (async (): Promise<void> => {
+        setIsLoading(true);
+
+        const content = await AgenciesService.getYachtsAgency(agency.id);
+
+        setAgenciesYachts(content);
+        setIsLoading(false);
+      })();
+    }
+  }, [agency.id]);
+
+  return (
+    <Stack direction="column" spacing={3}>
+      <Typography variant="body1" color={colors.black950}>
+        {t('common.discount-not-applicable')}
+      </Typography>
+      <Stack direction="column" spacing={1}>
+        {isLoading ? (
+          <Stack alignItems="center" py={4}>
+            <CircularProgress />
+          </Stack>
+        ) : (
+          agenciesYachts.map(({ id, name, excludeDiscount }) => (
+            <Box
+              key={id}
+              onClick={() => handleCheckboxChange(id, !excludeDiscount)}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                p: 1,
+                cursor: 'pointer',
+                borderRadius: 1,
+                transition: 'all 0.2s ease',
+                '&:hover': {
+                  backgroundColor: colors.black100,
+                },
+              }}
+            >
+              <Checkbox
+                checked={excludeDiscount || false}
+                onChange={e => {
+                  e.stopPropagation();
+                  handleCheckboxChange(id, e.target.checked);
+                }}
+              />
+
+              <Typography variant="body2" color={colors.black950} sx={{ userSelect: 'none' }}>
+                {name}
+              </Typography>
+            </Box>
+          ))
+        )}
+      </Stack>
+    </Stack>
+  );
+};
+
+export default DiscountedTab;

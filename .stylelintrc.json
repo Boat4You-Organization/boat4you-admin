@@ -1,0 +1,12 @@
+{
+  "extends": ["stylelint-config-standard-scss", "stylelint-config-prettier-scss"],
+  "plugins": ["stylelint-scss"],
+  "rules": {
+    "at-rule-no-unknown": null,
+    "selector-class-pattern": null,
+    "scss/no-global-function-names": null,
+    "scss/at-import-partial-extension": null,
+    "scss/at-rule-no-unknown": true,
+    "unit-no-unknown": [true, { "ignoreUnits": ["dvh"] }]
+  }
+}

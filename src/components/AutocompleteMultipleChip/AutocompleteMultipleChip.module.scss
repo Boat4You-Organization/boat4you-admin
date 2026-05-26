@@ -1,0 +1,29 @@
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/settings/variables' as *;
+
+.root {
+  height: 100%;
+
+  .input {
+    height: 100%;
+    padding-block: rem-calc(12);
+    padding-inline: rem-calc(12 42);
+    transition: padding $animation-duration-fast $timing-function;
+
+    &.compact {
+      padding: 0;
+    }
+
+    & fieldset {
+      border: none;
+      flex-wrap: nowrap;
+      overflow: hidden;
+      padding: 0;
+    }
+  }
+}
+
+.paper {
+  border-radius: rem-calc(10);
+  box-shadow: rem-calc(0 4 14 0) rgb(0 0 0 / 15%);
+}

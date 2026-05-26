@@ -1,0 +1,38 @@
+@use '@/styles/settings/variables' as *;
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/mixins/breakpoints' as *;
+
+.root {
+  &.container {
+    min-height: auto;
+    min-width: auto;
+    padding: rem-calc(12 16);
+    background-color: transparent;
+    color: $black-600;
+    border-radius: rem-calc(100);
+    transition:
+      background-color $animation-duration-normal ease-in-out,
+      color $animation-duration-normal ease-in-out;
+
+    &:hover {
+      background-color: $black-100;
+      color: $black-950;
+    }
+  }
+}
+
+.selected {
+  &.container {
+    border-width: rem-calc(2);
+    background-color: $blue-50;
+    color: $blue-500;
+    transition:
+      background-color $animation-duration-normal ease-in-out,
+      color $animation-duration-normal ease-in-out;
+
+    &:hover {
+      background-color: $blue-50;
+      color: $blue-500;
+    }
+  }
+}

@@ -1,0 +1,33 @@
+@use '@/styles/settings/variables' as *;
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/mixins/breakpoints' as *;
+
+.container {
+  .boatImage {
+    height: rem-calc(104);
+    width: rem-calc(104);
+    border-radius: rem-calc(5);
+    overflow: hidden;
+
+    .image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+  }
+
+  .link {
+    display: flex;
+    align-items: center;
+    gap: rem-calc(8);
+    color: $blue-500;
+    text-decoration: underline;
+  }
+
+  .generalInfoWrapper {
+    @include media(0, 'md') {
+      padding-top: rem-calc(24);
+      border-top: rem-calc(1) solid $black-200;
+    }
+  }
+}

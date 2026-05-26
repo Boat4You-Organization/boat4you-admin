@@ -1,0 +1,136 @@
+{
+  "skipper": "Skiperske usluge",
+  "skipper-description": "Profesionalni član posade koji upravlja i navigira jahtom",
+
+  "hostess": "Hostesa",
+  "hostess-description": "Član posade zadužen za uslugu gostiju i održavanje kabina",
+
+  "cook": "Kuhar",
+  "cook-description": "Profesionalni kuhar koji priprema obroke tijekom vašeg najma",
+
+  "towels": "Ručnici",
+  "towels-description": "Čisti ručnici osigurani za vašu udobnost tijekom najma",
+
+  "pets-onboard": "Kućni ljubimci na brodu",
+  "pets-onboard-description": "Dopušten boravak i smještaj vaših kućnih ljubimaca tijekom najma",
+
+  "safety-net": "Zaštitna mreža",
+  "safety-net-description": "Sigurnosne mreže postavljene oko jahte radi dodatne sigurnosti",
+
+  "beach-towels": "Ručnici za plažu",
+  "beach-towels-description": "Posebni ručnici za plažu i vodene aktivnosti",
+
+  "dinghy-outboard-engine": "Gumenjak s vanbrodskim motorom",
+  "dinghy-outboard-engine-description": "Motorni pomoćni čamac za lakši prijevoz do obale",
+
+  "stand-up-paddle-SUP": "SUP daska (Stand Up Paddle)",
+  "stand-up-paddle-SUP-description": "Oprema za daskanje na vodi radi sporta i rekreacije",
+
+  "kayak": "Kajak",
+  "kayak-description": "Jednosjed ili dvosjed za istraživanje obale i uvala",
+
+  "tourist-tax": "Boravišna pristojba",
+  "tourist-tax-description": "Lokalne pristojbe koje se plaćaju za posjet određenim destinacijama",
+
+  "transit-log": "Tranzitni log / Završno čišćenje",
+  "transit-log-description": "Charter paket koji uključuje završno čišćenje i tranzitnu dokumentaciju",
+
+  "refundable-security-deposit": "Povratni sigurnosni depozit",
+  "refundable-security-deposit-description": "Depozit koji se vraća ako ne dođe do štete",
+
+  "deposit-insurance": "Osiguranje depozita",
+  "deposit-insurance-description": "Osiguranje koje štiti vaš sigurnosni depozit",
+
+  "early-boarding": "Rani ukrcaj / prijava",
+  "early-boarding-description": "Ukrcaj na jahtu prije standardnog vremena prijave",
+
+  "late-boarding": "Kasni ukrcaj / prijava",
+  "late-boarding-description": "Fleksibilno vrijeme odjave nakon standardnih sati",
+
+  "wi-fi": "Wi-Fi paket / Internet",
+  "wi-fi-description": "Internetska povezanost tijekom vašeg najma",
+
+  "vip-pack": "VIP paket",
+  "vip-pack-description": "Premium paket usluga s ekskluzivnim pogodnostima",
+
+  "grill": "Roštilj / Barbecue",
+  "grill-description": "Vanjska oprema za roštiljanje i pripremu hrane",
+
+  "coffee-machine": "Aparat za kavu",
+  "coffee-machine-description": "Profesionalni aparat za pripremu svježe kave tijekom putovanja",
+
+  "fishing-equipment": "Oprema za ribolov",
+  "fishing-equipment-description": "Kompletna ribolovna oprema uključujući štapove, role i pribor",
+
+  "underwater-scooter": "Podvodni skuter",
+  "underwater-scooter-description": "Motorni uređaj za istraživanje podvodnog svijeta i zabavu",
+
+  "family-pack": "Obiteljski paket",
+  "family-pack-description": "Poseban paket namijenjen obiteljima s djecom",
+
+  "adrenalin-pack": "Adrenalinski paket",
+  "adrenalin-pack-description": "Paket opreme za adrenalinske vodene sportove",
+
+  "apa": "APA (avans za troškove)",
+  "apa-description": "Predujam za gorivo, hranu, piće i lučke pristojbe",
+
+  "permit-for-montenegro": "Dozvola za Crnu Goru",
+  "permit-for-montenegro-description": "Potrebna dokumentacija za plovidbu u crnogorskim vodama",
+
+  "inflatable-lifejacket": "Naprtnjak / Napuhavajući prsluk za spašavanje",
+  "inflatable-lifejacket-description": "Dodatna sigurnosna oprema za vodene aktivnosti",
+
+  "donut": "Kružni plivač (donut)",
+  "donut-description": "Naduvani prsten za zabavne vodene aktivnosti i opuštanje",
+
+  "water-skies": "Skije na vodi",
+  "water-skies-description": "Oprema za skijanje na vodi iza jahte ili pomoćnog čamca",
+
+  "larger-rib": "Veći RIB / gumenjak",
+  "larger-rib-description": "Veći pomoćni čamac s više kapaciteta i boljim performansama",
+
+  "snorkeling-equipment": "Oprema za ronjenje na dah",
+  "snorkeling-equipment-description": "Maske, peraje i disalice za istraživanje podvodnog svijeta",
+
+  "wakeboard": "Wakeboard daska",
+  "wakeboard-description": "Daska i oprema za wakeboarding vodene sportove",
+
+  "seabob": "Seabob skuter",
+  "seabob-description": "Vrhunski podvodni skuter za ronjenje i vožnju po površini",
+
+  "water-tube": "Vučna cijev na napuhavanje",
+  "water-tube-description": "Naduvani tubus za vuču iza jahte ili pomoćnog čamca",
+
+  "mono-skis": "Mono skije",
+  "mono-skis-description": "Jedna skija za napredne vozače na vodi",
+
+  "kneeboard": "Kneeboard daska",
+  "kneeboard-description": "Daska za vodeni sport vožnje klečeći",
+
+  "floating-mats": "Plutajuće prostirke",
+  "floating-mats-description": "Velike plutajuće platforme za opuštanje na vodi",
+
+  "banana-boat": "Banana čamac",
+  "banana-boat-description": "Zabavno naduvano plovilo za više osoba",
+
+  "towing-air-tube-ring": "Vučni zračni prsten",
+  "towing-air-tube-ring-description": "Naduvani prsten za uzbudljive aktivnosti vuče",
+
+  "diving-equipment": "Oprema za ronjenje",
+  "diving-equipment-description": "Kompletna oprema za ronjenje s bocama uključujući boce i regulatore",
+
+  "subwing": "Subwing daska",
+  "subwing-description": "Podvodna krila za klizanje ispod površine",
+
+  "inflatable-swimming-platform": "Napuhavajuća plivajuća platforma",
+  "inflatable-swimming-platform-description": "Dodatna plutajuća platforma za plivanje i opuštanje",
+
+  "jet-ski": "Jet ski",
+  "jet-ski-description": "Osobno plovilo za brze vodene avanture",
+
+  "efoil": "E-Foil daska",
+  "efoil-description": "Električna hidrofoil daska za surfanje iznad vode",
+
+  "airstream-towable": "Airstream vučna igračka",
+  "airstream-towable-description": "Premium naduvano plovilo za brze aktivnosti vuče"
+}

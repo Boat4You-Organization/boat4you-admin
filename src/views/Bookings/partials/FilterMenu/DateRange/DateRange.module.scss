@@ -1,0 +1,29 @@
+@use '@/styles/settings/variables' as *;
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/mixins/breakpoints' as *;
+
+.rootButton {
+  &.customButton {
+    justify-content: flex-start;
+    border-radius: rem-calc(12);
+    font-weight: 500;
+    gap: rem-calc(8);
+    align-self: stretch;
+    padding-block: 0;
+    border: rem-calc(1) solid $black-200;
+    padding: rem-calc(12);
+    height: rem-calc(47);
+
+    &:hover {
+      border-color: $black-500;
+    }
+  }
+
+  &.isButtonActive {
+    border-color: $blue-500;
+  }
+
+  &.isButtonExpanded {
+    padding: 0;
+  }
+}

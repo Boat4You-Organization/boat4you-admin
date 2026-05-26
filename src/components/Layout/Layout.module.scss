@@ -1,0 +1,13 @@
+@use '@/styles/settings/variables' as *;
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/mixins/breakpoints' as *;
+
+.main {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  background-color: $white;
+  overflow-y: scroll;
+  height: 100vh;
+  max-height: 100vh;
+}

@@ -1,0 +1,77 @@
+@use '@/styles/settings/variables' as *;
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/mixins/breakpoints' as *;
+
+.buttonDesktopRoot {
+  &.desktopButton {
+    display: flex;
+    align-items: center;
+    gap: rem-calc(10);
+    padding: rem-calc(8);
+    border-radius: rem-calc(8);
+    cursor: pointer;
+
+    @include media(0, 'xl') {
+      display: none;
+    }
+  }
+}
+
+.buttonMobileRoot {
+  &.mobileButton {
+    display: none;
+    background-color: transparent;
+
+    &:hover {
+      color: inherit;
+      background-color: transparent;
+    }
+
+    &:active {
+      color: inherit;
+      background-color: transparent;
+    }
+
+    @include media(0, 'xl') {
+      display: flex;
+    }
+  }
+}
+
+.menuRoot {
+  .paper {
+    margin-top: rem-calc(32);
+    width: rem-calc(348);
+    padding: rem-calc(8 16);
+    border-radius: rem-calc(10);
+
+    .menuItem {
+      display: flex;
+      align-items: center;
+      gap: rem-calc(8);
+      width: 100%;
+      background-color: $white;
+      border-radius: rem-calc(12);
+      padding: rem-calc(8);
+      margin-bottom: rem-calc(4);
+
+      &:hover {
+        background-color: $black-100;
+      }
+
+      &:active {
+        background-color: $black-200;
+      }
+    }
+
+    .logoutButton {
+      display: flex;
+      align-items: center;
+      gap: rem-calc(8);
+    }
+
+    .list {
+      gap: 0;
+    }
+  }
+}

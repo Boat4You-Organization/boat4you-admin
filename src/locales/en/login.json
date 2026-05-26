@@ -1,0 +1,38 @@
+{
+  "title": "Admin Panel Login",
+  "email-address": "Email",
+  "password": "Password",
+  "logging-in": "Logging in...",
+  "log-in": "Login",
+  "toggle-password-visibility": "Toggle password visibility",
+  "remember-me": "Remember me",
+  "forgotten-password": "Forgotten password?",
+  "back-to-login": "Back to login",
+  "reset-password": {
+    "title": "Reset Password",
+    "button": "Send reactivation code",
+    "check-mailbox": "Check your mailbox!",
+    "check-mailbox-description": "A code has been sent to email <strong>{{name}}</strong>"
+  },
+  "setup-password": {
+    "title": "Setup New Password",
+    "description": "Input your new password.",
+    "repeat-password": "Repeat password",
+    "reset-password": "Reset Password",
+    "glad-you-back": "Glad to have you back!",
+    "resetted-successfully": "Password has been resetted successfully. Login below.",
+    "password-reset-failed": "Password reset code failed",
+    "password-reset-failed-description": "We are sorry, but your password reset code is either invalid or has expired. Please check the link or request a new password reset."
+  },
+  "signup": {
+    "title": "Set up your account.",
+    "description": "You’ve been invited to use Boat4You. Please finish up your profile below.",
+    "repeat-password": "Repeat password",
+    "sign-up": "Sing up",
+    "signing-up": "Signing Up...",
+    "invite-failed": "Invite code failed",
+    "invite-failed-description": " We are sorry, but your invite is either invalid or has expired. Please check the link or request a new invitation.",
+    "sign-up-successfully": "Signed up successfully",
+    "sign-up-failed": "Failed to sign up"
+  }
+}

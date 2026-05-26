@@ -1,0 +1,46 @@
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/settings/variables' as *;
+
+.hamburgerMenu {
+  width: rem-calc(32);
+  height: rem-calc(32);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  cursor: pointer;
+  gap: rem-calc(4);
+
+  .bar {
+    height: rem-calc(2);
+    background-color: $white;
+    border-radius: rem-calc(5);
+    transition: all $animation-duration-fast $timing-function;
+    position: relative;
+
+    &:nth-child(1) {
+      width: rem-calc(18);
+
+      &.open {
+        transform: rotate(45deg) translate(rem-calc(4), rem-calc(5));
+      }
+    }
+
+    &:nth-child(2) {
+      width: rem-calc(14);
+
+      &.open {
+        opacity: 0;
+      }
+    }
+
+    &:nth-child(3) {
+      width: rem-calc(10);
+
+      &.open {
+        transform: rotate(-45deg) translate(rem-calc(4), rem-calc(-4));
+        width: rem-calc(18);
+      }
+    }
+  }
+}

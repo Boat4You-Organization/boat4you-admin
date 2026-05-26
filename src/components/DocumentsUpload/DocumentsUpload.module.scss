@@ -1,0 +1,14 @@
+@use '@/styles/settings/variables' as *;
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/mixins/breakpoints' as *;
+
+.uploadWrapper {
+  display: flex;
+  align-items: center;
+  padding: rem-calc(16);
+  border-radius: rem-calc(10);
+  border: rem-calc(2) dashed $black-200;
+  transition:
+    background-color $animation-duration-fast ease,
+    border-color $animation-duration-fast ease;
+}

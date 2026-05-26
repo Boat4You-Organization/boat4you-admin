@@ -1,0 +1,69 @@
+{
+  "custom-boats": {
+    "model": "Model",
+    "name": "Naziv",
+    "location": "Lokacija",
+    "low-price": "Najniža cijena",
+    "mid-price": "Srednja cijena",
+    "high-price": "Najviša cijena"
+  },
+  "bookings": {
+    "order-number": "Broj narudžbe",
+    "user": "Klijent",
+    "boat": "Brod",
+    "check-in": "Prijava",
+    "check-out": "Odjava",
+    "dates": "Datumi",
+    "starting": "Polazak",
+    "ending": "Povratak",
+    "route": "Ruta",
+    "booking-date": "Datum rezervacije",
+    "price": "Cijena klijenta (€)",
+    "agency-price": "Cijena agencije (€)",
+    "net-price": "Neto marža (€)",
+    "status": "Status"
+  },
+  "invoices": {
+    "invoices-number": "Broj računa",
+    "reservation-number": "Broj rezervacije",
+    "client": "Klijent",
+    "price": "Cijena",
+    "date": "Datum",
+    "email": "E-pošta",
+    "phone-number": "Broj telefona"
+  },
+  "inquiries": {
+    "inquiries-number": "Broj upita",
+    "boat": "Plovilo",
+    "location": "Lokacija",
+    "check-in": "Prijava",
+    "check-out": "Odjava",
+    "name": "Ime i prezime",
+    "email": "E-pošta",
+    "phone-number": "Broj telefona",
+    "status": "Status"
+  },
+  "extras": {
+    "name": "Naziv",
+    "description": "Opis",
+    "matchKeys": "Podudarni ključevi"
+  },
+  "agencies": {
+    "name": "Naziv",
+    "max-discount": "Maks. popust",
+    "email": "Email",
+    "phone-number": "Telefonski broj",
+    "by-pass": "MMK/NauSys zaobilaznica",
+    "primary-source": "Primarni izvor",
+    "status": "Status"
+  },
+  "users": {
+    "id": "ID klijenta",
+    "name": "Ime",
+    "surname": "Prezime",
+    "email": "Email",
+    "role": "Uloga",
+    "status": "Status",
+    "phone-number": "Broj telefona"
+  }
+}

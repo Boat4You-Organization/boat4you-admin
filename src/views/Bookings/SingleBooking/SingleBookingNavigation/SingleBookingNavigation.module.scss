@@ -1,0 +1,21 @@
+@use '@/styles/settings/variables' as *;
+@use '@/styles/utils/rem-calc' as *;
+@use '@/styles/mixins/breakpoints' as *;
+
+.container {
+  display: none;
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  padding-block: rem-calc(16);
+  border-radius: rem-calc(12 12 0 0);
+  border-top: rem-calc(1) solid $black-200;
+  box-shadow: $box-shadow-booking-navigation;
+  overflow: hidden;
+  background-color: $white;
+
+  @include media(0, 'md') {
+    display: block;
+  }
+}

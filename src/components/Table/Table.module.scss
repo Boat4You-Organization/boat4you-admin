@@ -1,0 +1,53 @@
+@use '@/styles/settings/variables' as *;
+@use '@/styles/utils/rem-calc' as *;
+
+.container {
+  font-variant-numeric: normal;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-top-left-radius: rem-calc(8);
+  border-top-right-radius: rem-calc(8);
+
+  thead {
+    background-color: $black-100;
+
+    th {
+      border-bottom: none;
+
+      &:first-child {
+        border-top-left-radius: rem-calc(8);
+      }
+
+      &:last-child {
+        border-top-right-radius: rem-calc(8);
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      &.clickable {
+        cursor: pointer;
+
+        &:hover {
+          background-color: $black-100;
+        }
+
+        &:active {
+          background-color: $black-100;
+        }
+      }
+    }
+
+    td {
+      border-bottom: none;
+      padding: rem-calc(8 16);
+    }
+
+    .root {
+      &.tableCell {
+        padding: rem-calc(8 16);
+      }
+    }
+  }
+}

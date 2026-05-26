@@ -1,0 +1,476 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+import {
+  Autocomplete,
+  Box,
+  Chip,
+  FormControl,
+  MenuItem,
+  Select,
+  Stack,
+  TextField,
+} from '@mui/material';
+
+import { api } from '@/config/axios.config';
+import colors from '@/styles/themes/colors';
+
+/**
+ * Offers-workspace specific filter pickers. Kept in this folder so we can
+ * iterate on the broker UX without disrupting the shared CreateReservationModal
+ * partials (which keep their own chip-style pickers).
+ *
+ *   CountrySelect        — single country, powered by /public/countries
+ *   RegionMultiSelect    — regions filtered by selected country via /public/regions
+ *   VesselTypeDropdown   — multi-select dropdown replacement for chip picker
+ *   ManufacturerPicker   — multi-select autocomplete, /public/catalogue/manufacturers
+ *   ModelPicker          — multi-select autocomplete, cascades on manufacturer ids
+ *   BuildYearRangeField  — numeric "from / to" range
+ */
+
+// ---------- country ---------------------------------------------------------
+
+export interface Country {
+  id: string; // "c-54"
+  name: string;
+  countryCode: string; // "HR"
+}
+
+export const CountrySelect = ({
+  value,
+  onChange,
+}: {
+  value: Country | null;
+  onChange: (next: Country | null) => void;
+}) => {
+  const [countries, setCountries] = useState<Country[]>([]);
+
+  useEffect(() => {
+    api
+      .get('/public/countries')
+      .then(({ data }) => {
+        const list = (Array.isArray(data) ? data : []).map((c: any) => ({
+          id: String(c.id),
+          name: c.name,
+          countryCode: c.countryCode || '',
+        })) as Country[];
+        setCountries(list.sort((a, b) => a.name.localeCompare(b.name)));
+      })
+      .catch(() => setCountries([]));
+  }, []);
+
+  return (
+    <Autocomplete
+      fullWidth
+      options={countries}
+      value={value}
+      getOptionLabel={o => o.name}
+      isOptionEqualToValue={(a, b) => a.id === b.id}
+      onChange={(_, next) => onChange(next)}
+      size="small"
+      renderInput={params => <TextField {...params} placeholder="Pick a country" />}
+    />
+  );
+};
+
+// ---------- region ----------------------------------------------------------
+
+export interface Region {
+  id: string; // "r-6"
+  name: string;
+}
+
+export const RegionMultiSelect = ({
+  countryCode,
+  value,
+  onChange,
+}: {
+  countryCode: string | null;
+  value: Region[];
+  onChange: (next: Region[]) => void;
+}) => {
+  const [regions, setRegions] = useState<Region[]>([]);
+
+  useEffect(() => {
+    if (!countryCode) {
+      setRegions([]);
+      return;
+    }
+    api
+      .get(`/public/regions?countryCode=${encodeURIComponent(countryCode)}`)
+      .then(({ data }) => {
+        const list = (Array.isArray(data) ? data : []).map((r: any) => ({
+          id: String(r.id),
+          name: r.name,
+        })) as Region[];
+        setRegions(list.sort((a, b) => a.name.localeCompare(b.name)));
+      })
+      .catch(() => setRegions([]));
+  }, [countryCode]);
+
+  return (
+    <Autocomplete
+      multiple
+      fullWidth
+      size="small"
+      options={regions}
+      value={value}
+      getOptionLabel={o => o.name}
+      isOptionEqualToValue={(a, b) => a.id === b.id}
+      disabled={!countryCode}
+      onChange={(_, next) => onChange(next)}
+      renderTags={(selected, getTagProps) =>
+        selected.map((option, index) => (
+          <Chip
+            label={option.name}
+            size="small"
+            {...getTagProps({ index })}
+            key={option.id}
+            sx={{ backgroundColor: colors.blue50, color: colors.blue500, fontWeight: 600 }}
+          />
+        ))
+      }
+      renderInput={params => (
+        <TextField
+          {...params}
+          placeholder={countryCode ? 'Any region' : 'Pick a country first'}
+        />
+      )}
+    />
+  );
+};
+
+// ---------- vessel type -----------------------------------------------------
+
+export const VESSEL_TYPES_OFFERS: { id: string; label: string }[] = [
+  { id: 'CATAMARAN', label: 'Catamaran' },
+  { id: 'SAILING_YACHT', label: 'Sailing Yacht' },
+  { id: 'POWER_CATAMARAN', label: 'Power Catamaran' },
+  { id: 'GULET', label: 'Gulet' },
+  { id: 'LUXURY_MOTOR_YACHT', label: 'Luxury Motor Yacht' },
+  { id: 'MINI_CRUISER', label: 'Mini Cruiser' },
+  { id: 'MOTORBOAT', label: 'Motorboat' },
+  { id: 'MOTOR_YACHT', label: 'Motor Yacht' },
+  { id: 'MOTORSAILER', label: 'Motorsailer' },
+];
+
+export const VesselTypeDropdown = ({
+  value,
+  onChange,
+}: {
+  value: string[];
+  onChange: (next: string[]) => void;
+}) => {
+  const labelById = useMemo(
+    () => Object.fromEntries(VESSEL_TYPES_OFFERS.map(v => [v.id, v.label])),
+    []
+  );
+  return (
+    <FormControl fullWidth size="small">
+      <Select
+        multiple
+        displayEmpty
+        value={value}
+        onChange={e => {
+          const v = e.target.value;
+          onChange(typeof v === 'string' ? v.split(',') : (v as string[]));
+        }}
+        renderValue={selected =>
+          (selected as string[]).length === 0 ? (
+            <Box component="span" sx={{ color: colors.black400, fontSize: 13 }}>All yacht types</Box>
+          ) : (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+              {(selected as string[]).map(id => (
+                <Chip
+                  key={id}
+                  label={labelById[id] || id}
+                  size="small"
+                  // Chip deletion lives inside a MUI Select so clicking the
+                  // X would also toggle the Select dropdown. mousedown +
+                  // stopPropagation suppresses the Select activation so the
+                  // broker can quickly pop a single type off without the
+                  // menu flashing open; we then call onChange with the
+                  // filtered value list.
+                  onMouseDown={e => e.stopPropagation()}
+                  onDelete={() => onChange(value.filter(v => v !== id))}
+                  sx={{ backgroundColor: colors.blue50, color: colors.blue500, fontWeight: 600, height: 22 }}
+                />
+              ))}
+            </Box>
+          )
+        }
+      >
+        {VESSEL_TYPES_OFFERS.map(t => (
+          <MenuItem key={t.id} value={t.id}>
+            {t.label}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+  );
+};
+
+// ---------- manufacturer ----------------------------------------------------
+
+/**
+ * A "manufacturer" on the UI is actually a CANONICAL GROUP that can span
+ * multiple backend manufacturer ids. The catalogue has duplicates left over
+ * from two partner sources merging records ("Lagoon" + "Lagoon-Bénéteau";
+ * "Bali Catamarans" + "Catana" + "Catana Group"). Treating them as separate
+ * in the picker UI would force the broker to hold cmd and tick both, and
+ * would leak partner plumbing into the admin experience.
+ *
+ * Each alias regex below is matched against the raw backend name (case
+ * insensitive). All matching ids collapse into one UI option. When the
+ * picker value is used in search, we flatten back to the full id list.
+ */
+const MANUFACTURER_ALIASES: { canonical: string; matches: RegExp }[] = [
+  { canonical: 'Lagoon', matches: /^lagoon/i },
+  { canonical: 'Bali', matches: /^(bali|catana)/i },
+];
+
+export interface Manufacturer {
+  canonical: string; // display label AND stable identity key
+  ids: number[]; // all backend manufacturer ids that resolve to this group
+}
+
+const useDebouncedSearch = <T,>(fetcher: (q: string) => Promise<T[]>, delay = 250) => {
+  const [input, setInput] = useState('');
+  const [options, setOptions] = useState<T[]>([]);
+  const [loading, setLoading] = useState(false);
+  const ref = useRef<number | null>(null);
+  // Sequence id — only the latest inflight fetch is allowed to write
+  // back into state. Prevents stale-response clobber when React 18's
+  // strict-mode double-invokes effects in dev and the slower first
+  // fetch resolves after the narrowed second fetch.
+  const reqIdRef = useRef(0);
+
+  useEffect(() => {
+    if (ref.current) window.clearTimeout(ref.current);
+    const id = ++reqIdRef.current;
+    ref.current = window.setTimeout(async () => {
+      setLoading(true);
+      try {
+        const result = await fetcher(input.trim());
+        if (id !== reqIdRef.current) return;
+        setOptions(result);
+      } catch {
+        if (id !== reqIdRef.current) return;
+        setOptions([]);
+      } finally {
+        if (id === reqIdRef.current) setLoading(false);
+      }
+    }, delay);
+    return () => {
+      if (ref.current) window.clearTimeout(ref.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input]);
+
+  return { input, setInput, options, loading };
+};
+
+/**
+ * Collapses the flat manufacturer list returned by the backend into
+ * canonical groups via the MANUFACTURER_ALIASES table. Non-matching rows
+ * are returned as their own single-id group.
+ *
+ * Keeps group order: canonical groups first (sorted alphabetically by
+ * canonical name), then the remaining singletons sorted by name.
+ */
+const dedupManufacturers = (raw: { id: number; name: string }[]): Manufacturer[] => {
+  const canonical = new Map<string, number[]>();
+  const singletons: Manufacturer[] = [];
+  for (const m of raw) {
+    const rule = MANUFACTURER_ALIASES.find(a => a.matches.test(m.name));
+    if (rule) {
+      const list = canonical.get(rule.canonical) || [];
+      list.push(m.id);
+      canonical.set(rule.canonical, list);
+    } else {
+      singletons.push({ canonical: m.name, ids: [m.id] });
+    }
+  }
+  const grouped = Array.from(canonical.entries())
+    .map(([name, ids]) => ({ canonical: name, ids }))
+    .sort((a, b) => a.canonical.localeCompare(b.canonical));
+  singletons.sort((a, b) => a.canonical.localeCompare(b.canonical));
+  return [...grouped, ...singletons];
+};
+
+export const ManufacturerPicker = ({
+  value,
+  onChange,
+}: {
+  value: Manufacturer[];
+  onChange: (next: Manufacturer[]) => void;
+}) => {
+  const { setInput, options, loading } = useDebouncedSearch<Manufacturer>(async q => {
+    const qs = new URLSearchParams();
+    // Pull the whole catalogue so the alias collapse runs on the complete
+    // set — narrow server-side name search would hide matches under the
+    // canonical (e.g. searching "lagoon" with 300-row page limit might
+    // still return both "Lagoon" and "Lagoon-Bénéteau" but the user
+    // needs to see them ALREADY collapsed before picking). Backend has
+    // <2000 manufacturers so this is a cheap one-shot call.
+    qs.set('size', '3000');
+    qs.set('sort', 'name,asc');
+    if (q) qs.set('name', q);
+    const { data } = await api.get(`/public/catalogue/manufacturers?${qs.toString()}`);
+    const raw = (data?.content || []).map((m: any) => ({ id: m.id, name: (m.name || '').trim() }));
+    return dedupManufacturers(raw);
+  });
+
+  const merged = [...value, ...options.filter(o => !value.find(v => v.canonical === o.canonical))];
+
+  return (
+    <Autocomplete
+      multiple
+      fullWidth
+      size="small"
+      openOnFocus
+      options={merged}
+      value={value}
+      filterOptions={x => x}
+      getOptionLabel={o => o.canonical}
+      isOptionEqualToValue={(a, b) => a.canonical === b.canonical}
+      loading={loading}
+      onInputChange={(_, v, reason) => {
+        if (reason === 'input' || reason === 'clear') setInput(v);
+      }}
+      onChange={(_, next) => onChange(next)}
+      renderTags={(selected, getTagProps) =>
+        selected.map((option, index) => (
+          <Chip
+            label={option.canonical}
+            size="small"
+            {...getTagProps({ index })}
+            key={option.canonical}
+            sx={{ backgroundColor: colors.blue50, color: colors.blue500, fontWeight: 600 }}
+          />
+        ))
+      }
+      renderInput={params => (
+        <TextField
+          {...params}
+          placeholder={value.length === 0 ? 'Builder' : ''}
+        />
+      )}
+    />
+  );
+};
+
+// ---------- model (cascades on manufacturer) -------------------------------
+
+export interface Model {
+  id: number;
+  name: string;
+  manufacturerId?: number;
+}
+
+export const ModelPicker = ({
+  manufacturerIds,
+  value,
+  onChange,
+}: {
+  manufacturerIds: number[];
+  value: Model[];
+  onChange: (next: Model[]) => void;
+}) => {
+  // When manufacturer changes, re-pull the full list of its models. Keep the
+  // hook input in a string so debounce tracks name-search changes too.
+  const manufacturerKey = useMemo(() => manufacturerIds.join(','), [manufacturerIds]);
+
+  const { setInput, options, loading } = useDebouncedSearch<Model>(async q => {
+    if (!manufacturerIds.length) return [];
+    const qs = new URLSearchParams();
+    qs.set('size', '300');
+    qs.set('sort', 'name,asc');
+    manufacturerIds.forEach(id => qs.append('manufacturerIds', String(id)));
+    if (q) qs.set('name', q);
+    const { data } = await api.get(`/public/catalogue/models?${qs.toString()}`);
+    return (data?.content || []).map((m: any) => ({
+      id: m.id,
+      name: m.name,
+      manufacturerId: m.manufacturerId,
+    }));
+  });
+
+  // Force a refetch when the manufacturer list changes (by resetting `input`
+  // to empty, which re-runs the debounce effect).
+  useEffect(() => {
+    setInput('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [manufacturerKey]);
+
+  const merged = [...value, ...options.filter(o => !value.find(v => v.id === o.id))];
+
+  return (
+    <Autocomplete
+      multiple
+      fullWidth
+      size="small"
+      options={merged}
+      value={value}
+      filterOptions={x => x}
+      getOptionLabel={o => o.name}
+      isOptionEqualToValue={(a, b) => a.id === b.id}
+      loading={loading}
+      disabled={manufacturerIds.length === 0}
+      onInputChange={(_, v, reason) => {
+        if (reason === 'input') setInput(v);
+      }}
+      onChange={(_, next) => onChange(next)}
+      renderTags={(selected, getTagProps) =>
+        selected.map((option, index) => (
+          <Chip
+            label={option.name}
+            size="small"
+            {...getTagProps({ index })}
+            key={option.id}
+            sx={{ backgroundColor: colors.blue50, color: colors.blue500, fontWeight: 600 }}
+          />
+        ))
+      }
+      renderInput={params => (
+        <TextField
+          {...params}
+          placeholder={manufacturerIds.length === 0 ? 'Pick a builder first' : 'Model'}
+        />
+      )}
+    />
+  );
+};
+
+// ---------- build year range ------------------------------------------------
+
+export const BuildYearRangeField = ({
+  from,
+  to,
+  onChange,
+}: {
+  from: string;
+  to: string;
+  onChange: (from: string, to: string) => void;
+}) => (
+  // No internal label — parent "Build year" Section provides the label.
+  <Stack direction="row" spacing={1}>
+    <TextField
+      placeholder="From"
+      type="number"
+      value={from}
+      onChange={e => onChange(e.target.value, to)}
+      size="small"
+      inputProps={{ min: 1980, max: 2030 }}
+      fullWidth
+    />
+    <TextField
+      placeholder="To"
+      type="number"
+      value={to}
+      onChange={e => onChange(from, e.target.value)}
+      size="small"
+      inputProps={{ min: 1980, max: 2030 }}
+      fullWidth
+    />
+  </Stack>
+);

@@ -1,0 +1,31 @@
+@use '@/styles/settings/variables' as *;
+@use '@/styles/utils/rem-calc' as *;
+
+.root {
+  &.container {
+    padding: rem-calc(16);
+    color: $white;
+    transition: background-color $animation-duration-normal $timing-function;
+
+    &:hover {
+      background-color: $blue-600;
+      color: $white;
+    }
+
+    &.active {
+      background-color: $blue-700;
+      color: $white;
+    }
+
+    .button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0;
+
+      &:hover {
+        background-color: transparent;
+      }
+    }
+  }
+}

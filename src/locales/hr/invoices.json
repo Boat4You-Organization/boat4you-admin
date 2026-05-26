@@ -1,0 +1,33 @@
+{
+  "invoice-details": {
+    "title": "Detalji računa",
+    "invoice-number": "Broj računa",
+    "invoice-date": "Datum",
+    "invoice-language": "Jezik",
+    "invoice-vat": "PDV",
+    "included": "Uključen"
+  },
+  "recipient-details": {
+    "title": "Podaci o primatelju",
+    "recipient-name": "Ime",
+    "recipient-type": "Vrsta",
+    "recipient-city": "Grad",
+    "recipient-street": "Ulica",
+    "recipient-country": "Država",
+    "recipient-zip": "Poštanski broj",
+    "recipient-vat-code": "OIB"
+  },
+  "booking-details": {
+    "title": "Detalji rezervacije",
+    "booking-number": "Broj rezervacije",
+    "client-name": "Ime klijenta",
+    "client-email": "E-mail klijenta",
+    "client-phone": "Broj telefona klijenta",
+    "invoice-item": "Opis stavke na računu"
+  },
+  "pricing-details": {
+    "title": "Cijene",
+    "price-without-vat": "Cijena bez PDV-a",
+    "total": "Ukupno"
+  }
+}

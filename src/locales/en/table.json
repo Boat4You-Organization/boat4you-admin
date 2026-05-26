@@ -1,0 +1,69 @@
+{
+  "custom-boats": {
+    "model": "Model",
+    "name": "Name",
+    "location": "Location",
+    "low-price": "Low Price",
+    "mid-price": "Mid Price",
+    "high-price": "High Price"
+  },
+  "bookings": {
+    "order-number": "Order No.",
+    "user": "Client",
+    "boat": "Boat",
+    "check-in": "Check-In",
+    "check-out": "Check-Out",
+    "dates": "Dates",
+    "starting": "Starting",
+    "ending": "Ending",
+    "route": "Route",
+    "booking-date": "Booking Date",
+    "price": "Client Price (€)",
+    "agency-price": "Agency Price (€)",
+    "net-price": "Net Price (€)",
+    "status": "Status"
+  },
+  "invoices": {
+    "invoices-number": "Invoice No.",
+    "reservation-number": "Reservation No.",
+    "client": "Client",
+    "price": "Price",
+    "date": "Date",
+    "email": "Email",
+    "phone-number": "Phone Number"
+  },
+  "inquiries": {
+    "inquiries-number": "Order No.",
+    "boat": "Boat",
+    "location": "Location",
+    "check-in": "Check-In",
+    "check-out": "Check-Out",
+    "name": "Name",
+    "email": "Email",
+    "phone-number": "Phone Number",
+    "status": "Status"
+  },
+  "extras": {
+    "name": "Name",
+    "description": "Description",
+    "matchKeys": "Match Keys"
+  },
+  "agencies": {
+    "name": "Name",
+    "max-discount": "Max. Discount",
+    "email": "Email",
+    "phone-number": "Phone Number",
+    "by-pass": "MMK/NauSys Bypass",
+    "primary-source": "Primary Source",
+    "status": "Status"
+  },
+  "users": {
+    "id": "Client ID",
+    "name": "Name",
+    "surname": "Surname",
+    "email": "Email",
+    "role": "Role",
+    "status": "Status",
+    "phone-number": "Phone Number"
+  }
+}

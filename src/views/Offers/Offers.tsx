@@ -41,7 +41,7 @@ import {
   RegionMultiSelect,
   VesselTypeDropdown,
 } from './filters';
-import { buildClientOfferHtml, buildClientOfferWhatsApp, CartYacht } from './offerHtml';
+import { CartYacht, buildClientOfferHtml, buildClientOfferWhatsApp } from './offerHtml';
 
 /**
  * Internal broker workspace for building a multi-yacht client offer.
@@ -82,8 +82,7 @@ const CURRENCIES: { code: string; label: string; symbol: string }[] = [
   { code: 'CAD', label: 'Canadian dollar', symbol: 'C$' },
 ];
 
-const getCurrencySymbol = (code: string): string =>
-  CURRENCIES.find(c => c.code === code)?.symbol || code;
+const getCurrencySymbol = (code: string): string => CURRENCIES.find(c => c.code === code)?.symbol || code;
 
 interface SearchRow {
   yachtId: number;
@@ -243,9 +242,7 @@ const Offers = () => {
     // model only if ANY of its canonical group's ids still match the
     // model's manufacturer.
     setModels(prev =>
-      prev.filter(m =>
-        m.manufacturerId == null ? true : manufacturers.some(mf => mf.ids.includes(m.manufacturerId!))
-      )
+      prev.filter(m => (m.manufacturerId == null ? true : manufacturers.some(mf => mf.ids.includes(m.manufacturerId!))))
     );
   }, [manufacturers]);
 
@@ -287,8 +284,7 @@ const Offers = () => {
     try {
       const raw = localStorage.getItem(CART_STORAGE_KEY);
 
-      
-return raw ? (JSON.parse(raw) as CartYacht[]) : [];
+      return raw ? (JSON.parse(raw) as CartYacht[]) : [];
     } catch {
       return [];
     }
@@ -328,8 +324,7 @@ return raw ? (JSON.parse(raw) as CartYacht[]) : [];
     // country id so backend's location filter scopes the result set at
     // country granularity. `did` accepts both region ("r-6") and country
     // ("c-54") synthetic ids from the LocationView.
-    const did: string[] =
-      regions.length > 0 ? regions.map(r => r.id) : country ? [country.id] : [];
+    const did: string[] = regions.length > 0 ? regions.map(r => r.id) : country ? [country.id] : [];
 
     try {
       const res = await ReservationsService.searchYachtsForAdmin({
@@ -341,8 +336,7 @@ return raw ? (JSON.parse(raw) as CartYacht[]) : [];
         agencyId: agencies.length > 0 ? agencies.map(a => a.id) : undefined,
         // Flatten canonical manufacturer groups back to their raw ids so
         // "Lagoon" (which holds 2 backend rows) filters against both.
-        manufacturerId:
-          manufacturers.length > 0 ? manufacturers.flatMap(m => m.ids) : undefined,
+        manufacturerId: manufacturers.length > 0 ? manufacturers.flatMap(m => m.ids) : undefined,
         modelId: models.length > 0 ? models.map(m => m.id) : undefined,
         minBuildYear: Number(buildYearFrom) || undefined,
         maxBuildYear: Number(buildYearTo) || undefined,
@@ -364,8 +358,7 @@ return raw ? (JSON.parse(raw) as CartYacht[]) : [];
         modelName: y.modelName,
         clientPriceEur: Number(y.clientPriceEur) || 0,
         listPriceEur: y.listPriceEur != null ? Number(y.listPriceEur) : null,
-        agencyCommissionEur:
-          y.agencyCommissionEur != null ? Number(y.agencyCommissionEur) : null,
+        agencyCommissionEur: y.agencyCommissionEur != null ? Number(y.agencyCommissionEur) : null,
         currency,
         agencyName: y.agencyName,
         locationName: y.location?.name || '',
@@ -427,8 +420,8 @@ return raw ? (JSON.parse(raw) as CartYacht[]) : [];
   const handleAddToOffer = async (row: SearchRow) => {
     if (cart.some(c => c.yachtId === row.yachtId && c.dateFrom === startDate.format('YYYY-MM-DD'))) {
       showToast({ status: 'info', text: 'Already in offer for the selected period' });
-      
-return;
+
+      return;
     }
 
     setAddingSlug(row.slug);
@@ -443,8 +436,8 @@ return;
 
       if (!matchedOffer) {
         showToast({ status: 'error', text: 'No offer available for this yacht in the selected period' });
-        
-return;
+
+        return;
       }
 
       const checkin = matchedOffer.checkin || yachtDetails.defaultCheckin || '';
@@ -468,10 +461,22 @@ return;
       // browsing. Order here doesn't matter — we preserve the backend's
       // filterOrder-sorted order from yachtDetails.amenities.
       const KEY_AMENITY_LABEL_CODES = new Set([
-        'air-conditioning', 'autopilot', 'dinghy', 'generator', 'wifi',
-        'bimini', 'outside-GPS-plotter', 'outside-shower', 'cooker',
-        'fridge', 'water-toys', 'snorkel-sets', 'solar-panels',
-        'bow-thruster', 'radar', 'heating',
+        'air-conditioning',
+        'autopilot',
+        'dinghy',
+        'generator',
+        'wifi',
+        'bimini',
+        'outside-GPS-plotter',
+        'outside-shower',
+        'cooker',
+        'fridge',
+        'water-toys',
+        'snorkel-sets',
+        'solar-panels',
+        'bow-thruster',
+        'radar',
+        'heating',
       ]);
       const groupedAmenities: Record<string, string[]> = {};
       const keyAmenitiesAccum: { labelCode: string; label: string }[] = [];
@@ -489,11 +494,7 @@ return;
 
         groupedAmenities[cat].push(String(label));
 
-        if (
-          labelCode &&
-          KEY_AMENITY_LABEL_CODES.has(labelCode) &&
-          !seenKeyCodes.has(labelCode)
-        ) {
+        if (labelCode && KEY_AMENITY_LABEL_CODES.has(labelCode) && !seenKeyCodes.has(labelCode)) {
           seenKeyCodes.add(labelCode);
           keyAmenitiesAccum.push({ labelCode, label: String(label) });
         }
@@ -538,7 +539,10 @@ return;
         PER_BOAT: 'per boat',
         PERCENTAGE: '%',
       };
-      const toCartExtra = (e: ExtraResponse, forceObligatory: boolean): {
+      const toCartExtra = (
+        e: ExtraResponse,
+        forceObligatory: boolean
+      ): {
         key: string;
         value: {
           name: string;
@@ -558,14 +562,10 @@ return;
         // labelCode null) — keying on labelCode broke the merge and rendered
         // "Charter package" twice. obligatoryExtrasKeys uses `e.key` too.
         const key = String(
-          e.externalId ??
-            e.key ??
-            e.extras?.labelCode ??
-            `${name.toLowerCase().trim()}-${priceNum ?? '-'}`
+          e.externalId ?? e.key ?? e.extras?.labelCode ?? `${name.toLowerCase().trim()}-${priceNum ?? '-'}`
         );
 
-        
-return {
+        return {
           key,
           value: {
             name,
@@ -576,7 +576,7 @@ return {
               e.obligatory === true ||
               (e.key != null && (matchedOffer.obligatoryExtrasKeys || []).includes(e.key)),
             description: e.description ?? null,
-            unit: e.unit ? UNIT_LABEL[e.unit] ?? null : null,
+            unit: e.unit ? (UNIT_LABEL[e.unit] ?? null) : null,
           },
         };
       };
@@ -673,26 +673,43 @@ return {
   // currency the broker had active, and the partner may have changed
   // prices or catalogue since. Only the missing new field is hydrated.
   const KEY_AMENITY_LABEL_CODES_GLOBAL = new Set([
-    'air-conditioning', 'autopilot', 'dinghy', 'generator', 'wifi',
-    'bimini', 'outside-GPS-plotter', 'outside-shower', 'cooker',
-    'fridge', 'water-toys', 'snorkel-sets', 'solar-panels',
-    'bow-thruster', 'radar', 'heating',
+    'air-conditioning',
+    'autopilot',
+    'dinghy',
+    'generator',
+    'wifi',
+    'bimini',
+    'outside-GPS-plotter',
+    'outside-shower',
+    'cooker',
+    'fridge',
+    'water-toys',
+    'snorkel-sets',
+    'solar-panels',
+    'bow-thruster',
+    'radar',
+    'heating',
   ]);
 
   const handleOpenOfferModal = async () => {
-    const missing = cart.filter(c => !c.keyAmenities || c.keyAmenities.length === 0);
+    // Top up entries that pre-date a field added later — keyAmenities
+    // (23.4.2026) or imageUrl (28.5.2026; older carts cached a null image
+    // before the /public/image fallback landed, so the offer rendered the
+    // "Yacht photo" placeholder). Only the missing field is re-fetched;
+    // prices / extras stay snapshotted at add-time.
+    const missing = cart.filter(c => !c.keyAmenities || c.keyAmenities.length === 0 || !c.imageUrl);
 
     if (missing.length === 0) {
       setOfferModalOpen(true);
-      
-return;
+
+      return;
     }
 
     setOpeningModal(true);
     try {
       const hydrated = await Promise.all(
         cart.map(async entry => {
-          if (entry.keyAmenities && entry.keyAmenities.length > 0) return entry;
+          if (entry.keyAmenities && entry.keyAmenities.length > 0 && entry.imageUrl) return entry;
 
           try {
             const { data } = await api.get<YachtDetailsResponse>(
@@ -710,8 +727,20 @@ return;
               seen.add(labelCode);
               keyAccum.push({ labelCode, label: String(label) });
             });
-            
-return { ...entry, keyAmenities: keyAccum.slice(0, 4) };
+
+            // Backfill the hero image the same way handleAddToOffer does:
+            // the sync leaves yachtImages[].url null, so build the auth-free
+            // /public/image/{id} URL from the mainImage-flagged row (it
+            // renders inside the client's email too). Keep an existing one.
+            const imgs = data.yachtImages || [];
+            const mainImg = imgs.find(i => i?.mainImage) || imgs[0];
+            const imageUrl = entry.imageUrl || mainImg?.url || getBoatImageUrl(mainImg?.id, 800);
+
+            return {
+              ...entry,
+              keyAmenities: entry.keyAmenities?.length ? entry.keyAmenities : keyAccum.slice(0, 4),
+              imageUrl,
+            };
           } catch {
             // Leave entry as-is with empty amenities — failing one yacht
             // shouldn't block the whole offer preview.
@@ -743,19 +772,10 @@ return { ...entry, keyAmenities: keyAccum.slice(0, 4) };
   const [includeSkipper, setIncludeSkipper] = useState<boolean>(false);
   const [includeHostess, setIncludeHostess] = useState<boolean>(false);
 
-  const offerOptions = useMemo(
-    () => ({ includeSkipper, includeHostess }),
-    [includeSkipper, includeHostess]
-  );
+  const offerOptions = useMemo(() => ({ includeSkipper, includeHostess }), [includeSkipper, includeHostess]);
 
-  const clientOfferHtml = useMemo(
-    () => buildClientOfferHtml(cart, offerOptions),
-    [cart, offerOptions]
-  );
-  const clientOfferWhatsApp = useMemo(
-    () => buildClientOfferWhatsApp(cart, offerOptions),
-    [cart, offerOptions]
-  );
+  const clientOfferHtml = useMemo(() => buildClientOfferHtml(cart, offerOptions), [cart, offerOptions]);
+  const clientOfferWhatsApp = useMemo(() => buildClientOfferWhatsApp(cart, offerOptions), [cart, offerOptions]);
 
   const handleCopyHtml = async () => {
     try {
@@ -776,9 +796,7 @@ return { ...entry, keyAmenities: keyAccum.slice(0, 4) };
         const blob = new Blob([clientOfferHtml], { type: 'text/html' });
         const plain = new Blob([cart.map(c => `${c.modelName} | ${c.name}`).join('\n')], { type: 'text/plain' });
 
-        await navigator.clipboard.write([
-          new ClipboardItem({ 'text/html': blob, 'text/plain': plain }),
-        ]);
+        await navigator.clipboard.write([new ClipboardItem({ 'text/html': blob, 'text/plain': plain })]);
         showToast({ status: 'success', text: 'Rich text copied — paste into Gmail/Outlook' });
       } else {
         await handleCopyHtml();
@@ -827,10 +845,7 @@ return { ...entry, keyAmenities: keyAccum.slice(0, 4) };
           <Stack spacing={1.25}>
             <Section label="Currency">
               <FormControl fullWidth size="small">
-                <Select
-                  value={currency}
-                  onChange={e => handleCurrencyChange(String(e.target.value))}
-                >
+                <Select value={currency} onChange={e => handleCurrencyChange(String(e.target.value))}>
                   {CURRENCIES.map(c => (
                     <MenuItem key={c.code} value={c.code}>
                       {c.symbol}&nbsp;&nbsp;{c.code} — {c.label}
@@ -858,11 +873,7 @@ return { ...entry, keyAmenities: keyAccum.slice(0, 4) };
             <Section label="Destination">
               <Stack spacing={1}>
                 <CountrySelect value={country} onChange={setCountry} />
-                <RegionMultiSelect
-                  countryCode={country?.countryCode || null}
-                  value={regions}
-                  onChange={setRegions}
-                />
+                <RegionMultiSelect countryCode={country?.countryCode || null} value={regions} onChange={setRegions} />
               </Stack>
             </Section>
 
@@ -877,11 +888,7 @@ return { ...entry, keyAmenities: keyAccum.slice(0, 4) };
             <Section label="Builder & model">
               <Stack spacing={1}>
                 <ManufacturerPicker value={manufacturers} onChange={setManufacturers} />
-                <ModelPicker
-                  manufacturerIds={manufacturers.flatMap(m => m.ids)}
-                  value={models}
-                  onChange={setModels}
-                />
+                <ModelPicker manufacturerIds={manufacturers.flatMap(m => m.ids)} value={models} onChange={setModels} />
               </Stack>
             </Section>
 
@@ -956,12 +963,15 @@ return { ...entry, keyAmenities: keyAccum.slice(0, 4) };
               right mirroring the mockup. Search-active filters aren't
               echoed here because the left panel already shows them —
               keeping this row sparse so the results take the focus. */}
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ mb: 2, flexWrap: 'wrap', gap: 1 }}
+          >
             <Stack direction="row" alignItems="baseline" gap={1} sx={{ flexWrap: 'wrap' }}>
               <Typography variant="h4" fontWeight={700} sx={{ fontSize: 20 }}>
-                {searched
-                  ? `${totalCount} yacht${totalCount === 1 ? '' : 's'} found`
-                  : 'No search yet'}
+                {searched ? `${totalCount} yacht${totalCount === 1 ? '' : 's'} found` : 'No search yet'}
               </Typography>
               {searched && (
                 <Typography variant="body2" color={colors.black500} sx={{ fontSize: 13 }}>
@@ -986,7 +996,9 @@ return { ...entry, keyAmenities: keyAccum.slice(0, 4) };
                   color: colors.black800,
                 }}
               >
-                <Box component="span" sx={{ fontSize: 13 }}>📅</Box>
+                <Box component="span" sx={{ fontSize: 13 }}>
+                  📅
+                </Box>
                 {startDate.format('DD MMM')} → {endDate.format('DD MMM YYYY')}
               </Box>
               <Box
@@ -1043,7 +1055,9 @@ return { ...entry, keyAmenities: keyAccum.slice(0, 4) };
           </Stack>
 
           {!searched && (
-            <Alert severity="info">Set filters on the left and click <strong>Search</strong>.</Alert>
+            <Alert severity="info">
+              Set filters on the left and click <strong>Search</strong>.
+            </Alert>
           )}
 
           {searched && !searching && results.length === 0 && (
@@ -1073,8 +1087,7 @@ return { ...entry, keyAmenities: keyAccum.slice(0, 4) };
                     const [y, m, d] = datePart.split('-');
                     const hm = timePart ? timePart.slice(0, 5) : '';
 
-                    
-return hm ? `${d}.${m}.${y} ${hm}` : `${d}.${m}.${y}`;
+                    return hm ? `${d}.${m}.${y} ${hm}` : `${d}.${m}.${y}`;
                   })()
                 : null;
 
@@ -1096,11 +1109,7 @@ return hm ? `${d}.${m}.${y} ${hm}` : `${d}.${m}.${y}`;
                     border: `1px solid ${
                       inCart ? colors.green500 : row.isOption ? colors.mandalay500 : colors.black200
                     }`,
-                    backgroundColor: inCart
-                      ? '#f4fbf6'
-                      : row.isOption
-                        ? '#fff8eb'
-                        : colors.white,
+                    backgroundColor: inCart ? '#f4fbf6' : row.isOption ? '#fff8eb' : colors.white,
                     borderRadius: 1.5,
                     p: 1.5,
                   }}
@@ -1140,7 +1149,10 @@ return hm ? `${d}.${m}.${y} ${hm}` : `${d}.${m}.${y}`;
                           <Box component="span" sx={{ color: colors.black500, fontWeight: 600, mx: 0.75 }}>
                             /
                           </Box>
-                          <Box component="span" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                          <Box
+                            component="span"
+                            sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.3 }}
+                          >
                             {row.name}
                           </Box>
                         </Typography>
@@ -1206,8 +1218,12 @@ return hm ? `${d}.${m}.${y} ${hm}` : `${d}.${m}.${y}`;
                               fontWeight: 500,
                             }}
                           >
-                            <Box component="span" sx={{ color: colors.black500 }}>{p.label}</Box>
-                            <Box component="span" sx={{ fontWeight: 700 }}>{p.value}</Box>
+                            <Box component="span" sx={{ color: colors.black500 }}>
+                              {p.label}
+                            </Box>
+                            <Box component="span" sx={{ fontWeight: 700 }}>
+                              {p.value}
+                            </Box>
                           </Box>
                         ))}
                       </Stack>
@@ -1227,11 +1243,17 @@ return hm ? `${d}.${m}.${y} ${hm}` : `${d}.${m}.${y}`;
                     <Stack alignItems="flex-end" spacing={0.5} sx={{ minWidth: 180 }}>
                       {hasDiscount && (
                         <Typography sx={{ fontSize: 12, color: colors.black500, textDecoration: 'line-through' }}>
-                          List: {listPeriodTotal!.toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {rowSymbol}
+                          List:{' '}
+                          {listPeriodTotal!.toLocaleString('hr-HR', {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })}{' '}
+                          {rowSymbol}
                         </Typography>
                       )}
                       <Typography sx={{ fontSize: 18, fontWeight: 800, color: colors.green500, lineHeight: 1.15 }}>
-                        {periodTotal.toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {rowSymbol}
+                        {periodTotal.toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
+                        {rowSymbol}
                       </Typography>
                       {(() => {
                         if (row.agencyCommissionEur == null || row.clientPriceEur <= 0) return null;
@@ -1241,8 +1263,7 @@ return hm ? `${d}.${m}.${y} ${hm}` : `${d}.${m}.${y}`;
                         const pct = pctBase > 0 ? (commissionTotal / pctBase) * 100 : 0;
                         const isZero = commissionTotal === 0;
 
-                        
-return (
+                        return (
                           <Box
                             sx={{
                               backgroundColor: isZero ? colors.black100 : colors.mandalay100,
@@ -1257,18 +1278,24 @@ return (
                           >
                             {isZero
                               ? 'Commission: —'
-                              : `Commission ${pct.toFixed(1)}% · ${commissionTotal.toLocaleString(
-                                  'hr-HR',
-                                  { minimumFractionDigits: 2, maximumFractionDigits: 2 }
-                                )} ${rowSymbol}`}
+                              : `Commission ${pct.toFixed(1)}% · ${commissionTotal.toLocaleString('hr-HR', {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })} ${rowSymbol}`}
                           </Box>
                         );
                       })()}
                       {row.isOption && (
-                        <Typography sx={{ fontSize: 11, color: colors.mandalay900, fontWeight: 600, mt: 0.25, textAlign: 'right' }}>
-                          {optionExpiresText
-                            ? `Option expires: ${optionExpiresText}`
-                            : 'Under option — expiry unknown'}
+                        <Typography
+                          sx={{
+                            fontSize: 11,
+                            color: colors.mandalay900,
+                            fontWeight: 600,
+                            mt: 0.25,
+                            textAlign: 'right',
+                          }}
+                        >
+                          {optionExpiresText ? `Option expires: ${optionExpiresText}` : 'Under option — expiry unknown'}
                         </Typography>
                       )}
                       <Button
@@ -1301,13 +1328,7 @@ return (
               worth of results for the current filters. Page size is fixed
               at 100 on the backend (hard cap). */}
           {totalPages > 1 && (
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="center"
-              spacing={2}
-              sx={{ mt: 3, mb: 2 }}
-            >
+            <Stack direction="row" alignItems="center" justifyContent="center" spacing={2} sx={{ mt: 3, mb: 2 }}>
               <Button
                 variant="outlined"
                 size="small"
@@ -1398,9 +1419,7 @@ return (
                     {y.modelName} | {y.name}
                   </Typography>
                   <Typography sx={{ fontSize: 11, color: colors.black500 }}>{y.base}</Typography>
-                  <Typography sx={{ fontSize: 11, color: colors.blue500, fontWeight: 600 }}>
-                    {y.agencyName}
-                  </Typography>
+                  <Typography sx={{ fontSize: 11, color: colors.blue500, fontWeight: 600 }}>{y.agencyName}</Typography>
                 </Box>
                 <Stack alignItems="flex-end" gap={0.25} sx={{ flexShrink: 0 }}>
                   <Typography sx={{ fontSize: 13, fontWeight: 700, color: colors.green500, whiteSpace: 'nowrap' }}>
@@ -1456,10 +1475,9 @@ return (
       >
         <Stack spacing={1}>
           <Alert severity="info" sx={{ alignItems: 'flex-start' }}>
-            Preview of the HTML that will be pasted into your email.{' '}
-            <strong>Agency names are hidden.</strong> Use <strong>Copy as rich text</strong> for Gmail / Outlook
-            composers (formatted paste). Use <strong>Copy HTML source</strong> when pasting into a CMS / editor
-            that accepts raw HTML.
+            Preview of the HTML that will be pasted into your email. <strong>Agency names are hidden.</strong> Use{' '}
+            <strong>Copy as rich text</strong> for Gmail / Outlook composers (formatted paste). Use{' '}
+            <strong>Copy HTML source</strong> when pasting into a CMS / editor that accepts raw HTML.
           </Alert>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
             <Button variant="contained" startIcon={<ContentCopyIcon />} onClick={handleCopyRichText}>
@@ -1487,7 +1505,11 @@ return (
               onClick={() => setIncludeSkipper(v => !v)}
               sx={
                 includeSkipper
-                  ? { backgroundColor: colors.black950, color: '#ffffff', '&:hover': { backgroundColor: colors.black950 } }
+                  ? {
+                      backgroundColor: colors.black950,
+                      color: '#ffffff',
+                      '&:hover': { backgroundColor: colors.black950 },
+                    }
                   : { borderColor: colors.black300, color: colors.black950 }
               }
             >
@@ -1499,7 +1521,11 @@ return (
               onClick={() => setIncludeHostess(v => !v)}
               sx={
                 includeHostess
-                  ? { backgroundColor: colors.black950, color: '#ffffff', '&:hover': { backgroundColor: colors.black950 } }
+                  ? {
+                      backgroundColor: colors.black950,
+                      color: '#ffffff',
+                      '&:hover': { backgroundColor: colors.black950 },
+                    }
                   : { borderColor: colors.black300, color: colors.black950 }
               }
             >

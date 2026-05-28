@@ -528,11 +528,11 @@ return `<tr>
   <tr><td>
     <table class="b4y-card" border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="background: ${BRAND.cardBg}; border: 1px solid ${BRAND.border}; border-radius: 12px;">
 
-      <!-- Hero band — image left (half width) · date / title / location / amenities right -->
-      <tr><td style="padding: 14px 16px 4px 16px;">
+      <!-- Hero band — image left · date / title / location / amenities / specs chips all stacked right -->
+      <tr><td style="padding: 14px 16px 8px 16px;">
         <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation"><tr>
-          <td class="col-img" width="248" valign="middle" style="width: 248px; padding: 0; line-height: 0;">${heroCell}</td>
-          <td class="col-text" valign="middle" style="vertical-align: middle; padding-left: 18px;">
+          <td class="col-img" width="248" valign="top" style="width: 248px; padding: 0; line-height: 0;">${heroCell}</td>
+          <td class="col-text" valign="top" style="vertical-align: top; padding-left: 18px;">
             <div style="font-family: ${FONT_STACK}; font-size: 12px; line-height: 1.3; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: ${BRAND.warn}; -webkit-text-size-adjust: 100%;">${escapeHtml(periodHeader)}</div>
             ${optionBadge}
             <p style="margin: 5px 0 1px 0; padding: 0;">${titleHtml}</p>
@@ -546,17 +546,19 @@ return `<tr>
                 ? `<div style="font-family: ${FONT_STACK}; font-size: 12px; color: ${BRAND.textMuted}; line-height: 1.6; margin-top: 9px;">${amenitiesInline}</div>`
                 : ''
             }
+            ${
+              chips.length > 0
+                ? `<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin-top: 8px;">${Array.from(
+                    { length: Math.ceil(chips.length / 3) },
+                    (_, i) => chips.slice(i * 3, i * 3 + 3),
+                  )
+                    .map(row => `<tr>${row.map(([k, v]) => renderChip(k, v)).join('')}</tr>`)
+                    .join('')}</table>`
+                : ''
+            }
           </td>
         </tr></table>
       </td></tr>
-
-      ${
-        chips.length > 0
-          ? `<tr><td class="b4y-pad-x" style="padding: 4px 18px 2px 18px;">
-        <table border="0" cellpadding="0" cellspacing="0" role="presentation"><tr>${chips.map(([k, v]) => renderChip(k, v)).join('')}</tr></table>
-      </td></tr>`
-          : ''
-      }
 
       <tr><td class="b4y-pad-x" style="padding: 6px 16px 16px 16px;">
         <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation"><tr>

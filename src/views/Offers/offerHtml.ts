@@ -1,9 +1,11 @@
 /**
  * Builds the HTML snippet the broker copy-pastes into their own email
- * client. Layout matches the provided sample (period header → boat title
- * + highlights → spec grid → extras → equipment). Agency identity is
- * intentionally OMITTED from the output — the broker wants the customer
- * to stay on boat4you, not learn which partner runs the fleet.
+ * client. Layout: a horizontal hero band (half-width photo left · date /
+ * title / location / amenities right), then spec chips, then obligatory
+ * services + price — kept low so several yachts stack readably in one
+ * offer. Agency identity is intentionally OMITTED from the output — the
+ * broker wants the customer to stay on boat4you, not learn which partner
+ * runs the fleet.
  */
 
 export interface CartExtra {
@@ -229,6 +231,11 @@ const BRAND = {
 
 const FONT_STACK = '-apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, sans-serif';
 
+// Modern display face for the yacht title (model + name). Pulled via @import
+// in the responsive <style> block — renders in clients that honour web fonts
+// (Apple Mail, most webmail); Gmail/Outlook fall back to the system stack.
+const POPPINS_STACK = '\'Poppins\', -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif';
+
 /**
  * One specs chip (e.g. "Length 15.35 m"). Pill-shaped with a soft brand
  * background — uses an inline-block table cell so it survives Gmail's
@@ -292,24 +299,14 @@ const AMENITY_SHORT_LABEL: Record<string, string> = {
   'snorkel-sets': 'Snorkel',
 };
 
-// Square "kocka" badge: icon top, short text below. Fixed 54x54 so the
-// four badges line up as an even strip next to the yacht title on the
-// right side of the header row.
-const renderAmenityBox = (a: { labelCode: string; label: string }): string => {
-  const icon = AMENITY_ICON_MAP[a.labelCode] || '•';
-  const short = AMENITY_SHORT_LABEL[a.labelCode] || a.label;
-
-  
-return `
-<td valign="top" style="padding: 0 0 0 6px; vertical-align: top;">
-  <table border="0" cellpadding="0" cellspacing="0" role="presentation"><tr>
-    <td align="center" valign="middle" width="54" height="54" style="background: #f5f5f5; border-radius: 8px; width: 54px; height: 54px; padding: 4px; vertical-align: middle;">
-      <div style="font-size: 18px; line-height: 1.1;">${icon}</div>
-      <div style="font-family: ${FONT_STACK}; font-size: 9px; line-height: 1.2; color: ${BRAND.textMuted}; margin-top: 3px; white-space: nowrap;">${escapeHtml(short)}</div>
-    </td>
-  </tr></table>
-</td>`;
-};
+// Amenities as a compact inline strip ("☀ Solar · 🛥 Dinghy · ❄ AC · …")
+// instead of the old 54x54 boxes — keeps the hero band's right column low
+// so each card stays short when several yachts stack in one offer.
+const renderAmenitiesInline = (items: { labelCode: string; label: string }[]): string =>
+  items
+    .slice(0, 4)
+    .map(a => `${AMENITY_ICON_MAP[a.labelCode] || '•'} ${escapeHtml(AMENITY_SHORT_LABEL[a.labelCode] || a.label)}`)
+    .join(' &nbsp;&middot;&nbsp; ');
 
 const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}): string => {
   const periodHeader = `${formatDateLong(y.dateFrom, y.checkin)}  →  ${formatDateLong(y.dateTo, y.checkout)}`;
@@ -344,32 +341,43 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}): strin
   const discountAmount =
     hasDiscount && y.listPriceEur != null ? y.listPriceEur - y.clientPriceEur : 0;
 
-  // Title is clickable when we have a public detail URL; falls back to
-  // plain heading text on custom yachts (no public listing). Font size /
-  // weight / family are re-declared on the <a> itself because some email
+  // Title — model + name in a modern Poppins face. Clickable when a public
+  // detail URL exists; the font is re-declared on the <a> because some
   // clients (Apple Mail, Outlook) inject default link styles that ignore
-  // the parent's inline font rules — which is why one of Mario's
-  // recipients saw the yacht name shrink to ~13px link text instead of
-  // the intended 22px title.
+  // inherited font rules.
+  const titleStyle = `font-family: ${POPPINS_STACK}; font-size: 22px; font-weight: 600; color: ${BRAND.text}; line-height: 1.18; letter-spacing: -0.2px; -webkit-text-size-adjust: 100%;`;
   const titleHtml = y.detailUrl
-    ? `<a href="${escapeHtml(y.detailUrl)}" class="b4y-yacht-title" style="font-family: ${FONT_STACK}; font-size: 22px; font-weight: 700; color: ${BRAND.text}; text-decoration: none; line-height: 1.25; -webkit-text-size-adjust: 100%;" target="_blank" rel="noopener">${escapeHtml(title)}</a>`
-    : `<span class="b4y-yacht-title" style="-webkit-text-size-adjust: 100%;">${escapeHtml(title)}</span>`;
+    ? `<a href="${escapeHtml(y.detailUrl)}" style="${titleStyle} text-decoration: none;" target="_blank" rel="noopener">${escapeHtml(title)}</a>`
+    : `<span style="${titleStyle}">${escapeHtml(title)}</span>`;
 
-  // Hero image — fixed 220px tall, full card width. Renders a labelled
-  // placeholder frame (soft brand bg + centered "Yacht photo" label) when
-  // the yacht row has no synced image, so the broker can see where the
-  // photo will sit while reviewing the offer layout.
-  const heroImage = y.imageUrl
-    ? `<tr>
-         <td style="padding: 0; line-height: 0;">
-           <img src="${escapeHtml(y.imageUrl)}" alt="${escapeHtml(y.modelName)}" width="640" class="b4y-hero-img" style="display: block; width: 100%; max-width: 100%; height: 220px; object-fit: cover; border-radius: 12px 12px 0 0;" />
-         </td>
-       </tr>`
-    : `<tr>
-         <td align="center" valign="middle" height="220" class="b4y-hero-img" style="height: 220px; background: ${BRAND.primarySoft}; border-bottom: 1px solid ${BRAND.primaryBorder}; border-radius: 12px 12px 0 0; color: ${BRAND.textMuted}; font-family: ${FONT_STACK}; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; font-weight: 700;">
-           Yacht photo
-         </td>
-       </tr>`;
+  // Hero image cell — half-width (248px) and near-landscape (248x192) so the
+  // mostly-square partner photos show far more of the boat than the old
+  // full-width 640x220 letterbox crop. Labelled placeholder when no image.
+  const heroCell = y.imageUrl
+    ? `<img src="${escapeHtml(y.imageUrl)}" alt="${escapeHtml(y.modelName)}" width="248" height="192" class="b4y-img" style="display: block; width: 248px; height: 192px; object-fit: cover; border-radius: 10px;" />`
+    : `<table border="0" cellpadding="0" cellspacing="0" width="248" role="presentation" class="b4y-img" style="width: 248px;"><tr><td align="center" valign="middle" height="192" style="height: 192px; background: ${BRAND.primarySoft}; border: 1px solid ${BRAND.primaryBorder}; border-radius: 10px; color: ${BRAND.textMuted}; font-family: ${FONT_STACK}; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; font-weight: 700;">Yacht photo</td></tr></table>`;
+
+  // Compact inline amenities (icon + short label) for the hero right column.
+  const amenitiesInline = renderAmenitiesInline(y.keyAmenities || []);
+
+  // Option badge — time-sensitive offers render "Under option until …" under
+  // the period date in the hero right column.
+  const optionBadge = y.isOption
+    ? (() => {
+        const formatted = y.optionExpiresAt
+          ? (() => {
+              const [datePart, timePart = ''] = y.optionExpiresAt!.split('T');
+              const [yy, mm, dd] = datePart.split('-');
+              const hm = timePart ? timePart.slice(0, 5) : '';
+
+              return hm ? `${dd}.${mm}.${yy} ${hm}` : `${dd}.${mm}.${yy}`;
+            })()
+          : null;
+        const badgeText = formatted ? `Under option until ${formatted}` : 'Under option';
+
+        return `<div style="margin-top: 6px;"><span style="display: inline-block; background: ${BRAND.warnSoft}; color: ${BRAND.warn}; font-family: ${FONT_STACK}; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.3px;">${escapeHtml(badgeText)}</span></div>`;
+      })()
+    : '';
 
   // Location line under title — country, base, joined with a middle-dot
   // separator. Stays one line on desktop, wraps on mobile.
@@ -513,82 +521,51 @@ return `<tr>
       </table>
     </td>`;
 
-  // Card-level wrapper — outer border + radius. We wrap each yacht in
-  // its own outer table so spacing between cards stays consistent.
+  // Card-level wrapper — outer border + radius. Each yacht is wrapped in its
+  // own outer table so spacing between cards stays consistent.
   return `
-<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="margin: 0 0 24px 0; font-family: ${FONT_STACK};">
+<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="margin: 0 0 20px 0; font-family: ${FONT_STACK};">
   <tr><td>
     <table class="b4y-card" border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="background: ${BRAND.cardBg}; border: 1px solid ${BRAND.border}; border-radius: 12px;">
-      ${heroImage}
-      <tr>
-        <td class="b4y-pad-x" style="padding: 18px 20px 6px 20px;">
-          <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="margin-bottom: 6px;"><tr>
-            <td class="b4y-period" valign="middle" style="vertical-align: middle; font-family: ${FONT_STACK}; font-size: 12px; line-height: 1.2; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: ${BRAND.warn}; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; text-size-adjust: 100%;">${escapeHtml(periodHeader)}</td>
+
+      <!-- Hero band — image left (half width) · date / title / location / amenities right -->
+      <tr><td style="padding: 14px 16px 4px 16px;">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation"><tr>
+          <td class="col-img" width="248" valign="middle" style="width: 248px; padding: 0; line-height: 0;">${heroCell}</td>
+          <td class="col-text" valign="middle" style="vertical-align: middle; padding-left: 18px;">
+            <div style="font-family: ${FONT_STACK}; font-size: 12px; line-height: 1.3; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: ${BRAND.warn}; -webkit-text-size-adjust: 100%;">${escapeHtml(periodHeader)}</div>
+            ${optionBadge}
+            <p style="margin: 5px 0 1px 0; padding: 0;">${titleHtml}</p>
             ${
-              y.isOption
-                ? (() => {
-                    // "Under option until DD.MM.YYYY HH:mm" — mandalay badge
-                    // pinned to the right edge of the period-header row so
-                    // it uses the horizontal whitespace next to the date
-                    // instead of adding a new row. Same visual weight as
-                    // the date — client eye already scans that line first.
-                    const formatted = y.optionExpiresAt
-                      ? (() => {
-                          const [datePart, timePart = ''] = y.optionExpiresAt!.split('T');
-                          const [yy, mm, dd] = datePart.split('-');
-                          const hm = timePart ? timePart.slice(0, 5) : '';
-
-                          
-return hm ? `${dd}.${mm}.${yy} ${hm}` : `${dd}.${mm}.${yy}`;
-                        })()
-                      : null;
-                    const badgeText = formatted
-                      ? `Under option until ${formatted}`
-                      : 'Under option';
-
-                    
-return `<td valign="middle" align="right" style="vertical-align: middle; text-align: right;">
-              <span style="display: inline-block; background: ${BRAND.warnSoft}; color: ${BRAND.warn}; font-family: ${FONT_STACK}; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.3px; text-transform: none;">${escapeHtml(badgeText)}</span>
-            </td>`;
-                  })()
+              locationLine
+                ? `<div style="font-family: ${FONT_STACK}; font-size: 13px; color: ${BRAND.textMuted}; line-height: 1.3;">${escapeHtml(locationLine)}</div>`
                 : ''
             }
-          </tr></table>
-          <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation"><tr>
-            <td valign="top" style="vertical-align: top;">
-              <p style="font-family: ${FONT_STACK}; font-size: 22px; font-weight: 700; color: ${BRAND.text}; margin: 0 0 4px 0; padding: 0; line-height: 1.25;">${titleHtml}</p>
-              ${
-                locationLine
-                  ? `<div style="font-family: ${FONT_STACK}; font-size: 13px; color: ${BRAND.textMuted}; margin-bottom: 4px;">${escapeHtml(locationLine)}</div>`
-                  : ''
-              }
-            </td>
             ${
-              y.keyAmenities && y.keyAmenities.length > 0
-                ? `<td class="b4y-amenities-row" valign="top" align="right" style="vertical-align: top;">
-              <table border="0" cellpadding="0" cellspacing="0" role="presentation"><tr>
-                ${y.keyAmenities.slice(0, 4).map(renderAmenityBox).join('')}
-              </tr></table>
-            </td>`
+              amenitiesInline
+                ? `<div style="font-family: ${FONT_STACK}; font-size: 12px; color: ${BRAND.textMuted}; line-height: 1.6; margin-top: 9px;">${amenitiesInline}</div>`
                 : ''
             }
-          </tr></table>
-          <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin-top: 10px;"><tr>
-            ${chips.map(([k, v]) => renderChip(k, v)).join('')}
-          </tr></table>
-        </td>
-      </tr>
-      <tr>
-        <td class="b4y-pad-x" style="padding: 14px 20px 20px 20px;">
-          <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation"><tr>
-            <td class="b4y-extras-col" valign="top" style="vertical-align: top;">
-              ${extrasSection.join('')}
-            </td>
-            ${priceCard}
-          </tr></table>
-          ${equipmentSection}
-        </td>
-      </tr>
+          </td>
+        </tr></table>
+      </td></tr>
+
+      ${
+        chips.length > 0
+          ? `<tr><td class="b4y-pad-x" style="padding: 4px 18px 2px 18px;">
+        <table border="0" cellpadding="0" cellspacing="0" role="presentation"><tr>${chips.map(([k, v]) => renderChip(k, v)).join('')}</tr></table>
+      </td></tr>`
+          : ''
+      }
+
+      <tr><td class="b4y-pad-x" style="padding: 6px 16px 16px 16px;">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation"><tr>
+          <td class="b4y-extras-col" valign="top" style="vertical-align: top;">${extrasSection.join('')}</td>
+          ${priceCard}
+        </tr></table>
+        ${equipmentSection}
+      </td></tr>
+
     </table>
   </td></tr>
 </table>`;
@@ -720,23 +697,21 @@ export const buildClientOfferHtml = (
   // renderYachtBlock — keep in sync.
   const responsiveStyles = `
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
   @media only screen and (max-width: 600px) {
     .b4y-outer { width: 100% !important; }
     .b4y-card { width: 100% !important; }
-    .b4y-extras-col, .b4y-price-col {
+    .col-img, .col-text, .b4y-extras-col, .b4y-price-col {
       display: block !important;
       width: 100% !important;
       padding-left: 0 !important;
       padding-right: 0 !important;
       box-sizing: border-box;
     }
+    .b4y-img { width: 100% !important; height: 200px !important; }
+    .col-text { padding: 12px 0 0 0 !important; }
     .b4y-price-col { padding-top: 12px !important; }
     .b4y-pad-x { padding-left: 14px !important; padding-right: 14px !important; }
-    .b4y-amenities-row { display: none !important; }
-    .b4y-hero-img { height: 180px !important; }
-    .b4y-period { font-size: 11px !important; letter-spacing: 0.4px !important; }
-    .b4y-yacht-title { font-size: 19px !important; }
-    .b4y-section-h { font-size: 11px !important; }
   }
 </style>`;
 

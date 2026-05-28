@@ -32,7 +32,7 @@ export const bbColors = {
 } as const;
 
 export const bbFont = {
-  stack: `-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Helvetica, Arial, sans-serif`,
+  stack: '-apple-system, BlinkMacSystemFont, \'Inter\', \'Segoe UI\', Helvetica, Arial, sans-serif',
 } as const;
 
 export const bbRadii = {
@@ -105,7 +105,9 @@ export const bbStatusPill = (variant: StatusVariant | string) => {
     bd: '#e1e5ea',
     label: String(variant),
   };
-  return {
+
+  
+return {
     style: {
       fontSize: 10.5,
       fontWeight: 700,

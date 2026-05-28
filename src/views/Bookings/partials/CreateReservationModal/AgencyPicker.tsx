@@ -47,7 +47,11 @@ const AgencyPicker = ({ value, onChange, hideLabel = false }: AgencyPickerProps)
 
   useEffect(() => {
     if (debounceRef.current) window.clearTimeout(debounceRef.current);
-    const id = ++requestIdRef.current;
+
+    requestIdRef.current += 1;
+
+    const id = requestIdRef.current;
+
     debounceRef.current = window.setTimeout(async () => {
       setLoading(true);
       try {
@@ -56,21 +60,28 @@ const AgencyPicker = ({ value, onChange, hideLabel = false }: AgencyPickerProps)
         // A typical admin has 100–300 agencies; 500 covers the dropdown
         // without paging. Name filter server-side narrows as user types.
         const qs = new URLSearchParams();
+
         qs.set('size', '500');
         qs.set('sort', 'name,asc');
         qs.set('active', 'true');
+
         if (input.trim()) qs.set('name', input.trim());
+
         const { data } = await api.get(`/admin/agencies?${qs.toString()}`);
+
         if (id !== requestIdRef.current) return; // stale response from a faster race-winner
+
         setOptions((data?.content || []) as Agency[]);
       } catch {
         if (id !== requestIdRef.current) return;
+
         setOptions([]);
       } finally {
         if (id === requestIdRef.current) setLoading(false);
       }
     }, 250);
-    return () => {
+    
+return () => {
       if (debounceRef.current) window.clearTimeout(debounceRef.current);
     };
   }, [input]);
@@ -120,7 +131,9 @@ const AgencyPicker = ({ value, onChange, hideLabel = false }: AgencyPickerProps)
       }
       renderOption={(props, option) => {
         const { key, ...rest } = props as typeof props & { key: string };
-        return (
+
+        
+return (
           <Box component="li" {...rest} key={key}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
               <Typography variant="body2" sx={{ flex: 1 }}>

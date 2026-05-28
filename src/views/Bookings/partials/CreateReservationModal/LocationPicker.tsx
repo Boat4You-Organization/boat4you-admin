@@ -58,15 +58,20 @@ const LocationPicker = ({
 
   useEffect(() => {
     if (debounceRef.current) window.clearTimeout(debounceRef.current);
+
     debounceRef.current = window.setTimeout(async () => {
       setLoading(true);
       try {
         const selectedIds = value.map(v => v.id);
         const params = new URLSearchParams();
+
         if (input.trim()) params.set('name', input.trim());
+
         selectedIds.forEach(id => params.append('selected', id));
         params.set('size', '25');
+
         const { data } = await api.get(`/public/locations?${params.toString()}`);
+
         setOptions(data?.content || []);
       } catch {
         setOptions([]);
@@ -74,7 +79,8 @@ const LocationPicker = ({
         setLoading(false);
       }
     }, 250);
-    return () => {
+    
+return () => {
       if (debounceRef.current) window.clearTimeout(debounceRef.current);
     };
   }, [input, value]);
@@ -96,7 +102,7 @@ const LocationPicker = ({
       filterOptions={x => x}
       getOptionLabel={o => o.name}
       isOptionEqualToValue={(a, b) => a.id === b.id}
-      groupBy={o => TYPE_LABEL[o.locationType] + 's'}
+      groupBy={o => `${TYPE_LABEL[o.locationType]  }s`}
       loading={loading}
       onInputChange={(_, v, reason) => {
         // Ignore the "reset" event that fires when the user picks an option
@@ -118,7 +124,9 @@ const LocationPicker = ({
       }
       renderOption={(props, option) => {
         const { key, ...otherProps } = props as typeof props & { key: string };
-        return (
+
+        
+return (
           <Box component="li" {...otherProps} key={key}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
               <Typography variant="body2" sx={{ flex: 1 }}>

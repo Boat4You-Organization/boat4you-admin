@@ -15,9 +15,13 @@ export const VIEWED_BOOKINGS_SEEDED_KEY = 'viewedBookingsSeeded';
 const loadViewedIds = (): number[] => {
   try {
     const raw = localStorage.getItem(VIEWED_BOOKINGS_STORAGE_KEY);
+
     if (!raw) return [];
+
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter((n: unknown) => typeof n === 'number') : [];
+
+    
+return Array.isArray(parsed) ? parsed.filter((n: unknown) => typeof n === 'number') : [];
   } catch {
     return [];
   }

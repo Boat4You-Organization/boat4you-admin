@@ -52,7 +52,9 @@ const useBookingAutocomplete = ({
         // is for, mirroring the Bookings YACHT / BASE column.
         const bookingNumber = booking.reservationNumber ?? `#${booking.reservationId}`;
         const yacht = [booking.modelName, booking.yachtName].filter(Boolean).join(' - ');
-        return {
+
+        
+return {
           id: byReservationFlowId ? booking.reservationFlowId.toString() : booking.reservationId.toString(),
           label: `${bookingNumber} - ${booking.endUser} - ${yacht}`,
         };

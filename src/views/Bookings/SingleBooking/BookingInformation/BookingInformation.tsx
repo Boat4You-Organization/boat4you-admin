@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary */
 import { useTranslation } from 'react-i18next';
 
 import { Box, Button, Divider, Grid, Stack, Typography } from '@mui/material';
@@ -81,6 +82,7 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
   // but already paid via the wire transfer. Mario rule (3.5.2026): "stavi i
   // meni u admin da vidim sta moraju jos platit u marini".
   type DisplayRow = { id: number | string; name: string; labelCode?: string; priceEur: number };
+
   const obligatoryAtMarinaSelected: DisplayRow[] = sortedServices.filter(service => service.obligatory && service.payableInBase);
   const obligatoryIncludedSelected: DisplayRow[] = sortedServices.filter(service => service.obligatory && !service.payableInBase);
   const obligatoryAtMarinaCatalog: DisplayRow[] = catalogObligatory
@@ -131,6 +133,7 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
           !isRejected &&
           !isFinalisedByAgent &&
           selectedBooking.reservationSysStatus !== ReservationSysStatus.CANCELLED;
+
         if (!isPending && !isFinalisedByAgent && !isRejected) return null;
 
         const bannerBg = isRejected
@@ -218,7 +221,9 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
               reservationDateFrom,
               reservationDateTo
             );
-            return (
+
+            
+return (
               <StatusChip
                 label={t(RESERVATION_SYS_STATUS_LABEL_MAP[effStatus])}
                 color={RESERVATION_SYS_STATUS_COLOR_MAP[effStatus]}

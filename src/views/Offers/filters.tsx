@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-restricted-syntax */
 import { useEffect, useMemo, useRef, useState } from 'react';
 
 import {
@@ -53,6 +54,7 @@ export const CountrySelect = ({
           name: c.name,
           countryCode: c.countryCode || '',
         })) as Country[];
+
         setCountries(list.sort((a, b) => a.name.localeCompare(b.name)));
       })
       .catch(() => setCountries([]));
@@ -93,8 +95,10 @@ export const RegionMultiSelect = ({
   useEffect(() => {
     if (!countryCode) {
       setRegions([]);
-      return;
+      
+return;
     }
+
     api
       .get(`/public/regions?countryCode=${encodeURIComponent(countryCode)}`)
       .then(({ data }) => {
@@ -102,6 +106,7 @@ export const RegionMultiSelect = ({
           id: String(r.id),
           name: r.name,
         })) as Region[];
+
         setRegions(list.sort((a, b) => a.name.localeCompare(b.name)));
       })
       .catch(() => setRegions([]));
@@ -164,7 +169,9 @@ export const VesselTypeDropdown = ({
     () => Object.fromEntries(VESSEL_TYPES_OFFERS.map(v => [v.id, v.label])),
     []
   );
-  return (
+
+  
+return (
     <FormControl fullWidth size="small">
       <Select
         multiple
@@ -172,6 +179,7 @@ export const VesselTypeDropdown = ({
         value={value}
         onChange={e => {
           const v = e.target.value;
+
           onChange(typeof v === 'string' ? v.split(',') : (v as string[]));
         }}
         renderValue={selected =>
@@ -246,21 +254,29 @@ const useDebouncedSearch = <T,>(fetcher: (q: string) => Promise<T[]>, delay = 25
 
   useEffect(() => {
     if (ref.current) window.clearTimeout(ref.current);
-    const id = ++reqIdRef.current;
+
+    reqIdRef.current += 1;
+
+    const id = reqIdRef.current;
+
     ref.current = window.setTimeout(async () => {
       setLoading(true);
       try {
         const result = await fetcher(input.trim());
+
         if (id !== reqIdRef.current) return;
+
         setOptions(result);
       } catch {
         if (id !== reqIdRef.current) return;
+
         setOptions([]);
       } finally {
         if (id === reqIdRef.current) setLoading(false);
       }
     }, delay);
-    return () => {
+    
+return () => {
       if (ref.current) window.clearTimeout(ref.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -280,21 +296,27 @@ const useDebouncedSearch = <T,>(fetcher: (q: string) => Promise<T[]>, delay = 25
 const dedupManufacturers = (raw: { id: number; name: string }[]): Manufacturer[] => {
   const canonical = new Map<string, number[]>();
   const singletons: Manufacturer[] = [];
+
   for (const m of raw) {
     const rule = MANUFACTURER_ALIASES.find(a => a.matches.test(m.name));
+
     if (rule) {
       const list = canonical.get(rule.canonical) || [];
+
       list.push(m.id);
       canonical.set(rule.canonical, list);
     } else {
       singletons.push({ canonical: m.name, ids: [m.id] });
     }
   }
+
   const grouped = Array.from(canonical.entries())
     .map(([name, ids]) => ({ canonical: name, ids }))
     .sort((a, b) => a.canonical.localeCompare(b.canonical));
+
   singletons.sort((a, b) => a.canonical.localeCompare(b.canonical));
-  return [...grouped, ...singletons];
+  
+return [...grouped, ...singletons];
 };
 
 export const ManufacturerPicker = ({
@@ -306,6 +328,7 @@ export const ManufacturerPicker = ({
 }) => {
   const { setInput, options, loading } = useDebouncedSearch<Manufacturer>(async q => {
     const qs = new URLSearchParams();
+
     // Pull the whole catalogue so the alias collapse runs on the complete
     // set — narrow server-side name search would hide matches under the
     // canonical (e.g. searching "lagoon" with 300-row page limit might
@@ -314,10 +337,14 @@ export const ManufacturerPicker = ({
     // <2000 manufacturers so this is a cheap one-shot call.
     qs.set('size', '3000');
     qs.set('sort', 'name,asc');
+
     if (q) qs.set('name', q);
+
     const { data } = await api.get(`/public/catalogue/manufacturers?${qs.toString()}`);
     const raw = (data?.content || []).map((m: any) => ({ id: m.id, name: (m.name || '').trim() }));
-    return dedupManufacturers(raw);
+
+    
+return dedupManufacturers(raw);
   });
 
   const merged = [...value, ...options.filter(o => !value.find(v => v.canonical === o.canonical))];
@@ -382,13 +409,19 @@ export const ModelPicker = ({
 
   const { setInput, options, loading } = useDebouncedSearch<Model>(async q => {
     if (!manufacturerIds.length) return [];
+
     const qs = new URLSearchParams();
+
     qs.set('size', '300');
     qs.set('sort', 'name,asc');
     manufacturerIds.forEach(id => qs.append('manufacturerIds', String(id)));
+
     if (q) qs.set('name', q);
+
     const { data } = await api.get(`/public/catalogue/models?${qs.toString()}`);
-    return (data?.content || []).map((m: any) => ({
+
+    
+return (data?.content || []).map((m: any) => ({
       id: m.id,
       name: m.name,
       manufacturerId: m.manufacturerId,

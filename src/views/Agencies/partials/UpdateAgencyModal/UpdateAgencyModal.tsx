@@ -153,9 +153,12 @@ const UpdateAgencyModal = ({ isOpen, onClose }: UpdateAgencyModalProps) => {
 
   const handleRecalculate = async () => {
     if (!selectedAgency) return;
+
     setRecalculating(true);
+
     const { payload, message } = await AgenciesService.recalculatePrices(selectedAgency.id);
     const success = typeof payload === 'number' && payload >= 0;
+
     showToast({
       status: success ? 'success' : 'error',
       text: success

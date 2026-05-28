@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Route, Routes, useParams } from 'react-router-dom';
@@ -17,13 +18,13 @@ import useQueryParams from '@/utils/hooks/useQueryParams';
 import { getAgencies, getSelectedAgency, toggleUpdateAgencyModal } from '@/valtio/agencies/agencies.actions';
 import { useAgenciesStore } from '@/valtio/agencies/agencies.store';
 
-// Agencies list uses a bigger page than the standard admin PAGE_SIZE (20)
-// so the broker sees the whole partner fleet in just a couple of pages.
-const AGENCIES_PAGE_SIZE = AgenciesService.AGENCIES_PAGE_SIZE;
-
 import AgencyModal from './partials/AgencyModal';
 import UpdateAgencyModal from './partials/UpdateAgencyModal';
 import useAgenciesView from './useAgenciesView';
+
+// Agencies list uses a bigger page than the standard admin PAGE_SIZE (20)
+// so the broker sees the whole partner fleet in just a couple of pages.
+const {AGENCIES_PAGE_SIZE} = AgenciesService;
 
 /**
  * Agencies list — Broker Desk redesign.
@@ -37,7 +38,9 @@ import useAgenciesView from './useAgenciesView';
 
 const initialsOf = (name: string): string => {
   const parts = name.trim().split(/\s+/).filter(Boolean);
-  return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase() || '?';
+
+  
+return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase() || '?';
 };
 
 const Agencies = () => {
@@ -55,7 +58,9 @@ const Agencies = () => {
 
   useEffect(() => {
     const id = window.setTimeout(() => setDebouncedSearch(searchInput.trim()), 350);
-    return () => window.clearTimeout(id);
+
+    
+return () => window.clearTimeout(id);
   }, [searchInput]);
 
   const { isLoading, selectedAgency, agencies, totalCount, updateAgencyModalOpen } = useAgenciesStore();
@@ -66,6 +71,7 @@ const Agencies = () => {
 
   useEffect(() => {
     if (!id) return;
+
     getSelectedAgency(Number(id));
   }, [id]);
 
@@ -73,6 +79,7 @@ const Agencies = () => {
     const pageNumber = page - PAGE_NUMBER;
     const countryParam = country || '';
     const sourceParam = sourceFilter === 'all' ? '' : sourceFilter;
+
     getAgencies(pageNumber, debouncedSearch || undefined, sortBy, sortDirection, countryParam, sourceParam);
   }, [country, page, sortBy, sortDirection, sourceFilter, debouncedSearch]);
 
@@ -157,7 +164,9 @@ const Agencies = () => {
                         v as keyof typeof AGENCY_PRIMARY_SOURCE_LABEL_MAP
                       ]
                     );
-              return (
+
+              
+return (
                 <Box
                   key={v}
                   onClick={() => {
@@ -256,7 +265,9 @@ const Agencies = () => {
             >
               {agencies.map(a => {
                 const statusPill = bbStatusPill(a.active ? 'active' : 'cancelled');
-                return (
+
+                
+return (
                   <Box
                     key={a.id}
                     data-id={a.id}

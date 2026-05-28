@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -62,12 +63,14 @@ const Invoices = () => {
 
   useEffect(() => {
     if (!id) return;
+
     getSelectedInvoice(Number(id));
   }, [id]);
 
   useEffect(() => {
     const pageNumber = page - PAGE_NUMBER;
     const status = (statusFilter === 'all' ? '' : statusFilter) as InvoiceStatus;
+
     getInvoices(pageNumber, sortBy, sortDirection, status, search);
   }, [page, sortBy, sortDirection, statusFilter, search]);
 
@@ -140,7 +143,9 @@ const Invoices = () => {
           >
             {INVOICE_STATUS_TAB_VALUES.map(v => {
               const active = v === statusFilter;
-              return (
+
+              
+return (
                 <Box
                   key={v}
                   onClick={() => {
@@ -256,7 +261,9 @@ const Invoices = () => {
                   {!isLoading &&
                     invoices.map(inv => {
                       const pill = bbStatusPill(statusToVariant(inv.invoiceStatus));
-                      return (
+
+                      
+return (
                         <Box
                           component="tr"
                           key={inv.id}
@@ -267,6 +274,7 @@ const Invoices = () => {
                             // postavljao `selectedInvoice` ali URL ostao na
                             // /invoices, pa modal nije ulazio u DOM.
                             const qs = searchParamsRaw.toString();
+
                             navigate(`/invoices/${inv.id}${qs ? `?${qs}` : ''}`);
                           }}
                           sx={{ cursor: 'pointer', '&:hover': { backgroundColor: bbColors.gray75 } }}

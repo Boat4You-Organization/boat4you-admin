@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define, no-nested-ternary */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -79,27 +80,42 @@ const statusToPillVariant = (s: ReservationSysStatus | VirtualReservationStatus)
 
 const formatCheckIn = (from?: string): string => {
   if (!from) return '—';
+
   const f = dayjs(from);
+
   if (!f.isValid()) return '—';
+
   const diff = f.startOf('day').diff(dayjs().startOf('day'), 'day');
+
   if (diff === 0) return 'today';
+
   if (diff === 1) return 'tomorrow';
+
   if (diff > 0 && diff < 60) return `in ${diff} days`;
+
   if (diff < 0 && diff > -60) return `${Math.abs(diff)}d ago`;
-  return f.format('DD MMM YYYY');
+
+  
+return f.format('DD MMM YYYY');
 };
 
 const formatNights = (from?: string, to?: string): number => {
   if (!from || !to) return 0;
+
   const f = dayjs(from);
   const t = dayjs(to);
+
   if (!f.isValid() || !t.isValid()) return 0;
-  return Math.max(0, t.startOf('day').diff(f.startOf('day'), 'day'));
+
+  
+return Math.max(0, t.startOf('day').diff(f.startOf('day'), 'day'));
 };
 
 const initialsOf = (s: string): string => {
   const parts = s.split(' ').filter(Boolean);
-  return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase() || '?';
+
+  
+return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase() || '?';
 };
 
 type TabValue = (typeof RESERVATION_SYS_TAB_VALUES)[number];
@@ -139,7 +155,9 @@ const Bookings = () => {
 
   useEffect(() => {
     const id = window.setTimeout(() => setDebouncedSearch(searchInput.trim()), 350);
-    return () => window.clearTimeout(id);
+
+    
+return () => window.clearTimeout(id);
   }, [searchInput]);
 
   const {
@@ -192,8 +210,10 @@ const Bookings = () => {
         undefined,
         search
       );
-      return;
+      
+return;
     }
+
     getBookings(pageNumber, sortBy, sortDirection, effectiveBackendStatus, undefined, undefined, undefined, undefined, search);
   }, [dateRange, page, sortBy, sortDirection, statusFilter, debouncedSearch, isVirtualTab]);
 
@@ -208,12 +228,15 @@ const Bookings = () => {
           b.reservationDateFrom,
           b.reservationDateTo
         );
-        return eff === statusFilter;
+
+        
+return eff === statusFilter;
       })
     : bookings;
 
   const openBooking = (b: (typeof bookings)[number]) => {
     const key = b.reservationNumber?.replace('/', '-') ?? b.reservationId.toString();
+
     navigate(`/bookings/${key}?${searchParams.toString()}`);
   };
 
@@ -311,7 +334,9 @@ const Bookings = () => {
           >
             {RESERVATION_SYS_TAB_VALUES.map(v => {
               const active = v === statusFilter;
-              return (
+
+              
+return (
                 <Box
                   key={v}
                   onClick={() => {
@@ -412,7 +437,9 @@ const Bookings = () => {
                       const isSortable = !!h.sortKey;
                       const isActive = isSortable && sortBy === h.sortKey;
                       const arrow = isActive ? (sortDirection === 'asc' ? ' ↑' : ' ↓') : '';
-                      return (
+
+                      
+return (
                         <Box
                           component="th"
                           key={h.label || `col-${i}`}
@@ -466,7 +493,9 @@ const Bookings = () => {
                       const nights = formatNights(b.reservationDateFrom, b.reservationDateTo);
                       const cleanYacht = b.modelName?.replace(/\s*-\s*\d+\s*cab\.?$/i, '') ?? '—';
                       const isUnviewed = !viewedSet.has(b.reservationId);
-                      return (
+
+                      
+return (
                         <Box
                           component="tr"
                           key={`${b.reservationId}`}

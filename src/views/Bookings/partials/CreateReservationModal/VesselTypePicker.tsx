@@ -45,7 +45,9 @@ const VesselTypePicker = ({ value, onChange }: VesselTypePickerProps) => {
       <Stack direction="row" spacing={0.75} flexWrap="wrap" rowGap={0.75}>
         {VESSEL_TYPES_ADMIN.map(t => {
           const selected = value.includes(t.id);
-          return (
+
+          
+return (
             <Box
               key={t.id}
               onClick={() => toggle(t.id)}

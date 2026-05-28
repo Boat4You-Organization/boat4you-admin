@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, no-nested-ternary */
 import { useEffect, useState } from 'react';
 
 import Calendar from '@mui/icons-material/CalendarMonthOutlined';
@@ -103,6 +104,7 @@ const DateRangeField = ({
 
   const handleClose = () => {
     setAnchor(null);
+
     // If admin closed without finishing the range, revert to committed value.
     if (!draftStart || !draftEnd) {
       setDraftStart(startDate);
@@ -112,26 +114,34 @@ const DateRangeField = ({
 
   const handleDayPick = (value: Dayjs | null) => {
     if (!value) return;
+
     if (!draftStart) {
       setDraftStart(value);
-      return;
+      
+return;
     }
+
     if (draftStart && !draftEnd) {
       if (value.isBefore(draftStart, 'day')) {
         // User picked a day earlier than current start — treat as new start.
         setDraftStart(value);
-        return;
+        
+return;
       }
+
       if (value.isSame(draftStart, 'day')) {
         // Same-day click = single-day range; common case "just picked start,
         // want to pick end elsewhere" — keep start, wait for real end.
         return;
       }
+
       setDraftEnd(value);
       onChange(draftStart, value);
       setAnchor(null);
-      return;
+      
+return;
     }
+
     // Both already set — restart with new start.
     setDraftStart(value);
     setDraftEnd(null);

@@ -64,6 +64,7 @@ export async function refreshOpenInquiriesCount(): Promise<void> {
       undefined,
       InquiriesStatus.NEW
     );
+
     inquiriesStore.openCount = page?.totalElements ?? 0;
   } catch {
     // leave previous count in place

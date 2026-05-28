@@ -38,9 +38,12 @@ const BookingCrewListUrl = ({ reservationId, initialUrl, onSaved }: BookingCrewL
 
   const handleSave = async () => {
     setSaving(true);
+
     const next = trimmed.length === 0 ? null : trimmed;
     const { payload } = await ReservationsService.updateCrewListUrl(reservationId, next);
+
     setSaving(false);
+
     if (payload) {
       onSaved?.(next);
     }

@@ -47,7 +47,9 @@ export default class ReservationsService {
   public static async getDashboardMetrics(): Promise<DashboardMetricsDto | null> {
     try {
       const { data } = await api.get('/admin/reservations/dashboard-metrics');
-      return data;
+
+      
+return data;
     } catch {
       return null;
     }
@@ -174,8 +176,11 @@ export default class ReservationsService {
       const { data, status } = await api.get(`/admin/reservations/${id}/yacht-swap`, {
         validateStatus: (code) => code < 300 || code === 204,
       });
+
       if (status === 204) return null;
-      return data || null;
+
+      
+return data || null;
     } catch {
       return null;
     }
@@ -202,6 +207,7 @@ export default class ReservationsService {
       const url = window.URL.createObjectURL(blob);
       const safeRef = (filenameRef ?? String(id)).replace(/\//g, '-');
       const a = document.createElement('a');
+
       a.href = url;
       a.download = `charter-agreement-${safeRef}.pdf`;
       // Some browsers also need `target=_blank` to trigger the download
@@ -212,18 +218,22 @@ export default class ReservationsService {
       a.click();
       a.remove();
       setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
-      return true;
+      
+return true;
     } catch (err) {
       // Surface the failure so admin sees something instead of silence.
       // Common causes: 401 (token expired — refresh interceptor failed),
       // 500 (renderer threw — check backend log), or network error.
       // eslint-disable-next-line no-console
       console.error('[charter-agreement] download failed', err);
+
       const message = (err as ErrorModel)?.message
         ?? (err as { message?: string })?.message
         ?? 'Charter agreement download failed. Check the backend log.';
+
       showToast({ status: 'error', text: message });
-      return false;
+      
+return false;
     }
   }
 
@@ -232,11 +242,14 @@ export default class ReservationsService {
   public static async listReservationDocuments(id: number): Promise<ReservationDocumentDto[]> {
     try {
       const { data } = await api.get<ReservationDocumentDto[]>(`/admin/reservations/${id}/documents`);
-      return data ?? [];
+
+      
+return data ?? [];
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('[documents] list failed', err);
-      return [];
+      
+return [];
     }
   }
 
@@ -250,21 +263,28 @@ export default class ReservationsService {
   ): Promise<ReservationDocumentDto | null> {
     try {
       const form = new FormData();
+
       form.append('file', file);
+
       const { data } = await api.post<ReservationDocumentDto>(
         `/admin/reservations/${id}/documents?internal=${internal}`,
         form,
         { headers: { 'Content-Type': 'multipart/form-data' } },
       );
-      return data;
+
+      
+return data;
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('[documents] upload failed', err);
+
       const message = (err as ErrorModel)?.message
         ?? (err as { message?: string })?.message
         ?? 'Document upload failed. Only PDF/DOC/DOCX up to 20MB are allowed.';
+
       showToast({ status: 'error', text: message });
-      return null;
+      
+return null;
     }
   }
 
@@ -285,6 +305,7 @@ export default class ReservationsService {
       const blob = new Blob([data], { type: contentType || 'application/octet-stream' });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
+
       a.href = url;
       a.download = filename;
       a.target = '_blank';
@@ -293,12 +314,14 @@ export default class ReservationsService {
       a.click();
       a.remove();
       setTimeout(() => window.URL.revokeObjectURL(url), 60_000);
-      return true;
+      
+return true;
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('[documents] open failed', err);
       showToast({ status: 'error', text: 'Could not download the document.' });
-      return false;
+      
+return false;
     }
   }
 
@@ -307,12 +330,14 @@ export default class ReservationsService {
   public static async deleteReservationDocument(reservationId: number, documentId: number): Promise<boolean> {
     try {
       await api.delete(`/admin/reservations/${reservationId}/documents/${documentId}`);
-      return true;
+      
+return true;
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('[documents] delete failed', err);
       showToast({ status: 'error', text: 'Could not delete the document.' });
-      return false;
+      
+return false;
     }
   }
 
@@ -325,10 +350,13 @@ export default class ReservationsService {
   public static async rejectCancellationRequest(id: number, reason: string): Promise<PayloadResponse<boolean>> {
     try {
       await api.post(`/admin/reservations/${id}/cancellation/reject`, { reason });
-      return { payload: true };
+      
+return { payload: true };
     } catch (error) {
       const { message } = error as ErrorModel;
-      return { payload: false, message };
+
+      
+return { payload: false, message };
     }
   }
 
@@ -381,10 +409,14 @@ export default class ReservationsService {
   }): Promise<PayloadResponse<ReservationModel>> {
     try {
       const { data } = await api.post<ReservationModel>('/admin/reservations', body);
-      return { payload: data };
+
+      
+return { payload: data };
     } catch (error) {
       const { message } = error as ErrorModel;
-      return { payload: null as unknown as ReservationModel, message };
+
+      
+return { payload: null as unknown as ReservationModel, message };
     }
   }
 
@@ -408,10 +440,14 @@ export default class ReservationsService {
   }): Promise<PayloadResponse<ReservationModel>> {
     try {
       const { data } = await api.post<ReservationModel>('/admin/reservations/fictitious', body);
-      return { payload: data };
+
+      
+return { payload: data };
     } catch (error) {
       const { message } = error as ErrorModel;
-      return { payload: null as unknown as ReservationModel, message };
+
+      
+return { payload: null as unknown as ReservationModel, message };
     }
   }
 
@@ -478,6 +514,7 @@ export default class ReservationsService {
   }>> {
     try {
       const qs = new URLSearchParams();
+
       (params.did || []).forEach(d => qs.append('did', d));
       (params.vesselType || []).forEach(b => qs.append('vesselType', b));
       (params.amenities || []).forEach(a => qs.append('amenities', String(a)));
@@ -490,12 +527,19 @@ export default class ReservationsService {
       (params.modelId || []).forEach(a => qs.append('mid', String(a)));
       qs.set('startDate', params.startDate);
       qs.set('endDate', params.endDate);
+
       if (params.minCabins) qs.set('minCabins', String(params.minCabins));
+
       if (params.minPersons) qs.set('minPersons', String(params.minPersons));
+
       if (params.minBuildYear) qs.set('minBuildYear', String(params.minBuildYear));
+
       if (params.maxBuildYear) qs.set('maxBuildYear', String(params.maxBuildYear));
+
       if (params.currency) qs.set('currency', params.currency);
+
       if (params.includeUnavailable) qs.set('includeUnavailable', 'true');
+
       // Backend `YachtQueryingService.MAX_PAGE_SIZE = 100` — requesting
       // more silently caps. The offers workspace paginates 100-at-a-time
       // with Prev/Next buttons; admin can flip pages through the 300+
@@ -510,8 +554,11 @@ export default class ReservationsService {
       // all pages" promise — so always pin this to "asc" for the offers
       // workspace.
       qs.set('sortBy', 'asc');
+
       const { data } = await api.get(`/public/yachts?${qs.toString()}`);
-      return data;
+
+      
+return data;
     } catch {
       return { content: [], page: { size: 0, totalElements: 0, totalPages: 0, number: 0 } };
     }

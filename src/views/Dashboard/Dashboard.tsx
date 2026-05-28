@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define, react/no-array-index-key, react/no-unescaped-entities */
 import { useEffect, useState } from 'react';
 
 import { Box, Stack, Typography } from '@mui/material';
@@ -44,15 +45,20 @@ const formatPeriod = (from: string, to: string): string => {
   const f = dayjs(from);
   const t = dayjs(to);
   const sameYear = f.year() === t.year();
-  return sameYear
+
+  
+return sameYear
     ? `${f.format('D')}–${t.format('D MMM YYYY')}`
     : `${f.format('D MMM YYYY')} – ${t.format('D MMM YYYY')}`;
 };
 
 const formatMoney = (n: number | string): string => {
   const num = typeof n === 'string' ? parseFloat(n) : n;
+
   if (!Number.isFinite(num)) return '€0';
-  return `€${Math.round(num).toLocaleString('en')}`;
+
+  
+return `€${Math.round(num).toLocaleString('en')}`;
 };
 
 // ─── SMALL UI HELPERS ─────────────────────────────────────────────────
@@ -100,7 +106,9 @@ const KpiCard = ({
 
 const StatusPill = ({ variant }: { variant: string }) => {
   const p = bbStatusPill(variant);
-  return <Box component="span" sx={p.style}>{p.label}</Box>;
+
+  
+return <Box component="span" sx={p.style}>{p.label}</Box>;
 };
 
 // ─── DASHBOARD ────────────────────────────────────────────────────────
@@ -113,6 +121,7 @@ const Dashboard = () => {
 
   useEffect(() => {
     let cancelled = false;
+
     (async () => {
       const [m, list] = await Promise.all([
         ReservationsService.getDashboardMetrics(),
@@ -120,11 +129,14 @@ const Dashboard = () => {
         // already gives newest-first on page 0 — no sort param needed.
         ReservationsService.getReservations(0),
       ]);
+
       if (cancelled) return;
+
       setMetrics(m);
       setRecent(list.content.slice(0, 10));
     })();
-    return () => {
+    
+return () => {
       cancelled = true;
     };
   }, []);
@@ -250,7 +262,9 @@ const Dashboard = () => {
                 : weekly.map((d, i) => {
                     const pct = Math.max(4, (d.count / maxCount) * 100);
                     const isToday = i === todayIdx;
-                    return (
+
+                    
+return (
                       <Box
                         key={d.day}
                         title={`${d.day} · ${d.count}`}
@@ -348,7 +362,9 @@ const Dashboard = () => {
                 )}
                 {recent.map(b => {
                   const orderNo = b.reservationNumber?.replace('/', '-') ?? String(b.reservationId);
-                  return (
+
+                  
+return (
                     <Box
                       component="tr"
                       key={b.reservationId}

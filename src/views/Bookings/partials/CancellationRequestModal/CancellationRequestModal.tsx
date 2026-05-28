@@ -54,6 +54,7 @@ const CancellationRequestModal = ({
 
   const requireReason = (): boolean => {
     const trimmed = reason.trim();
+
     if (trimmed.length === 0) {
       showToast({
         status: 'warning',
@@ -62,9 +63,12 @@ const CancellationRequestModal = ({
           'Please add an explanation — the customer sees this verbatim in their email.',
         ),
       });
-      return false;
+      
+return false;
     }
-    return true;
+
+    
+return true;
   };
 
   const afterMutation = (success: boolean, successText: string, failText: string, message?: string) => {
@@ -72,9 +76,12 @@ const CancellationRequestModal = ({
       status: success ? 'success' : 'error',
       text: success ? successText : message || failText,
     });
+
     if (success) {
       onClose();
+      // eslint-disable-next-line no-void
       void reloadSelectedBooking();
+
       // List view callers also pull a fresh page so the row's status pill
       // updates without a full reload. SinglePage owners reload through
       // `reloadSelectedBooking` above and don't need a navigate.
@@ -86,12 +93,16 @@ const CancellationRequestModal = ({
 
   const handleReject = async () => {
     if (!selectedBooking || submitting) return;
+
     if (!requireReason()) return;
+
     setSubmitting(true);
+
     const { payload, message } = await ReservationsService.rejectCancellationRequest(
       selectedBooking.reservationId,
       reason.trim(),
     );
+
     setSubmitting(false);
     afterMutation(
       payload,
@@ -106,12 +117,16 @@ const CancellationRequestModal = ({
 
   const handleConfirm = async () => {
     if (!selectedBooking || submitting) return;
+
     if (!requireReason()) return;
+
     setSubmitting(true);
+
     const { payload, message } = await ReservationsService.deleteReservation(
       selectedBooking.reservationId,
       reason.trim(),
     );
+
     setSubmitting(false);
     afterMutation(
       payload,

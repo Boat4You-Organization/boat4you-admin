@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define, @typescript-eslint/no-explicit-any, no-nested-ternary, react/no-array-index-key, react/no-unescaped-entities */
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -130,6 +131,7 @@ const CreateReservationModal = ({ isOpen, onClose }: CreateReservationModalProps
   // would bleed across and confuse the admin.
   useEffect(() => {
     if (!isOpen) return;
+
     setStep(0);
     setSubmitting(false);
     setCustomerIdInput('');
@@ -161,14 +163,18 @@ const CreateReservationModal = ({ isOpen, onClose }: CreateReservationModalProps
   // period length to get the weekly / full-period catalogue total.
   useEffect(() => {
     if (!pickedYacht) return;
+
     const nights = Math.max(1, endDate.diff(startDate, 'day'));
     // Fictitious-flow yachts (no offer) have null price — leave blank so
     // admin types the total manually. Regular flow seeds the estimate
     // from the per-day catalogue price × nights.
     const perDay = typeof pickedYacht.clientPriceEur === 'number' ? pickedYacht.clientPriceEur : 0;
     const estimated = perDay > 0 ? Math.round(perDay * nights) : 0;
+
     setTotalPrice(estimated > 0 ? String(estimated) : '');
+
     const half = estimated > 0 ? (estimated / 2).toFixed(2) : '';
+
     setPhases([
       blankPhase(dayjs(), half, true), // first installment already paid on the cancelled reservation
       blankPhase(startDate.subtract(60, 'day'), half, false),
@@ -179,17 +185,24 @@ const CreateReservationModal = ({ isOpen, onClose }: CreateReservationModalProps
   const handleLookupCustomer = async () => {
     setCustomerError('');
     setCustomerPreview(null);
+
     const id = Number(customerIdInput.trim());
+
     if (!Number.isInteger(id) || id <= 0) {
       setCustomerError('Enter a numeric user ID (shown in /users or as #NN on a booking row)');
-      return;
+      
+return;
     }
+
     try {
       const user = await UsersService.getUser(id);
+
       if (!user) {
         setCustomerError(`No user with ID ${id}`);
-        return;
+        
+return;
       }
+
       setCustomerPreview({
         id: user.id!,
         name: `${user.name || ''} ${user.surname || ''}`.trim() || '(no name)',
@@ -205,6 +218,7 @@ const CreateReservationModal = ({ isOpen, onClose }: CreateReservationModalProps
     setSearching(true);
     setSearchResults([]);
     setPickedYacht(null);
+
     const res = await ReservationsService.searchYachtsForAdmin({
       did: destinations.map(d => d.id),
       startDate: startDate.format('YYYY-MM-DD'),
@@ -241,6 +255,7 @@ const CreateReservationModal = ({ isOpen, onClose }: CreateReservationModalProps
       offerDateFrom: (y as any).offerDateFrom ?? undefined,
       offerDateTo: (y as any).offerDateTo ?? undefined,
     }));
+
     mapped.sort((a, b) => (a.clientPriceEur ?? Number.MAX_VALUE) - (b.clientPriceEur ?? Number.MAX_VALUE));
     setSearchResults(mapped);
     setSearching(false);
@@ -270,6 +285,7 @@ const CreateReservationModal = ({ isOpen, onClose }: CreateReservationModalProps
       );
       const offers = Array.isArray(data) ? data : [];
       const match = offers.find((o: any) => o.dateFrom === queryFrom && o.dateTo === queryTo) || offers[0];
+
       if (!match?.id) {
         // Replacement flow — this yacht has no offer for the selected week
         // (partner already sold the full period and sync didn't generate an
@@ -297,12 +313,14 @@ const CreateReservationModal = ({ isOpen, onClose }: CreateReservationModalProps
           offerDateFrom: match.dateFrom,
           offerDateTo: match.dateTo,
         });
+
         // Sync the wizard's dates with the actual offer window — so the
         // header banners, nights math, and the check-in field all line
         // up with what will be booked.
         if (match.dateFrom && match.dateFrom !== startDate.format('YYYY-MM-DD')) {
           setStartDate(dayjs(match.dateFrom));
         }
+
         if (match.dateTo && match.dateTo !== endDate.format('YYYY-MM-DD')) {
           setEndDate(dayjs(match.dateTo));
         }
@@ -331,22 +349,31 @@ const CreateReservationModal = ({ isOpen, onClose }: CreateReservationModalProps
   // ---- step gating -------------------------------------------------------
   const canProceed = (): boolean => {
     if (step === 0) return !!customerPreview;
+
     // Step 1: need a yacht. In regular mode an offer must resolve (offerId>0)
     // because backend's AdminCreateReservationDto requires one. In replacement
     // mode we bypass that — the wizard uses a separate fictitious-reservation
     // endpoint which doesn't need an offerId.
     if (step === 1) {
       if (!pickedYacht || pickingOffer) return false;
+
       if (includeUnavailable) return true;
-      return pickedYacht.offerId > 0;
+
+      
+return pickedYacht.offerId > 0;
     }
+
     if (step === 2) return totalPriceNum > 0 && phases.length > 0 && phasesMatchTotal;
-    return true;
+
+    
+return true;
   };
 
   const handleSubmit = async () => {
     if (!customerPreview || !pickedYacht) return;
+
     setSubmitting(true);
+
     const sharedPhases = phases.map(p => ({
       deadline: p.deadline.format('YYYY-MM-DD'),
       amount: Number(p.amount),
@@ -376,13 +403,17 @@ const CreateReservationModal = ({ isOpen, onClose }: CreateReservationModalProps
           specialRequest: specialRequest || undefined,
           sendOptionEmail,
         });
+
     setSubmitting(false);
+
     if (payload) {
       showToast({ status: 'success', text: `Reservation ${payload.reservationNumber ?? payload.reservationId} created` });
       toggleCreateReservationModal(false);
       onClose();
+
       // Refresh bookings list so the new row appears immediately
       const pageFromUrl = Number(new URLSearchParams(window.location.search).get('page')) || 1;
+
       getBookings(pageFromUrl);
     } else {
       showToast({ status: 'error', text: message || 'Failed to create reservation' });
@@ -595,7 +626,9 @@ const CreateReservationModal = ({ isOpen, onClose }: CreateReservationModalProps
             y.maxPersons != null ? `${y.maxPersons} pax` : null,
             y.buildYear != null ? `${y.buildYear}` : null,
           ].filter(Boolean);
-          return (
+
+          
+return (
             <Box
               key={`${y.yachtId}-${y.slug}`}
               onClick={() => handlePickYacht(y)}

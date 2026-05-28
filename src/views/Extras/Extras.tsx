@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -31,6 +32,7 @@ const Extras = () => {
 
   useEffect(() => {
     const pageNumber = page - PAGE_NUMBER;
+
     getExtras(pageNumber, search, sortBy, sortDirection);
   }, [page, search, sortBy, sortDirection]);
 

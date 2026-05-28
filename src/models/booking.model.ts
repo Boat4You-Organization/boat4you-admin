@@ -102,17 +102,29 @@ export const getEffectiveReservationSysStatus = (
   dateTo?: string
 ): ReservationSysStatus | VirtualReservationStatus => {
   if (raw !== ReservationSysStatus.RESERVATION) return raw;
+
   if (!dateFrom || !dateTo) return raw;
+
   const today = new Date();
+
   today.setHours(0, 0, 0, 0);
+
   const from = new Date(dateFrom);
+
   from.setHours(0, 0, 0, 0);
+
   const to = new Date(dateTo);
+
   to.setHours(0, 0, 0, 0);
+
   if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) return raw;
+
   if (today.getTime() > to.getTime()) return VIRTUAL_ENDED;
+
   if (today.getTime() >= from.getTime() && today.getTime() <= to.getTime()) return VIRTUAL_IN_CHARTER;
-  return raw;
+
+  
+return raw;
 };
 
 // Tabs hide both UNKNOWN (internal sync fallback) and OPTION_WAITING —

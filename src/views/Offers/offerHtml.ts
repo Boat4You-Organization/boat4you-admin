@@ -112,18 +112,26 @@ const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'S
 const formatDateShort = (isoDate: string): string => {
   // "2026-06-20" → "20 Jun 2026"
   if (!isoDate) return '';
+
   const parts = isoDate.split('-');
+
   if (parts.length !== 3) return isoDate;
+
   const [y, m, d] = parts;
   const mi = Math.max(0, Math.min(11, Number(m) - 1));
-  return `${Number(d)} ${MONTHS_SHORT[mi]} ${y}`;
+
+  
+return `${Number(d)} ${MONTHS_SHORT[mi]} ${y}`;
 };
 
 const daysBetween = (fromIso: string, toIso: string): number => {
   const f = new Date(`${fromIso}T00:00:00Z`).getTime();
   const t = new Date(`${toIso}T00:00:00Z`).getTime();
+
   if (!Number.isFinite(f) || !Number.isFinite(t)) return 0;
-  return Math.max(1, Math.round((t - f) / 86_400_000));
+
+  
+return Math.max(1, Math.round((t - f) / 86_400_000));
 };
 
 /**
@@ -134,32 +142,44 @@ const daysBetween = (fromIso: string, toIso: string): number => {
  */
 const findExtraByKeyword = (extras: CartExtra[], keyword: string): CartExtra | null => {
   const k = keyword.toLowerCase();
-  return extras.find(e => (e.name || '').toLowerCase().includes(k)) || null;
+
+  
+return extras.find(e => (e.name || '').toLowerCase().includes(k)) || null;
 };
 
 const formatDateLong = (isoDate: string, time?: string): string => {
   // "2026-05-23" → "May 23, 2026 17:00"
   if (!isoDate) return '';
+
   const parts = isoDate.split('-');
+
   if (parts.length !== 3) return isoDate;
+
   const [y, m, d] = parts;
   const mi = Math.max(0, Math.min(11, Number(m) - 1));
   const base = `${MONTHS[mi]} ${Number(d)}, ${y}`;
-  return time ? `${base} ${time}` : base;
+
+  
+return time ? `${base} ${time}` : base;
 };
 
 const formatPrice = (v: number | null | undefined): string => {
   if (v == null) return '';
-  return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  
+return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
 const priceWithCurrency = (v: number | null | undefined, symbol: string): string => {
   if (v == null) return '';
-  return `${formatPrice(v)} ${symbol}`;
+
+  
+return `${formatPrice(v)} ${symbol}`;
 };
 
 const humanizeVesselType = (t: string | null | undefined): string => {
   if (!t) return '';
+
   const map: Record<string, string> = {
     CATAMARAN: 'Catamaran',
     SAILING_YACHT: 'Sailing yacht',
@@ -171,7 +191,9 @@ const humanizeVesselType = (t: string | null | undefined): string => {
     CROSSOVER: 'Crossover',
     MONO_HULL: 'Monohull',
   };
-  return map[t] || t;
+
+  
+return map[t] || t;
 };
 
 const escapeHtml = (s: string): string =>
@@ -205,7 +227,7 @@ const BRAND = {
   cardBg: '#ffffff',
 } as const;
 
-const FONT_STACK = `-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif`;
+const FONT_STACK = '-apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, sans-serif';
 
 /**
  * One specs chip (e.g. "Length 15.35 m"). Pill-shaped with a soft brand
@@ -276,7 +298,9 @@ const AMENITY_SHORT_LABEL: Record<string, string> = {
 const renderAmenityBox = (a: { labelCode: string; label: string }): string => {
   const icon = AMENITY_ICON_MAP[a.labelCode] || '•';
   const short = AMENITY_SHORT_LABEL[a.labelCode] || a.label;
-  return `
+
+  
+return `
 <td valign="top" style="padding: 0 0 0 6px; vertical-align: top;">
   <table border="0" cellpadding="0" cellspacing="0" role="presentation"><tr>
     <td align="center" valign="middle" width="54" height="54" style="background: #f5f5f5; border-radius: 8px; width: 54px; height: 54px; padding: 4px; vertical-align: middle;">
@@ -296,12 +320,19 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}): strin
   // shows "Length —". Order matches what brokers said matters most:
   // type → year → length → cabins → berths → WC.
   const chips: Array<[string, string]> = [];
+
   if (y.vesselType) chips.push(['Type', humanizeVesselType(y.vesselType)]);
+
   if (y.buildYear != null) chips.push(['Year', String(y.buildYear)]);
+
   if (y.lengthMeters != null) chips.push(['Length', `${y.lengthMeters.toFixed(2)} m`]);
+
   if (y.cabins != null) chips.push(['Cabins', String(y.cabins)]);
+
   if (y.berths != null) chips.push(['Berths', String(y.berths)]);
+
   if (y.wc != null) chips.push(['WC', String(y.wc)]);
+
   if (y.mainSailType) chips.push(['Mainsail', humanizeVesselType(y.mainSailType)]);
 
   // Pricing — line-through old, big new, savings badge if discount > 0.
@@ -373,18 +404,25 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}): strin
     const alreadyShown = obligatory.some(e =>
       (e.name || '').toLowerCase().includes(keyword.toLowerCase())
     );
+
     if (alreadyShown) return;
+
     const found = findExtraByKeyword(y.extras, keyword);
+
     obligatory.push(found ? { ...found, obligatory: true } : placeholderExtra(label));
   };
+
   if (options.includeSkipper) ensureCrewExtra('skipper', 'Skipper');
+
   if (options.includeHostess) ensureCrewExtra('hostess', 'Hostess');
+
   const renderExtraRow = (e: CartExtra): string => {
     // "Included" is reserved for items that are TRULY free (e.priceEur=0 →
     // mapper sets included=true). priceEur=null means data is missing — show
     // a dash, NOT "included" (avoids the Captain/Chef/Stewardess false-
     // positives Mario flagged on crewed yachts where every item read as
     // "included").
+    // eslint-disable-next-line no-nested-ternary
     const priceStr = e.included
       ? `<span style="color: ${BRAND.success}; font-weight: 600;">included</span>`
       : e.priceEur == null
@@ -396,7 +434,9 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}): strin
     const descriptionLine = e.description
       ? `<div style="font-size: 11px; color: ${BRAND.textMuted}; margin-top: 2px; line-height: 1.4;">${escapeHtml(e.description)}</div>`
       : '';
-    return `<tr>
+
+    
+return `<tr>
       <td style="padding: 6px 12px 6px 0; font-size: 13px; color: ${BRAND.text};">
         <div>${escapeHtml(e.name)}</div>
         ${descriptionLine}
@@ -424,6 +464,7 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}): strin
     : '';
 
   const extrasSection: string[] = [];
+
   if (obligatory.length > 0 || hasSecurityDeposit) {
     extrasSection.push(`
       <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="margin-bottom: 12px;">
@@ -496,13 +537,17 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}): strin
                           const [datePart, timePart = ''] = y.optionExpiresAt!.split('T');
                           const [yy, mm, dd] = datePart.split('-');
                           const hm = timePart ? timePart.slice(0, 5) : '';
-                          return hm ? `${dd}.${mm}.${yy} ${hm}` : `${dd}.${mm}.${yy}`;
+
+                          
+return hm ? `${dd}.${mm}.${yy} ${hm}` : `${dd}.${mm}.${yy}`;
                         })()
                       : null;
                     const badgeText = formatted
                       ? `Under option until ${formatted}`
                       : 'Under option';
-                    return `<td valign="middle" align="right" style="vertical-align: middle; text-align: right;">
+
+                    
+return `<td valign="middle" align="right" style="vertical-align: middle; text-align: right;">
               <span style="display: inline-block; background: ${BRAND.warnSoft}; color: ${BRAND.warn}; font-family: ${FONT_STACK}; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.3px; text-transform: none;">${escapeHtml(badgeText)}</span>
             </td>`;
                   })()
@@ -581,41 +626,56 @@ export const buildClientOfferWhatsApp = (
     const period = `${formatDateShort(y.dateFrom)} – ${formatDateShort(y.dateTo)} (${days} ${days === 1 ? 'night' : 'nights'})`;
 
     const lines: string[] = [];
+
     lines.push(`⛵ *${y.modelName} | ${y.name}*`);
 
     const locParts = [y.base, y.country].filter(Boolean);
+
     if (locParts.length > 0) {
       lines.push(`📍 ${locParts.join(', ')}`);
     }
+
     lines.push(`📅 ${period}`);
 
     // Compact specs
     const specs: string[] = [];
+
     if (y.vesselType) specs.push(humanizeVesselType(y.vesselType));
+
     if (y.buildYear != null) specs.push(`Year ${y.buildYear}`);
+
     if (y.cabins != null) specs.push(`${y.cabins} cabins`);
+
     if (y.berths != null) specs.push(`${y.berths} berths`);
+
     if (y.lengthMeters != null) specs.push(`${y.lengthMeters.toFixed(2)} m`);
+
     if (specs.length > 0) lines.push(`✓ ${specs.join(' · ')}`);
 
     // Skipper / Hostess (only when toggle ON)
     const renderCrewLine = (label: string, keyword: string) => {
       const found = findExtraByKeyword(y.extras, keyword);
+
       if (found && found.priceEur != null) {
         const unitSuffix = found.unit ? ` (${found.unit})` : '';
+
         lines.push(`✓ ${label} +${formatPrice(found.priceEur)} ${sym}${unitSuffix}`);
       } else {
         lines.push(`✓ ${label} — on request`);
       }
     };
+
     if (options.includeSkipper) renderCrewLine('Skipper', 'skipper');
+
     if (options.includeHostess) renderCrewLine('Hostess', 'hostess');
 
     // Price
     lines.push('');
     lines.push(`💰 *Total: ${formatPrice(y.clientPriceEur)} ${sym}*`);
+
     if (y.listPriceEur != null && y.listPriceEur > y.clientPriceEur) {
       const save = y.listPriceEur - y.clientPriceEur;
+
       lines.push(`~${formatPrice(y.listPriceEur)} ${sym}~ · save ${formatPrice(save)} ${sym}`);
     }
 
@@ -625,6 +685,7 @@ export const buildClientOfferWhatsApp = (
       const [yy, mm, dd] = datePart.split('-');
       const hm = timePart ? timePart.slice(0, 5) : '';
       const formatted = hm ? `${dd}.${mm}.${yy} ${hm}` : `${dd}.${mm}.${yy}`;
+
       lines.push(`⏳ Under option until ${formatted}`);
     }
 
@@ -647,6 +708,7 @@ export const buildClientOfferHtml = (
   if (cart.length === 0) {
     return '<p><em>No yachts added to offer yet.</em></p>';
   }
+
   const blocks = cart.map(y => renderYachtBlock(y, options)).join('\n');
 
   // Responsive style block — collapses the right-hand price card under the

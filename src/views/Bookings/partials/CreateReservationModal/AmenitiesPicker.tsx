@@ -38,6 +38,7 @@ const AmenitiesPicker = ({ value, onChange, hideLabel = false }: AmenitiesPicker
       .get('/public/catalogue/amenities')
       .then(({ data }) => {
         const list: Amenity[] = Array.isArray(data) ? data : data?.content || [];
+
         setOptions(list);
       })
       .catch(() => setOptions([]))

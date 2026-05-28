@@ -9,6 +9,7 @@ import { bookingsStore, VIEWED_BOOKINGS_SEEDED_KEY, VIEWED_BOOKINGS_STORAGE_KEY 
 // equation changes (after a poll, after the admin opens a booking).
 function recomputeUnviewedCount() {
   const viewed = new Set(bookingsStore.viewedBookingIds);
+
   bookingsStore.unviewedCount = bookingsStore.recentBookings.filter(
     b => !viewed.has(b.reservationId)
   ).length;
@@ -41,6 +42,7 @@ export async function refreshUnviewedBookingsCount(): Promise<void> {
   // wrong attribute name throws UnknownPathException which floods the
   // backend log every 60s.
   const { content } = await ReservationsService.getReservations(0, 'reservationCreatedAt', 'desc');
+
   bookingsStore.recentBookings = content;
 
   const seeded = (() => {
@@ -50,8 +52,10 @@ export async function refreshUnviewedBookingsCount(): Promise<void> {
       return false;
     }
   })();
+
   if (!seeded && content.length > 0) {
     const seedSet = new Set(bookingsStore.viewedBookingIds);
+
     content.forEach(b => seedSet.add(b.reservationId));
     bookingsStore.viewedBookingIds = Array.from(seedSet);
     persistViewedIds();
@@ -73,6 +77,7 @@ export async function refreshUnviewedBookingsCount(): Promise<void> {
  */
 export function markBookingAsViewed(id: number): void {
   if (bookingsStore.viewedBookingIds.includes(id)) return;
+
   bookingsStore.viewedBookingIds = [...bookingsStore.viewedBookingIds, id];
   persistViewedIds();
   recomputeUnviewedCount();
@@ -120,7 +125,9 @@ export async function getSelectedBooking(id: number): Promise<void> {
  *  selected. */
 export async function reloadSelectedBooking(): Promise<void> {
   const id = bookingsStore.selectedBooking?.reservationId;
+
   if (!id) return;
+
   await getSelectedBooking(id);
 }
 
@@ -129,10 +136,13 @@ export async function getSelectedBookingByOrderNo(orderNo: string): Promise<void
   // slash swapped for `-` so it's one router segment). Backend expects two
   // path parts — split on the last `-` in case a future sequence contains one.
   const dashIndex = orderNo.lastIndexOf('-');
+
   if (dashIndex < 0) {
     bookingsStore.selectedBooking = undefined;
-    return;
+    
+return;
   }
+
   const sequence = orderNo.slice(0, dashIndex);
   const year = orderNo.slice(dashIndex + 1);
   const response = await ReservationsService.getReservationByNumber(sequence, year);

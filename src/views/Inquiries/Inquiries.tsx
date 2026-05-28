@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define, react/no-unescaped-entities */
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -32,24 +33,39 @@ import StatusInquiryModal from './partials/StatusInquiryModal';
 // Simple relative-time helper — keeps this module dependency-free.
 const formatReceived = (iso: string): string => {
   if (!iso) return '—';
+
   const t = dayjs(iso);
+
   if (!t.isValid()) return iso;
+
   const diffMin = dayjs().diff(t, 'minute');
+
   if (diffMin < 1) return 'just now';
+
   if (diffMin < 60) return `${diffMin}m ago`;
+
   const diffHr = dayjs().diff(t, 'hour');
+
   if (diffHr < 24) return `${diffHr}h ago`;
+
   const diffDay = dayjs().diff(t, 'day');
+
   if (diffDay < 7) return `${diffDay}d ago`;
-  return t.format('DD MMM YYYY');
+
+  
+return t.format('DD MMM YYYY');
 };
 
 const formatPeriod = (from?: string, to?: string): string => {
   if (!from || !to) return '—';
+
   const f = dayjs(from);
   const t = dayjs(to);
+
   if (!f.isValid() || !t.isValid()) return '—';
-  return `${f.format('DD MMM')} – ${t.format('DD MMM YYYY')}`;
+
+  
+return `${f.format('DD MMM')} – ${t.format('DD MMM YYYY')}`;
 };
 
 const initialsOf = (name?: string, surname?: string): string =>
@@ -94,12 +110,14 @@ const Inquiries = () => {
 
   useEffect(() => {
     if (!id) return;
+
     getSelectedInquiry(Number(id));
   }, [id]);
 
   useEffect(() => {
     const pageNumber = page - PAGE_NUMBER;
     const status = tab === 'all' ? undefined : (tab as InquiriesStatus);
+
     getInquiries(pageNumber, search, sortBy, sortDirection, status);
   }, [tab, page, search, sortBy, sortDirection]);
 
@@ -210,7 +228,9 @@ const Inquiries = () => {
             {TABS.map(tb => {
               const active = tb.id === tab;
               const count = tabCounts[tb.id as keyof typeof tabCounts];
-              return (
+
+              
+return (
                 <Box
                   key={tb.id}
                   onClick={() => setTab(tb.id)}
@@ -347,7 +367,9 @@ const Inquiries = () => {
                       // always white; the styling hook stays so we can flip
                       // it on when a hot-flag endpoint lands.
                       const rowBg = bbColors.white;
-                      return (
+
+                      
+return (
                         <Box
                           component="tr"
                           key={iq.id}

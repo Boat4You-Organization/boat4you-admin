@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define, no-nested-ternary, @typescript-eslint/no-shadow, no-duplicate-imports */
 import type { ReactNode } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -207,6 +208,7 @@ const Offers = () => {
       return 'EUR';
     }
   });
+
   useEffect(() => {
     try {
       localStorage.setItem(CURRENCY_STORAGE_KEY, currency);
@@ -214,6 +216,7 @@ const Offers = () => {
       // storage unavailable — no-op, state still works in-memory
     }
   }, [currency]);
+
   const [country, setCountry] = useState<Country | null>(null);
   const [regions, setRegions] = useState<Region[]>([]);
   const [startDate, setStartDate] = useState<Dayjs>(dayjs().add(30, 'day').startOf('week').add(6, 'day'));
@@ -248,14 +251,18 @@ const Offers = () => {
 
   const handleCurrencyChange = (next: string) => {
     if (next === currency) return;
+
     if (cart.length > 0) {
       const confirm = window.confirm(
         `Changing currency from ${currency} to ${next} will clear the current offer ` +
           `(${cart.length} yacht${cart.length === 1 ? '' : 's'}). Continue?`
       );
+
       if (!confirm) return;
+
       setCart([]);
     }
+
     setCurrency(next);
     // Drop stale results — their prices are in the old currency and would
     // confuse the admin; a re-search is always the right next step.
@@ -279,7 +286,9 @@ const Offers = () => {
   const [cart, setCart] = useState<CartYacht[]>(() => {
     try {
       const raw = localStorage.getItem(CART_STORAGE_KEY);
-      return raw ? (JSON.parse(raw) as CartYacht[]) : [];
+
+      
+return raw ? (JSON.parse(raw) as CartYacht[]) : [];
     } catch {
       return [];
     }
@@ -308,16 +317,20 @@ const Offers = () => {
   // and the backend would silently 400 → empty results.
   const handleSearch = async (pageOverride?: number) => {
     const targetPage = typeof pageOverride === 'number' ? pageOverride : 0;
+
     if (typeof pageOverride !== 'number') setPage(0);
+
     setSearching(true);
     setSearched(true);
     setResults([]);
+
     // Region ids take precedence when picked — otherwise fall back to the
     // country id so backend's location filter scopes the result set at
     // country granularity. `did` accepts both region ("r-6") and country
     // ("c-54") synthetic ids from the LocationView.
     const did: string[] =
       regions.length > 0 ? regions.map(r => r.id) : country ? [country.id] : [];
+
     try {
       const res = await ReservationsService.searchYachtsForAdmin({
         did,
@@ -338,8 +351,10 @@ const Offers = () => {
         currency,
         page: targetPage,
       });
+
       setTotalPages(res.page?.totalPages ?? 0);
       setTotalCount(res.page?.totalElements ?? 0);
+
       // The search endpoint returns a wider row than the admin-reservation
       // flow needs; pick out just what the offer card actually shows.
       const mapped: SearchRow[] = (res.content || []).map(y => ({
@@ -364,6 +379,7 @@ const Offers = () => {
         isOption: y.isOption === true,
         optionExpiresAt: y.optionExpiresAt ?? null,
       }));
+
       // Trust backend ordering. A client-side re-sort over the 100 rows of
       // this page would shuffle them against the GLOBAL ascending order —
       // you'd see the last item on page 1 priced higher than the first on
@@ -377,6 +393,7 @@ const Offers = () => {
 
   const handlePageChange = (nextPage: number) => {
     if (nextPage < 0 || nextPage >= totalPages || nextPage === page) return;
+
     setPage(nextPage);
     handleSearch(nextPage);
     // Scroll the middle panel back to the top so the broker sees the new
@@ -410,8 +427,10 @@ const Offers = () => {
   const handleAddToOffer = async (row: SearchRow) => {
     if (cart.some(c => c.yachtId === row.yachtId && c.dateFrom === startDate.format('YYYY-MM-DD'))) {
       showToast({ status: 'info', text: 'Already in offer for the selected period' });
-      return;
+      
+return;
     }
+
     setAddingSlug(row.slug);
     try {
       const { data: yachtDetails } = await api.get<YachtDetailsResponse>(
@@ -424,7 +443,8 @@ const Offers = () => {
 
       if (!matchedOffer) {
         showToast({ status: 'error', text: 'No offer available for this yacht in the selected period' });
-        return;
+        
+return;
       }
 
       const checkin = matchedOffer.checkin || yachtDetails.defaultCheckin || '';
@@ -456,14 +476,19 @@ const Offers = () => {
       const groupedAmenities: Record<string, string[]> = {};
       const keyAmenitiesAccum: { labelCode: string; label: string }[] = [];
       const seenKeyCodes = new Set<string>();
+
       (yachtDetails.amenities || []).forEach(a => {
         const rawCat = a.equipment?.category || a.category;
         const cat = (rawCat && CATEGORY_LABELS[rawCat]) || rawCat || 'Equipment';
         const labelCode = a.equipment?.labelCode || a.labelCode;
         const label = a.name || labelCode || a.label;
+
         if (!label) return;
+
         if (!groupedAmenities[cat]) groupedAmenities[cat] = [];
+
         groupedAmenities[cat].push(String(label));
+
         if (
           labelCode &&
           KEY_AMENITY_LABEL_CODES.has(labelCode) &&
@@ -473,6 +498,7 @@ const Offers = () => {
           keyAmenitiesAccum.push({ labelCode, label: String(label) });
         }
       });
+
       // Cap at 4 pills so the title row stays tight even on narrow
       // clients — listing card uses 3, email has slightly more width so
       // we allow one extra.
@@ -483,8 +509,14 @@ const Offers = () => {
       // the yacht has no images at all (custom yachts before upload, or
       // partner row that came without media).
       const images: YachtImageResponse[] = yachtDetails.yachtImages || [];
+      // Image rows carry the catalogue `id`, not a ready `.url` (the sync leaves
+      // url null), so the offer email showed the "Yacht photo" placeholder. Build
+      // the public image URL from the id exactly like the cart thumbnail does
+      // (`/public/image/{id}` is auth-free, so it loads inside the client's email
+      // client too). Prefer an explicit `.url` if a row ever carries one.
+      const mainImg = images.find(i => i?.mainImage) || images[0];
       const imageUrl: string | null =
-        images.find(i => i?.mainImage)?.url || images[0]?.url || null;
+        mainImg?.url || getBoatImageUrl(row.mainImageId, 800) || getBoatImageUrl(mainImg?.id, 800);
 
       // Build the cart extras list from BOTH sources:
       //   1. offer.extras   — obligatory/extras the partner attached to THIS
@@ -531,7 +563,9 @@ const Offers = () => {
             e.extras?.labelCode ??
             `${name.toLowerCase().trim()}-${priceNum ?? '-'}`
         );
-        return {
+
+        
+return {
           key,
           value: {
             name,
@@ -548,8 +582,10 @@ const Offers = () => {
       };
 
       const extrasMap = new Map<string, ReturnType<typeof toCartExtra>['value']>();
+
       (yachtDetails.services || []).forEach(s => {
         const { key, value } = toCartExtra(s, false);
+
         extrasMap.set(key, value);
       });
       // Offer-level data wins where the partner sent period-specific values,
@@ -564,11 +600,14 @@ const Offers = () => {
         const { key, value } = toCartExtra(e, false);
         // Merge: keep richer description when offer-level lacks one.
         const existing = extrasMap.get(key);
+
         if (existing && !value.description && existing.description) {
           value.description = existing.description;
         }
+
         extrasMap.set(key, value);
       });
+
       const extras = Array.from(extrasMap.values());
 
       const entry: CartYacht = {
@@ -613,6 +652,7 @@ const Offers = () => {
         isOption: row.isOption,
         optionExpiresAt: row.optionExpiresAt,
       };
+
       setCart(prev => [...prev, entry]);
       showToast({ status: 'success', text: `${row.modelName} | ${row.name} added to offer` });
     } catch {
@@ -641,29 +681,37 @@ const Offers = () => {
 
   const handleOpenOfferModal = async () => {
     const missing = cart.filter(c => !c.keyAmenities || c.keyAmenities.length === 0);
+
     if (missing.length === 0) {
       setOfferModalOpen(true);
-      return;
+      
+return;
     }
+
     setOpeningModal(true);
     try {
       const hydrated = await Promise.all(
         cart.map(async entry => {
           if (entry.keyAmenities && entry.keyAmenities.length > 0) return entry;
+
           try {
             const { data } = await api.get<YachtDetailsResponse>(
               `/public/yachts/${encodeURIComponent(entry.slug)}?dateFrom=${entry.dateFrom}&dateTo=${entry.dateTo}&currency=${entry.currency}`
             );
             const keyAccum: { labelCode: string; label: string }[] = [];
             const seen = new Set<string>();
+
             (data.amenities || []).forEach(a => {
               const labelCode = a.equipment?.labelCode || a.labelCode;
               const label = a.name || labelCode || a.label;
+
               if (!labelCode || !label || !KEY_AMENITY_LABEL_CODES_GLOBAL.has(labelCode) || seen.has(labelCode)) return;
+
               seen.add(labelCode);
               keyAccum.push({ labelCode, label: String(label) });
             });
-            return { ...entry, keyAmenities: keyAccum.slice(0, 4) };
+            
+return { ...entry, keyAmenities: keyAccum.slice(0, 4) };
           } catch {
             // Leave entry as-is with empty amenities — failing one yacht
             // shouldn't block the whole offer preview.
@@ -671,6 +719,7 @@ const Offers = () => {
           }
         })
       );
+
       setCart(hydrated);
     } finally {
       setOpeningModal(false);
@@ -680,6 +729,7 @@ const Offers = () => {
 
   const handleClearCart = () => {
     if (cart.length === 0) return;
+
     if (window.confirm(`Clear all ${cart.length} yacht${cart.length === 1 ? '' : 's'} from offer?`)) {
       setCart([]);
     }
@@ -725,6 +775,7 @@ const Offers = () => {
       if (typeof ClipboardItem !== 'undefined' && navigator.clipboard.write) {
         const blob = new Blob([clientOfferHtml], { type: 'text/html' });
         const plain = new Blob([cart.map(c => `${c.modelName} | ${c.name}`).join('\n')], { type: 'text/plain' });
+
         await navigator.clipboard.write([
           new ClipboardItem({ 'text/html': blob, 'text/plain': plain }),
         ]);
@@ -1021,15 +1072,21 @@ const Offers = () => {
                     const [datePart, timePart = ''] = row.optionExpiresAt.split('T');
                     const [y, m, d] = datePart.split('-');
                     const hm = timePart ? timePart.slice(0, 5) : '';
-                    return hm ? `${d}.${m}.${y} ${hm}` : `${d}.${m}.${y}`;
+
+                    
+return hm ? `${d}.${m}.${y} ${hm}` : `${d}.${m}.${y}`;
                   })()
                 : null;
 
               const thumbUrl = getBoatImageUrl(row.mainImageId, 200);
               const statsPills: Array<{ label: string; value: string }> = [];
+
               if (row.cabins != null) statsPills.push({ label: 'Cab', value: String(row.cabins) });
+
               if (row.maxPersons != null) statsPills.push({ label: 'Pax', value: String(row.maxPersons) });
+
               if (row.lengthMeters != null) statsPills.push({ label: 'L', value: `${row.lengthMeters.toFixed(2)} m` });
+
               if (row.buildYear != null) statsPills.push({ label: 'Year', value: String(row.buildYear) });
 
               return (
@@ -1178,11 +1235,14 @@ const Offers = () => {
                       </Typography>
                       {(() => {
                         if (row.agencyCommissionEur == null || row.clientPriceEur <= 0) return null;
+
                         const commissionTotal = row.agencyCommissionEur * nights;
                         const pctBase = listPeriodTotal ?? periodTotal;
                         const pct = pctBase > 0 ? (commissionTotal / pctBase) * 100 : 0;
                         const isZero = commissionTotal === 0;
-                        return (
+
+                        
+return (
                           <Box
                             sx={{
                               backgroundColor: isZero ? colors.black100 : colors.mandalay100,

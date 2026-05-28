@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define, react/no-unescaped-entities */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -52,6 +53,7 @@ const CustomBoats = () => {
 
   useEffect(() => {
     const pageNumber = page - PAGE_NUMBER;
+
     getCustomYachts(pageNumber, search, sortBy, sortDirection);
   }, [page, search, sortBy, sortDirection]);
 

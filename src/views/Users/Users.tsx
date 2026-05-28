@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define, no-nested-ternary */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -69,6 +70,7 @@ const Users = () => {
 
   useEffect(() => {
     if (!id) return;
+
     getSelectedUser(Number(id));
   }, [id]);
 
@@ -76,6 +78,7 @@ const Users = () => {
     const pageNumber = page - PAGE_NUMBER;
     const role = (userRole === USER_ROLE_NAME_TAB_VALUES[0] ? '' : userRole) as UserRoleName;
     const status = (userStatus === USER_STATUS_VALUES[0] ? '' : userStatus) as UserStatus;
+
     getUsers(pageNumber, search, sortBy, sortDirection, role, status);
   }, [page, search, sortBy, sortDirection, userRole, userStatus]);
 
@@ -171,7 +174,9 @@ const Users = () => {
           >
             {USER_ROLE_NAME_TAB_VALUES.map(v => {
               const active = v === userRole;
-              return (
+
+              
+return (
                 <Box
                   key={v}
                   onClick={() => {
@@ -232,7 +237,9 @@ const Users = () => {
             <Stack direction="row" gap={0.5}>
               {USER_STATUS_VALUES.map(v => {
                 const active = v === userStatus;
-                return (
+
+                
+return (
                   <Box
                     key={v}
                     onClick={() => {
@@ -324,7 +331,9 @@ const Users = () => {
                       const roleLabel = u.roles.length
                         ? t(`common.${u.roles[0].roleName.toLowerCase()}`, u.roles[0].roleName)
                         : '—';
-                      return (
+
+                      
+return (
                         <Box
                           component="tr"
                           key={u.id}

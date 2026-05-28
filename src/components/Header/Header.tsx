@@ -72,9 +72,13 @@ const Header = () => {
   // newly-arrived bookings without a manual refresh.
   useEffect(() => {
     if (!user || isUserRole) return undefined;
+
     refreshUnviewedBookingsCount();
+
     const id = window.setInterval(refreshUnviewedBookingsCount, 60_000);
-    return () => window.clearInterval(id);
+
+    
+return () => window.clearInterval(id);
   }, [user, isUserRole]);
 
   if (!user || isUserRole) return null;
@@ -137,6 +141,7 @@ const Header = () => {
     </Link>
   );
 
+  // eslint-disable-next-line react/no-unstable-nested-components
   const NavBadge = ({ count }: { count: number }) => (
     <Box
       sx={{
@@ -195,7 +200,9 @@ const Header = () => {
               // every 60s). Other nav items fall back to the static `news`
               // prop (currently unused but kept for future module alerts).
               const count = item.id === 'bookings' ? unviewedBookings : item.news ?? 0;
-              return (
+
+              
+return (
                 <NavLink key={item.id} to={item.path || '/'} style={navLinkStyle}>
                   {t(item.id, item.id)}
                   {count > 0 ? <NavBadge count={count} /> : null}

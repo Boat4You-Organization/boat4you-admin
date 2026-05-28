@@ -28,6 +28,7 @@ const useMarinaAutocomplete = ({ countryId }: UseMarinaAutocompleteOptions) => {
     }
 
     let cancelled = false;
+
     (async (): Promise<void> => {
       // Resolve countryId ("c-86") -> countryCode ("GR") via the same
       // /public/countries endpoint useCountryAutocomplete already calls.
@@ -36,15 +37,19 @@ const useMarinaAutocomplete = ({ countryId }: UseMarinaAutocompleteOptions) => {
       // so the cost is negligible.
       const countries = await LocationsService.getCountires();
       const country = countries.find(c => c.id === countryId);
+
       if (!country?.countryCode) {
         if (!cancelled) setMarinas([]);
 
         return;
       }
+
       const data = await LocationsService.getMarinasByCountry(country.countryCode);
+
       if (!cancelled) setMarinas(data);
     })();
 
+    // eslint-disable-next-line consistent-return
     return () => {
       cancelled = true;
     };

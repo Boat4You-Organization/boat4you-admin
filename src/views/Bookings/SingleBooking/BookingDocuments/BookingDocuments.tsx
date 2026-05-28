@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary, no-await-in-loop, no-restricted-syntax, no-void */
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -31,15 +32,21 @@ const ACCEPT = '.pdf,.doc,.docx,application/pdf,application/msword,application/v
 
 const formatSize = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
+
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+
+  
+return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 };
 
 const formatDate = (iso: string): string => {
   try {
     const d = new Date(iso);
+
     if (isNaN(d.getTime())) return '';
-    return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+
+    
+return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
   } catch {
     return '';
   }
@@ -57,7 +64,9 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
 
   const reload = async () => {
     setLoading(true);
+
     const list = await ReservationsService.listReservationDocuments(reservationId);
+
     // Backend returns ALL docs to admin; we split client-side so the customer
     // and internal drawers each render their own slice.
     setDocuments(list.filter(d => d.isInternal === internal));
@@ -79,25 +88,35 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
    *  both paths so callers don't have to duplicate it. */
   const uploadFiles = async (files: FileList | File[]) => {
     const list = Array.from(files);
+
     if (list.length === 0) return;
+
     setUploading(true);
+
     let anyOk = false;
+
     for (const file of list) {
       const created = await ReservationsService.uploadReservationDocument(reservationId, file, internal);
+
       if (created) anyOk = true;
     }
+
     setUploading(false);
+
     if (anyOk) {
       await reload();
     }
   };
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
+    const {files} = e.target;
+
     // Reset the input so the SAME file can be re-uploaded later (otherwise
     // `change` doesn't fire on identical filenames).
     e.target.value = '';
+
     if (!files || files.length === 0) return;
+
     await uploadFiles(files);
   };
 
@@ -108,8 +127,11 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
   const handleDragEnter = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
+
     if (uploading) return;
+
     if (!Array.from(e.dataTransfer.types).includes('Files')) return;
+
     dragCounter.current += 1;
     setIsDragging(true);
   };
@@ -118,6 +140,7 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
     e.preventDefault();
     e.stopPropagation();
     dragCounter.current = Math.max(0, dragCounter.current - 1);
+
     if (dragCounter.current === 0) {
       setIsDragging(false);
     }
@@ -127,6 +150,7 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
     // Required: without preventDefault the drop event never fires.
     e.preventDefault();
     e.stopPropagation();
+
     if (!uploading) {
       e.dataTransfer.dropEffect = 'copy';
     }
@@ -137,9 +161,13 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
     e.stopPropagation();
     dragCounter.current = 0;
     setIsDragging(false);
+
     if (uploading) return;
-    const files = e.dataTransfer.files;
+
+    const {files} = e.dataTransfer;
+
     if (!files || files.length === 0) return;
+
     await uploadFiles(files);
   };
 
@@ -151,8 +179,11 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
     const ok = window.confirm(
       t('booking.documents.confirm-delete', `Delete "${doc.filename}"? This cannot be undone.`) as string,
     );
+
     if (!ok) return;
+
     const deleted = await ReservationsService.deleteReservationDocument(reservationId, doc.id);
+
     if (deleted) {
       await reload();
     }

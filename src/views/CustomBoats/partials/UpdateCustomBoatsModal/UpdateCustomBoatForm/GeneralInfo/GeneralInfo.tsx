@@ -48,10 +48,12 @@ const GeneralInfo = () => {
   // ref tracks the previous value so the first paint doesn't blank out the
   // marina that came from selectedCustomYacht).
   const prevCountryIdRef = useRef<string | undefined>(customYachtRequest.countryId);
+
   useEffect(() => {
     if (prevCountryIdRef.current !== undefined && prevCountryIdRef.current !== customYachtRequest.countryId) {
       setValue('customYachtRequest.locationId', '');
     }
+
     prevCountryIdRef.current = customYachtRequest.countryId;
   }, [customYachtRequest.countryId, setValue]);
 

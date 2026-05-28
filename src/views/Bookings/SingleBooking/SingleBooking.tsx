@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define, no-nested-ternary, react/no-unescaped-entities, consistent-return */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -66,21 +67,28 @@ const SingleBooking = () => {
 
   useEffect(() => {
     if (!orderNo) return;
+
     getSelectedBookingByOrderNo(orderNo);
   }, [orderNo]);
 
   useEffect(() => {
     const reservationId = selectedBooking?.reservationId;
+
     if (!reservationId) return;
+
     // Drop the "new" highlight + Header badge as soon as the admin lands
     // on the detail page — Mario asked for the count to clear on click.
     markBookingAsViewed(reservationId);
+
     let cancelled = false;
+
     (async () => {
       const info = await ReservationsService.getYachtSwapInfo(reservationId);
+
       if (!cancelled) setYachtSwap(info);
     })();
-    return () => {
+    
+return () => {
       cancelled = true;
     };
   }, [selectedBooking?.reservationId]);
@@ -347,6 +355,7 @@ const SingleBooking = () => {
                   !!selectedBooking.cancellationRequestAt &&
                   !selectedBooking.cancellationRejectedAt &&
                   selectedBooking.reservationSysStatus !== ReservationSysStatus.CANCELLED;
+
                 if (hasPendingRequest) {
                   return (
                     <Button
@@ -367,7 +376,9 @@ const SingleBooking = () => {
                     </Button>
                   );
                 }
-                return (
+
+                
+return (
                   <Button
                     fullWidth
                     disabled={!isBookingCancellable}

@@ -275,6 +275,7 @@ const AMENITY_ICON_MAP: Record<string, string> = {
   fridge: '🧊',
   'water-toys': '🏄',
   'snorkel-sets': '🤿',
+  watermaker: '💧',
 };
 
 // Short labels tuned to fit a 54px-wide square box at 9-10px font so
@@ -297,6 +298,7 @@ const AMENITY_SHORT_LABEL: Record<string, string> = {
   fridge: 'Fridge',
   'water-toys': 'Toys',
   'snorkel-sets': 'Snorkel',
+  watermaker: 'Watermaker',
 };
 
 // Amenities as a compact inline strip ("☀ Solar · 🛥 Dinghy · ❄ AC · …")

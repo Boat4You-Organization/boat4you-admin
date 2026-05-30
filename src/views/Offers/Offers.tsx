@@ -499,6 +499,14 @@ const Offers = () => {
         if (labelCode && KEY_AMENITY_LABEL_CODES.has(labelCode) && !seenKeyCodes.has(labelCode)) {
           seenKeyCodes.add(labelCode);
           keyAmenitiesAccum.push({ labelCode, label: String(label) });
+        } else if (/water\s*-?\s*maker|desalinat/i.test(String(label)) && !seenKeyCodes.has('watermaker')) {
+          // Watermaker is a premium feature buyers ask about, but the partner
+          // data has NO reliable labelCode for it (seen live as `waste-tank`,
+          // empty string, etc.) — so match by NAME. The regex catches
+          // "Water maker" / "Watermaker" / "desalinator" but NOT "water pump",
+          // "water hose" or "hot water" (none contain "maker"/"desalin").
+          seenKeyCodes.add('watermaker');
+          keyAmenitiesAccum.push({ labelCode: 'watermaker', label: 'Watermaker' });
         }
       });
 
@@ -724,10 +732,17 @@ const Offers = () => {
               const labelCode = a.equipment?.labelCode || a.labelCode;
               const label = a.name || labelCode || a.label;
 
-              if (!labelCode || !label || !KEY_AMENITY_LABEL_CODES_GLOBAL.has(labelCode) || seen.has(labelCode)) return;
+              if (!label) return;
 
-              seen.add(labelCode);
-              keyAccum.push({ labelCode, label: String(label) });
+              if (labelCode && KEY_AMENITY_LABEL_CODES_GLOBAL.has(labelCode) && !seen.has(labelCode)) {
+                seen.add(labelCode);
+                keyAccum.push({ labelCode, label: String(label) });
+              } else if (/water\s*-?\s*maker|desalinat/i.test(String(label)) && !seen.has('watermaker')) {
+                // Match watermaker by NAME — partner data has no reliable
+                // labelCode for it (see handleAddToOffer for the same logic).
+                seen.add('watermaker');
+                keyAccum.push({ labelCode: 'watermaker', label: 'Watermaker' });
+              }
             });
 
             // Backfill the hero image the same way handleAddToOffer does:

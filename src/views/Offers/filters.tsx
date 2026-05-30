@@ -77,9 +77,47 @@ export const CountrySelect = ({
 // ---------- region ----------------------------------------------------------
 
 export interface Region {
-  id: string; // "r-6"
+  id: string; // primary region id ("r-6") — bucket anchor + Autocomplete key
   name: string;
+  // One or more backend region ids this option represents. Dual-source regions
+  // (the same area imported under two provider rows — e.g. "Ionian" +
+  // "Ionian Islands") merge into ONE option whose `ids` carries BOTH, so a
+  // single pick searches both provider pools. Usually just `[id]`.
+  ids: string[];
 }
+
+// Dual-source region pairs: the same logical region is imported twice (one row
+// per provider — MMK without country code, NauSys with it), splitting the yacht
+// inventory across two ids. Picking one alone misses the other pool, so we merge
+// each pair into a single option carrying BOTH ids. Matched by a distinctive
+// keyword present in both member names (verified against the live
+// /public/regions list). Mirrors the web's `dedupeRegionDuplicates`.
+const REGION_MERGE_GROUPS: { label: string; keyword: string }[] = [
+  { label: 'Ionian Islands', keyword: 'ionian' }, //       "Ionian" + "Ionian Islands"
+  { label: 'Sporades', keyword: 'sporades' }, //           "Sporades" + "Skiathos/Sporades, Volos"
+  { label: 'Athens / Saronic Gulf', keyword: 'saronic' }, // "Athens / Saronic Gulf" + "Athens area/Saronic/Peloponese"
+];
+
+const mergeDualSourceRegions = (list: Region[]): Region[] => {
+  const consumed = new Set<string>();
+  const out: Region[] = [];
+
+  REGION_MERGE_GROUPS.forEach(group => {
+    const members = list.filter(r => r.name.toLowerCase().includes(group.keyword));
+
+    // Only collapse when BOTH provider rows are present; a lone member stays as-is.
+    if (members.length > 1) {
+      out.push({ id: members[0].id, name: group.label, ids: members.flatMap(m => m.ids) });
+      members.forEach(m => consumed.add(m.id));
+    }
+  });
+
+  list.forEach(r => {
+    if (!consumed.has(r.id)) out.push(r);
+  });
+
+  return out.sort((a, b) => a.name.localeCompare(b.name));
+};
 
 export const RegionMultiSelect = ({
   countryCode,
@@ -105,9 +143,10 @@ return;
         const list = (Array.isArray(data) ? data : []).map((r: any) => ({
           id: String(r.id),
           name: r.name,
+          ids: [String(r.id)],
         })) as Region[];
 
-        setRegions(list.sort((a, b) => a.name.localeCompare(b.name)));
+        setRegions(mergeDualSourceRegions(list));
       })
       .catch(() => setRegions([]));
   }, [countryCode]);

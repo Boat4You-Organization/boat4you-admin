@@ -324,7 +324,9 @@ const Offers = () => {
     // country id so backend's location filter scopes the result set at
     // country granularity. `did` accepts both region ("r-6") and country
     // ("c-54") synthetic ids from the LocationView.
-    const did: string[] = regions.length > 0 ? regions.map(r => r.id) : country ? [country.id] : [];
+    // `flatMap(r => r.ids)` — a merged dual-source region (e.g. "Ionian Islands")
+    // carries BOTH provider ids, so one pick searches both yacht pools.
+    const did: string[] = regions.length > 0 ? regions.flatMap(r => r.ids) : country ? [country.id] : [];
 
     try {
       const res = await ReservationsService.searchYachtsForAdmin({

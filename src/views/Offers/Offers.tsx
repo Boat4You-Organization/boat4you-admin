@@ -9,6 +9,7 @@ import {
   Alert,
   Box,
   Button,
+  Collapse,
   FormControl,
   IconButton,
   MenuItem,
@@ -26,7 +27,6 @@ import ReservationsService from '@/services/reservations.service';
 import colors from '@/styles/themes/colors';
 import { showToast } from '@/valtio/global/global.actions';
 import AgencyPicker, { Agency } from '@/views/Bookings/partials/CreateReservationModal/AgencyPicker';
-import AmenitiesPicker from '@/views/Bookings/partials/CreateReservationModal/AmenitiesPicker';
 import DateRangeField from '@/views/Bookings/partials/CreateReservationModal/DateRangeField';
 
 import {
@@ -37,6 +37,7 @@ import {
   ManufacturerPicker,
   Model,
   ModelPicker,
+  OffersAmenityChips,
   Region,
   RegionMultiSelect,
   VesselTypeDropdown,
@@ -296,6 +297,8 @@ const Offers = () => {
   // "Create client offer" button in a visibly-busy state so the broker
   // doesn't double-click while details load.
   const [openingModal, setOpeningModal] = useState(false);
+  // Advanced "More filters" group starts collapsed (company / builder / year).
+  const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -898,15 +901,8 @@ const Offers = () => {
               <VesselTypeDropdown value={vesselTypes} onChange={setVesselTypes} />
             </Section>
 
-            <Section label="Charter company">
-              <AgencyPicker value={agencies} onChange={setAgencies} hideLabel />
-            </Section>
-
-            <Section label="Builder & model">
-              <Stack spacing={1}>
-                <ManufacturerPicker value={manufacturers} onChange={setManufacturers} />
-                <ModelPicker manufacturerIds={manufacturers.flatMap(m => m.ids)} value={models} onChange={setModels} />
-              </Stack>
+            <Section label="Amenities">
+              <OffersAmenityChips value={amenities} onChange={setAmenities} />
             </Section>
 
             <Section label="Capacity">
@@ -932,20 +928,43 @@ const Offers = () => {
               </Stack>
             </Section>
 
-            <Section label="Build year">
-              <BuildYearRangeField
-                from={buildYearFrom}
-                to={buildYearTo}
-                onChange={(f, t) => {
-                  setBuildYearFrom(f);
-                  setBuildYearTo(t);
-                }}
-              />
-            </Section>
+            {/* Advanced filters tucked behind a toggle — keeps the panel short
+                and easy on the eye; brokers expand only when they need to scope
+                by company / builder / build year. */}
+            <CollapsibleSection
+              label="More filters"
+              hint="company · builder · year"
+              open={moreFiltersOpen}
+              onToggle={() => setMoreFiltersOpen(o => !o)}
+            >
+              <Stack spacing={1.75}>
+                <Section label="Charter company">
+                  <AgencyPicker value={agencies} onChange={setAgencies} hideLabel />
+                </Section>
 
-            <Section label="Amenities">
-              <AmenitiesPicker value={amenities} onChange={setAmenities} hideLabel />
-            </Section>
+                <Section label="Builder & model">
+                  <Stack spacing={1}>
+                    <ManufacturerPicker value={manufacturers} onChange={setManufacturers} />
+                    <ModelPicker
+                      manufacturerIds={manufacturers.flatMap(m => m.ids)}
+                      value={models}
+                      onChange={setModels}
+                    />
+                  </Stack>
+                </Section>
+
+                <Section label="Build year">
+                  <BuildYearRangeField
+                    from={buildYearFrom}
+                    to={buildYearTo}
+                    onChange={(f, t) => {
+                      setBuildYearFrom(f);
+                      setBuildYearTo(t);
+                    }}
+                  />
+                </Section>
+              </Stack>
+            </CollapsibleSection>
 
             <Stack direction="row" spacing={1} sx={{ pt: 1 }}>
               <Button
@@ -1588,6 +1607,74 @@ const Section = ({ label, children }: { label: string; children: ReactNode }) =>
       {label}
     </Typography>
     {children}
+  </Box>
+);
+
+/**
+ * Collapsible group header + animated body — used for the advanced "More
+ * filters" block so the panel stays short by default. Click the whole header
+ * row to toggle; a chevron rotates to signal state. Pure UI; parent owns `open`.
+ */
+const CollapsibleSection = ({
+  label,
+  hint,
+  open,
+  onToggle,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  open: boolean;
+  onToggle: () => void;
+  children: ReactNode;
+}) => (
+  <Box sx={{ borderTop: `1px solid ${colors.black200}`, pt: 1 }}>
+    <Box
+      component="button"
+      type="button"
+      onClick={onToggle}
+      sx={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 1,
+        background: 'none',
+        border: 0,
+        p: 0,
+        cursor: 'pointer',
+        font: 'inherit',
+        color: colors.black800,
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, minWidth: 0 }}>
+        <Typography component="span" sx={{ fontSize: 13, fontWeight: 700, color: colors.black950 }}>
+          {label}
+        </Typography>
+        {hint && (
+          <Typography
+            component="span"
+            sx={{ fontSize: 11, color: colors.black400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+          >
+            {hint}
+          </Typography>
+        )}
+      </Box>
+      <Box
+        component="span"
+        sx={{
+          fontSize: 12,
+          color: colors.black500,
+          transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+          transition: 'transform .15s ease',
+        }}
+      >
+        ▾
+      </Box>
+    </Box>
+    <Collapse in={open} timeout={180} unmountOnExit>
+      <Box sx={{ pt: 1.5 }}>{children}</Box>
+    </Collapse>
   </Box>
 );
 

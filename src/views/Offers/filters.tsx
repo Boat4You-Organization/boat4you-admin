@@ -1,19 +1,61 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, no-restricted-syntax */
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import {
-  Autocomplete,
-  Box,
-  Chip,
-  FormControl,
-  MenuItem,
-  Select,
-  Stack,
-  TextField,
-} from '@mui/material';
+import { Autocomplete, Box, Chip, Stack, TextField } from '@mui/material';
 
 import { api } from '@/config/axios.config';
 import colors from '@/styles/themes/colors';
+
+/**
+ * Reusable pill/chip multi-toggle — click a pill to add/remove it from the
+ * selection. Replaces the multi-Select dropdowns (Yacht type, Amenities) so a
+ * pick applies instantly with no hanging menu. Selected = filled navy, unselected
+ * = outlined. Pure presentational; parent owns the `selected` string[] state.
+ */
+export const ToggleChipGroup = ({
+  options,
+  selected,
+  onToggle,
+}: {
+  options: { id: string; label: string }[];
+  selected: string[];
+  onToggle: (id: string) => void;
+}) => (
+  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+    {options.map(o => {
+      const on = selected.includes(o.id);
+
+      return (
+        <Box
+          key={o.id}
+          component="button"
+          type="button"
+          onClick={() => onToggle(o.id)}
+          sx={{
+            cursor: 'pointer',
+            font: 'inherit',
+            fontSize: 13,
+            fontWeight: 600,
+            lineHeight: 1.2,
+            px: 1.5,
+            py: 0.75,
+            borderRadius: 999,
+            border: `1px solid ${on ? colors.black950 : colors.black300}`,
+            backgroundColor: on ? colors.black950 : colors.white,
+            color: on ? colors.white : colors.black800,
+            transition: 'all .12s ease',
+            '&:hover': {
+              borderColor: on ? colors.black950 : colors.black500,
+              backgroundColor: on ? colors.black800 : colors.black100,
+            },
+          }}
+        >
+          {o.label}
+        </Box>
+      );
+    })}
+  </Box>
+);
 
 /**
  * Offers-workspace specific filter pickers. Kept in this folder so we can
@@ -183,6 +225,76 @@ return;
   );
 };
 
+// ---------- amenities (chips, /offers only) ---------------------------------
+
+/** Most-requested amenities surfaced as quick chips at the TOP of the list
+ *  (Mario: brokers mostly want AC · Watermaker · Generator). The rest follow
+ *  in catalogue order. labelCode-based so it's resilient to id changes. */
+const PRIORITY_AMENITY_CODES = ['air-conditioning', 'water-maker', 'generator'];
+
+interface AmenityOption {
+  id: number;
+  labelCode?: string;
+  key?: string;
+  name?: string;
+}
+
+const amenityLabel = (a: AmenityOption) =>
+  a.name || a.labelCode || a.key?.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || `#${a.id}`;
+
+/**
+ * Amenities as toggle chips (replaces the Autocomplete dropdown on /offers).
+ * Fetches the live catalogue (`/public/catalogue/amenities`) so AC / Watermaker
+ * / Generator etc. stay data-driven; priority three render first. Selection is
+ * the same `number[]` of equipment ids the search already consumes.
+ */
+export const OffersAmenityChips = ({
+  value,
+  onChange,
+}: {
+  value: number[];
+  onChange: (next: number[]) => void;
+}) => {
+  const [options, setOptions] = useState<AmenityOption[]>([]);
+
+  useEffect(() => {
+    api
+      .get('/public/catalogue/amenities')
+      .then(({ data }) => setOptions(Array.isArray(data) ? data : data?.content || []))
+      .catch(() => setOptions([]));
+  }, []);
+
+  const ordered = useMemo(() => {
+    const rank = (a: AmenityOption) => {
+      const i = PRIORITY_AMENITY_CODES.indexOf(a.labelCode || a.key || '');
+
+      return i === -1 ? PRIORITY_AMENITY_CODES.length : i;
+    };
+
+    return [...options].sort((a, b) => rank(a) - rank(b));
+  }, [options]);
+
+  const toggle = (idStr: string) => {
+    const id = Number(idStr);
+
+    onChange(value.includes(id) ? value.filter(v => v !== id) : [...value, id]);
+  };
+
+  if (options.length === 0) {
+    return (
+      <Box sx={{ fontSize: 12, color: colors.black400 }}>Loading amenities…</Box>
+    );
+  }
+
+  return (
+    <ToggleChipGroup
+      options={ordered.map(a => ({ id: String(a.id), label: amenityLabel(a) }))}
+      selected={value.map(String)}
+      onToggle={toggle}
+    />
+  );
+};
+
 // ---------- vessel type -----------------------------------------------------
 
 export const VESSEL_TYPES_OFFERS: { id: string; label: string }[] = [
@@ -204,56 +316,14 @@ export const VesselTypeDropdown = ({
   value: string[];
   onChange: (next: string[]) => void;
 }) => {
-  const labelById = useMemo(
-    () => Object.fromEntries(VESSEL_TYPES_OFFERS.map(v => [v.id, v.label])),
-    []
-  );
+  // Toggle CHIPS instead of a multi-Select dropdown: a click applies
+  // instantly and there's no menu that "stays open hanging" after a pick
+  // (Mario's UX gripe). State shape (string[] of vessel ids) is unchanged,
+  // so the search query keeps working exactly as before.
+  const toggle = (id: string) =>
+    onChange(value.includes(id) ? value.filter(v => v !== id) : [...value, id]);
 
-  
-return (
-    <FormControl fullWidth size="small">
-      <Select
-        multiple
-        displayEmpty
-        value={value}
-        onChange={e => {
-          const v = e.target.value;
-
-          onChange(typeof v === 'string' ? v.split(',') : (v as string[]));
-        }}
-        renderValue={selected =>
-          (selected as string[]).length === 0 ? (
-            <Box component="span" sx={{ color: colors.black400, fontSize: 13 }}>All yacht types</Box>
-          ) : (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {(selected as string[]).map(id => (
-                <Chip
-                  key={id}
-                  label={labelById[id] || id}
-                  size="small"
-                  // Chip deletion lives inside a MUI Select so clicking the
-                  // X would also toggle the Select dropdown. mousedown +
-                  // stopPropagation suppresses the Select activation so the
-                  // broker can quickly pop a single type off without the
-                  // menu flashing open; we then call onChange with the
-                  // filtered value list.
-                  onMouseDown={e => e.stopPropagation()}
-                  onDelete={() => onChange(value.filter(v => v !== id))}
-                  sx={{ backgroundColor: colors.blue50, color: colors.blue500, fontWeight: 600, height: 22 }}
-                />
-              ))}
-            </Box>
-          )
-        }
-      >
-        {VESSEL_TYPES_OFFERS.map(t => (
-          <MenuItem key={t.id} value={t.id}>
-            {t.label}
-          </MenuItem>
-        ))}
-      </Select>
-    </FormControl>
-  );
+  return <ToggleChipGroup options={VESSEL_TYPES_OFFERS} selected={value} onToggle={toggle} />;
 };
 
 // ---------- manufacturer ----------------------------------------------------

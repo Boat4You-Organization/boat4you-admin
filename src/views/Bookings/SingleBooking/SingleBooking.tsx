@@ -11,6 +11,7 @@ import Layout from '@/components/Layout';
 import { ReservationSysStatus } from '@/models/booking.model';
 import ReservationsService, { YachtSwapInfoAdminDto } from '@/services/reservations.service';
 import { bbColors, bbFont } from '@/styles/bb';
+import { showToast } from '@/valtio/global/global.actions';
 import {
   getSelectedBookingByOrderNo,
   markBookingAsViewed,
@@ -399,6 +400,45 @@ return (
                   </Button>
                 );
               })()}
+              {/* Delete (purge) — only for CANCELLED bookings. Hard-removes the
+                  reservation from our DB; for cleaning up spam / fake bot
+                  bookings so the fake user can then be deleted (the reservation
+                  FK otherwise blocks user deletion). Backend snapshots rows to
+                  _purged_*_backup first. Cancel the partner option first. */}
+              {!isBookingCancellable && selectedBooking?.reservationId && (
+                <Button
+                  fullWidth
+                  sx={{
+                    mt: 1,
+                    backgroundColor: bbColors.red600,
+                    color: '#fff',
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    fontSize: 13,
+                    borderRadius: '6px',
+                    '&:hover': { backgroundColor: '#a52f22' },
+                  }}
+                  onClick={async () => {
+                    const ref = selectedBooking.reservationNumber ?? `#${selectedBooking.reservationId}`;
+
+                    // eslint-disable-next-line no-alert
+                    if (!window.confirm(`Permanently DELETE booking ${ref} from the database? This cannot be undone (a backup row is kept). Use only for spam/fake bookings.`)) {
+                      return;
+                    }
+
+                    const { payload, message } = await ReservationsService.purgeReservation(selectedBooking.reservationId!);
+
+                    showToast({
+                      status: payload ? 'success' : 'error',
+                      text: payload ? `Booking ${ref} deleted` : message || 'Delete failed',
+                    });
+
+                    if (payload) navigate('/bookings');
+                  }}
+                >
+                  {t('booking.delete-booking', 'Delete booking (spam)')}
+                </Button>
+              )}
               {/* Charter agreement download — fetches the per-reservation
                   PDF (same artefact attached to the confirmation email)
                   and triggers a download via a hidden anchor. Separated

@@ -171,6 +171,24 @@ return data;
     }
   }
 
+  /**
+   * HARD-DELETE (purge) a cancelled reservation from the DB. For spam / fake
+   * bookings only. Backend guards: refuses unless the reservation is CANCELLED,
+   * and snapshots rows into _purged_*_backup before deleting. Does NOT touch the
+   * partner — cancel the option first via the normal Cancel action.
+   */
+  public static async purgeReservation(id: number): Promise<PayloadResponse<boolean>> {
+    try {
+      await api.delete(`admin/reservations/${id}/purge`);
+
+      return { payload: true };
+    } catch (error) {
+      const { message } = error as ErrorModel;
+
+      return { payload: false, message };
+    }
+  }
+
   public static async getYachtSwapInfo(id: number): Promise<YachtSwapInfoAdminDto | null> {
     try {
       const { data, status } = await api.get(`/admin/reservations/${id}/yacht-swap`, {

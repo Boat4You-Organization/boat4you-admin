@@ -159,7 +159,22 @@ const findExtraByKeyword = (extras: CartExtra[], keyword: string): CartExtra | n
   const k = keyword.toLowerCase();
 
   
-return extras.find(e => (e.name || '').toLowerCase().includes(k)) || null;
+// Prefer an EXACT name match ("Skipper") over a loose contains, and skip the
+  // separate "Additional fee for Skipper in forepeak..." surcharge. Otherwise
+  // that surcharge (it contains "skipper") gets picked as the skipper row and
+  // the real Skipper service — and its price — never shows. Mirrors the backend
+  // `not:additional fee` skipper match rule.
+  const exact = extras.find(e => (e.name || '').trim().toLowerCase() === k);
+
+  if (exact) return exact;
+
+  return (
+    extras.find(e => {
+      const n = (e.name || '').toLowerCase();
+
+      return n.includes(k) && !n.includes('additional fee');
+    }) || null
+  );
 };
 
 const formatDateLong = (isoDate: string, time?: string): string => {

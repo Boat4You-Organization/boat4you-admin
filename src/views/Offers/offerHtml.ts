@@ -55,6 +55,14 @@ export interface CartYacht {
   currencySymbol: string; // pre-resolved for the HTML renderer
   equipmentByCategory: Record<string, string[]>;
   extras: CartExtra[];
+  // Offer id of the matched offer for this period. Lets the Offers workspace
+  // re-quote the partner via /calculate so partner-recomputed obligatory extras
+  // (e.g. NauSys Damage Waiver, mandatory once a Skipper is added) surface here.
+  offerId?: number;
+  // Backend extrasKey of the Skipper / Hostess rows (when the partner synced
+  // them) — sent as the selectedExtras param to /calculate.
+  skipperKey?: string | null;
+  hostessKey?: string | null;
   // Main yacht image URL (mainImage flag in yachtImages, falls back to
   // first image). Null when the yacht has no images synced — render
   // skips the image cell entirely so the layout doesn't break.
@@ -93,6 +101,11 @@ export interface OfferRenderOptions {
   includeSkipper?: boolean;
   includeHostess?: boolean;
 }
+
+// Stable per-cart-entry key (yacht + period) used to look up the live /calculate
+// result map (autoObligatoryByYacht). MUST match the key the Offers workspace
+// builds when it stores the fetched rows.
+export const offerYachtKey = (y: Pick<CartYacht, 'yachtId' | 'dateFrom'>): string => `${y.yachtId}-${y.dateFrom}`;
 
 const MONTHS = [
   'January',
@@ -310,7 +323,7 @@ const renderAmenitiesInline = (items: { labelCode: string; label: string }[]): s
     .map(a => `${AMENITY_ICON_MAP[a.labelCode] || '•'} ${escapeHtml(AMENITY_SHORT_LABEL[a.labelCode] || a.label)}`)
     .join(' &nbsp;&middot;&nbsp; ');
 
-const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}): string => {
+const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}, autoObligatory: CartExtra[] = []): string => {
   const periodHeader = `${formatDateLong(y.dateFrom, y.checkin)}  →  ${formatDateLong(y.dateTo, y.checkout)}`;
   const title = `${y.modelName} (${y.name})`;
   const sym = y.currencySymbol || '€';
@@ -425,6 +438,21 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}): strin
   if (options.includeSkipper) ensureCrewExtra('skipper', 'Skipper');
 
   if (options.includeHostess) ensureCrewExtra('hostess', 'Hostess');
+
+  // Partner-recomputed obligatory extras fetched live via /calculate when crew
+  // is toggled on — chiefly the NauSys Damage Waiver that becomes mandatory once
+  // a Skipper is added (mirrors the customer boat page). Promote/append each,
+  // deduped by name against whatever is already shown (handling/preparation
+  // fees + the crew rows above), so we never double a line.
+  autoObligatory.forEach(extra => {
+    const name = (extra.name || '').trim().toLowerCase();
+
+    if (!name) return;
+
+    const alreadyShown = obligatory.some(e => (e.name || '').trim().toLowerCase() === name);
+
+    if (!alreadyShown) obligatory.push({ ...extra, obligatory: true });
+  });
 
   const renderExtraRow = (e: CartExtra): string => {
     // "Included" is reserved for items that are TRULY free (e.priceEur=0 →
@@ -597,7 +625,8 @@ return `<tr>
  */
 export const buildClientOfferWhatsApp = (
   cart: CartYacht[],
-  options: OfferRenderOptions = {}
+  options: OfferRenderOptions = {},
+  autoObligatoryByYacht: Record<string, CartExtra[]> = {}
 ): string => {
   if (cart.length === 0) return 'No yachts added to offer yet.';
 
@@ -650,6 +679,21 @@ export const buildClientOfferWhatsApp = (
 
     if (options.includeHostess) renderCrewLine('Hostess', 'hostess');
 
+    // Partner-recomputed obligatory extras (NauSys Damage Waiver when a Skipper
+    // is added) — same source as the HTML block, deduped against the crew lines.
+    (autoObligatoryByYacht[offerYachtKey(y)] ?? []).forEach(extra => {
+      const nm = (extra.name || '').trim();
+
+      if (!nm || /skipper|hostess/i.test(nm)) return;
+
+      const priceTxt =
+        extra.priceEur == null
+          ? '— on request'
+          : `+${formatPrice(extra.priceEur)} ${sym}${extra.unit ? ` (${extra.unit})` : ''}`;
+
+      lines.push(`✓ ${nm} ${priceTxt}`);
+    });
+
     // Price
     lines.push('');
     lines.push(`💰 *Total: ${formatPrice(y.clientPriceEur)} ${sym}*`);
@@ -684,13 +728,14 @@ export const buildClientOfferWhatsApp = (
 
 export const buildClientOfferHtml = (
   cart: CartYacht[],
-  options: OfferRenderOptions = {}
+  options: OfferRenderOptions = {},
+  autoObligatoryByYacht: Record<string, CartExtra[]> = {}
 ): string => {
   if (cart.length === 0) {
     return '<p><em>No yachts added to offer yet.</em></p>';
   }
 
-  const blocks = cart.map(y => renderYachtBlock(y, options)).join('\n');
+  const blocks = cart.map(y => renderYachtBlock(y, options, autoObligatoryByYacht[offerYachtKey(y)] ?? [])).join('\n');
 
   // Responsive style block — collapses the right-hand price card under the
   // extras list on screens narrower than ~600px (Gmail iOS/Android, Apple

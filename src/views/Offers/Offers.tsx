@@ -23,6 +23,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import Layout from '@/components/Layout';
 import ModalRoot from '@/components/ModalRoot';
 import { api } from '@/config/axios.config';
+import CatalogueService from '@/services/catalogue.service';
 import ReservationsService from '@/services/reservations.service';
 import colors from '@/styles/themes/colors';
 import { showToast } from '@/valtio/global/global.actions';
@@ -42,7 +43,7 @@ import {
   RegionMultiSelect,
   VesselTypeDropdown,
 } from './filters';
-import { CartYacht, buildClientOfferHtml, buildClientOfferWhatsApp } from './offerHtml';
+import { CartExtra, CartYacht, buildClientOfferHtml, buildClientOfferWhatsApp, offerYachtKey } from './offerHtml';
 
 /**
  * Internal broker workspace for building a multi-yacht client offer.
@@ -67,6 +68,20 @@ const API_URL = import.meta.env.VITE_BOAT_API_URL || '';
 // pick up the partner-trusted obligatory flag.
 const CART_STORAGE_KEY = 'b4y-admin-offers-cart-v2';
 const CURRENCY_STORAGE_KEY = 'b4y-admin-offers-currency-v1';
+
+// Maps the backend ExtrasUnitType enum to the human label shown in the offer.
+// Module-scoped so both the add-to-cart extras builder and the live /calculate
+// effect (skipper -> Damage Waiver) format units identically.
+const UNIT_LABEL: Record<string, string> = {
+  PER_WEEK: 'per week',
+  PER_WEEK_PERSON: 'per week / person',
+  PER_BOOKING: 'per booking',
+  PER_BOOKING_PERSON: 'per booking / person',
+  PER_NIGHT: 'per night',
+  PER_NIGHT_PERSON: 'per person / night',
+  PER_BOAT: 'per boat',
+  PERCENTAGE: '%',
+};
 
 const getBoatImageUrl = (id: number | null | undefined, width = 200): string | null =>
   id == null ? null : `${API_URL}/public/image/${id}?width=${width}`;
@@ -542,16 +557,6 @@ const Offers = () => {
       // Key by a stable identifier (label-code / external-id / name) so an
       // item present on both levels (e.g. APA) doesn't appear twice. Prefer
       // offer-level data where both exist — it carries period-specific price.
-      const UNIT_LABEL: Record<string, string> = {
-        PER_WEEK: 'per week',
-        PER_WEEK_PERSON: 'per week / person',
-        PER_BOOKING: 'per booking',
-        PER_BOOKING_PERSON: 'per booking / person',
-        PER_NIGHT: 'per night',
-        PER_NIGHT_PERSON: 'per person / night',
-        PER_BOAT: 'per boat',
-        PERCENTAGE: '%',
-      };
       const toCartExtra = (
         e: ExtraResponse,
         forceObligatory: boolean
@@ -623,8 +628,26 @@ const Offers = () => {
 
       const extras = Array.from(extrasMap.values());
 
+      // Backend extrasKey of the Skipper / Hostess rows, if the partner synced
+      // them. Sent to /calculate so NauSys re-quotes obligatory extras (Damage
+      // Waiver) when the broker toggles crew on. Exact name match first, then a
+      // loose contains — excluding the separate "Additional fee for Skipper..."
+      // surcharge row, which is NOT the bareboat-skipper service.
+      const findCrewKey = (kw: string): string | null => {
+        const pool: ExtraResponse[] = [...(matchedOffer.extras || []), ...(yachtDetails.services || [])];
+        const exact = pool.find(e => (e.name || '').trim().toLowerCase() === kw);
+        const loose = pool.find(
+          e => (e.name || '').toLowerCase().includes(kw) && !(e.name || '').toLowerCase().includes('additional fee')
+        );
+
+        return (exact || loose)?.key ?? null;
+      };
+
       const entry: CartYacht = {
         yachtId: row.yachtId,
+        offerId: matchedOffer.id,
+        skipperKey: findCrewKey('skipper'),
+        hostessKey: findCrewKey('hostess'),
         slug: row.slug,
         name: row.name,
         modelName: row.modelName,
@@ -794,8 +817,75 @@ const Offers = () => {
 
   const offerOptions = useMemo(() => ({ includeSkipper, includeHostess }), [includeSkipper, includeHostess]);
 
-  const clientOfferHtml = useMemo(() => buildClientOfferHtml(cart, offerOptions), [cart, offerOptions]);
-  const clientOfferWhatsApp = useMemo(() => buildClientOfferWhatsApp(cart, offerOptions), [cart, offerOptions]);
+  // When the broker toggles Skipper / Hostess on, re-quote each cart yacht's
+  // offer against the partner (the same /calculate endpoint the customer boat
+  // page uses) and capture any newly-obligatory extras — chiefly the NauSys
+  // Damage Waiver that becomes mandatory once a Skipper is added. The offer
+  // builders then surface those exactly like the customer site. Best-effort: a
+  // failed call or a non-NauSys yacht just keeps its statically-synced extras.
+  const [autoObligatoryByYacht, setAutoObligatoryByYacht] = useState<Record<string, CartExtra[]>>({});
+
+  useEffect(() => {
+    if ((!includeSkipper && !includeHostess) || cart.length === 0) {
+      setAutoObligatoryByYacht({});
+
+      return undefined;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      const results = await Promise.all(
+        cart.map(async y => {
+          const selected = [includeSkipper ? y.skipperKey : null, includeHostess ? y.hostessKey : null].filter(
+            (k): k is string => !!k
+          );
+
+          if (y.offerId == null || selected.length === 0) return null;
+
+          const calc = await CatalogueService.calculateOfferPrice(y.slug, y.offerId, selected, y.currency);
+
+          if (!calc) return null;
+
+          const rows: CartExtra[] = [...(calc.selectedExtrasInPrice || []), ...(calc.selectedExtrasAtBase || [])]
+            .filter(e => e.obligatory)
+            .map(e => ({
+              name: e.name,
+              priceEur: e.priceEur != null ? Number(e.priceEur) : null,
+              included: e.priceEur != null && Number(e.priceEur) === 0,
+              obligatory: true,
+              description: null,
+              unit: e.unit ? (UNIT_LABEL[e.unit] ?? null) : null,
+            }));
+
+          return { key: offerYachtKey(y), rows };
+        })
+      );
+
+      if (cancelled) return;
+
+      const map: Record<string, CartExtra[]> = {};
+
+      results.forEach(r => {
+        if (r) map[r.key] = r.rows;
+      });
+
+      setAutoObligatoryByYacht(map);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [includeSkipper, includeHostess, cart, currency]);
+
+  const clientOfferHtml = useMemo(
+    () => buildClientOfferHtml(cart, offerOptions, autoObligatoryByYacht),
+    [cart, offerOptions, autoObligatoryByYacht]
+  );
+  const clientOfferWhatsApp = useMemo(
+    () => buildClientOfferWhatsApp(cart, offerOptions, autoObligatoryByYacht),
+    [cart, offerOptions, autoObligatoryByYacht]
+  );
 
   const handleCopyHtml = async () => {
     try {

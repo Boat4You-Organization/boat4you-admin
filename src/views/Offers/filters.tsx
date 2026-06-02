@@ -134,10 +134,17 @@ export interface Region {
 // each pair into a single option carrying BOTH ids. Matched by a distinctive
 // keyword present in both member names (verified against the live
 // /public/regions list). Mirrors the web's `dedupeRegionDuplicates`.
-const REGION_MERGE_GROUPS: { label: string; keyword: string }[] = [
-  { label: 'Ionian Islands', keyword: 'ionian' }, //       "Ionian" + "Ionian Islands"
-  { label: 'Sporades', keyword: 'sporades' }, //           "Sporades" + "Skiathos/Sporades, Volos"
-  { label: 'Athens / Saronic Gulf', keyword: 'saronic' }, // "Athens / Saronic Gulf" + "Athens area/Saronic/Peloponese"
+const REGION_MERGE_GROUPS: { label: string; keywords: string[] }[] = [
+  { label: 'Ionian Islands', keywords: ['ionian'] }, //       "Ionian" + "Ionian Islands"
+  { label: 'Sporades', keywords: ['sporades'] }, //           "Sporades" + "Skiathos/Sporades, Volos"
+  { label: 'Athens / Saronic Gulf', keywords: ['saronic'] }, // "Athens / Saronic Gulf" + "Athens area/Saronic/Peloponese"
+  // Italy: one provider lists the combined "Liguria / Toscana", the other splits it into
+  // separate "Liguria" + "Tuscany" — collapse all three into one option so a single pick
+  // searches the whole NW-coast inventory. Needs multi-keyword because "Tuscany" (EN) and
+  // "Toscana" (in the combined row) don't share a substring.
+  { label: 'Liguria / Tuscany', keywords: ['liguria', 'tuscany', 'toscana'] },
+  // "Sardinia" + "Sardinia / Corsica" (the combined row carries country_code=IT so it surfaces).
+  { label: 'Sardinia / Corsica', keywords: ['sardinia', 'corsica'] },
 ];
 
 const mergeDualSourceRegions = (list: Region[]): Region[] => {
@@ -145,7 +152,7 @@ const mergeDualSourceRegions = (list: Region[]): Region[] => {
   const out: Region[] = [];
 
   REGION_MERGE_GROUPS.forEach(group => {
-    const members = list.filter(r => r.name.toLowerCase().includes(group.keyword));
+    const members = list.filter(r => group.keywords.some(k => r.name.toLowerCase().includes(k)));
 
     // Only collapse when BOTH provider rows are present; a lone member stays as-is.
     if (members.length > 1) {

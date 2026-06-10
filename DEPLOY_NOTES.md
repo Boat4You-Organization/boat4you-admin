@@ -14,8 +14,8 @@ changes, no new dependencies, no env changes.
 Deploy = standard SPA build per `README_PROD.md` (build with prod `.env`, upload
 `dist/` to cusma1 `/var/www/admin.boat4you.com/html`).
 
-⚠️ `yarn build` (tsc step) fails on **10 pre-existing TS errors** in
-`src/views/Bookings/partials/CreateReservationModal/` (`CreateReservationModal.tsx`,
-`DateRangeField.tsx`, `LocationPicker.tsx`) — MUI/x-date-pickers type bump, present
-on `main` before this work. `npx vite build` alone succeeds and produces a correct
-bundle. Fix the types or build with `npx vite build` until then.
+~~⚠️ `yarn build` (tsc step) fails on 10 pre-existing TS errors~~ — **FIXED same day**:
+`PickersDayProps` is non-generic in x-date-pickers v8 (DateRangeField) and
+`variant="caption"` is type-disabled repo-wide (typings.d.ts) — those usages now
+carry equivalent `captionSx` (MUI default caption metrics, render unchanged).
+`yarn build` passes clean again.

@@ -76,6 +76,10 @@ interface PickedYacht {
 // the yacht search results. Falls back to dev default if env isn't wired.
 const CUSTOMER_WEB_URL = import.meta.env.VITE_CUSTOMER_WEB_URL || 'http://localhost:3000';
 
+// `variant="caption"` is type-disabled repo-wide (typings.d.ts); this mirrors
+// the MUI default caption metrics so the render stays byte-identical.
+const captionSx = { fontSize: '0.75rem', fontWeight: 400, lineHeight: 1.66, letterSpacing: '0.03333em' } as const;
+
 interface PhaseRow {
   deadline: Dayjs;
   amount: string; // keep as string during editing to allow empty cells mid-type
@@ -650,18 +654,18 @@ return (
                     📍 {y.locationName} · {y.agencyName}
                   </Typography>
                   {stats.length > 0 && (
-                    <Typography variant="caption" color={colors.black500} sx={{ display: 'block', mt: 0.5 }}>
+                    <Typography color={colors.black500} sx={{ ...captionSx, display: 'block', mt: 0.5 }}>
                       {stats.join(' · ')}
                     </Typography>
                   )}
-                  <Typography variant="caption" color={colors.black400} sx={{ display: 'block', mt: 0.25 }}>
+                  <Typography color={colors.black400} sx={{ ...captionSx, display: 'block', mt: 0.25 }}>
                     yacht #{y.yachtId} · offer #{y.offerId}
                   </Typography>
                 </Box>
 
                 {/* Right column — pricing + preview */}
                 <Stack alignItems="flex-end" spacing={0.5} sx={{ minWidth: 180 }}>
-                  <Typography variant="caption" color={colors.black500}>
+                  <Typography color={colors.black500} sx={captionSx}>
                     Period price ({nights} days)
                   </Typography>
                   <Typography variant="h4" fontWeight={700} color={colors.blue500}>
@@ -669,7 +673,7 @@ return (
                       ? `${periodTotal.toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`
                       : '— € (set manually)'}
                   </Typography>
-                  <Typography variant="caption" color={colors.black500}>
+                  <Typography color={colors.black500} sx={captionSx}>
                     {hasPrice ? `${y.clientPriceEur.toFixed(2)} € / day` : 'No offer — enter price in next step'}
                   </Typography>
                   {y.slug && (

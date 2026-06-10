@@ -9,6 +9,10 @@ import dayjs, { Dayjs } from 'dayjs';
 
 import colors from '@/styles/themes/colors';
 
+// `variant="caption"` is type-disabled repo-wide (typings.d.ts); this mirrors
+// the MUI default caption metrics so the render stays byte-identical.
+const captionSx = { fontSize: '0.75rem', fontWeight: 400, lineHeight: 1.66, letterSpacing: '0.03333em' } as const;
+
 /**
  * Single-field date range picker that mirrors the customer homepage UX —
  * click opens a calendar popover, first click = start date, second click =
@@ -32,7 +36,7 @@ interface DateRangeFieldProps {
   hideLabel?: boolean;
 }
 
-interface RangeDayProps extends PickersDayProps<Dayjs> {
+interface RangeDayProps extends PickersDayProps {
   rangeStart: Dayjs | null;
   rangeEnd: Dayjs | null;
 }
@@ -173,7 +177,7 @@ return;
           </Typography>
         ) : (
           <Stack alignItems="flex-start" spacing={0}>
-            <Typography variant="caption" color={colors.black500}>
+            <Typography sx={captionSx} color={colors.black500}>
               {label}
             </Typography>
             <Typography variant="body2" fontWeight={600}>
@@ -192,7 +196,7 @@ return;
       >
         <Box sx={{ p: 1.5, minWidth: 340 }}>
           <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1} px={1}>
-            <Typography variant="caption" color={colors.black500}>
+            <Typography sx={captionSx} color={colors.black500}>
               {!draftStart
                 ? 'Click a date to set start'
                 : !draftEnd

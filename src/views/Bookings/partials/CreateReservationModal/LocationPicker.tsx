@@ -132,7 +132,9 @@ return (
               <Typography variant="body2" sx={{ flex: 1 }}>
                 {option.name}
               </Typography>
-              <Typography variant="caption" sx={{ color: TYPE_COLOR[option.locationType], fontWeight: 600 }}>
+              <Typography
+                sx={{ fontSize: '0.75rem', lineHeight: 1.66, letterSpacing: '0.03333em', color: TYPE_COLOR[option.locationType], fontWeight: 600 }}
+              >
                 {TYPE_LABEL[option.locationType]}
               </Typography>
             </Box>

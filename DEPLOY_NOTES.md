@@ -2,9 +2,11 @@
 
 ## ✅ DEPLOYED 2026-06-10 ~18:30 — /offers Broker Desk re-skin
 
-Commit `b472d41`, live entry `index-bZUFMX73.js`, offers chunk verified 200.
-Design-only: bb tokens (navy/yellow CTAs, soft state-tinted cards, amber
-commission pills, de-indigo'd chips). Rollback: `html.old` on cusma1.
+Commit `b472d41` + clunkiness fixups after Mario's live review (compact filter
+pills, branded EmptyState instead of stock Alerts, cart CTA hugs content —
+live entry `index-CpZhWYjN.js`). Design-only: bb tokens (navy/yellow CTAs,
+soft state-tinted cards, amber commission pills, de-indigo'd chips).
+Rollback: `html.old` on cusma1.
 
 ## ✅ DEPLOYED 2026-06-10 ~18:00 — visual polish "Polirani Broker Desk"
 

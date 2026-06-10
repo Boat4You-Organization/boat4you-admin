@@ -15,11 +15,12 @@ export const bbColors = {
   navyDim: '#a8bccf',
   yellow500: '#ffd24a',
   yellowText: '#3b2900',
-  gray50: '#eef1f4',
+  gray50: '#f4f6f8',
   gray75: '#fafbfc',
   gray100: '#eef2f6',
   gray200: '#e2e8f0',
   gray300: '#d7dde4',
+  cardBorder: '#e9eef4',
   gray500: '#5b6b7d',
   gray600: '#7b8ca3',
   green600: '#128a51',
@@ -36,7 +37,7 @@ export const bbFont = {
 } as const;
 
 export const bbRadii = {
-  card: 10,
+  card: 14,
   input: 6,
   pill: 999,
   squareTag: 4,
@@ -44,6 +45,25 @@ export const bbRadii = {
 
 export const bbShadow = {
   yellowCta: '0 4px 10px -4px rgba(255,210,74,0.5)',
+  card: '0 1px 2px rgba(11,26,43,0.04), 0 4px 12px rgba(11,26,43,0.05)',
+} as const;
+
+/** Soft card surface — bg, hairline border, radius and shadow in one place. */
+export const bbCardSx = {
+  backgroundColor: bbColors.white,
+  border: `1px solid ${bbColors.cardBorder}`,
+  borderRadius: `${bbRadii.card}px`,
+  boxShadow: bbShadow.card,
+} as const;
+
+/** Auth page H1 — replaces the old Raleway-italic blue hero. */
+export const bbAuthTitleSx = {
+  fontFamily: bbFont.stack,
+  fontSize: { xs: 32, md: 40 },
+  fontWeight: 800,
+  letterSpacing: '-0.02em',
+  lineHeight: 1.15,
+  color: bbColors.navy900,
 } as const;
 
 export type StatusVariant =

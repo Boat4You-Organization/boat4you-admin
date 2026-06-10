@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Autocomplete, Box, Chip, Stack, TextField } from '@mui/material';
 
 import { api } from '@/config/axios.config';
+import { bbColors } from '@/styles/bb';
 import colors from '@/styles/themes/colors';
 
 /**
@@ -40,13 +41,13 @@ export const ToggleChipGroup = ({
             px: 1.5,
             py: 0.75,
             borderRadius: 999,
-            border: `1px solid ${on ? colors.black950 : colors.black300}`,
-            backgroundColor: on ? colors.black950 : colors.white,
-            color: on ? colors.white : colors.black800,
+            border: `1px solid ${on ? bbColors.navy900 : bbColors.gray300}`,
+            backgroundColor: on ? bbColors.navy900 : colors.white,
+            color: on ? colors.white : '#2c3e56',
             transition: 'all .12s ease',
             '&:hover': {
-              borderColor: on ? colors.black950 : colors.black500,
-              backgroundColor: on ? colors.black800 : colors.black100,
+              borderColor: on ? bbColors.navy900 : bbColors.gray500,
+              backgroundColor: on ? '#13283d' : bbColors.gray100,
             },
           }}
         >
@@ -218,7 +219,7 @@ return;
             size="small"
             {...getTagProps({ index })}
             key={option.id}
-            sx={{ backgroundColor: colors.blue50, color: colors.blue500, fontWeight: 600 }}
+            sx={{ backgroundColor: '#eef3f9', color: bbColors.navy700, fontWeight: 600 }}
           />
         ))
       }
@@ -289,7 +290,7 @@ export const OffersAmenityChips = ({
 
   if (options.length === 0) {
     return (
-      <Box sx={{ fontSize: 12, color: colors.black400 }}>Loading amenities…</Box>
+      <Box sx={{ fontSize: 12, color: bbColors.gray600 }}>Loading amenities…</Box>
     );
   }
 
@@ -488,7 +489,7 @@ return dedupManufacturers(raw);
             size="small"
             {...getTagProps({ index })}
             key={option.canonical}
-            sx={{ backgroundColor: colors.blue50, color: colors.blue500, fontWeight: 600 }}
+            sx={{ backgroundColor: '#eef3f9', color: bbColors.navy700, fontWeight: 600 }}
           />
         ))
       }
@@ -576,7 +577,7 @@ return (data?.content || []).map((m: any) => ({
             size="small"
             {...getTagProps({ index })}
             key={option.id}
-            sx={{ backgroundColor: colors.blue50, color: colors.blue500, fontWeight: 600 }}
+            sx={{ backgroundColor: '#eef3f9', color: bbColors.navy700, fontWeight: 600 }}
           />
         ))
       }

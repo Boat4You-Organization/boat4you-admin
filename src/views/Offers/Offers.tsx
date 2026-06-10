@@ -25,6 +25,7 @@ import ModalRoot from '@/components/ModalRoot';
 import { api } from '@/config/axios.config';
 import CatalogueService from '@/services/catalogue.service';
 import ReservationsService from '@/services/reservations.service';
+import { bbColors, bbFont, bbShadow } from '@/styles/bb';
 import colors from '@/styles/themes/colors';
 import { showToast } from '@/valtio/global/global.actions';
 import AgencyPicker, { Agency } from '@/views/Bookings/partials/CreateReservationModal/AgencyPicker';
@@ -930,7 +931,10 @@ const Offers = () => {
 
   return (
     <Layout>
-      <Stack direction="row" sx={{ backgroundColor: colors.black100, minHeight: 600, alignItems: 'stretch', pt: 11.5 }}>
+      <Stack
+        direction="row"
+        sx={{ backgroundColor: bbColors.gray50, minHeight: 600, alignItems: 'stretch', pt: '54px', fontFamily: bbFont.stack }}
+      >
         {/* === LEFT PANEL: filters ============================================ */}
         {/* Filters are grouped into labelled SECTIONs (uppercase small caps) so
             the broker can scan the panel vertically by category — matches the
@@ -941,14 +945,14 @@ const Offers = () => {
             width: 320,
             flexShrink: 0,
             backgroundColor: colors.white,
-            borderRight: `1px solid ${colors.black200}`,
+            borderRight: `1px solid ${bbColors.gray200}`,
             p: 2,
           }}
         >
-          <Typography variant="h3" fontWeight={700} sx={{ fontSize: 18, mb: 0.25 }}>
+          <Typography variant="h3" fontWeight={700} sx={{ fontSize: 18, mb: 0.25, color: bbColors.navy900 }}>
             Search yachts
           </Typography>
-          <Typography variant="body2" color={colors.black500} sx={{ fontSize: 12, mb: 2 }}>
+          <Typography variant="body2" color={bbColors.gray500} sx={{ fontSize: 12, mb: 2 }}>
             Pick yachts → build offer → copy HTML into email.
           </Typography>
 
@@ -975,7 +979,7 @@ const Offers = () => {
                   setEndDate(e);
                 }}
               />
-              <Typography variant="body2" color={colors.black500} sx={{ fontSize: 11, mt: 0.5 }}>
+              <Typography variant="body2" color={bbColors.gray500} sx={{ fontSize: 11, mt: 0.5 }}>
                 {nights} {nights === 1 ? 'night' : 'nights'}
               </Typography>
             </Section>
@@ -1063,10 +1067,13 @@ const Offers = () => {
                 disabled={searching}
                 fullWidth
                 sx={{
-                  backgroundColor: colors.black950,
-                  '&:hover': { backgroundColor: colors.black800 },
+                  backgroundColor: bbColors.yellow500,
+                  color: bbColors.yellowText,
+                  boxShadow: bbShadow.yellowCta,
+                  '&:hover': { backgroundColor: '#f7c83d', boxShadow: bbShadow.yellowCta },
+                  '&:disabled': { backgroundColor: '#f6e8bd', color: '#a08a45', boxShadow: 'none' },
                   textTransform: 'none',
-                  fontWeight: 600,
+                  fontWeight: 800,
                 }}
               >
                 {searching ? 'Searching…' : 'Search'}
@@ -1074,7 +1081,7 @@ const Offers = () => {
               <Button
                 variant="outlined"
                 onClick={handleResetFilters}
-                sx={{ textTransform: 'none', color: colors.black700, borderColor: colors.black300 }}
+                sx={{ textTransform: 'none', color: bbColors.gray500, borderColor: bbColors.gray300 }}
               >
                 Reset
               </Button>
@@ -1100,7 +1107,7 @@ const Offers = () => {
                 {searched ? `${totalCount} yacht${totalCount === 1 ? '' : 's'} found` : 'No search yet'}
               </Typography>
               {searched && (
-                <Typography variant="body2" color={colors.black500} sx={{ fontSize: 13 }}>
+                <Typography variant="body2" color={bbColors.gray500} sx={{ fontSize: 13 }}>
                   matching your filters
                   {totalPages > 1 ? ` · page ${page + 1} of ${totalPages}` : ''}
                 </Typography>
@@ -1114,12 +1121,12 @@ const Offers = () => {
                   gap: 0.75,
                   px: 1.25,
                   py: 0.5,
-                  borderRadius: 1,
-                  border: `1px solid ${colors.black200}`,
+                  borderRadius: '8px',
+                  border: `1px solid ${bbColors.gray200}`,
                   backgroundColor: colors.white,
                   fontSize: 12,
-                  fontWeight: 600,
-                  color: colors.black800,
+                  fontWeight: 700,
+                  color: bbColors.navy900,
                 }}
               >
                 <Box component="span" sx={{ fontSize: 13 }}>
@@ -1131,12 +1138,12 @@ const Offers = () => {
                 sx={{
                   px: 1.25,
                   py: 0.5,
-                  borderRadius: 1,
-                  border: `1px solid ${colors.black200}`,
+                  borderRadius: '8px',
+                  border: `1px solid ${bbColors.gray200}`,
                   backgroundColor: colors.white,
                   fontSize: 12,
-                  fontWeight: 600,
-                  color: colors.black800,
+                  fontWeight: 700,
+                  color: bbColors.navy900,
                 }}
               >
                 {nights} {nights === 1 ? 'day' : 'days'}
@@ -1145,12 +1152,12 @@ const Offers = () => {
                 sx={{
                   px: 1.25,
                   py: 0.5,
-                  borderRadius: 1,
-                  border: `1px solid ${colors.black200}`,
+                  borderRadius: '8px',
+                  border: `1px solid ${bbColors.gray200}`,
                   backgroundColor: colors.white,
                   fontSize: 12,
-                  fontWeight: 600,
-                  color: colors.black800,
+                  fontWeight: 700,
+                  color: bbColors.navy900,
                 }}
               >
                 {currency}
@@ -1232,11 +1239,9 @@ const Offers = () => {
                 <Box
                   key={`${row.yachtId}-${row.slug}`}
                   sx={{
-                    border: `1px solid ${
-                      inCart ? colors.green500 : row.isOption ? colors.mandalay500 : colors.black200
-                    }`,
-                    backgroundColor: inCart ? '#f4fbf6' : row.isOption ? '#fff8eb' : colors.white,
-                    borderRadius: 1.5,
+                    border: `1px solid ${inCart ? '#a8e7c4' : row.isOption ? '#f4e7a8' : bbColors.cardBorder}`,
+                    backgroundColor: inCart ? '#f6fdf9' : row.isOption ? '#fffdf2' : colors.white,
+                    borderRadius: '12px',
                     p: 1.5,
                   }}
                 >
@@ -1249,8 +1254,8 @@ const Offers = () => {
                         width: 96,
                         height: 96,
                         flexShrink: 0,
-                        borderRadius: 1,
-                        backgroundColor: colors.black100,
+                        borderRadius: '8px',
+                        backgroundColor: bbColors.gray100,
                         backgroundImage: thumbUrl ? `url(${thumbUrl})` : 'none',
                         backgroundSize: 'cover',
                         backgroundPosition: 'center',
@@ -1270,9 +1275,9 @@ const Offers = () => {
                     {/* Middle: identity + location + agency + specs pills */}
                     <Box sx={{ flex: 1, minWidth: 0 }}>
                       <Stack direction="row" alignItems="center" gap={1} sx={{ flexWrap: 'wrap' }}>
-                        <Typography sx={{ fontSize: 15, fontWeight: 700, color: colors.black950 }}>
+                        <Typography sx={{ fontSize: 15, fontWeight: 700, color: bbColors.navy900 }}>
                           {row.modelName}
-                          <Box component="span" sx={{ color: colors.black500, fontWeight: 600, mx: 0.75 }}>
+                          <Box component="span" sx={{ color: bbColors.gray500, fontWeight: 600, mx: 0.75 }}>
                             /
                           </Box>
                           <Box
@@ -1287,15 +1292,16 @@ const Offers = () => {
                             component="span"
                             sx={{
                               display: 'inline-block',
-                              backgroundColor: colors.mandalay100,
-                              color: colors.mandalay900,
+                              backgroundColor: '#fef7e0',
+                              color: '#8a6d00',
+                              border: '1px solid #f4e7a8',
                               fontSize: 10,
                               fontWeight: 700,
                               letterSpacing: 0.5,
                               textTransform: 'uppercase',
                               px: 0.75,
                               py: 0.25,
-                              borderRadius: 0.75,
+                              borderRadius: '999px',
                             }}
                           >
                             Under option
@@ -1309,21 +1315,21 @@ const Offers = () => {
                             width: 8,
                             height: 8,
                             borderRadius: '50%',
-                            backgroundColor: colors.mandalay700,
+                            backgroundColor: bbColors.yellow500,
                             display: 'inline-block',
                           }}
                         />
-                        <Typography sx={{ fontSize: 13, color: colors.black700, fontWeight: 500 }}>
+                        <Typography sx={{ fontSize: 13, color: '#2c3e56', fontWeight: 500 }}>
                           {row.locationName}
                           {row.locationCountryCode ? ` · ${row.locationCountryCode}` : ''}
                         </Typography>
-                        <Typography component="span" sx={{ fontSize: 13, color: colors.black500, mx: 0.25 }}>
+                        <Typography component="span" sx={{ fontSize: 13, color: bbColors.gray500, mx: 0.25 }}>
                           🏕
                         </Typography>
-                        <Typography sx={{ fontSize: 13, color: colors.blue500, fontWeight: 600 }}>
+                        <Typography sx={{ fontSize: 13, color: bbColors.navy700, fontWeight: 600 }}>
                           {row.agencyName}
                         </Typography>
-                        <Typography component="span" sx={{ fontSize: 11, color: colors.black400 }}>
+                        <Typography component="span" sx={{ fontSize: 11, color: bbColors.gray600 }}>
                           (hidden when sent to client)
                         </Typography>
                       </Stack>
@@ -1338,13 +1344,13 @@ const Offers = () => {
                               px: 0.9,
                               py: 0.3,
                               borderRadius: 4,
-                              backgroundColor: colors.black100,
+                              backgroundColor: bbColors.gray100,
                               fontSize: 11,
-                              color: colors.black800,
+                              color: '#2c3e56',
                               fontWeight: 500,
                             }}
                           >
-                            <Box component="span" sx={{ color: colors.black500 }}>
+                            <Box component="span" sx={{ color: bbColors.gray500 }}>
                               {p.label}
                             </Box>
                             <Box component="span" sx={{ fontWeight: 700 }}>
@@ -1359,7 +1365,7 @@ const Offers = () => {
                         onClick={() =>
                           window.open(`${CUSTOMER_WEB_URL}/boat/${row.slug}`, '_blank', 'noopener,noreferrer')
                         }
-                        sx={{ p: 0, minWidth: 0, fontSize: 11, textTransform: 'none', mt: 0.75, color: colors.blue500 }}
+                        sx={{ p: 0, minWidth: 0, fontSize: 11, textTransform: 'none', mt: 0.75, color: bbColors.navy700, fontWeight: 700 }}
                       >
                         View on customer site ↗
                       </Button>
@@ -1368,7 +1374,7 @@ const Offers = () => {
                     {/* Right: pricing + action */}
                     <Stack alignItems="flex-end" spacing={0.5} sx={{ minWidth: 180 }}>
                       {hasDiscount && (
-                        <Typography sx={{ fontSize: 12, color: colors.black500, textDecoration: 'line-through' }}>
+                        <Typography sx={{ fontSize: 12, color: bbColors.gray500, textDecoration: 'line-through' }}>
                           List:{' '}
                           {listPeriodTotal!.toLocaleString('hr-HR', {
                             minimumFractionDigits: 2,
@@ -1377,7 +1383,15 @@ const Offers = () => {
                           {rowSymbol}
                         </Typography>
                       )}
-                      <Typography sx={{ fontSize: 18, fontWeight: 800, color: colors.green500, lineHeight: 1.15 }}>
+                      <Typography
+                        sx={{
+                          fontSize: 18,
+                          fontWeight: 800,
+                          color: bbColors.green600,
+                          lineHeight: 1.15,
+                          fontVariantNumeric: 'tabular-nums',
+                        }}
+                      >
                         {periodTotal.toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
                         {rowSymbol}
                       </Typography>
@@ -1392,14 +1406,14 @@ const Offers = () => {
                         return (
                           <Box
                             sx={{
-                              backgroundColor: isZero ? colors.black100 : colors.mandalay100,
-                              color: isZero ? colors.black600 : colors.mandalay900,
-                              border: `1px solid ${isZero ? colors.black200 : '#f3d79a'}`,
+                              backgroundColor: isZero ? bbColors.gray100 : '#fef7e0',
+                              color: isZero ? bbColors.gray500 : '#8a6d00',
+                              border: `1px solid ${isZero ? bbColors.gray200 : '#f4e7a8'}`,
                               fontSize: 11,
                               fontWeight: 700,
                               px: 0.9,
                               py: 0.3,
-                              borderRadius: 0.75,
+                              borderRadius: '999px',
                             }}
                           >
                             {isZero
@@ -1415,7 +1429,7 @@ const Offers = () => {
                         <Typography
                           sx={{
                             fontSize: 11,
-                            color: colors.mandalay900,
+                            color: '#8a6d00',
                             fontWeight: 600,
                             mt: 0.25,
                             textAlign: 'right',
@@ -1432,11 +1446,12 @@ const Offers = () => {
                         sx={{
                           mt: 0.5,
                           textTransform: 'none',
-                          backgroundColor: inCart ? colors.green500 : colors.black950,
+                          backgroundColor: inCart ? bbColors.green600 : bbColors.navy900,
                           boxShadow: 'none',
-                          fontWeight: 600,
+                          fontWeight: 700,
+                          borderRadius: '8px',
                           '&:hover': {
-                            backgroundColor: inCart ? colors.green500 : colors.black800,
+                            backgroundColor: inCart ? bbColors.green600 : '#13283d',
                             boxShadow: 'none',
                           },
                         }}
@@ -1460,10 +1475,11 @@ const Offers = () => {
                 size="small"
                 disabled={page === 0 || searching}
                 onClick={() => handlePageChange(page - 1)}
+                sx={{ color: bbColors.navy900, borderColor: bbColors.gray300 }}
               >
                 ← Prev
               </Button>
-              <Typography variant="body2" color={colors.black600}>
+              <Typography variant="body2" color={bbColors.gray500}>
                 Page <strong>{page + 1}</strong> of <strong>{totalPages}</strong>
               </Typography>
               <Button
@@ -1471,6 +1487,7 @@ const Offers = () => {
                 size="small"
                 disabled={page >= totalPages - 1 || searching}
                 onClick={() => handlePageChange(page + 1)}
+                sx={{ color: bbColors.navy900, borderColor: bbColors.gray300 }}
               >
                 Next →
               </Button>
@@ -1484,7 +1501,7 @@ const Offers = () => {
             width: 320,
             flexShrink: 0,
             backgroundColor: colors.white,
-            borderLeft: `1px solid ${colors.black200}`,
+            borderLeft: `1px solid ${bbColors.gray200}`,
             p: 2,
             display: 'flex',
             flexDirection: 'column',
@@ -1492,7 +1509,7 @@ const Offers = () => {
         >
           <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
             <Stack direction="row" alignItems="baseline" gap={1}>
-              <Typography sx={{ fontSize: 16, fontWeight: 700 }}>Client offer</Typography>
+              <Typography sx={{ fontSize: 16, fontWeight: 700, color: bbColors.navy900 }}>Client offer</Typography>
               {cart.length > 0 && (
                 <Box
                   sx={{
@@ -1502,10 +1519,10 @@ const Offers = () => {
                     minWidth: 22,
                     height: 22,
                     borderRadius: '50%',
-                    backgroundColor: colors.black950,
-                    color: colors.white,
+                    backgroundColor: bbColors.yellow500,
+                    color: bbColors.yellowText,
                     fontSize: 11,
-                    fontWeight: 700,
+                    fontWeight: 800,
                     px: 0.5,
                   }}
                 >
@@ -1518,7 +1535,7 @@ const Offers = () => {
                 size="small"
                 variant="text"
                 onClick={handleClearCart}
-                sx={{ color: colors.black500, fontSize: 12, textTransform: 'none', minWidth: 0 }}
+                sx={{ color: bbColors.gray500, fontSize: 12, textTransform: 'none', minWidth: 0 }}
               >
                 Clear
               </Button>
@@ -1526,7 +1543,7 @@ const Offers = () => {
           </Stack>
 
           {cart.length === 0 && (
-            <Typography variant="body2" color={colors.black500} sx={{ py: 4, textAlign: 'center', fontSize: 12 }}>
+            <Typography variant="body2" color={bbColors.gray500} sx={{ py: 4, textAlign: 'center', fontSize: 12 }}>
               No yachts added yet. Pick from the results list.
             </Typography>
           )}
@@ -1538,24 +1555,24 @@ const Offers = () => {
                 direction="row"
                 alignItems="flex-start"
                 gap={1}
-                sx={{ py: 0.75, borderBottom: `1px solid ${colors.black100}` }}
+                sx={{ py: 0.75, borderBottom: `1px solid ${bbColors.gray100}` }}
               >
                 <Box sx={{ minWidth: 0, flex: 1 }}>
-                  <Typography sx={{ fontSize: 13, fontWeight: 700, color: colors.black950 }} noWrap>
+                  <Typography sx={{ fontSize: 13, fontWeight: 700, color: bbColors.navy900 }} noWrap>
                     {y.modelName} | {y.name}
                   </Typography>
-                  <Typography sx={{ fontSize: 11, color: colors.black500 }}>{y.base}</Typography>
-                  <Typography sx={{ fontSize: 11, color: colors.blue500, fontWeight: 600 }}>{y.agencyName}</Typography>
+                  <Typography sx={{ fontSize: 11, color: bbColors.gray500 }}>{y.base}</Typography>
+                  <Typography sx={{ fontSize: 11, color: bbColors.navy700, fontWeight: 600 }}>{y.agencyName}</Typography>
                 </Box>
                 <Stack alignItems="flex-end" gap={0.25} sx={{ flexShrink: 0 }}>
-                  <Typography sx={{ fontSize: 13, fontWeight: 700, color: colors.green500, whiteSpace: 'nowrap' }}>
+                  <Typography sx={{ fontSize: 13, fontWeight: 700, color: bbColors.green600, whiteSpace: 'nowrap' }}>
                     {y.clientPriceEur.toLocaleString('hr-HR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}{' '}
                     {y.currencySymbol || getCurrencySymbol(y.currency)}
                   </Typography>
                   <IconButton
                     size="small"
                     onClick={() => handleRemoveFromCart(y.yachtId, y.dateFrom)}
-                    sx={{ color: colors.black400, p: 0.25 }}
+                    sx={{ color: bbColors.gray600, p: 0.25 }}
                   >
                     <DeleteOutlineIcon sx={{ fontSize: 16 }} />
                   </IconButton>
@@ -1576,11 +1593,13 @@ const Offers = () => {
             sx={{
               mt: 2,
               textTransform: 'none',
-              backgroundColor: colors.black950,
-              color: colors.white,
-              fontWeight: 600,
-              boxShadow: 'none',
-              '&:hover': { backgroundColor: colors.black800, boxShadow: 'none' },
+              backgroundColor: bbColors.yellow500,
+              color: bbColors.yellowText,
+              fontWeight: 800,
+              borderRadius: '8px',
+              boxShadow: bbShadow.yellowCta,
+              '&:hover': { backgroundColor: '#f7c83d', boxShadow: bbShadow.yellowCta },
+              '&:disabled': { backgroundColor: '#f6e8bd', color: '#a08a45', boxShadow: 'none' },
             }}
           >
             {openingModal ? 'Loading details…' : 'Preview email'}
@@ -1606,10 +1625,20 @@ const Offers = () => {
             <strong>Copy HTML source</strong> when pasting into a CMS / editor that accepts raw HTML.
           </Alert>
           <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-            <Button variant="contained" startIcon={<ContentCopyIcon />} onClick={handleCopyRichText}>
+            <Button
+              variant="contained"
+              startIcon={<ContentCopyIcon />}
+              onClick={handleCopyRichText}
+              sx={{ backgroundColor: bbColors.navy900, '&:hover': { backgroundColor: '#13283d' } }}
+            >
               Copy as rich text
             </Button>
-            <Button variant="outlined" startIcon={<ContentCopyIcon />} onClick={handleCopyHtml}>
+            <Button
+              variant="outlined"
+              startIcon={<ContentCopyIcon />}
+              onClick={handleCopyHtml}
+              sx={{ color: bbColors.navy900, borderColor: bbColors.gray300 }}
+            >
               Copy HTML source
             </Button>
             <Button
@@ -1632,11 +1661,11 @@ const Offers = () => {
               sx={
                 includeSkipper
                   ? {
-                      backgroundColor: colors.black950,
+                      backgroundColor: bbColors.navy900,
                       color: '#ffffff',
-                      '&:hover': { backgroundColor: colors.black950 },
+                      '&:hover': { backgroundColor: bbColors.navy900 },
                     }
-                  : { borderColor: colors.black300, color: colors.black950 }
+                  : { borderColor: bbColors.gray300, color: bbColors.navy900 }
               }
             >
               {includeSkipper ? '✓ Skipper' : '+ Skipper'}
@@ -1648,11 +1677,11 @@ const Offers = () => {
               sx={
                 includeHostess
                   ? {
-                      backgroundColor: colors.black950,
+                      backgroundColor: bbColors.navy900,
                       color: '#ffffff',
-                      '&:hover': { backgroundColor: colors.black950 },
+                      '&:hover': { backgroundColor: bbColors.navy900 },
                     }
-                  : { borderColor: colors.black300, color: colors.black950 }
+                  : { borderColor: bbColors.gray300, color: bbColors.navy900 }
               }
             >
               {includeHostess ? '✓ Hostess' : '+ Hostess'}
@@ -1660,8 +1689,8 @@ const Offers = () => {
           </Stack>
           <Box
             sx={{
-              border: `1px solid ${colors.black200}`,
-              borderRadius: 1,
+              border: `1px solid ${bbColors.gray200}`,
+              borderRadius: '10px',
               p: 2,
               backgroundColor: colors.white,
               maxHeight: 500,
@@ -1688,9 +1717,9 @@ const Section = ({ label, children }: { label: string; children: ReactNode }) =>
       sx={{
         fontSize: 10.5,
         fontWeight: 700,
-        letterSpacing: 0.8,
+        letterSpacing: '0.14em',
         textTransform: 'uppercase',
-        color: colors.black600,
+        color: bbColors.gray500,
         mb: 0.5,
       }}
     >
@@ -1718,7 +1747,7 @@ const CollapsibleSection = ({
   onToggle: () => void;
   children: ReactNode;
 }) => (
-  <Box sx={{ borderTop: `1px solid ${colors.black200}`, pt: 1 }}>
+  <Box sx={{ borderTop: `1px solid ${bbColors.gray200}`, pt: 1 }}>
     <Box
       component="button"
       type="button"
@@ -1734,17 +1763,17 @@ const CollapsibleSection = ({
         p: 0,
         cursor: 'pointer',
         font: 'inherit',
-        color: colors.black800,
+        color: '#2c3e56',
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, minWidth: 0 }}>
-        <Typography component="span" sx={{ fontSize: 13, fontWeight: 700, color: colors.black950 }}>
+        <Typography component="span" sx={{ fontSize: 13, fontWeight: 700, color: bbColors.navy900 }}>
           {label}
         </Typography>
         {hint && (
           <Typography
             component="span"
-            sx={{ fontSize: 11, color: colors.black400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            sx={{ fontSize: 11, color: bbColors.gray600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
           >
             {hint}
           </Typography>
@@ -1754,7 +1783,7 @@ const CollapsibleSection = ({
         component="span"
         sx={{
           fontSize: 12,
-          color: colors.black500,
+          color: bbColors.gray500,
           transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
           transition: 'transform .15s ease',
         }}

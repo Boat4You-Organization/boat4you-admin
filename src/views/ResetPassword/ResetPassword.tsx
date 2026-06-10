@@ -1,21 +1,19 @@
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 
-import { Box, Button, Container, Grid, IconButton, Stack, Typography } from '@mui/material';
+import { Button, IconButton, Stack, Typography } from '@mui/material';
 
+import AuthShell from '@/components/AuthShell';
 import Form from '@/components/Forms/Form';
-import Layout from '@/components/Layout';
 import ArrowLeft from '@/components/SvgIcons/ArrowLeft';
-import AdminLoginVector from '@/components/SvgIcons/Vector/AdminLoginVector';
-import ResetPasswordCodeVector from '@/components/SvgIcons/Vector/ResetPasswordCodeVector';
 import { ResetPasswordFormValues } from '@/config/forms/form-models.config';
 import { FORGOT_PASSWORD_FORM } from '@/config/forms/form-names.config';
 import AuthService from '@/services/auth.service';
+import { bbAuthTitleSx } from '@/styles/bb';
 import colors from '@/styles/themes/colors';
 import useToggleState from '@/utils/hooks/useToggleState';
 import { showToast } from '@/valtio/global/global.actions';
 
-import styles from './ResetPassword.module.scss';
 import ForgotPasswordForm from './ResetPasswordForm';
 
 const defaultValues: ResetPasswordFormValues = {
@@ -48,19 +46,13 @@ const ResetPassword = () => {
 
   const renderForm = () => (
     <>
-      <IconButton onClick={handleBackButtonClick} className={styles.navigationArrow}>
+      <IconButton onClick={handleBackButtonClick} sx={{ display: { xs: 'none', md: 'inline-flex' }, ml: -1, mb: 1 }}>
         <ArrowLeft size={24} fill={colors.black950} />
       </IconButton>
-      <Typography variant="hero" fontWeight={800} fontStyle="italic" color={colors.blue500} pt={{ xs: 0, md: 3 }}>
+      <Typography component="h1" sx={bbAuthTitleSx}>
         {t('login.reset-password.title')}
       </Typography>
-      <Form
-        defaultValues={defaultValues}
-        className={styles.form}
-        onSubmit={handleSubmit}
-        id={FORGOT_PASSWORD_FORM}
-        mode="onBlur"
-      >
+      <Form defaultValues={defaultValues} onSubmit={handleSubmit} id={FORGOT_PASSWORD_FORM} mode="onBlur">
         <ForgotPasswordForm />
       </Form>
     </>
@@ -68,11 +60,11 @@ const ResetPassword = () => {
 
   const renderSuccessContent = () => (
     <Stack>
-      <Typography variant="hero" fontWeight={800} fontStyle="italic" color={colors.blue500}>
+      <Typography component="h1" sx={bbAuthTitleSx}>
         {t('login.reset-password.check-mailbox')}
       </Typography>
       <Typography
-        pt={6}
+        pt={2}
         pb={3}
         variant="body1"
         dangerouslySetInnerHTML={{
@@ -89,24 +81,7 @@ const ResetPassword = () => {
     </Stack>
   );
 
-  return (
-    <Layout>
-      <Container component="section" disableGutters maxWidth="xl" className={styles.container}>
-        <Grid container spacing={5} className={styles.contentWrapper}>
-          <Grid size={{ xs: 12, md: 6 }} className={styles.content}>
-            {!successState ? renderForm() : renderSuccessContent()}
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }} />
-        </Grid>
-        <Grid container spacing={5} className={styles.imageWrapper}>
-          <Grid size={{ xs: 12, md: 6 }} />
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Box className={styles.vector}>{!successState ? <AdminLoginVector /> : <ResetPasswordCodeVector />}</Box>
-          </Grid>
-        </Grid>
-      </Container>
-    </Layout>
-  );
+  return <AuthShell>{!successState ? renderForm() : renderSuccessContent()}</AuthShell>;
 };
 
 export default ResetPassword;

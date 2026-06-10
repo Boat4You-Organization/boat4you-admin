@@ -2,18 +2,16 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import { Box, Container, Grid, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 
+import AuthShell from '@/components/AuthShell';
 import Form from '@/components/Forms/Form';
-import Layout from '@/components/Layout';
-import ReserSuccessfulVector from '@/components/SvgIcons/Vector/ReserSuccessfulVector';
 import { SignUpFormValues } from '@/config/forms/form-models.config';
 import { SIGNUP_FORM } from '@/config/forms/form-names.config';
 import UsersService from '@/services/users.service';
-import colors from '@/styles/themes/colors';
+import { bbAuthTitleSx } from '@/styles/bb';
 import { showToast } from '@/valtio/global/global.actions';
 
-import styles from './SignUp.module.scss';
 import SignUpForm from './SignUpForm';
 
 const defaultValues: SignUpFormValues = {
@@ -48,19 +46,13 @@ const SignUp = () => {
 
   const renderForm = () => (
     <>
-      <Typography variant="hero" fontWeight={800} fontStyle="italic" color={colors.blue500} pt={{ xs: 0, md: 3 }}>
+      <Typography component="h1" sx={bbAuthTitleSx}>
         {t('login.signup.title')}
       </Typography>
-      <Typography pt={6} pb={3} variant="body1">
+      <Typography pt={2} pb={3} variant="body1">
         {t('login.signup.description')}
       </Typography>
-      <Form
-        defaultValues={defaultValues}
-        className={styles.form}
-        onSubmit={handleSubmit}
-        id={SIGNUP_FORM}
-        mode="onBlur"
-      >
+      <Form defaultValues={defaultValues} onSubmit={handleSubmit} id={SIGNUP_FORM} mode="onBlur">
         <SignUpForm />
       </Form>
     </>
@@ -68,10 +60,10 @@ const SignUp = () => {
 
   const renderErrorState = () => (
     <>
-      <Typography variant="hero" fontWeight={800} fontStyle="italic" color={colors.blue500}>
+      <Typography component="h1" sx={bbAuthTitleSx}>
         {t('login.signup.invite-failed')}
       </Typography>
-      <Typography pt={6} pb={3} variant="body1">
+      <Typography pt={2} pb={3} variant="body1">
         {t('login.signup.invite-failed-description')}
       </Typography>
     </>
@@ -103,26 +95,7 @@ const SignUp = () => {
     checkInviteCode();
   }, [inviteCode]);
 
-  return (
-    <Layout>
-      <Container component="section" disableGutters maxWidth="xl" className={styles.container}>
-        <Grid container spacing={5} className={styles.contentWrapper}>
-          <Grid size={{ xs: 12, md: 6 }} className={styles.content}>
-            {renderContent()}
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }} />
-        </Grid>
-        <Grid container spacing={5} className={styles.imageWrapper}>
-          <Grid size={{ xs: 12, md: 6 }} />
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Box className={styles.vector}>
-              <ReserSuccessfulVector />
-            </Box>
-          </Grid>
-        </Grid>
-      </Container>
-    </Layout>
-  );
+  return <AuthShell>{renderContent()}</AuthShell>;
 };
 
 export default SignUp;

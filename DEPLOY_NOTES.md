@@ -1,6 +1,14 @@
 # boat4you-admin — deploy notes
 
-## Pending deploy (2026-06-10) — visual polish "Polirani Broker Desk"
+## ✅ DEPLOYED 2026-06-10 ~18:00 — visual polish "Polirani Broker Desk"
+
+Live on admin.boat4you.com (entry `index-BMlyh7nZ.js`, verified: AuthShell chunk
+200 + new tagline served, `api.boat4you.com` baked, 0× localhost). Rollback copy
+on cusma1: `/var/www/admin.boat4you.com/html.old`. Recipe used: local
+`yarn build` (picks `.env.production.local`), tar dist → scp cusma1 →
+sudo swap into `/var/www/admin.boat4you.com/html` (strip macOS `._*` first).
+
+## Original pending-deploy notes (2026-06-10) — visual polish "Polirani Broker Desk"
 
 Commits `3019f4e..646fe1f` on `main` (pushed). Styling only — no API/routing/logic
 changes, no new dependencies, no env changes.

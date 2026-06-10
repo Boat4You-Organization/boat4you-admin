@@ -21,7 +21,7 @@ const LoginForm = () => {
 
   return (
     <>
-      <Stack gap={3} pt={6}>
+      <Stack gap={3} pt={4}>
         <FormInput
           name="email"
           formLabel={t('email-address')}

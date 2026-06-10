@@ -949,6 +949,12 @@ const Offers = () => {
             backgroundColor: colors.white,
             borderRight: `1px solid ${bbColors.gray200}`,
             p: 2,
+            // Uniform control typography across the whole filter panel: MUI
+            // inputs (Select/Autocomplete/TextField) default to 16px while
+            // chips render 13px, so Destination read bigger than the region
+            // chips next to it. One container rule beats per-field overrides.
+            '& .MuiInputBase-input': { fontSize: 13 },
+            '& .MuiChip-label': { fontSize: 13 },
           }}
         >
           <Typography variant="h3" fontWeight={700} sx={{ fontSize: 18, mb: 0.25, color: bbColors.navy900 }}>

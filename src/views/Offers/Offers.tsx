@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import SailingOutlinedIcon from '@mui/icons-material/SailingOutlined';
+import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import {
   Alert,
   Box,
@@ -1188,13 +1190,19 @@ const Offers = () => {
           </Stack>
 
           {!searched && (
-            <Alert severity="info">
-              Set filters on the left and click <strong>Search</strong>.
-            </Alert>
+            <EmptyState
+              icon={<SearchOutlinedIcon sx={{ fontSize: 22 }} />}
+              title="Start with the filters"
+              sub="Pick dates, destination and yacht type on the left, then hit Search."
+            />
           )}
 
           {searched && !searching && results.length === 0 && (
-            <Alert severity="warning">No yachts match — try loosening filters.</Alert>
+            <EmptyState
+              icon={<SailingOutlinedIcon sx={{ fontSize: 22 }} />}
+              title="No yachts match"
+              sub="Try loosening a filter or two — different dates or fewer amenities usually help."
+            />
           )}
 
           <Stack spacing={1}>
@@ -1548,7 +1556,7 @@ const Offers = () => {
             </Typography>
           )}
 
-          <Stack spacing={0.75} sx={{ flex: 1 }}>
+          <Stack spacing={0.75}>
             {cart.map(y => (
               <Stack
                 key={`${y.yachtId}-${y.dateFrom}`}
@@ -1703,6 +1711,33 @@ const Offers = () => {
     </Layout>
   );
 };
+
+/**
+ * Centered placeholder for the results column (pre-search prompt and the
+ * no-results case) — yellow-tinted icon chip + title + hint, replacing the
+ * stock MUI Alerts that looked off-palette in the Broker Desk skin.
+ */
+const EmptyState = ({ icon, title, sub }: { icon: ReactNode; title: string; sub: string }) => (
+  <Stack alignItems="center" justifyContent="center" sx={{ py: { xs: 6, md: 12 }, px: 3, textAlign: 'center' }}>
+    <Box
+      sx={{
+        width: 44,
+        height: 44,
+        borderRadius: '12px',
+        backgroundColor: '#fef7e0',
+        color: '#8a6d00',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        mb: 1.5,
+      }}
+    >
+      {icon}
+    </Box>
+    <Typography sx={{ fontSize: 15, fontWeight: 700, color: bbColors.navy900 }}>{title}</Typography>
+    <Typography sx={{ fontSize: 12.5, color: bbColors.gray500, mt: 0.5, maxWidth: 360 }}>{sub}</Typography>
+  </Stack>
+);
 
 /**
  * Left-panel filter section wrapper — uppercase small-caps label stacked

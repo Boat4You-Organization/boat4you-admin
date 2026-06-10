@@ -22,7 +22,7 @@ export const ToggleChipGroup = ({
   selected: string[];
   onToggle: (id: string) => void;
 }) => (
-  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75 }}>
+  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
     {options.map(o => {
       const on = selected.includes(o.id);
 
@@ -35,11 +35,11 @@ export const ToggleChipGroup = ({
           sx={{
             cursor: 'pointer',
             font: 'inherit',
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: 600,
             lineHeight: 1.2,
-            px: 1.5,
-            py: 0.75,
+            px: 1.1,
+            py: 0.45,
             borderRadius: 999,
             border: `1px solid ${on ? bbColors.navy900 : bbColors.gray300}`,
             backgroundColor: on ? bbColors.navy900 : colors.white,

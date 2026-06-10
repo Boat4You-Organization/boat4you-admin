@@ -71,6 +71,21 @@ export const ToggleChipGroup = ({
  *   BuildYearRangeField  — numeric "from / to" range
  */
 
+/**
+ * Dense dropdown options for the filter panel. Autocomplete/Select popups
+ * render in a portal (outside the sidebar), so the panel's container font
+ * rule can't reach them — without these the option lists open at MUI's
+ * default 16px with roomy padding and look oversized next to the 13px
+ * controls they belong to.
+ */
+export const DENSE_AUTOCOMPLETE_SLOT_PROPS = {
+  listbox: { sx: { '& .MuiAutocomplete-option': { fontSize: 13, minHeight: 32, py: 0.5 } } },
+} as const;
+
+export const DENSE_SELECT_MENU_PROPS = {
+  sx: { '& .MuiMenuItem-root': { fontSize: 13, minHeight: 32 } },
+} as const;
+
 // ---------- country ---------------------------------------------------------
 
 export interface Country {
@@ -106,6 +121,7 @@ export const CountrySelect = ({
   return (
     <Autocomplete
       fullWidth
+      slotProps={DENSE_AUTOCOMPLETE_SLOT_PROPS}
       options={countries}
       value={value}
       getOptionLabel={o => o.name}
@@ -206,6 +222,7 @@ return;
       multiple
       fullWidth
       size="small"
+      slotProps={DENSE_AUTOCOMPLETE_SLOT_PROPS}
       options={regions}
       value={value}
       getOptionLabel={o => o.name}
@@ -472,6 +489,7 @@ return dedupManufacturers(raw);
       fullWidth
       size="small"
       openOnFocus
+      slotProps={DENSE_AUTOCOMPLETE_SLOT_PROPS}
       options={merged}
       value={value}
       filterOptions={x => x}
@@ -559,6 +577,7 @@ return (data?.content || []).map((m: any) => ({
       multiple
       fullWidth
       size="small"
+      slotProps={DENSE_AUTOCOMPLETE_SLOT_PROPS}
       options={merged}
       value={value}
       filterOptions={x => x}

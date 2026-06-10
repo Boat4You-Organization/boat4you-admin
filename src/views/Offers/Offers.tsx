@@ -37,6 +37,7 @@ import {
   BuildYearRangeField,
   Country,
   CountrySelect,
+  DENSE_SELECT_MENU_PROPS,
   Manufacturer,
   ManufacturerPicker,
   Model,
@@ -967,7 +968,11 @@ const Offers = () => {
           <Stack spacing={1.25}>
             <Section label="Currency">
               <FormControl fullWidth size="small">
-                <Select value={currency} onChange={e => handleCurrencyChange(String(e.target.value))}>
+                <Select
+                  value={currency}
+                  MenuProps={DENSE_SELECT_MENU_PROPS}
+                  onChange={e => handleCurrencyChange(String(e.target.value))}
+                >
                   {CURRENCIES.map(c => (
                     <MenuItem key={c.code} value={c.code}>
                       {c.symbol}&nbsp;&nbsp;{c.code} — {c.label}

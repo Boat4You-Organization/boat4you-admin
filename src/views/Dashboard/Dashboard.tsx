@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-use-before-define, react/no-array-index-key, react/no-unescaped-entities */
 import { useEffect, useState } from 'react';
 
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
+import EventAvailableOutlinedIcon from '@mui/icons-material/EventAvailableOutlined';
+import EuroOutlinedIcon from '@mui/icons-material/EuroOutlined';
+import SailingOutlinedIcon from '@mui/icons-material/SailingOutlined';
 import { Box, Stack, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { ReservationModelShortInfo, ReservationSysStatus } from '@/models/booking.model';
 import ReservationsService, { DashboardMetricsDto } from '@/services/reservations.service';
-import { bbColors, bbFont, bbStatusPill } from '@/styles/bb';
+import { bbCardSx, bbColors, bbFont, bbStatusPill } from '@/styles/bb';
 import { useAuthStore } from '@/valtio/auth/auth.store';
 
 /**
@@ -68,29 +72,45 @@ const KpiCard = ({
   value,
   foot,
   valueColor,
+  icon,
+  chipBg,
+  chipFg,
 }: {
   label: string;
   value: string;
   foot?: React.ReactNode;
   valueColor?: string;
+  icon: React.ReactNode;
+  chipBg: string;
+  chipFg: string;
 }) => (
-  <Box
-    sx={{
-      backgroundColor: bbColors.white,
-      border: `1px solid ${bbColors.gray200}`,
-      borderRadius: '10px',
-      p: '14px 16px',
-    }}
-  >
-    <Typography sx={{ fontSize: 10.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: bbColors.gray500, fontWeight: 700 }}>
-      {label}
-    </Typography>
+  <Box sx={{ ...bbCardSx, p: '16px 18px' }}>
+    <Stack direction="row" alignItems="flex-start" justifyContent="space-between" gap={1}>
+      <Typography sx={{ fontSize: 10.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: bbColors.gray500, fontWeight: 700, pt: '6px' }}>
+        {label}
+      </Typography>
+      <Box
+        sx={{
+          width: 30,
+          height: 30,
+          borderRadius: '9px',
+          backgroundColor: chipBg,
+          color: chipFg,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+        }}
+      >
+        {icon}
+      </Box>
+    </Stack>
     <Typography
       sx={{
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: 800,
         letterSpacing: '-0.02em',
-        mt: 0.75,
+        mt: 0.25,
         color: valueColor || bbColors.navy900,
         fontVariantNumeric: 'tabular-nums',
         lineHeight: 1.2,
@@ -212,35 +232,40 @@ return () => {
             label="Bookings · this week"
             value={metrics ? String(metrics.bookingsThisWeek) : '—'}
             foot={`Mon → Sun, ${dayjs().format('D MMM')}`}
+            icon={<EventAvailableOutlinedIcon sx={{ fontSize: 17 }} />}
+            chipBg="#e8f0fb"
+            chipFg="#1a4fa8"
           />
           <KpiCard
             label="Bookings · this month"
             value={metrics ? String(metrics.bookingsThisMonth) : '—'}
             foot={dayjs().format('MMMM YYYY')}
+            icon={<CalendarMonthOutlinedIcon sx={{ fontSize: 17 }} />}
+            chipBg="#e1f5ee"
+            chipFg="#0f6e56"
           />
           <KpiCard
             label="Confirmed reservations"
             value={metrics ? String(metrics.confirmedReservations) : '—'}
             foot="All time"
+            icon={<SailingOutlinedIcon sx={{ fontSize: 17 }} />}
+            chipBg="#fef7e0"
+            chipFg="#8a6d00"
           />
           <KpiCard
             label={`Revenue · YTD ${currentYear}`}
             value={metrics ? formatMoney(metrics.revenueYearToDate) : '—'}
             valueColor={bbColors.green600}
             foot="Commission accumulated"
+            icon={<EuroOutlinedIcon sx={{ fontSize: 17 }} />}
+            chipBg="#d1fae5"
+            chipFg="#047857"
           />
         </Box>
 
         {/* ─── Chart ─── */}
         <Box sx={{ mb: 1.75 }}>
-          <Box
-            sx={{
-              backgroundColor: bbColors.white,
-              border: `1px solid ${bbColors.gray200}`,
-              borderRadius: '10px',
-              p: 2.25,
-            }}
-          >
+          <Box sx={{ ...bbCardSx, p: 2.25 }}>
             <Stack direction="row" justifyContent="space-between" alignItems="baseline" flexWrap="wrap" gap={1}>
               <Box>
                 <Typography sx={{ fontSize: 13.5, fontWeight: 800 }}>Bookings this week</Typography>
@@ -254,10 +279,10 @@ return () => {
             </Stack>
 
             {/* Bar row — flex-end keeps bars growing upward from baseline */}
-            <Stack direction="row" alignItems="flex-end" gap={0.75} sx={{ height: 120, mt: 2 }}>
+            <Stack direction="row" alignItems="flex-end" gap={0.75} sx={{ height: 128, mt: 2 }}>
               {weekly.length === 0
                 ? Array.from({ length: 7 }).map((_, i) => (
-                    <Box key={i} sx={{ flex: 1, height: '4%', backgroundColor: bbColors.gray200, borderRadius: '4px 4px 0 0' }} />
+                    <Box key={i} sx={{ flex: 1, height: '4%', backgroundColor: bbColors.gray200, borderRadius: '6px' }} />
                   ))
                 : weekly.map((d, i) => {
                     const pct = Math.max(4, (d.count / maxCount) * 100);
@@ -271,9 +296,8 @@ return (
                         sx={{
                           flex: 1,
                           height: `${pct}%`,
-                          backgroundColor: isToday ? bbColors.yellow500 : bbColors.navy900,
-                          borderRadius: '4px 4px 0 0',
-                          opacity: isToday ? 1 : 0.85,
+                          backgroundColor: isToday ? bbColors.yellow500 : bbColors.navy700,
+                          borderRadius: '6px',
                         }}
                       />
                     );
@@ -296,14 +320,7 @@ return (
         </Box>
 
         {/* ─── Recent bookings ─── */}
-        <Box
-          sx={{
-            backgroundColor: bbColors.white,
-            border: `1px solid ${bbColors.gray200}`,
-            borderRadius: '10px',
-            overflow: 'hidden',
-          }}
-        >
+        <Box sx={{ ...bbCardSx, overflow: 'hidden' }}>
           <Stack
             direction="row"
             justifyContent="space-between"
@@ -336,7 +353,7 @@ return (
                         textTransform: 'uppercase',
                         color: bbColors.gray500,
                         fontWeight: 700,
-                        padding: '10px 14px',
+                        padding: '11px 16px',
                         textAlign: i === 4 ? 'right' : 'left',
                         backgroundColor: bbColors.gray75,
                         borderBottom: `1px solid ${bbColors.gray200}`,
@@ -400,8 +417,8 @@ return (
 };
 
 const tdBase = {
-  padding: '12px 14px',
-  fontSize: 12.5,
+  padding: '14px 16px',
+  fontSize: 13,
   borderBottom: `1px solid ${bbColors.gray100}`,
   color: '#2c3e56',
   whiteSpace: 'nowrap' as const,

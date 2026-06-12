@@ -1,6 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-import { AuthKeys } from '@/config/constants.config';
+import { getStoredToken } from '@/config/tokenStore';
 import { ErrorModel } from '@/models/error.model';
 import { setToken } from '@/valtio/auth/auth.actions';
 
@@ -11,7 +11,9 @@ interface TokenData {
 }
 
 const getTokenData = (): TokenData | null => {
-  const tokenString = localStorage.getItem(AuthKeys.TOKEN);
+  // setToken() keeps the in-memory holder in sync (auth.actions), so this is
+  // the single source of truth for the bearer/refresh tokens — no localStorage.
+  const tokenString = getStoredToken();
 
   if (!tokenString) return null;
 
@@ -23,12 +25,11 @@ const getTokenData = (): TokenData | null => {
 };
 
 const saveTokenData = (tokenData: TokenData): void => {
-  localStorage.setItem(AuthKeys.TOKEN, JSON.stringify(tokenData));
+  // setToken updates both the valtio store and the in-memory holder.
   setToken(JSON.stringify(tokenData));
 };
 
 const clearTokenData = (): void => {
-  localStorage.removeItem(AuthKeys.TOKEN);
   setToken(null);
 };
 

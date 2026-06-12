@@ -1,3 +1,4 @@
+import { getStoredToken } from '@/config/tokenStore';
 import { Language } from '@/models/user.model';
 
 export const POST_REQUEST_PARAMETERS = {
@@ -36,10 +37,6 @@ export const PAGE_SIZE = 20;
 
 export type SortDirection = 'asc' | 'desc';
 
-export enum AuthKeys {
-  TOKEN = 'BOAT4YOU_TOKEN',
-}
-
 export enum LocaleKeys {
   LOCALE = 'LOCALE',
 }
@@ -53,7 +50,7 @@ export const supportedLocales = Object.values(Locale).map(l => l.toLowerCase());
 
 export const authHeaders = () => {
   const headers = new Headers();
-  const token = localStorage.getItem(AuthKeys.TOKEN);
+  const token = getStoredToken();
 
   if (token) {
     const { token: accessToken } = JSON.parse(token);

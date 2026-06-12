@@ -1,6 +1,6 @@
 import { proxy, useSnapshot } from 'valtio';
 
-import { AuthKeys } from '@/config/constants.config';
+import { getStoredToken } from '@/config/tokenStore';
 import { UserModel, UserSettings } from '@/models/user.model';
 
 interface AuthStore {
@@ -14,7 +14,9 @@ export const authStore = proxy<AuthStore>({
   user: null,
   userSettings: null,
   authenticating: true,
-  token: localStorage.getItem(AuthKeys.TOKEN),
+  // In-memory only — null on a fresh load/reload, so the app shows the login
+  // screen until the user re-authenticates (token no longer persisted).
+  token: getStoredToken(),
 });
 
 export const useAuthStore = (): AuthStore => useSnapshot(authStore);

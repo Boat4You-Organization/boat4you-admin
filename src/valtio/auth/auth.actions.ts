@@ -1,3 +1,4 @@
+import { setStoredToken } from '@/config/tokenStore';
 import { UserModel } from '@/models/user.model';
 import AuthService from '@/services/auth.service';
 
@@ -18,5 +19,8 @@ export const setUser = (user: UserModel | null): void => {
 };
 
 export const setToken = (token: string | null): void => {
+  // Single entry point that keeps the reactive valtio store and the
+  // non-reactive in-memory holder (read by axios + authHeaders) in lockstep.
   authStore.token = token;
+  setStoredToken(token);
 };

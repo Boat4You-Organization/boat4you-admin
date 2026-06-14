@@ -26,10 +26,14 @@
       content="Charter your perfect yacht in just a few clicks. Easy, fast, and stress-free — your dream sailing adventure starts here."
     />
     <meta name="twitter:image" content="/images/meta/og-image.png" />
-    <!-- Meta Assets  -->
-    <link rel="icon" href="/favicons/favicon.ico" sizes="any" />
-    <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png" />
-    <link rel="mask-icon" href="/favicons/mask-icon.svg" color="#ffffff" />
+    <!-- Meta Assets. `?v=2` busts the browser favicon cache after the
+         dark-navy admin recolour (favicons are cached very aggressively and
+         survive a normal/hard refresh otherwise). Bump the version on future
+         favicon changes. -->
+    <link rel="icon" href="/favicons/favicon.ico?v=2" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png?v=2" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png?v=2" />
+    <link rel="apple-touch-icon" href="/favicons/apple-touch-icon.png?v=2" />
   </head>
 
   <body>

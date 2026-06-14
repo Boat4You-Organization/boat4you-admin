@@ -508,8 +508,15 @@ return { payload: null as unknown as ReservationModel, message };
     slug?: string;                     // used for "View on customer site" link
     name: string;
     modelName: string;
-    clientPriceEur: number;
-    listPriceEur?: number | null;      // pre-discount, drives the strikethrough price
+    clientPriceEur: number;            // ALWAYS EUR (the name is literal) — convert via clientPriceInfo
+    listPriceEur?: number | null;      // pre-discount, drives the strikethrough price (also EUR)
+    // Currency-converted amounts when the search was made with ?currency= — the
+    // backend leaves clientPriceEur/listPriceEur in EUR and returns the converted
+    // value here (amount in the active currency + the EUR→currency `rate`). The
+    // Offers workspace reads `.amount` for display so the figure matches the
+    // currency symbol (was showing the EUR number with the AUD/USD symbol).
+    clientPriceInfo?: { amount: number; currency: string; rate?: number } | null;
+    listPriceInfo?: { amount: number; currency: string; rate?: number } | null;
     agencyName: string;
     // Admin-only commission per offer (admin gate enforced server-side via
     // YachtMapper.toSearchDto isAdminUser()). Customer auth gets null here.

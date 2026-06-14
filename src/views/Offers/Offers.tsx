@@ -109,10 +109,10 @@ interface SearchRow {
   slug: string;
   name: string;
   modelName: string;
-  // Prices are in whatever `currency` was sent with the search — backend
-  // converts at request time. The name stays `clientPriceEur` for legacy
-  // compatibility (the JPA field / DTO hasn't been renamed yet) but the
-  // numeric value reflects the active currency, NOT always EUR.
+  // Held in the ACTIVE display currency. The backend returns clientPriceEur/
+  // listPriceEur always in EUR plus a converted clientPriceInfo/listPriceInfo;
+  // the search map below stores the converted `.amount` here so the figure
+  // matches the currency symbol (the bug: EUR amount shown with an A$ symbol).
   clientPriceEur: number;
   listPriceEur: number | null;
   // Broker commission PER DAY — backend divides the total commission by
@@ -188,6 +188,10 @@ interface OfferResponse {
   dateTo: string;
   clientPriceEur?: number;
   listPriceEur?: number | null;
+  // Currency-converted amounts (active currency + EUR→currency rate) when the
+  // offer was fetched with ?currency=. clientPriceEur/listPriceEur stay EUR.
+  clientPriceInfo?: { amount: number; currency: string; rate?: number } | null;
+  listPriceInfo?: { amount: number; currency: string; rate?: number } | null;
   totalDiscountEur?: number | null;
   obligatoryExtrasKeys?: string[];
   extras?: ExtraResponse[];
@@ -380,9 +384,15 @@ const Offers = () => {
         slug: y.slug || '',
         name: y.name,
         modelName: y.modelName,
-        clientPriceEur: Number(y.clientPriceEur) || 0,
-        listPriceEur: y.listPriceEur != null ? Number(y.listPriceEur) : null,
-        agencyCommissionEur: y.agencyCommissionEur != null ? Number(y.agencyCommissionEur) : null,
+        // Display in the active currency: read the converted amount from
+        // clientPriceInfo/listPriceInfo (backend leaves *Eur in EUR). Commission
+        // has no converted field, so scale it by the same EUR→currency rate so
+        // the commission % (commission/price) and its displayed amount stay
+        // correct. EUR → rate 1 / info.amount == *Eur, so no change.
+        clientPriceEur: y.clientPriceInfo?.amount ?? (Number(y.clientPriceEur) || 0),
+        listPriceEur: y.listPriceInfo?.amount ?? (y.listPriceEur != null ? Number(y.listPriceEur) : null),
+        agencyCommissionEur:
+          y.agencyCommissionEur != null ? Number(y.agencyCommissionEur) * (y.clientPriceInfo?.rate ?? 1) : null,
         currency,
         agencyName: y.agencyName,
         locationName: y.location?.name || '',
@@ -671,8 +681,13 @@ const Offers = () => {
         dateTo: endDate.format('YYYY-MM-DD'),
         checkin,
         checkout,
-        clientPriceEur: Number(matchedOffer.clientPriceEur) || row.clientPriceEur,
-        listPriceEur: matchedOffer.listPriceEur != null ? Number(matchedOffer.listPriceEur) : row.listPriceEur,
+        // Converted to the active currency (matchedOffer.*Info.amount); *Eur stays
+        // EUR. row.clientPriceEur is already converted by the search map, so the
+        // fallbacks are consistent.
+        clientPriceEur: matchedOffer.clientPriceInfo?.amount ?? (Number(matchedOffer.clientPriceEur) || row.clientPriceEur),
+        listPriceEur:
+          matchedOffer.listPriceInfo?.amount ??
+          (matchedOffer.listPriceEur != null ? Number(matchedOffer.listPriceEur) : row.listPriceEur),
         discountEur: matchedOffer.totalDiscountEur != null ? Number(matchedOffer.totalDiscountEur) : null,
         securityDepositEur: yachtDetails.securityDeposit != null ? Number(yachtDetails.securityDeposit) : null,
         // Snapshot the currency at add-time. Keeps the HTML output stable

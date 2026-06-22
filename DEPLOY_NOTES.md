@@ -1,6 +1,27 @@
 # boat4you-admin — deploy notes
 
-## ⏳ PENDING DEPLOY 2026-06-12 — security hardening (audit S-002: JWT in localStorage + no CSP/X-Frame)
+## ✅ DEPLOYED 2026-06-22 — offer share-link carries charter dates + currency
+
+Commit `dd2f6bd`, live entry `index-BE8VBeEP.js` (verified: entry-hash match +
+served Offers chunk contains the `startDate=` link logic, `/offers` 200).
+Bug: WhatsApp/email boat link was dateless → client saw the page's default
+price (8000 €) not the offered week (4000 €). Fix: `withOfferDates()` in
+`offerHtml.ts` appends `?startDate&endDate&currency` to the WhatsApp link +
+HTML title/More-info button (idempotent → also repairs carts already saved in
+localStorage); `Offers.tsx` stamps the stored `detailUrl` + admin preview.
+Deployed with cusma1 pass `Nikairis2019cusma1` (the old `ccCCuuUU1!` is dead).
+Rollback: `html.old` on cusma1.
+
+## ✅ DEPLOYED (live, verified 2026-06-22) — security hardening (audit S-002: JWT in localStorage + no CSP/X-Frame)
+
+Both parts confirmed LIVE on admin.boat4you.com: part A (in-memory token) has
+been in every build since the 14.6 currency deploy (commit `1f8de9f` is an
+ancestor of the deployed `bdae904`); part B nginx headers verified on the live
+response (`content-security-policy`, `x-frame-options: DENY`, `x-content-type-
+options`, `referrer-policy`, `strict-transport-security` all present). The
+"PENDING" status below was stale — kept for the CSP rationale + nginx recipe.
+
+### (reference) security-hardening detail — audit S-002
 
 Two-part fix for the audit HIGH "admin holds JWT in localStorage + admin has no
 CSP/X-Frame". No API/routing/logic change, no new deps, no env change.

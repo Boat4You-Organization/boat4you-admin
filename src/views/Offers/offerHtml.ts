@@ -107,6 +107,37 @@ export interface OfferRenderOptions {
 // builds when it stores the fetched rows.
 export const offerYachtKey = (y: Pick<CartYacht, 'yachtId' | 'dateFrom'>): string => `${y.yachtId}-${y.dateFrom}`;
 
+/**
+ * Append this offer's charter week + currency to the public boat URL so the
+ * link opens the detail page pre-priced for THESE dates — not the page's
+ * dateless default, which shows a different (usually higher) number and made
+ * clients think the WhatsApp/email price was wrong.
+ *
+ * The customer BoatCalendar reads `startDate` / `endDate` (YYYY-MM-DD, the
+ * cart's `dateFrom` / `dateTo`) to pre-select the week, and the detail page
+ * forwards them + `currency` to the pricing API.
+ *
+ * Idempotent: overwrites any startDate/endDate/currency already on the URL, so
+ * carts persisted in localStorage before this fix (whose stored `detailUrl`
+ * was dateless) and any re-render both yield one clean, correct link.
+ */
+const withOfferDates = (y: CartYacht): string | null => {
+  if (!y.detailUrl) return null;
+
+  const [base, existingQuery = ''] = y.detailUrl.split('?');
+  const params = new URLSearchParams(existingQuery);
+
+  params.set('startDate', y.dateFrom);
+  params.set('endDate', y.dateTo);
+
+  if (y.currency) params.set('currency', y.currency);
+
+  const qs = params.toString();
+
+
+return qs ? `${base}?${qs}` : base;
+};
+
 const MONTHS = [
   'January',
   'February',
@@ -342,6 +373,8 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}, autoOb
   const periodHeader = `${formatDateLong(y.dateFrom, y.checkin)}  →  ${formatDateLong(y.dateTo, y.checkout)}`;
   const title = `${y.modelName} (${y.name})`;
   const sym = y.currencySymbol || '€';
+  // Date-aware public link so the client lands on this week's price (see withOfferDates).
+  const detailUrl = withOfferDates(y);
 
   // Specs chips — only render values we actually have so the row never
   // shows "Length —". Order matches what brokers said matters most:
@@ -376,8 +409,8 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}, autoOb
   // clients (Apple Mail, Outlook) inject default link styles that ignore
   // inherited font rules.
   const titleStyle = `font-family: ${POPPINS_STACK}; font-size: 22px; font-weight: 600; color: ${BRAND.text}; line-height: 1.18; letter-spacing: -0.2px; -webkit-text-size-adjust: 100%;`;
-  const titleHtml = y.detailUrl
-    ? `<a href="${escapeHtml(y.detailUrl)}" style="${titleStyle} text-decoration: none;" target="_blank" rel="noopener">${escapeHtml(title)}</a>`
+  const titleHtml = detailUrl
+    ? `<a href="${escapeHtml(detailUrl)}" style="${titleStyle} text-decoration: none;" target="_blank" rel="noopener">${escapeHtml(title)}</a>`
     : `<span style="${titleStyle}">${escapeHtml(title)}</span>`;
 
   // Hero image cell — half-width (248px) and near-landscape (248x192) so the
@@ -555,10 +588,10 @@ return `<tr>
           <div style="font-family: ${FONT_STACK}; font-size: 24px; font-weight: 800; color: ${BRAND.success}; line-height: 1.1;">${priceWithCurrency(y.clientPriceEur, sym)}</div>
           <div style="font-family: ${FONT_STACK}; font-size: 11px; color: ${BRAND.textMuted}; margin-top: 4px;">total for the period</div>
           ${
-            y.detailUrl
+            detailUrl
               ? `
           <div style="margin-top: 14px;">
-            <a href="${escapeHtml(y.detailUrl)}" target="_blank" rel="noopener" style="display: inline-block; background: ${BRAND.primary}; color: #ffffff; font-family: ${FONT_STACK}; font-size: 13px; font-weight: 600; text-decoration: none; padding: 9px 14px; border-radius: 6px;">More info  →</a>
+            <a href="${escapeHtml(detailUrl)}" target="_blank" rel="noopener" style="display: inline-block; background: ${BRAND.primary}; color: #ffffff; font-family: ${FONT_STACK}; font-size: 13px; font-weight: 600; text-decoration: none; padding: 9px 14px; border-radius: 6px;">More info  →</a>
           </div>`
               : ''
           }
@@ -729,10 +762,13 @@ export const buildClientOfferWhatsApp = (
       lines.push(`⏳ Under option until ${formatted}`);
     }
 
-    // Public yacht detail link — WhatsApp auto-previews the first URL
-    if (y.detailUrl) {
+    // Public yacht detail link — WhatsApp auto-previews the first URL. Carries
+    // the offer's dates + currency so the client opens this week's exact price.
+    const detailUrl = withOfferDates(y);
+
+    if (detailUrl) {
       lines.push('');
-      lines.push(`🔗 ${y.detailUrl}`);
+      lines.push(`🔗 ${detailUrl}`);
     }
 
     return lines.join('\n');

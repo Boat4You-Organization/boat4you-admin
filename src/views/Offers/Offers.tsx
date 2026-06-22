@@ -699,10 +699,11 @@ const Offers = () => {
         equipmentByCategory: groupedAmenities,
         extras,
         imageUrl,
-        // Public boat detail URL — the customer can click straight from
-        // the email back to the listing on boat4you. Same path the search
-        // card's "View on customer site" button opens.
-        detailUrl: `${CUSTOMER_WEB_URL}/boat/${row.slug}`,
+        // Public boat detail URL — carries the offer's dates + currency so the
+        // customer lands on THIS week's price, not the page's dateless default
+        // (the 4000-vs-8000 mismatch Mario hit). offerHtml re-normalises these
+        // params at render time too, so older stored carts get fixed as well.
+        detailUrl: `${CUSTOMER_WEB_URL}/boat/${row.slug}?startDate=${startDate.format('YYYY-MM-DD')}&endDate=${endDate.format('YYYY-MM-DD')}&currency=${currency}`,
         keyAmenities,
         isOption: row.isOption,
         optionExpiresAt: row.optionExpiresAt,
@@ -1397,7 +1398,11 @@ const Offers = () => {
                         size="small"
                         variant="text"
                         onClick={() =>
-                          window.open(`${CUSTOMER_WEB_URL}/boat/${row.slug}`, '_blank', 'noopener,noreferrer')
+                          window.open(
+                            `${CUSTOMER_WEB_URL}/boat/${row.slug}?startDate=${startDate.format('YYYY-MM-DD')}&endDate=${endDate.format('YYYY-MM-DD')}&currency=${currency}`,
+                            '_blank',
+                            'noopener,noreferrer'
+                          )
                         }
                         sx={{ p: 0, minWidth: 0, fontSize: 11, textTransform: 'none', mt: 0.75, color: bbColors.navy700, fontWeight: 700 }}
                       >

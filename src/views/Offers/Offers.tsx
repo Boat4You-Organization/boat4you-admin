@@ -650,9 +650,16 @@ const Offers = () => {
       const findCrewKey = (kw: string): string | null => {
         const pool: ExtraResponse[] = [...(matchedOffer.extras || []), ...(yachtDetails.services || [])];
         const exact = pool.find(e => (e.name || '').trim().toLowerCase() === kw);
-        const loose = pool.find(
-          e => (e.name || '').toLowerCase().includes(kw) && !(e.name || '').toLowerCase().includes('additional fee')
-        );
+        // Skip surcharge rows that merely CONTAIN the keyword — "Additional fee for
+        // Skipper…" and (Adriatic Sailing) "Fun Pack skipper surcharge", an optional
+        // add-on. Otherwise that key is sent to /calculate as the skipper, so the
+        // surcharge gets priced instead of the real Skipper service. Mirrors
+        // offerHtml.findExtraByKeyword. Hostess has no surcharge twin (worked already).
+        const loose = pool.find(e => {
+          const n = (e.name || '').toLowerCase();
+
+          return n.includes(kw) && !n.includes('additional fee') && !n.includes('surcharge');
+        });
 
         return (exact || loose)?.key ?? null;
       };

@@ -190,11 +190,13 @@ const findExtraByKeyword = (extras: CartExtra[], keyword: string): CartExtra | n
   const k = keyword.toLowerCase();
 
   
-// Prefer an EXACT name match ("Skipper") over a loose contains, and skip the
-  // separate "Additional fee for Skipper in forepeak..." surcharge. Otherwise
-  // that surcharge (it contains "skipper") gets picked as the skipper row and
-  // the real Skipper service — and its price — never shows. Mirrors the backend
-  // `not:additional fee` skipper match rule.
+// Prefer an EXACT name match ("Skipper") over a loose contains, and skip
+  // surcharge rows that merely CONTAIN the keyword — "Additional fee for Skipper
+  // in forepeak…" and, for Adriatic Sailing, "Fun Pack skipper surcharge" (an
+  // optional add-on, only due if the client also takes the Fun Pack). Either
+  // would otherwise be picked as the skipper row and the real Skipper service —
+  // and its price — would never show. (Hostess has no such surcharge twin, which
+  // is why only skipper mis-matched.)
   const exact = extras.find(e => (e.name || '').trim().toLowerCase() === k);
 
   if (exact) return exact;
@@ -203,7 +205,7 @@ const findExtraByKeyword = (extras: CartExtra[], keyword: string): CartExtra | n
     extras.find(e => {
       const n = (e.name || '').toLowerCase();
 
-      return n.includes(k) && !n.includes('additional fee');
+      return n.includes(k) && !n.includes('additional fee') && !n.includes('surcharge');
     }) || null
   );
 };

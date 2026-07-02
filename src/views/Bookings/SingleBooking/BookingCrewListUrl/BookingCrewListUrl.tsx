@@ -72,7 +72,23 @@ const BookingCrewListUrl = ({ reservationId, initialUrl, onSaved }: BookingCrewL
           },
         }}
       />
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+        {/* Quick sanity check — open the partner crew editor in a new tab
+            before (or after) saving, so a broken/expired link never reaches
+            the customer untested. */}
+        <Button
+          onClick={() => window.open(trimmed, '_blank', 'noopener,noreferrer')}
+          disabled={!/^https?:\/\//i.test(trimmed)}
+          variant="outlined"
+          size="small"
+          sx={{
+            textTransform: 'none',
+            fontSize: 13,
+            borderRadius: '6px',
+          }}
+        >
+          {t('booking.crew-list-open', 'Open ↗')}
+        </Button>
         <Button
           onClick={handleSave}
           disabled={!dirty || saving}

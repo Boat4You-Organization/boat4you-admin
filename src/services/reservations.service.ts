@@ -31,7 +31,11 @@ export interface ReservationDocumentDto {
   uploadedAt: string;
   /** True = admin-only (hidden from customer my-bookings sidebar). */
   isInternal: boolean;
+  /** BOARDING_PASS | CREW_LIST | CONTRACT | OTHER — drives the customer-facing label. */
+  documentType: ReservationDocumentType;
 }
+
+export type ReservationDocumentType = 'BOARDING_PASS' | 'CREW_LIST' | 'CONTRACT' | 'OTHER';
 
 export interface DashboardMetricsDto {
   bookingsThisWeek: number;
@@ -278,6 +282,7 @@ return [];
     id: number,
     file: File,
     internal: boolean = false,
+    type: ReservationDocumentType = 'OTHER',
   ): Promise<ReservationDocumentDto | null> {
     try {
       const form = new FormData();
@@ -285,7 +290,7 @@ return [];
       form.append('file', file);
 
       const { data } = await api.post<ReservationDocumentDto>(
-        `/admin/reservations/${id}/documents?internal=${internal}`,
+        `/admin/reservations/${id}/documents?internal=${internal}&type=${type}`,
         form,
         { headers: { 'Content-Type': 'multipart/form-data' } },
       );

@@ -15,6 +15,7 @@ import { showToast } from '@/valtio/global/global.actions';
 import {
   getSelectedBookingByOrderNo,
   markBookingAsViewed,
+  reloadSelectedBooking,
   toggleCancelBookingModal,
   toggleConfirmBookingModal,
   toggleEditNotesModal,
@@ -473,6 +474,11 @@ return (
                   <BookingCrewListUrl
                     reservationId={selectedBooking.reservationId}
                     initialUrl={selectedBooking.reservationCrewListUrl}
+                    // Refresh the store copy after save so the input's dirty
+                    // state resets and dependent UI reads the new link.
+                    onSaved={() => {
+                      reloadSelectedBooking();
+                    }}
                   />
                   {/* Customer-visible documents — what we want the client to
                       see in /my-bookings sidebar (crew-list docx, pickup

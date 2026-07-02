@@ -2,13 +2,13 @@
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box, IconButton, Stack, Tooltip, Typography } from '@mui/material';
+import { Box, Chip, IconButton, MenuItem, Select, Stack, Tooltip, Typography } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import DownloadIcon from '@mui/icons-material/Download';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 
-import ReservationsService, { ReservationDocumentDto } from '@/services/reservations.service';
+import ReservationsService, { ReservationDocumentDto, ReservationDocumentType } from '@/services/reservations.service';
 import { bbColors } from '@/styles/bb';
 
 interface BookingDocumentsProps {
@@ -39,6 +39,15 @@ const formatSize = (bytes: number): string => {
 return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 };
 
+/** Customer-facing identity of an upload. OTHER renders without a chip so the
+ *  legacy (pre-type) documents keep looking exactly as before. */
+const TYPE_LABELS: Record<ReservationDocumentType, string> = {
+  BOARDING_PASS: 'Boarding pass',
+  CREW_LIST: 'Crew list',
+  CONTRACT: 'Contract',
+  OTHER: 'Other',
+};
+
 const formatDate = (iso: string): string => {
   try {
     const d = new Date(iso);
@@ -60,6 +69,9 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  // Applies to the NEXT upload (picker or drop). Customer drawer only —
+  // internal docs never reach the customer so labelling them buys nothing.
+  const [docType, setDocType] = useState<ReservationDocumentType>('OTHER');
   const dragCounter = useRef(0);
 
   const reload = async () => {
@@ -96,7 +108,7 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
     let anyOk = false;
 
     for (const file of list) {
-      const created = await ReservationsService.uploadReservationDocument(reservationId, file, internal);
+      const created = await ReservationsService.uploadReservationDocument(reservationId, file, internal, internal ? 'OTHER' : docType);
 
       if (created) anyOk = true;
     }
@@ -244,18 +256,34 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
                 onClick={() => handleOpen(doc)}
                 title={t('booking.documents.open', 'Open document') as string}
               >
-                <Typography
-                  sx={{
-                    fontSize: 12,
-                    fontWeight: 600,
-                    color: bbColors.gray600,
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  {doc.filename}
-                </Typography>
+                <Stack direction="row" alignItems="center" gap={0.75} sx={{ minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: bbColors.gray600,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                    }}
+                  >
+                    {doc.filename}
+                  </Typography>
+                  {doc.documentType && doc.documentType !== 'OTHER' && (
+                    <Chip
+                      label={TYPE_LABELS[doc.documentType]}
+                      size="small"
+                      sx={{
+                        height: 16,
+                        fontSize: 9,
+                        fontWeight: 700,
+                        backgroundColor: '#e8efff',
+                        color: bbColors.navy700,
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
+                </Stack>
                 <Typography sx={{ fontSize: 10, color: bbColors.gray500 }}>
                   {formatSize(doc.sizeBytes)}
                   {doc.uploadedAt ? ` · ${formatDate(doc.uploadedAt)}` : ''}
@@ -273,6 +301,30 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
               </Tooltip>
             </Box>
           ))}
+        </Stack>
+      )}
+
+      {/* Type of the NEXT upload — customer drawer only. Drives the label
+          the customer sees in the my-bookings "Travel documents" section
+          ("Boarding pass" instead of the raw filename). */}
+      {!internal && (
+        <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 1 }}>
+          <Typography sx={{ fontSize: 11, color: bbColors.gray500, fontWeight: 600, flexShrink: 0 }}>
+            {t('booking.documents.upload-as', 'Upload as')}
+          </Typography>
+          <Select
+            value={docType}
+            onChange={(e) => setDocType(e.target.value as ReservationDocumentType)}
+            size="small"
+            fullWidth
+            disabled={uploading}
+            sx={{ fontSize: 12, '& .MuiSelect-select': { py: 0.5 } }}
+          >
+            <MenuItem value="BOARDING_PASS" sx={{ fontSize: 12 }}>{TYPE_LABELS.BOARDING_PASS}</MenuItem>
+            <MenuItem value="CREW_LIST" sx={{ fontSize: 12 }}>{TYPE_LABELS.CREW_LIST}</MenuItem>
+            <MenuItem value="CONTRACT" sx={{ fontSize: 12 }}>{TYPE_LABELS.CONTRACT}</MenuItem>
+            <MenuItem value="OTHER" sx={{ fontSize: 12 }}>{TYPE_LABELS.OTHER}</MenuItem>
+          </Select>
         </Stack>
       )}
 

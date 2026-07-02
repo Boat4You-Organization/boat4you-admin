@@ -42,9 +42,10 @@ return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 /** Customer-facing identity of an upload. OTHER renders without a chip so the
  *  legacy (pre-type) documents keep looking exactly as before. */
 const TYPE_LABELS: Record<ReservationDocumentType, string> = {
-  BOARDING_PASS: 'Boarding pass',
+  BOARDING_PASS: 'Boarding pass / Base info',
   CREW_LIST: 'Crew list',
   CONTRACT: 'Contract',
+  PREFERENCE_LIST: 'Preference list',
   OTHER: 'Other',
 };
 
@@ -322,6 +323,7 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
           >
             <MenuItem value="BOARDING_PASS" sx={{ fontSize: 12 }}>{TYPE_LABELS.BOARDING_PASS}</MenuItem>
             <MenuItem value="CREW_LIST" sx={{ fontSize: 12 }}>{TYPE_LABELS.CREW_LIST}</MenuItem>
+            <MenuItem value="PREFERENCE_LIST" sx={{ fontSize: 12 }}>{TYPE_LABELS.PREFERENCE_LIST}</MenuItem>
             <MenuItem value="CONTRACT" sx={{ fontSize: 12 }}>{TYPE_LABELS.CONTRACT}</MenuItem>
             <MenuItem value="OTHER" sx={{ fontSize: 12 }}>{TYPE_LABELS.OTHER}</MenuItem>
           </Select>

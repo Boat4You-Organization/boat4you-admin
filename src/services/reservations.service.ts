@@ -35,7 +35,7 @@ export interface ReservationDocumentDto {
   documentType: ReservationDocumentType;
 }
 
-export type ReservationDocumentType = 'BOARDING_PASS' | 'CREW_LIST' | 'CONTRACT' | 'OTHER';
+export type ReservationDocumentType = 'BOARDING_PASS' | 'CREW_LIST' | 'CONTRACT' | 'PREFERENCE_LIST' | 'OTHER';
 
 export interface DashboardMetricsDto {
   bookingsThisWeek: number;

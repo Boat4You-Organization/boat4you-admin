@@ -1,5 +1,17 @@
 # boat4you-admin — deploy notes
 
+## ✅ FIXED 2026-07-03 — builds MUST set VITE_CUSTOMER_WEB_URL (localhost links incident)
+
+The 2026-07-02/03 deploys (travel documents, c427f6b) were built with only
+`VITE_BOAT_API_URL` — so the `http://localhost:3000` fallback got baked into
+every admin → customer-site link (Offers "More info", booking preview,
+inquiries). Offers e-mailed to customers during ~01:00–16:30 on 3.7. carry
+dead localhost links permanently; Mario re-sends those. Fixed by rebuilding
+with BOTH vars (`VITE_CUSTOMER_WEB_URL=https://www.boat4you.com`) and
+redeploying — live chunk verified 0×localhost. Rule going forward: after every
+build run `grep -r "localhost:3000" dist/assets | wc -l` → must be 0 before
+the dist leaves the machine. README_PROD env section updated accordingly.
+
 ## ✅ DEPLOYED 2026-06-22 — offer share-link carries charter dates + currency
 
 Commit `dd2f6bd`, live entry `index-BE8VBeEP.js` (verified: entry-hash match +

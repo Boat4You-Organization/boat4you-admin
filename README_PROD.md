@@ -29,15 +29,21 @@ The following tools must be installed on the machine used to build the applicati
 
 ### 1. Configure Environment Variables
 
-In the root of the project, create a `.env` file and populate it with the production environment variable values. The required variables are:
+In the root of the project, create a `.env` (or `.env.production.local`) file and populate it with the production environment variable values. The required variables are:
 
 ```
-VITE_BOAT_API_URL=
-VITE_BASE_URL=
-VITE_PUBLIC_BASE_URL=
+VITE_BOAT_API_URL=https://api.boat4you.com
+VITE_CUSTOMER_WEB_URL=https://www.boat4you.com
 ```
 
-> The actual values are provided separately. Do not commit this file to version control.
+> ⚠️ **Both are REQUIRED.** `VITE_CUSTOMER_WEB_URL` feeds every admin → customer-site
+> link (Offers "More info", booking preview, inquiry links). Building without it
+> bakes the `http://localhost:3000` fallback into the bundle — offers e-mailed to
+> customers then carry dead links (incident 2026-07-03). After every build verify:
+> `grep -r "localhost:3000" dist/assets | wc -l` → must print `0`.
+>
+> `VITE_BASE_URL` / `VITE_PUBLIC_BASE_URL` are optional legacy variables.
+> Do not commit env files to version control.
 
 ### 2. Install Dependencies
 

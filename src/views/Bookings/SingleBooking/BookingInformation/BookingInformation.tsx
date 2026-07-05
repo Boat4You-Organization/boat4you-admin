@@ -1,4 +1,5 @@
 /* eslint-disable no-nested-ternary */
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Box, Button, Divider, Grid, Stack, Typography } from '@mui/material';
@@ -6,6 +7,7 @@ import dayjs from 'dayjs';
 
 import Avatar from '@/components/Avatar';
 import FlagIcon from '@/components/FlagIcon';
+import { api } from '@/config/axios.config';
 import StatusChip from '@/components/StatusChip';
 import Email from '@/components/SvgIcons/Contact/Email';
 import ExternalLink from '@/components/SvgIcons/ExternalLink';
@@ -19,6 +21,7 @@ import {
 } from '@/models/booking.model';
 import { bbColors } from '@/styles/bb';
 import colors from '@/styles/themes/colors';
+import { bankFeeShareForPhase } from '@/utils/static/bankTransferFee';
 import DateTime from '@/utils/static/DateTime';
 import { formatPrice } from '@/utils/static/formatNumber';
 import { generateGoogleMapsLink } from '@/utils/static/googleMapsUtils';
@@ -33,6 +36,29 @@ interface BookingInformationProps {
 
 const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
   const { t } = useTranslation();
+  // Fixed wire fee (BANK_TRANSFER_FIXED_FEE, e.g. 32 €) — the customer's wire
+  // transfers carry per-phase shares of it, so the phases and the booking
+  // total must show the fee-inclusive amounts the wire emails ask for
+  // (Mario 5.7.2026: admin showed 3,455.63 while the email wired 3,487.63).
+  const [bankFeeEur, setBankFeeEur] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    api
+      .get('/public/settings/bank-transfer-fee')
+      .then(({ data }) => {
+        if (!cancelled) setBankFeeEur(parseFloat(data?.amountEur) || 0);
+      })
+      .catch(() => {
+        /* fee row simply stays hidden */
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const {
     yachtName,
     yachtMainImage,
@@ -308,25 +334,33 @@ return (
         <Typography component="p" variant="h3" fontWeight={700}>
           {t('booking.payment-phases')}
         </Typography>
-        {reservationPaymentPhases.map(({ id, paidOn, deadline, amount }) => (
-          <Stack key={id} direction="row" justifyContent="space-between">
-            <Stack>
-              <Typography component="p" variant="h4" fontWeight={700}>
-                {`${formatPrice(amount || 0)} €`}
-              </Typography>
-              <Typography variant="body2" color={colors.black500}>
-                {DateTime.formatHR(dayjs(deadline))}
-              </Typography>
+        {reservationPaymentPhases.map(({ id, paidOn, deadline, amount }, phaseIdx) => {
+          // Show the wire amount the customer is actually asked for: phase
+          // amount + this phase's share of the fixed bank fee (same split as
+          // the wire emails / payment page).
+          const feeShare = bankFeeShareForPhase(bankFeeEur, reservationPaymentPhases.length, phaseIdx);
+
+          return (
+            <Stack key={id} direction="row" justifyContent="space-between">
+              <Stack>
+                <Typography component="p" variant="h4" fontWeight={700}>
+                  {`${formatPrice((amount || 0) + feeShare)} €`}
+                </Typography>
+                <Typography variant="body2" color={colors.black500}>
+                  {DateTime.formatHR(dayjs(deadline))}
+                  {feeShare > 0 && ` · ${t('booking.bank-fee-note', { fee: feeShare })}`}
+                </Typography>
+              </Stack>
+              <StatusChip
+                label={paidOn ? t('booking.paid') : t('booking.not-paid')}
+                color={paidOn ? 'success' : 'error'}
+                sx={{
+                  alignSelf: 'center',
+                }}
+              />
             </Stack>
-            <StatusChip
-              label={paidOn ? t('booking.paid') : t('booking.not-paid')}
-              color={paidOn ? 'success' : 'error'}
-              sx={{
-                alignSelf: 'center',
-              }}
-            />
-          </Stack>
-        ))}
+          );
+        })}
       </Stack>
       <Divider sx={{ borderColor: colors.black200, paddingBlock: 1 }} />
       <Stack direction="column" spacing={2}>
@@ -435,9 +469,16 @@ return (
           </Stack>
         )}
         <Stack direction="row" justifyContent="space-between" pt={1}>
-          <Typography component="p" variant="h3" fontWeight={700}>
-            {t('booking.total')}
-          </Typography>
+          <Stack>
+            <Typography component="p" variant="h3" fontWeight={700}>
+              {t('booking.total')}
+            </Typography>
+            {reservationPaymentPhases.length > 0 && bankFeeEur > 0 && (
+              <Typography variant="body2" color={colors.black500}>
+                {t('booking.bank-fee-note', { fee: bankFeeEur })}
+              </Typography>
+            )}
+          </Stack>
           <Typography
             component="p"
             variant="h3"
@@ -446,7 +487,14 @@ return (
             display="flex"
             alignItems="center"
           >
-            {`${formatPrice(reservationTotalPrice || 0)} €`}
+            {/* Booking total = the wire transfers we actually ask for: sum of
+                phases + the full fixed bank fee. Falls back to the stored
+                total when a legacy booking has no phases. */}
+            {`${formatPrice(
+              reservationPaymentPhases.length > 0
+                ? reservationPaymentPhases.reduce((sum, p) => sum + (p.amount || 0), 0) + bankFeeEur
+                : reservationTotalPrice || 0,
+            )} €`}
           </Typography>
         </Stack>
       </Stack>

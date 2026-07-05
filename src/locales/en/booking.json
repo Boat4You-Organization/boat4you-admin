@@ -29,6 +29,7 @@
   "mark-as-paid": "Mark as Paid",
   "phase": "Phase",
   "payment-phases": "Payment Phases",
+  "bank-fee-note": "incl. {{fee}} € bank transfer fee",
   "paid": "Paid",
   "not-paid": "Not paid",
   "cancellation-requested": "Cancellation Requested",

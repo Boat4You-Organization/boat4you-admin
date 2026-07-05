@@ -29,6 +29,7 @@
   "mark-as-paid": "Označi kao plaćeno",
   "phase": "Faza",
   "payment-phases": "Faze plaćanja",
+  "bank-fee-note": "uklj. {{fee}} € naknade za bankovni prijenos",
   "paid": "Plaćeno",
   "not-paid": "Nije plaćeno",
   "cancellation-requested": "Zatraženo otkazivanje",

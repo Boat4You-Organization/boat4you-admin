@@ -536,6 +536,11 @@ return (
                                 </Box>
                               )}
                               <Box component="span">{b.reservationNumber ?? `#${b.reservationId}`}</Box>
+                              {b.tripChatUnread && (
+                                <Box component="span" title="Unread trip-chat messages" sx={{ fontSize: 13 }}>
+                                  💬
+                                </Box>
+                              )}
                             </Stack>
                           </Box>
                           <Box

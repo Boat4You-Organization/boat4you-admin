@@ -260,6 +260,8 @@ export interface ReservationModelShortInfo {
   reservationExternalReservationCode: string;
   reservationNumber: string;
   reservationUserId: number | null;
+  /** Trip-chat unread badge: crew wrote after the admin last opened the chat. */
+  tripChatUnread?: boolean;
   endUser: string;
   createdBy: string;
   offerCheckin: string;

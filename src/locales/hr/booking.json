@@ -50,6 +50,9 @@
   "deposit-insurance": "Osiguranje depozita",
   "crew-list-url": "Poveznica liste posade",
   "crew-list-url-placeholder": "https://...",
+  "charter-update": "Charter update",
+  "charter-update-hint": "Vidljivo klijentu u Moje rezervacije",
+  "charter-update-placeholder": "npr. Skipper: 1470 €\nStand Up Paddle: 200 €",
   "save": "Spremi",
   "saving": "Sprema se...",
   "documents": {

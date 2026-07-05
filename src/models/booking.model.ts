@@ -302,6 +302,9 @@ export interface ReservationModel {
   reservationNote: string;
   reservationPaymentNote: string | null;
   reservationCrewListUrl: string | null;
+  /** Broker-written "Charter update" — negotiated extras (e.g. "Skipper: 1470 €").
+   *  Customer-visible: shown below Pay-now in /my-bookings/{id}. */
+  charterUpdate: string | null;
   /** Boat4You Trip PWA hub key — /trip/{token}; admin shows link + QR. */
   reservationTripToken?: string | null;
   reservationUserId: number;

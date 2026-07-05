@@ -50,6 +50,9 @@
   "deposit-insurance": "Deposit insurance",
   "crew-list-url": "Crew list URL",
   "crew-list-url-placeholder": "https://...",
+  "charter-update": "Charter update",
+  "charter-update-hint": "Shown to the customer in My bookings",
+  "charter-update-placeholder": "e.g. Skipper: 1470 €\nStand Up Paddle: 200 €",
   "save": "Save",
   "saving": "Saving...",
   "documents": {

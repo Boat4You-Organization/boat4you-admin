@@ -158,6 +158,21 @@ return data;
     }
   }
 
+  // Broker-written "Charter update" — negotiated extras (e.g. "Skipper: 1470 €").
+  // Unlike admin notes this IS shown to the customer, below Pay-now in
+  // /my-bookings/{id}. Null/empty clears it.
+  public static async updateCharterUpdate(id: number, charterUpdate: string | null): Promise<PayloadResponse<boolean>> {
+    try {
+      await api.patch(`/admin/reservations/${id}/charterUpdate`, { charterUpdate });
+
+      return { payload: true };
+    } catch (error) {
+      const { message } = error as ErrorModel;
+
+      return { payload: false, message };
+    }
+  }
+
   public static async deleteReservation(id: number, reason?: string): Promise<PayloadResponse<boolean>> {
     try {
       // Axios needs `data` on DELETE to send a body (unlike POST/PATCH

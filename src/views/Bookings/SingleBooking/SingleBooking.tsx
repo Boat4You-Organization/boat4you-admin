@@ -31,6 +31,7 @@ import MarkAsPaidBookingModal from '@/views/Bookings/partials/MarkAsPaidBookingM
 import CancellationRequestModal from '@/views/Bookings/partials/CancellationRequestModal';
 import SyncBookingModal from '@/views/Bookings/partials/SyncBookingModal';
 
+import BookingCharterUpdate from './BookingCharterUpdate/BookingCharterUpdate';
 import BookingCrewListUrl from './BookingCrewListUrl/BookingCrewListUrl';
 import BookingTripHub from './BookingTripHub/BookingTripHub';
 import BookingTripAlbum from './BookingTripHub/BookingTripAlbum';
@@ -273,6 +274,17 @@ return () => {
                   )}
                 </Box>
               </Box>
+
+              {/* Charter update — customer-VISIBLE broker note (extras arranged
+                  with the agency). Sits right under Admin notes but highlighted
+                  amber so it's clearly a client-facing block. */}
+              <BookingCharterUpdate
+                reservationId={selectedBooking.reservationId}
+                initialCharterUpdate={selectedBooking.charterUpdate}
+                onSaved={() => {
+                  reloadSelectedBooking();
+                }}
+              />
             </Stack>
 
             {/* Right sidebar — actions */}

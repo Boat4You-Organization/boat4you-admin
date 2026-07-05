@@ -32,6 +32,7 @@ import CancellationRequestModal from '@/views/Bookings/partials/CancellationRequ
 import SyncBookingModal from '@/views/Bookings/partials/SyncBookingModal';
 
 import BookingCrewListUrl from './BookingCrewListUrl/BookingCrewListUrl';
+import BookingTripHub from './BookingTripHub/BookingTripHub';
 import BookingDocuments from './BookingDocuments';
 import BookingInformation from './BookingInformation';
 
@@ -471,6 +472,7 @@ return (
                   </Button>
                   {/* Crew-list URL (partner-supplied or admin-entered) shown
                       to the customer in /my-bookings sidebar as "Open link". */}
+                  <BookingTripHub tripToken={selectedBooking.reservationTripToken} />
                   <BookingCrewListUrl
                     reservationId={selectedBooking.reservationId}
                     initialUrl={selectedBooking.reservationCrewListUrl}

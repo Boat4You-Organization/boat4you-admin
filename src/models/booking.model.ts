@@ -302,6 +302,8 @@ export interface ReservationModel {
   reservationNote: string;
   reservationPaymentNote: string | null;
   reservationCrewListUrl: string | null;
+  /** Boat4You Trip PWA hub key — /trip/{token}; admin shows link + QR. */
+  reservationTripToken?: string | null;
   reservationUserId: number;
   endUser: string;
   endUserEmail: string;

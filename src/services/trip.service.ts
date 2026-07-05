@@ -99,6 +99,18 @@ export default class TripService {
     }
   }
 
+  public static async deletePhoto(reservationId: number, photoId: number): Promise<boolean> {
+    try {
+      await api.delete(`/admin/trip/${reservationId}/photos/${photoId}`);
+
+      return true;
+    } catch {
+      showToast({ status: 'error', text: 'Deleting the photo failed.' });
+
+      return false;
+    }
+  }
+
   public static async regenerateToken(reservationId: number): Promise<string | null> {
     try {
       const { data } = await api.post<{ tripToken: string }>(`/admin/trip/${reservationId}/regenerate-token`);

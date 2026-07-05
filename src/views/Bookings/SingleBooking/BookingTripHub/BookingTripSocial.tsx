@@ -29,7 +29,15 @@ const sectionTitleSx = {
 } as const;
 
 /** Lazy auth-fetched thumbnail (object URL, revoked on unmount). */
-const TripPhotoThumb = ({ reservationId, photo }: { reservationId: number; photo: TripPhotoDto }) => {
+const TripPhotoThumb = ({
+  reservationId,
+  photo,
+  onDelete,
+}: {
+  reservationId: number;
+  photo: TripPhotoDto;
+  onDelete: (photo: TripPhotoDto) => void;
+}) => {
   const [url, setUrl] = useState<string | null>(null);
 
   useEffect(() => {
@@ -71,6 +79,29 @@ const TripPhotoThumb = ({ reservationId, photo }: { reservationId: number; photo
         title={photo.marketingConsent ? 'Marketing consent given' : 'NO marketing consent'}
       >
         {photo.marketingConsent ? 'MKT ✓' : 'NO MKT'}
+      </Box>
+      <Box
+        component="button"
+        type="button"
+        onClick={() => onDelete(photo)}
+        title="Delete photo"
+        sx={{
+          position: 'absolute',
+          top: 4,
+          right: 4,
+          border: 'none',
+          borderRadius: '50%',
+          width: 20,
+          height: 20,
+          backgroundColor: 'rgba(12,36,97,.75)',
+          color: '#fff',
+          fontSize: 11,
+          fontWeight: 800,
+          cursor: 'pointer',
+          lineHeight: 1,
+        }}
+      >
+        ✕
       </Box>
     </Box>
   );
@@ -125,6 +156,13 @@ const BookingTripSocial = ({ reservationId }: BookingTripSocialProps) => {
     }
 
     setSending(false);
+  };
+
+  const deletePhoto = async (photo: TripPhotoDto) => {
+    // eslint-disable-next-line no-alert
+    if (!window.confirm('Delete this photo from the trip album?')) return;
+
+    if (await TripService.deletePhoto(reservationId, photo.id)) refresh();
   };
 
   const remove = async (participant: TripParticipantDto) => {
@@ -239,7 +277,7 @@ const BookingTripSocial = ({ reservationId }: BookingTripSocialProps) => {
           </Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 0.75 }}>
             {photos.map(photo => (
-              <TripPhotoThumb key={photo.id} reservationId={reservationId} photo={photo} />
+              <TripPhotoThumb key={photo.id} reservationId={reservationId} photo={photo} onDelete={deletePhoto} />
             ))}
           </Box>
         </>

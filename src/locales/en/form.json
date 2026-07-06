@@ -94,7 +94,8 @@
     "skipExternalSystem": "MMK / NauSys bypass",
     "status": "Status",
     "blacklisted": "Blacklisted",
-    "recommended": "Recommended"
+    "recommended": "Recommended",
+    "inquiryOnly": "Inquiry mode"
   },
   "booking": {
     "reservation-number": "Reservation number",

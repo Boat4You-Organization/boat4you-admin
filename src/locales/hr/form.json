@@ -94,7 +94,8 @@
     "skipExternalSystem": "MMK/NauSys zaobilaznica",
     "status": "Status",
     "blacklisted": "Na crnoj listi",
-    "recommended": "Preporučena"
+    "recommended": "Preporučena",
+    "inquiryOnly": "Samo upit"
   },
   "booking": {
     "reservation-number": "Broj rezervacije",

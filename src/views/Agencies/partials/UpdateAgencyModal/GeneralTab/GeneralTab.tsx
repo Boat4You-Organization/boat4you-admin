@@ -58,6 +58,17 @@ const GeneralTab = () => {
             />
           )}
         />
+        <Controller
+          name="inquiryOnly"
+          control={control}
+          render={({ field }) => (
+            <Checkbox
+              checked={field.value || false}
+              onChange={event => field.onChange(event.target.checked)}
+              label={t('form.agency.inquiryOnly')}
+            />
+          )}
+        />
       </Stack>
     </Stack>
   );

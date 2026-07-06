@@ -46,6 +46,7 @@ const defaultValues: UpdateAgencyFormValues = {
   director: '',
   skipExternalSystem: true,
   recommended: false,
+  inquiryOnly: false,
   primarySource: AgencyPrimarySource.UNKNOWN,
 };
 
@@ -80,6 +81,7 @@ const UpdateAgencyModal = ({ isOpen, onClose }: UpdateAgencyModalProps) => {
         director: selectedAgency.director,
         skipExternalSystem: selectedAgency.skipExternalSystem,
         recommended: selectedAgency.recommended ?? false,
+        inquiryOnly: selectedAgency.inquiryOnly ?? false,
         primarySource: selectedAgency.primarySource,
       }
     : defaultValues;

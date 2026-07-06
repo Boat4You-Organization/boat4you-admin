@@ -34,6 +34,10 @@ export interface AgencyModel {
    *  ASC within the boosted bucket and within the rest. Toggled per-agency
    *  from this admin's update modal. */
   recommended: boolean;
+  /** Inquiry-only partner. When true, this agency's yachts cannot be booked
+   *  directly — the customer can only send an inquiry, like a custom boat.
+   *  Toggled from this admin's update modal. */
+  inquiryOnly: boolean;
   primarySource: AgencyPrimarySource;
   /** All sources the agency syncs from. May contain MMK + NauSys when an
    *  agency is registered in both partner systems (admin renders the array

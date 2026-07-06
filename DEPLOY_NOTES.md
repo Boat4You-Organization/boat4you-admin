@@ -1,5 +1,16 @@
 # boat4you-admin — deploy notes
 
+## 2026-07-06 — Agencies: "Inquiry mode" checkbox (cc9b0f7, DEPLOYED)
+
+New Controller checkbox in the agency edit modal GeneralTab, right of "Recommended"
+(`name="inquiryOnly"`, label `form.agency.inquiryOnly` = "Inquiry mode" / "Samo upit").
+Threaded through `AgencyModel.inquiryOnly`, defaultValues + initialValues in
+UpdateAgencyModal, and the existing `updateAgency` PUT (`{ id, ...formValues }` → backend
+`AgencyDto.inquiryOnly`). ON = that agency's yachts become inquiry-only (no direct booking,
+like custom boats); see backend DEPLOY_NOTES same date. Build: `.env.production.local`
+(api.boat4you.com + www.boat4you.com) → `yarn build` → tar → cusma1
+`/var/www/admin.boat4you.com/html` (entry `index-DZLf54rx.js`, 0× localhost). Rollback `html.old`.
+
 ## ✅ FIXED 2026-07-03 — builds MUST set VITE_CUSTOMER_WEB_URL (localhost links incident)
 
 The 2026-07-02/03 deploys (travel documents, c427f6b) were built with only

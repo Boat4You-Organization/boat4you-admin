@@ -556,6 +556,12 @@ return { payload: null as unknown as ReservationModel, message };
     // a client decision. Null for non-optioned yachts and for partner
     // rows that didn't carry an expiry.
     optionExpiresAt?: string | null;
+    // The REAL window of the offer slot that matched the search ("2026-08-29"),
+    // NOT the searched dates. When matchKind !== 'EXACT' the card shows this
+    // window so the broker knows to adjust the offer dates.
+    offerDateFrom?: string | null;
+    offerDateTo?: string | null;
+    matchKind?: 'EXACT' | 'SHIFTED' | 'SHORTER' | 'LONGER' | null;
   }>> {
     try {
       const qs = new URLSearchParams();

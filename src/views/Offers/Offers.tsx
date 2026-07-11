@@ -104,6 +104,13 @@ const CURRENCIES: { code: string; label: string; symbol: string }[] = [
 
 const getCurrencySymbol = (code: string): string => CURRENCIES.find(c => c.code === code)?.symbol || code;
 
+// "2026-08-29" → "29.08.2026." — backend offerDateFrom/To come as ISO LocalDate strings.
+const formatIsoDateDMY = (iso: string): string => {
+  const [y, m, d] = iso.split('-');
+
+  return `${d}.${m}.${y}.`;
+};
+
 interface SearchRow {
   yachtId: number;
   slug: string;
@@ -141,6 +148,13 @@ interface SearchRow {
   // a timestamp by the partner sync; null when unavailable. Rendered as
   // "Option expires: DD.MM.YYYY HH:mm" next to the "Add to offer" button.
   optionExpiresAt: string | null;
+  // Honest matched offer window ("2026-08-29") — the search flexes ±3 days,
+  // so the priced slot may not equal the searched dates. When matchKind is
+  // not EXACT the card shows "Free DD.MM.–DD.MM." so the broker adjusts the
+  // offer dates instead of hitting "No offer available" on add.
+  offerDateFrom: string | null;
+  offerDateTo: string | null;
+  matchKind: string | null;
 }
 
 // --- typed minimal mirrors of backend YachtDetailsDto ----------------------
@@ -405,6 +419,9 @@ const Offers = () => {
         mainImageId: y.mainImageId ?? null,
         isOption: y.isOption === true,
         optionExpiresAt: y.optionExpiresAt ?? null,
+        offerDateFrom: y.offerDateFrom ?? null,
+        offerDateTo: y.offerDateTo ?? null,
+        matchKind: y.matchKind ?? null,
       }));
 
       // Trust backend ordering. A client-side re-sort over the 100 rows of
@@ -1347,6 +1364,27 @@ const Offers = () => {
                             }}
                           >
                             Under option
+                          </Box>
+                        )}
+                        {row.matchKind && row.matchKind !== 'EXACT' && row.offerDateFrom && row.offerDateTo && (
+                          <Box
+                            component="span"
+                            title="The searched dates are not offered for this yacht — the price shown is for the closest free period. Adjust the offer dates to this window."
+                            sx={{
+                              display: 'inline-block',
+                              backgroundColor: '#fdecec',
+                              color: '#a83232',
+                              border: '1px solid #f5c2c2',
+                              fontSize: 10,
+                              fontWeight: 700,
+                              letterSpacing: 0.5,
+                              textTransform: 'uppercase',
+                              px: 0.75,
+                              py: 0.25,
+                              borderRadius: '999px',
+                            }}
+                          >
+                            {`Free ${formatIsoDateDMY(row.offerDateFrom)} – ${formatIsoDateDMY(row.offerDateTo)}`}
                           </Box>
                         )}
                       </Stack>

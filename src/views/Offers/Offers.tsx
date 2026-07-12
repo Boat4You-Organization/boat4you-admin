@@ -129,6 +129,9 @@ interface SearchRow {
   agencyCommissionEur: number | null;
   currency: string;
   agencyName: string;
+  // Admin-only source system ("MMK" / "NauSys") so the broker can tell apart
+  // duplicate listings of one physical yacht that exist under both partners.
+  sourceSystem: string | null;
   locationName: string;
   locationCountryCode: string | null;
   cabins: number | null;
@@ -409,6 +412,7 @@ const Offers = () => {
           y.agencyCommissionEur != null ? Number(y.agencyCommissionEur) * (y.clientPriceInfo?.rate ?? 1) : null,
         currency,
         agencyName: y.agencyName,
+        sourceSystem: y.sourceSystem ?? null,
         locationName: y.location?.name || '',
         locationCountryCode: y.location?.countryCode ?? null,
         cabins: y.cabins ?? null,
@@ -692,6 +696,7 @@ const Offers = () => {
         manufacturerName: yachtDetails.manufacturerName || null,
         vesselType: yachtDetails.vesselType || row.vesselType || null,
         agencyName: row.agencyName,
+        sourceSystem: row.sourceSystem,
         locationName: row.locationName,
         country: yachtDetails.location?.country || null,
         base: yachtDetails.location?.name || row.locationName,
@@ -1409,6 +1414,23 @@ const Offers = () => {
                         <Typography sx={{ fontSize: 13, color: bbColors.navy700, fontWeight: 600 }}>
                           {row.agencyName}
                         </Typography>
+                        {row.sourceSystem && (
+                          <Box
+                            component="span"
+                            sx={{
+                              fontSize: 10,
+                              fontWeight: 700,
+                              letterSpacing: 0.3,
+                              px: 0.6,
+                              py: 0.1,
+                              borderRadius: 0.75,
+                              color: row.sourceSystem === 'MMK' ? '#7c3aed' : '#0369a1',
+                              backgroundColor: row.sourceSystem === 'MMK' ? '#ede9fe' : '#e0f2fe',
+                            }}
+                          >
+                            {row.sourceSystem}
+                          </Box>
+                        )}
                         <Typography component="span" sx={{ fontSize: 11, color: bbColors.gray600 }}>
                           (hidden when sent to client)
                         </Typography>
@@ -1646,7 +1668,28 @@ const Offers = () => {
                     {y.modelName} | {y.name}
                   </Typography>
                   <Typography sx={{ fontSize: 11, color: bbColors.gray500 }}>{y.base}</Typography>
-                  <Typography sx={{ fontSize: 11, color: bbColors.navy700, fontWeight: 600 }}>{y.agencyName}</Typography>
+                  <Stack direction="row" alignItems="center" gap={0.5}>
+                    <Typography sx={{ fontSize: 11, color: bbColors.navy700, fontWeight: 600 }}>
+                      {y.agencyName}
+                    </Typography>
+                    {y.sourceSystem && (
+                      <Box
+                        component="span"
+                        sx={{
+                          fontSize: 9,
+                          fontWeight: 700,
+                          letterSpacing: 0.3,
+                          px: 0.5,
+                          py: 0.1,
+                          borderRadius: 0.75,
+                          color: y.sourceSystem === 'MMK' ? '#7c3aed' : '#0369a1',
+                          backgroundColor: y.sourceSystem === 'MMK' ? '#ede9fe' : '#e0f2fe',
+                        }}
+                      >
+                        {y.sourceSystem}
+                      </Box>
+                    )}
+                  </Stack>
                 </Box>
                 <Stack alignItems="flex-end" gap={0.25} sx={{ flexShrink: 0 }}>
                   <Typography sx={{ fontSize: 13, fontWeight: 700, color: bbColors.green600, whiteSpace: 'nowrap' }}>

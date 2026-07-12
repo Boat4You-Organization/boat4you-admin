@@ -538,6 +538,7 @@ return { payload: null as unknown as ReservationModel, message };
     clientPriceInfo?: { amount: number; currency: string; rate?: number } | null;
     listPriceInfo?: { amount: number; currency: string; rate?: number } | null;
     agencyName: string;
+    sourceSystem?: string | null; // admin-only: "MMK" | "NauSys" — which partner system this yacht syncs from
     // Admin-only commission per offer (admin gate enforced server-side via
     // YachtMapper.toSearchDto isAdminUser()). Customer auth gets null here.
     agencyCommissionEur?: number | null;

@@ -31,6 +31,7 @@ export interface CartYacht {
   manufacturerName: string | null;
   vesselType: string | null;
   agencyName: string; // admin-only, never rendered in output
+  sourceSystem: string | null; // admin-only ("MMK" / "NauSys"), never rendered in output
   locationName: string;
   country: string | null;
   base: string;

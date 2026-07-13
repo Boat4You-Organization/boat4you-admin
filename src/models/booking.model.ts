@@ -296,6 +296,11 @@ export interface ReservationModel {
   reservationPaymentPhases: ReservationPaymentPhase[];
   reservationDiscount: number;
   reservationClientPrice: number;
+  // Clean charter-price breakdown (mirrors the contract): list price = boat
+  // price before discount; guest price = charter price after all discounts
+  // (excludes separately-settled extras that live in Booking total).
+  reservationListPrice: number | null;
+  reservationGuestPrice: number | null;
   reservationExternalId: number;
   reservationExternalReservationCode: string;
   reservationNumber: string | null;

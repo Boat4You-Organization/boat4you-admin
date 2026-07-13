@@ -78,6 +78,8 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
     specialRequest,
     selectedExtras,
     reservationTotalPrice,
+    reservationListPrice,
+    reservationGuestPrice,
     yachtSlug,
     reservationPaymentPhases,
     services,
@@ -88,8 +90,15 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
   } = selectedBooking;
 
   const googleMapsLink = generateGoogleMapsLink(locationFromName);
-  const days = Math.max(1, DateTime.daysBetween(dayjs(reservationDateFrom), dayjs(reservationDateTo)));
   const sortedServices = [...selectedExtras].sort(sortByNumericProp('id'));
+
+  // Charter-price breakdown (mirrors the charter-agreement PDF): boat list
+  // price -> discount -> guest price. Falls back to reservationTotalPrice when
+  // the offer_* columns are missing (legacy rows), so the block always renders.
+  const charterListPrice = reservationListPrice ?? reservationTotalPrice ?? 0;
+  const guestPrice = reservationGuestPrice ?? reservationTotalPrice ?? 0;
+  const charterDiscount = Math.max(0, charterListPrice - guestPrice);
+  const hasCharterDiscount = charterDiscount > 0;
 
   // Merge catalogue obligatory services with the selected ones. Selected wins
   // when keys collide (booking-specific price). Same fallback the customer
@@ -372,13 +381,18 @@ return (
           {t('booking.price-information')}
         </Typography>
         <Stack direction="row" justifyContent="space-between">
-          <Typography variant="body1">{t('booking.client-price')}</Typography>
-          <Typography variant="body1" display="flex" alignItems="baseline" gap={0.75}>
-            {`${formatPrice(reservationTotalPrice || 0)} €`}
-            <Typography component="span" variant="body2" color={colors.black500}>
-              {`/ ${days} ${days === 1 ? t('booking.day') : t('booking.days')}`}
-            </Typography>
-          </Typography>
+          <Typography variant="body1">{t('booking.charter-price')}</Typography>
+          <Typography variant="body1">{`${formatPrice(charterListPrice)} €`}</Typography>
+        </Stack>
+        {hasCharterDiscount && (
+          <Stack direction="row" justifyContent="space-between">
+            <Typography variant="body1">{t('booking.discount')}</Typography>
+            <Typography variant="body1" sx={{ color: '#15803d' }}>{`- ${formatPrice(charterDiscount)} €`}</Typography>
+          </Stack>
+        )}
+        <Stack direction="row" justifyContent="space-between">
+          <Typography variant="body1" fontWeight={700}>{t('booking.client-price')}</Typography>
+          <Typography variant="body1" fontWeight={700}>{`${formatPrice(guestPrice)} €`}</Typography>
         </Stack>
         {(obligatoryAtMarina.length > 0 || hasDeposit || hasInsurance) && (
           <>

@@ -121,6 +121,8 @@ interface Resources {
     'charter-company': 'Charter company';
     'check-in': 'Check-in';
     'check-out': 'Check-out';
+    'charter-price': 'Charter price';
+    'discount': 'Discount';
     'client-price': 'Client price';
     'confirm-booking': 'Confirm Booking';
     day: 'day';

@@ -24,6 +24,8 @@
   "sync-booking-text": "Jeste li sigurni da želite sinkronizirati rezervaciju {{value}}? Ova radnja je nepovratna.",
   "your-booking-is-sync": "Vaša rezervacija se <strong>sinkronizira!</strong>",
   "please-dont-close-window": "Molimo vas da ne zatvarate ovaj prozor dok traje sinkronizacija rezervacije",
+  "charter-price": "Cijena plovila",
+  "discount": "Popust",
   "client-price": "Cijena za klijenta",
   "confirm-booking": "Potvrdi rezervaciju",
   "mark-as-paid": "Označi kao plaćeno",

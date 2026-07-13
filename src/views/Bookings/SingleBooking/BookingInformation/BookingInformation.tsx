@@ -89,7 +89,6 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
 
   const googleMapsLink = generateGoogleMapsLink(locationFromName);
   const days = Math.max(1, DateTime.daysBetween(dayjs(reservationDateFrom), dayjs(reservationDateTo)));
-  const clientPricePerDay = (reservationTotalPrice || 0) / days;
   const sortedServices = [...selectedExtras].sort(sortByNumericProp('id'));
 
   // Merge catalogue obligatory services with the selected ones. Selected wins
@@ -122,7 +121,12 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
   const additionalPaidNow = sortedServices.filter(service => !service.obligatory && !service.payableInBase);
   const additionalAtMarina = sortedServices.filter(service => !service.obligatory && service.payableInBase);
   const hasDeposit = typeof securityDeposit === 'number' && securityDeposit > 0;
-  const hasInsurance = typeof insuredSecurityDeposit === 'number' && insuredSecurityDeposit > 0;
+  // Deposit insurance is the yacht's AVAILABLE deposit-waiver amount
+  // (yacht.insuredDeposit), never an actual reservation extra — showing it here
+  // read as if the client bought it. Mirror the customer /my-bookings fix
+  // (Mario 12.7.2026): a genuinely purchased waiver surfaces as a normal extra
+  // row, so never render the catalogue waiver as part of a booking.
+  const hasInsurance = false;
   // Marina total sums every payableInBase row regardless of obligatory flag —
   // it's the single number the customer hands over at the dock. Refundable
   // security deposit is held (card pre-auth) rather than spent, so it stays
@@ -369,8 +373,11 @@ return (
         </Typography>
         <Stack direction="row" justifyContent="space-between">
           <Typography variant="body1">{t('booking.client-price')}</Typography>
-          <Typography variant="body1" display="flex" alignItems="center">
-            {`${formatPrice(clientPricePerDay)} € x ${days} ${days === 1 ? t('booking.day') : t('booking.days')}`}
+          <Typography variant="body1" display="flex" alignItems="baseline" gap={0.75}>
+            {`${formatPrice(reservationTotalPrice || 0)} €`}
+            <Typography component="span" variant="body2" color={colors.black500}>
+              {`/ ${days} ${days === 1 ? t('booking.day') : t('booking.days')}`}
+            </Typography>
           </Typography>
         </Stack>
         {(obligatoryAtMarina.length > 0 || hasDeposit || hasInsurance) && (

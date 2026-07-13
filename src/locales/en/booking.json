@@ -24,7 +24,7 @@
   "sync-booking-text": "Are you sure you want to sync booking {{value}}? Doing this action cannot be reverted.",
   "your-booking-is-sync": "Your booking is <strong>being synced!</strong>",
   "please-dont-close-window": "Please keep this window open while the reservation is syncing",
-  "client-price": "Client price per day",
+  "client-price": "Client price",
   "confirm-booking": "Confirm Booking",
   "mark-as-paid": "Mark as Paid",
   "phase": "Phase",

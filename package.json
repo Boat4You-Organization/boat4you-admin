@@ -84,7 +84,7 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "husky": "^9.1.7",
     "i18next-resources-for-ts": "^2.0.0",
-    "prettier": "^3.7.4",
+    "prettier": "^3.8.3",
     "pretty-quick": "^4.2.2",
     "stylelint": "^16.26.1",
     "stylelint-config-prettier-scss": "^1.0.0",

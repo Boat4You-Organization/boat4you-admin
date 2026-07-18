@@ -1,0 +1,21 @@
+{
+  "title": "Chat sa stranice",
+  "needsHumanOnly": "Samo koji trebaju čovjeka",
+  "empty": "Još nema razgovora.",
+  "pickSession": "Odaberite razgovor s popisa.",
+  "close": "Zatvori razgovor",
+  "send": "Pošalji",
+  "replyPlaceholder": "Odgovorite posjetitelju…",
+  "status": {
+    "AI": "AI",
+    "HUMAN_REQUESTED": "Traži čovjeka",
+    "HUMAN": "Kod tima",
+    "CLOSED": "Zatvoren"
+  },
+  "role": {
+    "USER": "Posjetitelj",
+    "ASSISTANT": "AI asistent",
+    "ADMIN": "Tim",
+    "SYSTEM": "Sustav"
+  }
+}

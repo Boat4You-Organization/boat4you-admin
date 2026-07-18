@@ -6,6 +6,7 @@ import { Locale } from '@/config/constants.config';
 import actionsEn from '@/locales/en/actions.json';
 import amenitiesEn from '@/locales/en/amenities.json';
 import bookingEn from '@/locales/en/booking.json';
+import chatEn from '@/locales/en/chat.json';
 import commonEn from '@/locales/en/common.json';
 import extrasEn from '@/locales/en/extras.json';
 import formEn from '@/locales/en/form.json';
@@ -20,6 +21,7 @@ import yachtEn from '@/locales/en/yacht.json';
 import actionsHr from '@/locales/hr/actions.json';
 import amenitiesHr from '@/locales/hr/amenities.json';
 import bookingHr from '@/locales/hr/booking.json';
+import chatHr from '@/locales/hr/chat.json';
 import commonHr from '@/locales/hr/common.json';
 import extrasHr from '@/locales/hr/extras.json';
 import formHr from '@/locales/hr/form.json';
@@ -50,6 +52,7 @@ i18n.use(initReactI18next).init({
       booking: bookingEn,
       inquiries: inquiriesEn,
       invoices: invoicesEn,
+      chat: chatEn,
     },
     hr: {
       common: commonHr,
@@ -66,6 +69,7 @@ i18n.use(initReactI18next).init({
       booking: bookingHr,
       inquiries: inquiriesHr,
       invoices: invoicesHr,
+      chat: chatHr,
     },
   },
 
@@ -86,6 +90,7 @@ i18n.use(initReactI18next).init({
     'booking',
     'inquiries',
     'invoices',
+    'chat',
   ],
   defaultNS: 'common',
   nsSeparator: '.',

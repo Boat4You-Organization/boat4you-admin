@@ -1,0 +1,21 @@
+{
+  "title": "Site chat",
+  "needsHumanOnly": "Needs a human only",
+  "empty": "No conversations yet.",
+  "pickSession": "Select a conversation from the list.",
+  "close": "Close conversation",
+  "send": "Send",
+  "replyPlaceholder": "Reply to the visitor…",
+  "status": {
+    "AI": "AI",
+    "HUMAN_REQUESTED": "Wants a human",
+    "HUMAN": "With team",
+    "CLOSED": "Closed"
+  },
+  "role": {
+    "USER": "Visitor",
+    "ASSISTANT": "AI assistant",
+    "ADMIN": "Team",
+    "SYSTEM": "System"
+  }
+}

@@ -17,6 +17,7 @@ const Extras = lazy(() => import('@/views/Extras'));
 const Invoices = lazy(() => import('@/views/Invoices'));
 const Offers = lazy(() => import('@/views/Offers'));
 const Users = lazy(() => import('@/views/Users'));
+const Chat = lazy(() => import('@/views/Chat'));
 const Login = lazy(() => import('@/views/Login'));
 const MyProfile = lazy(() => import('@/views/MyProfile'));
 const SignUp = lazy(() => import('@/views/SignUp'));
@@ -43,6 +44,16 @@ const AppRouter: React.FC = () => (
               variant="protected"
               accessLevel={[UserRoleName.MANAGER, UserRoleName.SYSTEM_ADMIN]}
               component={<Offers />}
+            />
+          }
+        />
+        <Route
+          path="/chat"
+          element={
+            <AppRoute
+              variant="protected"
+              accessLevel={[UserRoleName.MANAGER, UserRoleName.SYSTEM_ADMIN]}
+              component={<Chat />}
             />
           }
         />

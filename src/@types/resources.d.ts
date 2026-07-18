@@ -173,6 +173,27 @@ interface Resources {
     'view-boat': 'View boat';
     'your-booking-is-sync': 'Your booking is <strong>being synced!</strong>';
   };
+  chat: {
+    title: string;
+    needsHumanOnly: string;
+    empty: string;
+    pickSession: string;
+    close: string;
+    send: string;
+    replyPlaceholder: string;
+    status: {
+      AI: string;
+      HUMAN_REQUESTED: string;
+      HUMAN: string;
+      CLOSED: string;
+    };
+    role: {
+      USER: string;
+      ASSISTANT: string;
+      ADMIN: string;
+      SYSTEM: string;
+    };
+  };
   common: {
     accepted: 'Accepted';
     'access-denied': 'Access Denied';

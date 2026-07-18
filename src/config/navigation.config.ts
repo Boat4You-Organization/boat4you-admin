@@ -61,6 +61,12 @@ const navigation: NavigationLink[] = [
     accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
   },
   {
+    id: 'chat',
+    icon: Contact,
+    path: '/chat',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
+  },
+  {
     id: 'agencies',
     icon: Contact,
     path: '/agencies',

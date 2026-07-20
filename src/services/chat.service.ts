@@ -13,6 +13,9 @@ export interface ChatSessionDto {
   currentPage: string | null;
   referrer: string | null;
   pageTrail: string | null;
+  countryCode: string | null;
+  country: string | null;
+  ip: string | null;
 }
 
 export interface ChatMessageDto {

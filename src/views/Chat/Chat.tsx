@@ -31,6 +31,12 @@ const STATUS_COLOR: Record<ChatSessionDto['status'], 'default' | 'info' | 'warni
 // still has the site open right now.
 const isLive = (s: ChatSessionDto) => !!s.lastSeenAt && Date.now() - new Date(s.lastSeenAt).getTime() < 90_000;
 
+// ISO-2 -> regional-indicator emoji flag ("HR" -> 🇭🇷); IP geolocation by DB-IP.
+const flagOf = (code: string | null) =>
+  code && code.length === 2
+    ? String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1f1e6 + c.charCodeAt(0) - 65))
+    : '';
+
 const trailOf = (s: ChatSessionDto): string[] => {
   try {
     const parsed = JSON.parse(s.pageTrail ?? '[]');
@@ -175,6 +181,7 @@ const Chat = () => {
                 </Typography>
                 <Typography sx={{ fontSize: 11, color: bbColors.gray500, mt: 0.2 }}>
                   {dayjs(s.lastActivityAt).format('DD.MM. HH:mm')} · {s.locale}
+                  {s.countryCode ? ` · ${flagOf(s.countryCode)} ${s.country ?? s.countryCode}` : ''}
                   {s.visitorEmail && s.visitorName ? ` · ${s.visitorEmail}` : ''}
                 </Typography>
               </Box>
@@ -218,6 +225,11 @@ const Chat = () => {
                           </>
                         )}
                         {` · ${sel.locale}`}
+                        {sel.countryCode && (
+                          <Box component="span" title={sel.ip ?? undefined}>
+                            {` · ${flagOf(sel.countryCode)} ${sel.country ?? sel.countryCode}`}
+                          </Box>
+                        )}
                         {` · ${t('cameFrom')}: ${sel.referrer || t('direct')}`}
                       </Typography>
                       {trail.length > 1 && (

@@ -143,6 +143,20 @@ return data;
     }
   }
 
+  // Broker → client free-text email about the reservation (sent from
+  // info@boat4you.com with the reservation card; archive copy to the team).
+  public static async emailClient(id: number, subject: string, message: string): Promise<PayloadResponse<boolean>> {
+    try {
+      await api.post(`/admin/reservations/${id}/emailClient`, { subject, message });
+
+      return { payload: true };
+    } catch (error) {
+      const { message: errorMessage } = error as ErrorModel;
+
+      return { payload: false, message: errorMessage };
+    }
+  }
+
   // Crew-list link admin sets manually for fictitious bookings or partner
   // bookings where partner didn't auto-fill (e.g. confirmation done outside
   // our system). Customer renders it as "Open link" CTA in /my-bookings/{id}.

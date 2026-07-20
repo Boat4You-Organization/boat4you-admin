@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box, Button, Divider, Grid, Stack, Typography } from '@mui/material';
+import { Box, Button, Divider, Grid, Link as MuiLink, Stack, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 
 import Avatar from '@/components/Avatar';
@@ -26,6 +26,7 @@ import DateTime from '@/utils/static/DateTime';
 import { formatPrice } from '@/utils/static/formatNumber';
 import { generateGoogleMapsLink } from '@/utils/static/googleMapsUtils';
 import { sortByNumericProp } from '@/utils/static/sortUtils';
+import EmailClientModal from '@/views/Bookings/partials/EmailClientModal/EmailClientModal';
 
 import BookingInfoItem from './BookingInfoItem';
 import styles from './BookingInformation.module.scss';
@@ -41,6 +42,9 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
   // total must show the fee-inclusive amounts the wire emails ask for
   // (Mario 5.7.2026: admin showed 3,455.63 while the email wired 3,487.63).
   const [bankFeeEur, setBankFeeEur] = useState(0);
+  // Click the guest's email -> compose a reply from info@boat4you.com
+  // (Mario 20.7.2026: answer a special request before the client pays).
+  const [emailModalOpen, setEmailModalOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -332,7 +336,22 @@ return (
               <Avatar name={endUser} />
               <Typography variant="body1">{endUser}</Typography>
             </Stack>
-            <BookingInfoItem icon={Email} value={endUserEmail} />
+            <BookingInfoItem
+              icon={Email}
+              value={
+                <MuiLink
+                  component="button"
+                  type="button"
+                  onClick={() => setEmailModalOpen(true)}
+                  sx={{ font: 'inherit', textAlign: 'left' }}
+                  title={t('booking.email-client-title', 'Email the client')}
+                >
+                  <Typography variant="body1" component="span">
+                    {endUserEmail}
+                  </Typography>
+                </MuiLink>
+              }
+            />
             <BookingInfoItem icon={PhoneOutlined} value={endUserPhone} />
             {specialRequest && (
               <Box sx={{ bgcolor: bbColors.amber100, borderRadius: 1, p: 1.5 }}>
@@ -519,6 +538,7 @@ return (
           </Typography>
         </Stack>
       </Stack>
+      <EmailClientModal isOpen={emailModalOpen} onClose={() => setEmailModalOpen(false)} booking={selectedBooking} />
     </Stack>
   );
 };

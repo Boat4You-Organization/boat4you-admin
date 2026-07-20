@@ -174,6 +174,12 @@ interface Resources {
     'your-booking-is-sync': 'Your booking is <strong>being synced!</strong>';
   };
   chat: {
+    live: string;
+    lastSeen: string;
+    viewing: string;
+    cameFrom: string;
+    direct: string;
+    trail: string;
     title: string;
     needsHumanOnly: string;
     empty: string;

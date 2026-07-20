@@ -9,6 +9,10 @@ export interface ChatSessionDto {
   adminUnread: boolean;
   lastActivityAt: string;
   lastMessage: string | null;
+  lastSeenAt: string | null;
+  currentPage: string | null;
+  referrer: string | null;
+  pageTrail: string | null;
 }
 
 export interface ChatMessageDto {

@@ -17,5 +17,11 @@
     "ASSISTANT": "AI asistent",
     "ADMIN": "Tim",
     "SYSTEM": "Sustav"
-  }
+  },
+  "live": "Sada na sajtu",
+  "lastSeen": "Zadnji put viđen",
+  "viewing": "Gleda",
+  "cameFrom": "Došao s",
+  "direct": "direktno",
+  "trail": "Zadnje stranice"
 }

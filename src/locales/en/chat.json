@@ -17,5 +17,11 @@
     "ASSISTANT": "AI assistant",
     "ADMIN": "Team",
     "SYSTEM": "System"
-  }
+  },
+  "live": "Live on site",
+  "lastSeen": "Last seen",
+  "viewing": "Viewing",
+  "cameFrom": "Came from",
+  "direct": "direct",
+  "trail": "Recent pages"
 }

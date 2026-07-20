@@ -27,6 +27,20 @@ const STATUS_COLOR: Record<ChatSessionDto['status'], 'default' | 'info' | 'warni
   CLOSED: 'default',
 };
 
+// Widget heartbeats every 30s — under 90s since the last ping = the visitor
+// still has the site open right now.
+const isLive = (s: ChatSessionDto) => !!s.lastSeenAt && Date.now() - new Date(s.lastSeenAt).getTime() < 90_000;
+
+const trailOf = (s: ChatSessionDto): string[] => {
+  try {
+    const parsed = JSON.parse(s.pageTrail ?? '[]');
+
+    return Array.isArray(parsed) ? parsed.slice(-6) : [];
+  } catch {
+    return [];
+  }
+};
+
 const Chat = () => {
   const { t } = useTranslation('chat');
   // Default = ALL conversations (Mario 20.7.2026: "zelim da vidim sve chatove");
@@ -145,11 +159,17 @@ const Chat = () => {
               >
                 <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
                   <Typography sx={{ fontSize: 13, fontWeight: 700, color: bbColors.navy900 }}>
+                    {isLive(s) && <Box component="span" title={t('live')} sx={{ mr: 0.7, display: 'inline-block', width: 8, height: 8, borderRadius: '50%', bgcolor: '#22c55e' }} />}
                     {s.visitorName || s.visitorEmail || `#${s.id}`}
                     {s.adminUnread && <Box component="span" sx={{ ml: 0.8, display: 'inline-block', width: 8, height: 8, borderRadius: '50%', bgcolor: '#e8622a' }} />}
                   </Typography>
                   <Chip label={t(`status.${s.status}`)} color={STATUS_COLOR[s.status]} size="small" sx={{ fontSize: 11 }} />
                 </Stack>
+                {isLive(s) && s.currentPage && (
+                  <Typography sx={{ fontSize: 11, color: '#15803d', mt: 0.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {t('viewing')}: {s.currentPage}
+                  </Typography>
+                )}
                 <Typography sx={{ fontSize: 12, color: bbColors.gray500, mt: 0.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {s.lastMessage || '—'}
                 </Typography>
@@ -167,14 +187,47 @@ const Chat = () => {
               <Typography sx={{ m: 'auto', fontSize: 14, color: bbColors.gray500 }}>{t('pickSession')}</Typography>
             ) : (
               <>
-                <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ p: 1.5, borderBottom: `1px solid ${bbColors.cardBorder}` }}>
-                  <Typography sx={{ fontSize: 14, fontWeight: 700, color: bbColors.navy900 }}>
-                    {selected.visitorName || selected.visitorEmail || `#${selected.id}`}
-                  </Typography>
-                  <Button size="small" variant="outlined" onClick={handleClose}>
-                    {t('close')}
-                  </Button>
-                </Stack>
+                {(() => {
+                  // The list refreshes every 10s; `selected` is a snapshot — read the
+                  // fresh row for live presence so the header doesn't go stale.
+                  const sel = sessions.find(x => x.id === selected.id) ?? selected;
+                  const trail = trailOf(sel);
+
+                  return (
+                    <Stack sx={{ p: 1.5, borderBottom: `1px solid ${bbColors.cardBorder}`, gap: 0.4 }}>
+                      <Stack direction="row" alignItems="center" justifyContent="space-between">
+                        <Typography sx={{ fontSize: 14, fontWeight: 700, color: bbColors.navy900 }}>
+                          {isLive(sel) && <Box component="span" sx={{ mr: 0.7, display: 'inline-block', width: 9, height: 9, borderRadius: '50%', bgcolor: '#22c55e' }} />}
+                          {sel.visitorName || sel.visitorEmail || `#${sel.id}`}
+                          <Box component="span" sx={{ ml: 1, fontSize: 12, fontWeight: 500, color: isLive(sel) ? '#15803d' : bbColors.gray500 }}>
+                            {isLive(sel) && t('live')}
+                            {!isLive(sel) && sel.lastSeenAt && `${t('lastSeen')} ${dayjs(sel.lastSeenAt).format('DD.MM. HH:mm')}`}
+                          </Box>
+                        </Typography>
+                        <Button size="small" variant="outlined" onClick={handleClose}>
+                          {t('close')}
+                        </Button>
+                      </Stack>
+                      <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>
+                        {sel.currentPage && (
+                          <>
+                            {t('viewing')}:{' '}
+                            <Box component="a" href={`https://www.boat4you.com${sel.currentPage}`} target="_blank" rel="noreferrer" sx={{ color: '#2856ff' }}>
+                              {sel.currentPage}
+                            </Box>
+                          </>
+                        )}
+                        {` · ${sel.locale}`}
+                        {` · ${t('cameFrom')}: ${sel.referrer || t('direct')}`}
+                      </Typography>
+                      {trail.length > 1 && (
+                        <Typography sx={{ fontSize: 11, color: bbColors.gray500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {t('trail')}: {trail.join(' → ')}
+                        </Typography>
+                      )}
+                    </Stack>
+                  );
+                })()}
                 <Box ref={listRef} sx={{ flex: 1, overflowY: 'auto', p: 2, display: 'flex', flexDirection: 'column', gap: 1, bgcolor: '#fafbff' }}>
                   {messages.map(m => (
                     <Box key={m.id} sx={bubbleSx(m.role)}>

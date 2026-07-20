@@ -29,7 +29,9 @@ const STATUS_COLOR: Record<ChatSessionDto['status'], 'default' | 'info' | 'warni
 
 const Chat = () => {
   const { t } = useTranslation('chat');
-  const [needsHumanOnly, setNeedsHumanOnly] = useState(true);
+  // Default = ALL conversations (Mario 20.7.2026: "zelim da vidim sve chatove");
+  // the toggle narrows to needs-human when triaging.
+  const [needsHumanOnly, setNeedsHumanOnly] = useState(false);
   const [sessions, setSessions] = useState<ChatSessionDto[]>([]);
   const [selected, setSelected] = useState<ChatSessionDto | null>(null);
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);

@@ -7,6 +7,7 @@
  * broker wants the customer to stay on boat4you, not learn which partner
  * runs the fleet.
  */
+import { itineraryAreaUrl } from '@/utils/static/itineraryArea';
 
 export interface CartExtra {
   name: string;
@@ -135,8 +136,7 @@ const withOfferDates = (y: CartYacht): string | null => {
 
   const qs = params.toString();
 
-
-return qs ? `${base}?${qs}` : base;
+  return qs ? `${base}?${qs}` : base;
 };
 
 const MONTHS = [
@@ -167,8 +167,7 @@ const formatDateShort = (isoDate: string): string => {
   const [y, m, d] = parts;
   const mi = Math.max(0, Math.min(11, Number(m) - 1));
 
-  
-return `${Number(d)} ${MONTHS_SHORT[mi]} ${y}`;
+  return `${Number(d)} ${MONTHS_SHORT[mi]} ${y}`;
 };
 
 const daysBetween = (fromIso: string, toIso: string): number => {
@@ -177,8 +176,7 @@ const daysBetween = (fromIso: string, toIso: string): number => {
 
   if (!Number.isFinite(f) || !Number.isFinite(t)) return 0;
 
-  
-return Math.max(1, Math.round((t - f) / 86_400_000));
+  return Math.max(1, Math.round((t - f) / 86_400_000));
 };
 
 /**
@@ -190,8 +188,7 @@ return Math.max(1, Math.round((t - f) / 86_400_000));
 const findExtraByKeyword = (extras: CartExtra[], keyword: string): CartExtra | null => {
   const k = keyword.toLowerCase();
 
-  
-// Prefer an EXACT name match ("Skipper") over a loose contains, and skip
+  // Prefer an EXACT name match ("Skipper") over a loose contains, and skip
   // surcharge rows that merely CONTAIN the keyword — "Additional fee for Skipper
   // in forepeak…" and, for Adriatic Sailing, "Fun Pack skipper surcharge" (an
   // optional add-on, only due if the client also takes the Fun Pack). Either
@@ -223,22 +220,19 @@ const formatDateLong = (isoDate: string, time?: string): string => {
   const mi = Math.max(0, Math.min(11, Number(m) - 1));
   const base = `${MONTHS[mi]} ${Number(d)}, ${y}`;
 
-  
-return time ? `${base} ${time}` : base;
+  return time ? `${base} ${time}` : base;
 };
 
 const formatPrice = (v: number | null | undefined): string => {
   if (v == null) return '';
 
-  
-return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
 const priceWithCurrency = (v: number | null | undefined, symbol: string): string => {
   if (v == null) return '';
 
-  
-return `${formatPrice(v)} ${symbol}`;
+  return `${formatPrice(v)} ${symbol}`;
 };
 
 const humanizeVesselType = (t: string | null | undefined): string => {
@@ -256,17 +250,11 @@ const humanizeVesselType = (t: string | null | undefined): string => {
     MONO_HULL: 'Monohull',
   };
 
-  
-return map[t] || t;
+  return map[t] || t;
 };
 
 const escapeHtml = (s: string): string =>
-  s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
 // boat4you brand palette — kept inline (no `<style>` block) because Outlook
 // and most webmail clients strip <head>/<style>. Single source of truth so a
@@ -291,12 +279,12 @@ const BRAND = {
   cardBg: '#ffffff',
 } as const;
 
-const FONT_STACK = '-apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, sans-serif';
+const FONT_STACK = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
 
 // Modern display face for the yacht title (model + name). Pulled via @import
 // in the responsive <style> block — renders in clients that honour web fonts
 // (Apple Mail, most webmail); Gmail/Outlook fall back to the system stack.
-const POPPINS_STACK = '\'Poppins\', -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif';
+const POPPINS_STACK = "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
 /**
  * One specs chip (e.g. "Length 15.35 m"). Pill-shaped with a soft brand
@@ -404,8 +392,7 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}, autoOb
     hasDiscount && y.listPriceEur != null && y.listPriceEur > 0
       ? ((y.listPriceEur - y.clientPriceEur) / y.listPriceEur) * 100
       : 0;
-  const discountAmount =
-    hasDiscount && y.listPriceEur != null ? y.listPriceEur - y.clientPriceEur : 0;
+  const discountAmount = hasDiscount && y.listPriceEur != null ? y.listPriceEur - y.clientPriceEur : 0;
 
   // Title — model + name in a modern Poppins face. Clickable when a public
   // detail URL exists; the font is re-declared on the <a> because some
@@ -449,6 +436,11 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}, autoOb
   // separator. Stays one line on desktop, wraps on mobile.
   const locationLine = [y.country, y.base].filter(Boolean).join(' · ');
 
+  // "Suggested itinerary" — deep link to the boat4you sailing-area routes
+  // for THIS yacht's waters (7- & 14-day options live on the landing).
+  // Resolves by marina-name keywords; null (uncovered waters) renders nothing.
+  const itineraryUrl = itineraryAreaUrl([y.base, y.locationName], y.country);
+
   // Only obligatory extras surface in the client offer — optional add-ons
   // were dropped (23.4.2026) because brokers found them noisy and customers
   // routinely asked "is this included in the price?" when scanning a long
@@ -475,9 +467,7 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}, autoOb
     unit: null,
   });
   const ensureCrewExtra = (keyword: string, label: string) => {
-    const alreadyShown = obligatory.some(e =>
-      (e.name || '').toLowerCase().includes(keyword.toLowerCase())
-    );
+    const alreadyShown = obligatory.some(e => (e.name || '').toLowerCase().includes(keyword.toLowerCase()));
 
     if (alreadyShown) return;
 
@@ -524,8 +514,7 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}, autoOb
       ? `<div style="font-size: 11px; color: ${BRAND.textMuted}; margin-top: 2px; line-height: 1.4;">${escapeHtml(e.description)}</div>`
       : '';
 
-    
-return `<tr>
+    return `<tr>
       <td style="padding: 6px 12px 6px 0; font-size: 13px; color: ${BRAND.text};">
         <div>${escapeHtml(e.name)}</div>
         ${descriptionLine}
@@ -623,6 +612,11 @@ return `<tr>
                 : ''
             }
             ${
+              itineraryUrl
+                ? `<div style="font-family: ${FONT_STACK}; font-size: 12px; line-height: 1.4; margin-top: 3px;">🗺️ <a href="${itineraryUrl}" target="_blank" style="color: ${BRAND.primary}; font-weight: 600; text-decoration: underline;">Suggested itineraries from ${escapeHtml(y.base || y.locationName)}</a> — 1- &amp; 2-week routes</div>`
+                : ''
+            }
+            ${
               amenitiesInline
                 ? `<div style="font-family: ${FONT_STACK}; font-size: 12px; color: ${BRAND.textMuted}; line-height: 1.6; margin-top: 9px;">${amenitiesInline}</div>`
                 : ''
@@ -631,7 +625,7 @@ return `<tr>
               chips.length > 0
                 ? `<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin-top: 8px;">${Array.from(
                     { length: Math.ceil(chips.length / 3) },
-                    (_, i) => chips.slice(i * 3, i * 3 + 3),
+                    (_, i) => chips.slice(i * 3, i * 3 + 3)
                   )
                     .map(row => `<tr>${row.map(([k, v]) => renderChip(k, v)).join('')}</tr>`)
                     .join('')}</table>`
@@ -694,6 +688,12 @@ export const buildClientOfferWhatsApp = (
 
     if (locParts.length > 0) {
       lines.push(`📍 ${locParts.join(', ')}`);
+    }
+
+    const waItineraryUrl = itineraryAreaUrl([y.base, y.locationName], y.country);
+
+    if (waItineraryUrl) {
+      lines.push(`🗺️ Suggested itineraries: ${waItineraryUrl}`);
     }
 
     lines.push(`📅 ${period}`);

@@ -641,6 +641,7 @@ const Offers = () => {
 
         extrasMap.set(key, value);
       });
+
       // Offer-level data wins where the partner sent period-specific values,
       // but DO NOT force-flag every offer.extras row as obligatory — trust the
       // partner-side `obligatory` boolean instead. Forcing it caused yachts with
@@ -649,6 +650,20 @@ const Offers = () => {
       // partner data (Bali 4.3) looked clean — visually inconsistent across
       // the same offer. obligatoryExtrasKeys still pins items the partner
       // explicitly tagged.
+      // The partner often names the SAME obligatory charge differently on the
+      // yacht catalogue vs the offer feed ("Comfort Pack 39/40/42 (…, OB)" vs
+      // "Comfort Pack 38/39/40/42 (…)") — strict keys can't unify those and
+      // the card showed the pack twice (Mario 26.7.2026, Master Yachting
+      // LUNA). Normalize away the size-group digits and parentheticals so an
+      // offer-level obligatory row supersedes its catalogue twin.
+      const normalizeExtraName = (n: string): string =>
+        n
+          .toLowerCase()
+          .replace(/\(.*?\)/g, '')
+          .replace(/[\d/]+/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+
       (matchedOffer.extras || []).forEach(e => {
         const { key, value } = toCartExtra(e, false);
         // Merge: keep richer description when offer-level lacks one.
@@ -656,6 +671,23 @@ const Offers = () => {
 
         if (existing && !value.description && existing.description) {
           value.description = existing.description;
+        }
+
+        // Supersede a catalogue OBLIGATORY twin (same normalized name +
+        // price + unit) — the offer row carries the period-specific truth.
+        if (value.obligatory) {
+          const norm = normalizeExtraName(value.name);
+
+          Array.from(extrasMap.entries())
+            .filter(
+              ([k, v]) =>
+                k !== key &&
+                v.obligatory &&
+                v.priceEur === value.priceEur &&
+                v.unit === value.unit &&
+                normalizeExtraName(v.name) === norm
+            )
+            .forEach(([k]) => extrasMap.delete(k));
         }
 
         extrasMap.set(key, value);

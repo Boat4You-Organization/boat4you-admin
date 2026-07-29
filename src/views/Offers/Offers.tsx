@@ -70,7 +70,11 @@ const API_URL = import.meta.env.VITE_BOAT_API_URL || '';
 // every yacht's "Selected services" list bloated with optional add-ons.
 // Bumping the key auto-discards stale carts so brokers re-add yachts and
 // pick up the partner-trusted obligatory flag.
-const CART_STORAGE_KEY = 'b4y-admin-offers-cart-v2';
+// v3 (29.7.2026) — pre-v3 non-EUR carts froze UNCONVERTED EUR amounts for
+// extras + security deposit (rendered with the cart currency symbol → a
+// 250 € pack read "250.00 £"). The baked numbers are indistinguishable from
+// converted ones, so hydration-backfill can't repair them — discard.
+const CART_STORAGE_KEY = 'b4y-admin-offers-cart-v3';
 const CURRENCY_STORAGE_KEY = 'b4y-admin-offers-currency-v1';
 
 // Maps the backend ExtrasUnitType enum to the human label shown in the offer.
@@ -193,6 +197,10 @@ interface ExtraResponse {
   key?: string;
   name?: string;
   priceEur?: number | null;
+  // Currency-converted amount when the request carried ?currency= — priceEur
+  // ALWAYS stays EUR (29.7.2026: a GBP offer showed "250.00 £" for a 250 €
+  // service — symbol swapped, amount not). Cart snapshots priceInfo.amount.
+  priceInfo?: { amount: number; currency?: string; rate?: number } | null;
   obligatory?: boolean;
   payableInBase?: boolean;
   unit?: string | null;
@@ -606,7 +614,9 @@ const Offers = () => {
           unit?: string | null;
         };
       } => {
-        const priceNum = e.priceEur != null ? Number(e.priceEur) : null;
+        // Converted amount first (active currency), EUR as fallback — priceEur
+        // is ALWAYS EUR while the card renders with the cart currency symbol.
+        const priceNum = e.priceInfo?.amount ?? (e.priceEur != null ? Number(e.priceEur) : null);
         const name = e.name || e.extras?.labelCode || e.key || 'Extra';
         // Stable de-dup key: externalId first, then partner row id (`e.key`),
         // then catalogue labelCode, then name+price. The partner row id wins
@@ -750,7 +760,13 @@ const Offers = () => {
           matchedOffer.listPriceInfo?.amount ??
           (matchedOffer.listPriceEur != null ? Number(matchedOffer.listPriceEur) : row.listPriceEur),
         discountEur: matchedOffer.totalDiscountEur != null ? Number(matchedOffer.totalDiscountEur) : null,
-        securityDepositEur: yachtDetails.securityDeposit != null ? Number(yachtDetails.securityDeposit) : null,
+        // Backend sends securityDeposit ONLY in EUR (no *Info variant) — convert
+        // with the same FX snapshot the offer prices used so the whole card is
+        // one currency (29.7.2026: GBP offer showed the EUR deposit as "£").
+        securityDepositEur:
+          yachtDetails.securityDeposit != null
+            ? Math.round(Number(yachtDetails.securityDeposit) * (matchedOffer.clientPriceInfo?.rate ?? 1) * 100) / 100
+            : null,
         // Snapshot the currency at add-time. Keeps the HTML output stable
         // even if the broker later flips the global currency selector.
         // handleCurrencyChange empties the cart on a global switch, so a
@@ -930,14 +946,18 @@ const Offers = () => {
 
           const rows: CartExtra[] = [...(calc.selectedExtrasInPrice || []), ...(calc.selectedExtrasAtBase || [])]
             .filter(e => e.obligatory)
-            .map(e => ({
-              name: e.name,
-              priceEur: e.priceEur != null ? Number(e.priceEur) : null,
-              included: e.priceEur != null && Number(e.priceEur) === 0,
-              obligatory: true,
-              description: null,
-              unit: e.unit ? (UNIT_LABEL[e.unit] ?? null) : null,
-            }));
+            .map(e => {
+              const amount = e.priceInfo?.amount ?? (e.priceEur != null ? Number(e.priceEur) : null);
+
+              return {
+                name: e.name,
+                priceEur: amount,
+                included: amount === 0,
+                obligatory: true,
+                description: null,
+                unit: e.unit ? (UNIT_LABEL[e.unit] ?? null) : null,
+              };
+            });
 
           return { key: offerYachtKey(y), rows };
         })

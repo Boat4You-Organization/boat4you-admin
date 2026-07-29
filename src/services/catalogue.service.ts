@@ -10,6 +10,9 @@ export interface CalcExtraRow {
   name: string;
   key: string;
   priceEur: number | null;
+  // Currency-converted amount when the calculate call carried ?currency= —
+  // priceEur always stays EUR. Offers cart snapshots priceInfo.amount.
+  priceInfo?: { amount: number; currency?: string; rate?: number } | null;
   obligatory: boolean;
   unit: string | null;
 }

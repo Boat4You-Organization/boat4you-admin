@@ -360,6 +360,108 @@ const renderAmenitiesInline = (items: { labelCode: string; label: string }[]): s
     .map(a => `${AMENITY_ICON_MAP[a.labelCode] || '•'} ${escapeHtml(AMENITY_SHORT_LABEL[a.labelCode] || a.label)}`)
     .join(' &nbsp;&middot;&nbsp; ');
 
+/**
+ * Builds the "Selected services" stack for one yacht: partner obligatory rows
+ * + broker-toggled Skipper / Hostess (an "on request" placeholder when the
+ * partner never synced the row) + partner-recomputed /calculate extras,
+ * deduped by name. Shared by the HTML card and the WhatsApp variant so both
+ * always describe the same stack.
+ */
+const buildObligatoryStack = (y: CartYacht, options: OfferRenderOptions, autoObligatory: CartExtra[]): CartExtra[] => {
+  const obligatory = y.extras.filter(e => e.obligatory);
+
+  const placeholderExtra = (label: string): CartExtra => ({
+    name: label,
+    priceEur: null,
+    included: false,
+    obligatory: true,
+    description: 'On request — confirm with charter',
+    unit: null,
+  });
+  const ensureCrewExtra = (keyword: string, label: string) => {
+    const alreadyShown = obligatory.some(e => (e.name || '').toLowerCase().includes(keyword.toLowerCase()));
+
+    if (alreadyShown) return;
+
+    const found = findExtraByKeyword(y.extras, keyword);
+
+    obligatory.push(found ? { ...found, obligatory: true } : placeholderExtra(label));
+  };
+
+  if (options.includeSkipper) ensureCrewExtra('skipper', 'Skipper');
+
+  if (options.includeHostess) ensureCrewExtra('hostess', 'Hostess');
+
+  autoObligatory.forEach(extra => {
+    const name = (extra.name || '').trim().toLowerCase();
+
+    if (!name) return;
+
+    const alreadyShown = obligatory.some(e => (e.name || '').trim().toLowerCase() === name);
+
+    if (!alreadyShown) obligatory.push({ ...extra, obligatory: true });
+  });
+
+  return obligatory;
+};
+
+/**
+ * Sums the payable part of a services stack, unit-aware ("per week" bills a
+ * started week whole, "per night"/"per day" multiply by nights). Rows that
+ * cannot be priced honestly — on-request placeholders, per-person units
+ * (pax unknown at offer time), percentage units — flip `partial` instead of
+ * guessing: callers render "from X €" and skip the arrival total. Clients
+ * kept asking "is Selected services included in the total?" (it is NOT —
+ * Mario 29.7.2026); this sum lets the card spell the relationship out.
+ */
+const computeServicesTotal = (
+  rows: CartExtra[],
+  dateFrom: string,
+  dateTo: string
+): { amount: number; partial: boolean; payableCount: number } => {
+  const days = Math.max(1, daysBetween(dateFrom, dateTo));
+  const weeks = Math.max(1, Math.ceil(days / 7));
+  let amount = 0;
+  let partial = false;
+  let payableCount = 0;
+
+  rows.forEach(e => {
+    if (e.included || e.priceEur === 0) return; // free rows add nothing
+
+    payableCount += 1;
+
+    if (e.priceEur == null) {
+      partial = true; // "on request" placeholder (e.g. unsynced Skipper)
+
+      return;
+    }
+
+    const unit = (e.unit || '').toLowerCase();
+
+    if (unit.includes('person') || unit.includes('%')) {
+      partial = true; // pax count unknown / percentage of charter price
+
+      return;
+    }
+
+    if (unit.includes('week')) {
+      amount += e.priceEur * weeks;
+
+      return;
+    }
+
+    if (unit.includes('night') || unit.includes('day')) {
+      amount += e.priceEur * days;
+
+      return;
+    }
+
+    amount += e.priceEur; // per booking / per boat / no unit → charged once
+  });
+
+  return { amount, partial, payableCount };
+};
+
 const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}, autoObligatory: CartExtra[] = []): string => {
   const periodHeader = `${formatDateLong(y.dateFrom, y.checkin)}  →  ${formatDateLong(y.dateTo, y.checkout)}`;
   const title = `${y.modelName} (${y.name})`;
@@ -451,49 +553,8 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}, autoOb
   // free/"included" ones like "WiFi GRATIS ON BOAT". The renderer below shows
   // those with a green "included" badge so customers see the value without
   // confusing them about price.
-  const obligatory = y.extras.filter(e => e.obligatory);
-
-  // Force-include Skipper / Hostess when the broker toggled them ON for
-  // this offer (inquiry asked for crewed sailing). Avoid duplicating if the
-  // partner already attached the row as obligatory — the existing entry
-  // wins. Missing row → "on request" placeholder so broker replaces price
-  // manually before sending.
-  const placeholderExtra = (label: string): CartExtra => ({
-    name: label,
-    priceEur: null,
-    included: false,
-    obligatory: true,
-    description: 'On request — confirm with charter',
-    unit: null,
-  });
-  const ensureCrewExtra = (keyword: string, label: string) => {
-    const alreadyShown = obligatory.some(e => (e.name || '').toLowerCase().includes(keyword.toLowerCase()));
-
-    if (alreadyShown) return;
-
-    const found = findExtraByKeyword(y.extras, keyword);
-
-    obligatory.push(found ? { ...found, obligatory: true } : placeholderExtra(label));
-  };
-
-  if (options.includeSkipper) ensureCrewExtra('skipper', 'Skipper');
-
-  if (options.includeHostess) ensureCrewExtra('hostess', 'Hostess');
-
-  // Partner-recomputed obligatory extras fetched live via /calculate when crew
-  // is toggled on — chiefly the NauSys Damage Waiver that becomes mandatory once
-  // a Skipper is added (mirrors the customer boat page). Promote/append each,
-  // deduped by name against whatever is already shown (handling/preparation
-  // fees + the crew rows above), so we never double a line.
-  autoObligatory.forEach(extra => {
-    const name = (extra.name || '').trim().toLowerCase();
-
-    if (!name) return;
-
-    const alreadyShown = obligatory.some(e => (e.name || '').trim().toLowerCase() === name);
-
-    if (!alreadyShown) obligatory.push({ ...extra, obligatory: true });
-  });
+  const obligatory = buildObligatoryStack(y, options, autoObligatory);
+  const servicesTotal = computeServicesTotal(obligatory, y.dateFrom, y.dateTo);
 
   const renderExtraRow = (e: CartExtra): string => {
     // "Included" is reserved for items that are TRULY free (e.priceEur=0 →
@@ -541,13 +602,27 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}, autoOb
       </tr>`
     : '';
 
+  // Sum row under the services list — before the deposit row, which is
+  // refundable and deliberately NOT part of the sum. "from X" when a row
+  // couldn't be priced (on request / per person / %).
+  const servicesTotalRow =
+    servicesTotal.payableCount > 0
+      ? `<tr>
+          <td style="padding: 8px 12px 2px 0; border-top: 1px solid ${BRAND.border}; font-size: 13px; font-weight: 700; color: ${BRAND.text};">Selected services total</td>
+          <td valign="top" style="padding: 8px 0 2px 0; border-top: 1px solid ${BRAND.border}; font-size: 13px; text-align: right; white-space: nowrap;">
+            <b>${servicesTotal.partial && servicesTotal.amount === 0 ? 'on request' : `${servicesTotal.partial ? 'from ' : ''}${priceWithCurrency(servicesTotal.amount, sym)}`}</b>
+          </td>
+        </tr>`
+      : '';
+
   const extrasSection: string[] = [];
 
   if (obligatory.length > 0 || hasSecurityDeposit) {
     extrasSection.push(`
       <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="margin-bottom: 12px;">
-        <tr><td colspan="2" style="font-family: ${FONT_STACK}; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: ${BRAND.textMuted}; -webkit-text-size-adjust: 100%; padding-bottom: 6px;">Selected services <span style="font-weight: 400; text-transform: none; letter-spacing: 0;">(obligatory additional)</span></td></tr>
+        <tr><td colspan="2" style="font-family: ${FONT_STACK}; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: ${BRAND.textMuted}; -webkit-text-size-adjust: 100%; padding-bottom: 6px;">Selected services <span style="font-weight: 400; text-transform: none; letter-spacing: 0;">(payable separately &mdash; not included in the total price)</span></td></tr>
         ${obligatory.map(renderExtraRow).join('')}
+        ${servicesTotalRow}
         ${securityDepositRow}
       </table>`);
   }
@@ -579,6 +654,25 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}, autoOb
           }
           <div style="font-family: ${FONT_STACK}; font-size: 24px; font-weight: 800; color: ${BRAND.success}; line-height: 1.1;">${priceWithCurrency(y.clientPriceEur, sym)}</div>
           <div style="font-family: ${FONT_STACK}; font-size: 11px; color: ${BRAND.textMuted}; margin-top: 4px;">total for the period</div>
+          ${
+            servicesTotal.payableCount > 0
+              ? `
+          <div style="font-family: ${FONT_STACK}; font-size: 12px; color: ${BRAND.text}; margin-top: 10px; padding-top: 8px; border-top: 1px solid ${BRAND.successBorder};">
+            ${
+              servicesTotal.partial && servicesTotal.amount === 0
+                ? `+ selected services <span style="color: ${BRAND.textMuted};">&middot; on request &middot; payable separately</span>`
+                : `+ <b>${servicesTotal.partial ? 'from ' : ''}${priceWithCurrency(servicesTotal.amount, sym)}</b> <span style="color: ${BRAND.textMuted};">selected services &middot; payable separately</span>`
+            }
+          </div>${
+            !servicesTotal.partial
+              ? `
+          <div style="font-family: ${FONT_STACK}; font-size: 12px; color: ${BRAND.text}; margin-top: 4px;">
+            = <b>${priceWithCurrency(y.clientPriceEur + servicesTotal.amount, sym)}</b> <span style="color: ${BRAND.textMuted};">total on arrival${hasSecurityDeposit ? ' (excl. refundable deposit)' : ''}</span>
+          </div>`
+              : ''
+          }`
+              : ''
+          }
           ${
             detailUrl
               ? `
@@ -748,6 +842,23 @@ export const buildClientOfferWhatsApp = (
     // Price
     lines.push('');
     lines.push(`💰 *Total: ${formatPrice(y.clientPriceEur)} ${sym}*`);
+
+    // Same stack + sum as the HTML card, so WhatsApp answers the "are the
+    // services included?" question too. One line — WA messages stay tight.
+    const waServicesTotal = computeServicesTotal(
+      buildObligatoryStack(y, options, autoObligatoryByYacht[offerYachtKey(y)] ?? []),
+      y.dateFrom,
+      y.dateTo
+    );
+
+    if (waServicesTotal.payableCount > 0) {
+      const amountTxt =
+        waServicesTotal.partial && waServicesTotal.amount === 0
+          ? 'on request'
+          : `${waServicesTotal.partial ? 'from ' : ''}${formatPrice(waServicesTotal.amount)} ${sym}`;
+
+      lines.push(`➕ Obligatory services: ${amountTxt} (payable separately, not included)`);
+    }
 
     if (y.listPriceEur != null && y.listPriceEur > y.clientPriceEur) {
       const save = y.listPriceEur - y.clientPriceEur;

@@ -23,5 +23,10 @@
   "viewing": "Viewing",
   "cameFrom": "Came from",
   "direct": "direct",
-  "trail": "Recent pages"
+  "trail": "Recent pages",
+  "delete": "Delete",
+  "deleteSelected": "Delete selected ({{count}})",
+  "selectAll": "Select all",
+  "confirmDelete": "Permanently delete this conversation?",
+  "confirmDeleteMany": "Permanently delete the selected conversations ({{count}})?"
 }

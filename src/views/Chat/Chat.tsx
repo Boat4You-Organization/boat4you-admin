@@ -6,14 +6,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box, Button, Chip, Stack, Switch, TextField, Typography } from '@mui/material';
+import { Box, Button, Checkbox, Chip, Stack, Switch, TextField, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 
 import Layout from '@/components/Layout';
 import {
+  bulkDeleteChats,
   ChatMessageDto,
   ChatSessionDto,
   closeChat,
+  deleteChat,
   getChatSessions,
   getChatTranscript,
   replyToChat,
@@ -57,6 +59,8 @@ const Chat = () => {
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
   const [reply, setReply] = useState('');
   const [sending, setSending] = useState(false);
+  // Housekeeping: tick conversations in the list, then delete them for good.
+  const [checked, setChecked] = useState<number[]>([]);
   const listRef = useRef<HTMLDivElement>(null);
 
   const loadSessions = useCallback(async () => {
@@ -120,6 +124,32 @@ const Chat = () => {
     await loadSessions();
   };
 
+  const handleDelete = async (id: number) => {
+    // eslint-disable-next-line no-alert -- destructive, no toast/confirm primitive in this view
+    if (!window.confirm(t('confirmDelete'))) return;
+
+    await deleteChat(id);
+    setChecked(prev => prev.filter(x => x !== id));
+
+    if (selected?.id === id) setSelected(null);
+
+    await loadSessions();
+  };
+
+  const handleBulkDelete = async () => {
+    // eslint-disable-next-line no-alert -- destructive, no toast/confirm primitive in this view
+    if (!checked.length || !window.confirm(t('confirmDeleteMany', { count: checked.length }))) return;
+
+    await bulkDeleteChats(checked);
+
+    if (selected && checked.includes(selected.id)) setSelected(null);
+
+    setChecked([]);
+    await loadSessions();
+  };
+
+  const toggleChecked = (id: number) => setChecked(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
+
   const bubbleSx = (role: ChatMessageDto['role']) => ({
     alignSelf: role === 'USER' ? 'flex-start' : 'flex-end',
     maxWidth: '78%',
@@ -140,6 +170,11 @@ const Chat = () => {
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
           <Typography sx={{ fontSize: 24, fontWeight: 800, color: bbColors.navy900 }}>{t('title')}</Typography>
           <Stack direction="row" alignItems="center" gap={1}>
+            {checked.length > 0 && (
+              <Button size="small" color="error" variant="outlined" onClick={handleBulkDelete}>
+                {t('deleteSelected', { count: checked.length })}
+              </Button>
+            )}
             <Typography sx={{ fontSize: 13, color: bbColors.gray500 }}>{t('needsHumanOnly')}</Typography>
             <Switch checked={needsHumanOnly} onChange={e => setNeedsHumanOnly(e.target.checked)} size="small" />
           </Stack>
@@ -148,6 +183,22 @@ const Chat = () => {
         <Stack direction="row" gap={2} sx={{ height: 'calc(100vh - 220px)', minHeight: 420 }}>
           {/* Session list */}
           <Box sx={{ width: 340, flexShrink: 0, overflowY: 'auto', bgcolor: '#fff', borderRadius: 2, border: `1px solid ${bbColors.cardBorder}` }}>
+            {sessions.length > 0 && (
+              <Stack
+                direction="row"
+                alignItems="center"
+                gap={0.5}
+                sx={{ px: 1, py: 0.5, borderBottom: `1px solid ${bbColors.cardBorder}`, position: 'sticky', top: 0, bgcolor: '#fff', zIndex: 1 }}
+              >
+                <Checkbox
+                  size="small"
+                  checked={checked.length === sessions.length}
+                  indeterminate={checked.length > 0 && checked.length < sessions.length}
+                  onChange={e => setChecked(e.target.checked ? sessions.map(x => x.id) : [])}
+                />
+                <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>{t('selectAll')}</Typography>
+              </Stack>
+            )}
             {sessions.length === 0 && (
               <Typography sx={{ p: 2, fontSize: 14, color: bbColors.gray500 }}>{t('empty')}</Typography>
             )}
@@ -164,7 +215,14 @@ const Chat = () => {
                 }}
               >
                 <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
-                  <Typography sx={{ fontSize: 13, fontWeight: 700, color: bbColors.navy900 }}>
+                  <Checkbox
+                    size="small"
+                    sx={{ p: 0.3, mr: 0.3 }}
+                    checked={checked.includes(s.id)}
+                    onClick={e => e.stopPropagation()}
+                    onChange={() => toggleChecked(s.id)}
+                  />
+                  <Typography sx={{ flex: 1, fontSize: 13, fontWeight: 700, color: bbColors.navy900 }}>
                     {isLive(s) && <Box component="span" title={t('live')} sx={{ mr: 0.7, display: 'inline-block', width: 8, height: 8, borderRadius: '50%', bgcolor: '#22c55e' }} />}
                     {s.visitorName || s.visitorEmail || `#${s.id}`}
                     {s.adminUnread && <Box component="span" sx={{ ml: 0.8, display: 'inline-block', width: 8, height: 8, borderRadius: '50%', bgcolor: '#e8622a' }} />}
@@ -211,9 +269,14 @@ const Chat = () => {
                             {!isLive(sel) && sel.lastSeenAt && `${t('lastSeen')} ${dayjs(sel.lastSeenAt).format('DD.MM. HH:mm')}`}
                           </Box>
                         </Typography>
-                        <Button size="small" variant="outlined" onClick={handleClose}>
-                          {t('close')}
-                        </Button>
+                        <Stack direction="row" gap={1}>
+                          <Button size="small" variant="outlined" onClick={handleClose}>
+                            {t('close')}
+                          </Button>
+                          <Button size="small" color="error" variant="outlined" onClick={() => handleDelete(sel.id)}>
+                            {t('delete')}
+                          </Button>
+                        </Stack>
                       </Stack>
                       <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>
                         {sel.currentPage && (

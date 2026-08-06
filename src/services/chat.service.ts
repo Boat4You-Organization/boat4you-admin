@@ -36,3 +36,8 @@ export const replyToChat = (id: number, content: string) =>
   api.post<ChatMessageDto>(`/admin/chat/sessions/${id}/reply`, { content });
 
 export const closeChat = (id: number) => api.post<void>(`/admin/chat/sessions/${id}/close`);
+
+export const deleteChat = (id: number) => api.delete<void>(`/admin/chat/sessions/${id}`);
+
+export const bulkDeleteChats = (ids: number[]) =>
+  api.post<{ deleted: number }>('/admin/chat/sessions/bulk-delete', { ids });

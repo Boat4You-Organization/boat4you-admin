@@ -23,5 +23,10 @@
   "viewing": "Gleda",
   "cameFrom": "Došao s",
   "direct": "direktno",
-  "trail": "Zadnje stranice"
+  "trail": "Zadnje stranice",
+  "delete": "Obriši",
+  "deleteSelected": "Obriši označene ({{count}})",
+  "selectAll": "Označi sve",
+  "confirmDelete": "Trajno obrisati ovaj razgovor?",
+  "confirmDeleteMany": "Trajno obrisati označene razgovore ({{count}})?"
 }

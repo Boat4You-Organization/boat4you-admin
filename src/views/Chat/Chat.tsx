@@ -158,6 +158,7 @@ const Chat = () => {
     borderRadius: 2,
     fontSize: 14,
     whiteSpace: 'pre-wrap' as const,
+    overflowWrap: 'anywhere' as const,
     // eslint-disable-next-line no-nested-ternary -- three-way role palette reads clearer inline
     bgcolor: role === 'USER' ? '#fff' : role === 'ADMIN' ? bbColors.navy700 : '#eef1fb',
     color: role === 'ADMIN' ? '#fff' : bbColors.navy900,
@@ -253,7 +254,7 @@ const Chat = () => {
           </Box>
 
           {/* Transcript + reply */}
-          <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', bgcolor: '#fff', borderRadius: 2, border: `1px solid ${bbColors.cardBorder}` }}>
+          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', bgcolor: '#fff', borderRadius: 2, border: `1px solid ${bbColors.cardBorder}` }}>
             {!selected ? (
               <Typography sx={{ m: 'auto', fontSize: 14, color: bbColors.gray500 }}>{t('pickSession')}</Typography>
             ) : (
@@ -284,7 +285,7 @@ const Chat = () => {
                           </Button>
                         </Stack>
                       </Stack>
-                      <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>
+                      <Typography sx={{ fontSize: 12, color: bbColors.gray500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {sel.currentPage && (
                           <>
                             {t('viewing')}:{' '}

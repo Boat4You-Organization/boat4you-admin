@@ -170,11 +170,6 @@ const Chat = () => {
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
           <Typography sx={{ fontSize: 24, fontWeight: 800, color: bbColors.navy900 }}>{t('title')}</Typography>
           <Stack direction="row" alignItems="center" gap={1}>
-            {checked.length > 0 && (
-              <Button size="small" color="error" variant="outlined" onClick={handleBulkDelete}>
-                {t('deleteSelected', { count: checked.length })}
-              </Button>
-            )}
             <Typography sx={{ fontSize: 13, color: bbColors.gray500 }}>{t('needsHumanOnly')}</Typography>
             <Switch checked={needsHumanOnly} onChange={e => setNeedsHumanOnly(e.target.checked)} size="small" />
           </Stack>
@@ -197,6 +192,17 @@ const Chat = () => {
                   onChange={e => setChecked(e.target.checked ? sessions.map(x => x.id) : [])}
                 />
                 <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>{t('selectAll')}</Typography>
+                {checked.length > 0 && (
+                  <Button
+                    size="small"
+                    color="error"
+                    variant="contained"
+                    onClick={handleBulkDelete}
+                    sx={{ ml: 'auto', fontSize: 11, py: 0.2, minWidth: 0 }}
+                  >
+                    {t('deleteSelected', { count: checked.length })}
+                  </Button>
+                )}
               </Stack>
             )}
             {sessions.length === 0 && (

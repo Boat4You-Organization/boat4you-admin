@@ -139,6 +139,8 @@
     "input-vat-amount": "Input VAT amount",
     "reservation-information": "Reservation information",
     "invoice-item": "Item description",
-    "input-invoice-item": "Input item description"
+    "input-invoice-item": "Input item description",
+    "invoice-number": "Invoice number",
+    "input-invoice-number": "Enter invoice number"
   }
 }

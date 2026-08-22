@@ -191,6 +191,12 @@ const UpdateInvoiceForm = () => {
       </Typography>
       <Stack direction={isMobile ? 'column' : 'row'} spacing={2} mb={3}>
         <FormInput
+          name="invoiceNumber"
+          formLabel={t('form.invoice.invoice-number')}
+          placeholder={t('form.invoice.input-invoice-number')}
+          validate={FormValidator.isNotEmpty}
+        />
+        <FormInput
           name="invoiceLanguage"
           renderInput={renderInvoiceLanguageInput}
           validate={FormValidator.isNotEmpty}

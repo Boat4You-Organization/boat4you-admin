@@ -20,177 +20,135 @@ export const LogoSVG = () => (
   </Svg>
 );
 
-export const LineDivider = () => <View style={styles.lineDivider} />;
+/** Croatian-style money formatting per PDF locale: 1.234,56 (hr) / 1,234.56 (en). */
+export const formatMoney = (value: unknown, locale: 'hr' | 'en'): string =>
+  new Intl.NumberFormat(locale === 'hr' ? 'hr-HR' : 'en-GB', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Number(value) || 0);
 
-export const DoubleLineDivider = () => (
-  <View style={styles.doubleDivider}>
-    <View style={styles.lineDividerThin} />
-    <View style={styles.lineDividerThin} />
+interface MetaItem {
+  label: string;
+  value: string;
+}
+
+export const renderMetaStrip = (items: MetaItem[]): JSX.Element => (
+  <View style={styles.metaRow}>
+    {items.map(item => (
+      <View key={item.label} style={styles.metaCell}>
+        <Text style={styles.metaLabel}>{item.label}</Text>
+        <Text style={styles.metaValue}>{item.value}</Text>
+      </View>
+    ))}
   </View>
 );
 
-export const renderHeader = ({
-  companyName,
-  companyAddress,
-  companyOib,
-  companyIban,
-  invoiceNumber,
-  invoiceDate,
-  invoiceLabel,
-  invoiceDateLabel,
-}: {
-  companyName: string;
-  companyAddress: string;
-  companyOib: string;
-  companyIban: string;
-  invoiceNumber: string;
-  invoiceDate: string;
-  invoiceLabel: string;
-  invoiceDateLabel: string;
-}): JSX.Element => (
-  <View style={styles.header}>
-    <View style={styles.leftColumn}>
-      <LogoSVG />
-      <View style={styles.companyInfo}>
-        <Text style={styles.companyText}>{companyName}</Text>
-        <Text style={styles.companyText}>{companyAddress}</Text>
-        <Text style={styles.companyText}>OIB: {companyOib}</Text>
-        <Text style={styles.companyText}>IBAN: {companyIban}</Text>
-      </View>
-    </View>
-
-    <View style={styles.rightColumn}>
-      <View style={styles.invoiceBox}>
-        <View style={styles.invoiceRow}>
-          <Text style={styles.invoiceLabel}>{invoiceLabel}</Text>
-          <Text style={styles.invoiceValue}>{invoiceNumber}</Text>
-        </View>
-        <View style={styles.invoiceRow}>
-          <Text style={styles.invoiceLabel}>{invoiceDateLabel}</Text>
-          <Text style={styles.invoiceValue}>{invoiceDate}</Text>
-        </View>
-      </View>
-    </View>
-  </View>
-);
-
-export const renderBuyerSection = ({
-  title,
-  name,
-  address,
-  oib,
-}: {
-  title: string;
+interface PartyProps {
+  label: string;
   name: string;
-  address: string;
-  oib: string;
-}): JSX.Element => (
-  <View style={styles.section}>
-    <Text style={styles.sectionTitle}>{title}</Text>
-    <Text style={styles.companyText}>{name}</Text>
-    <Text style={styles.companyText}>{address}</Text>
-    <Text style={styles.companyText}>OIB: {oib}</Text>
+  lines: string[];
+  vatLabel: string;
+  vatId?: string;
+}
+
+export const renderParty = ({ label, name, lines, vatLabel, vatId }: PartyProps): JSX.Element => (
+  <View style={styles.party}>
+    <Text style={styles.partyLabel}>{label}</Text>
+    <Text style={styles.partyName}>{name}</Text>
+    {lines.filter(Boolean).map(line => (
+      <Text key={line} style={styles.partyLine}>
+        {line}
+      </Text>
+    ))}
+    {vatId ? (
+      <Text style={styles.partyMuted}>
+        {vatLabel}: {vatId}
+      </Text>
+    ) : null}
   </View>
 );
 
-export const renderInvoiceTitle = ({ title, invoiceNumber }: { title: string; invoiceNumber: string }): JSX.Element => (
-  <View style={styles.invoiceTitleSection}>
-    <Text style={styles.invoiceTitle}>
-      {title} {invoiceNumber}
-    </Text>
-  </View>
-);
+interface ItemsTableProps {
+  headers: { no: string; description: string; qty: string; unitPrice: string; amount: string };
+  description: string;
+  unitPrice: string;
+  amount: string;
+}
 
-export const renderServicesTable = ({
-  descriptionLabel,
-  invoiceItem,
-}: {
-  descriptionLabel: string;
-  invoiceItem: string;
-}): JSX.Element => (
+export const renderItemsTable = ({ headers, description, unitPrice, amount }: ItemsTableProps): JSX.Element => (
   <View style={styles.table}>
-    <View style={styles.tableHeader}>
-      <Text style={[styles.tableHeaderCell]}>{descriptionLabel}</Text>
+    <View style={styles.thead}>
+      <Text style={[styles.th, styles.colNo]}>{headers.no}</Text>
+      <Text style={[styles.th, styles.colDesc]}>{headers.description}</Text>
+      <Text style={[styles.th, styles.colQty]}>{headers.qty}</Text>
+      <Text style={[styles.th, styles.colUnit]}>{headers.unitPrice}</Text>
+      <Text style={[styles.th, styles.colAmount]}>{headers.amount}</Text>
     </View>
-    <View style={styles.tableRow}>
-      <Text style={[styles.tableCell]}>{invoiceItem}</Text>
+    <View style={styles.tr}>
+      <Text style={[styles.td, styles.colNo]}>1.</Text>
+      <Text style={[styles.td, styles.colDesc]}>{description}</Text>
+      <Text style={[styles.td, styles.colQty]}>1</Text>
+      <Text style={[styles.td, styles.colUnit]}>{unitPrice}</Text>
+      <Text style={[styles.td, styles.colAmount]}>{amount}</Text>
     </View>
   </View>
 );
 
-export const renderSummary = ({
-  inTotalLabel,
-  inTotalPrice,
-  taxLabel,
-  taxValue,
-  totalLabel,
-  totalPrice,
-  currency,
-}: {
-  inTotalLabel: string;
-  inTotalPrice: string;
-  taxLabel: string;
-  taxValue: string;
+interface SummaryProps {
+  baseLabel: string;
+  base: string;
+  vatLabel: string | null;
+  vat: string | null;
+  noVatNote: string | null;
   totalLabel: string;
-  totalPrice: string;
-  currency: string;
-}): JSX.Element => (
-  <View>
-    <View style={styles.summarySection}>
-      <View style={styles.summaryRow}>
-        <Text style={styles.summaryLabel}>{inTotalLabel}</Text>
-        <Text style={styles.summaryValue}>
-          {inTotalPrice} {currency}
-        </Text>
+  total: string;
+}
+
+export const renderSummary = ({ baseLabel, base, vatLabel, vat, noVatNote, totalLabel, total }: SummaryProps): JSX.Element => (
+  <View style={styles.summaryWrap}>
+    <View style={styles.summary}>
+      <View style={styles.sumRow}>
+        <Text style={styles.sumLabel}>{baseLabel}</Text>
+        <Text style={styles.sumValue}>{base}</Text>
       </View>
-      <View style={styles.summaryRow}>
-        <Text style={styles.summaryLabel}>{taxLabel}</Text>
-        <Text style={styles.summaryValue}>
-          {taxValue} {currency}
-        </Text>
-      </View>
-    </View>
-    <DoubleLineDivider />
-    <View style={styles.summarySection}>
-      <View style={styles.summaryRow}>
-        <Text style={styles.summaryLabel}>{totalLabel}</Text>
-        <Text style={styles.summaryValue}>
-          {totalPrice} {currency}
-        </Text>
+      {vatLabel && vat ? (
+        <View style={styles.sumRow}>
+          <Text style={styles.sumLabel}>{vatLabel}</Text>
+          <Text style={styles.sumValue}>{vat}</Text>
+        </View>
+      ) : null}
+      {noVatNote ? <Text style={styles.sumNote}>{noVatNote}</Text> : null}
+      <View style={styles.sumTotal}>
+        <Text style={styles.sumTotalLabel}>{totalLabel}</Text>
+        <Text style={styles.sumTotalValue}>{total}</Text>
       </View>
     </View>
   </View>
 );
 
-export const renderPaymentSection = ({
-  paymentMethodLabel,
-  paymentMethod,
-  deliveryDateLabel,
-  deliveryDate,
-}: {
-  paymentMethodLabel: string;
-  paymentMethod: string;
-  deliveryDateLabel: string;
-  deliveryDate: string;
-}): JSX.Element => (
-  <View style={styles.paymentSection}>
-    <View style={styles.paymentRow}>
-      <View style={styles.paymentColumn}>
-        <Text style={styles.paymentTitle}>{paymentMethodLabel}</Text>
-        <Text style={styles.paymentText}>{paymentMethod}</Text>
-      </View>
-      <View style={styles.paymentColumn}>
-        <Text style={styles.paymentTitle}>{deliveryDateLabel}</Text>
-        <Text style={styles.paymentText}>{deliveryDate}</Text>
-      </View>
+interface PaymentBoxProps {
+  title: string;
+  cells: MetaItem[];
+}
+
+export const renderPaymentBox = ({ title, cells }: PaymentBoxProps): JSX.Element => (
+  <View style={styles.payBox}>
+    <Text style={styles.payTitle}>{title}</Text>
+    <View style={styles.payGrid}>
+      {cells.map(cell => (
+        <View key={cell.label} style={styles.payCell}>
+          <Text style={styles.payLabel}>{cell.label}</Text>
+          <Text style={styles.payValue}>{cell.value}</Text>
+        </View>
+      ))}
     </View>
   </View>
 );
 
 export const renderFooter = ({ text }: { text: string }): JSX.Element => (
-  <View style={styles.footer}>
-    {text.split('\n').map((line, index) => (
-      <Text key={`${index + 1}`} style={styles.footerText}>
+  <View style={styles.footer} fixed>
+    {text.split('\n').map(line => (
+      <Text key={line} style={styles.footerText}>
         {line}
       </Text>
     ))}

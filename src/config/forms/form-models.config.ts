@@ -175,6 +175,7 @@ export interface UpdateInvoiceFormValues {
   recipientVatCode: string;
   invoiceLanguage: InvoiceLanguage;
   invoiceStatus: InvoiceStatus;
+  invoiceNumber: string;
   invoiceItem: string;
   includeVat: boolean;
   vatPercentage: number | null;

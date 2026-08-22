@@ -139,6 +139,8 @@
     "input-vat-amount": "Unesite iznos PDV-a",
     "reservation-information": "Informacije o rezervaciji",
     "invoice-item": "Opis stavke na računu",
-    "input-invoice-item": "Unesi opis stavke na računu"
+    "input-invoice-item": "Unesi opis stavke na računu",
+    "invoice-number": "Broj računa",
+    "input-invoice-number": "Unesite broj računa"
   }
 }

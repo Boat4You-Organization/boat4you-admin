@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 import { Divider, Grid, Stack, Typography } from '@mui/material';
@@ -25,9 +25,30 @@ import { FormValidator } from '@/utils/static/FormValidator';
 
 const UpdateInvoiceForm = () => {
   const { isMobile } = useBreakpoint();
-  const { control, watch } = useFormContext<UpdateInvoiceFormValues>();
+  const { control, watch, setValue, formState } = useFormContext<UpdateInvoiceFormValues>();
 
-  const { includeVat, reservationId } = watch();
+  const { includeVat, reservationId, totalPrice, vatPercentage } = watch();
+  const { dirtyFields } = formState;
+
+  // Total price is the master figure (Mario 22.8.2026): as soon as the
+  // broker edits it (or the VAT %), derive the net and the VAT amount so
+  // the three can never drift apart (stored invoices had 515.04 + 128.77
+  // next to a 804.76 total). Untouched forms keep their stored values —
+  // only a user edit (dirty total / VAT % / checkbox) triggers the recompute.
+  useEffect(() => {
+    if (!dirtyFields.totalPrice && !dirtyFields.vatPercentage && !dirtyFields.includeVat) return;
+
+    const total = Number(totalPrice);
+
+    if (!Number.isFinite(total)) return;
+
+    const pct = includeVat ? Number(vatPercentage) || 0 : 0;
+    const net = Math.round((total / (1 + pct / 100)) * 100) / 100;
+    const vat = Math.round((total - net) * 100) / 100;
+
+    setValue('priceWithoutVat', net as never, { shouldDirty: true });
+    setValue('vatAmount', (includeVat ? vat : null) as never, { shouldDirty: true });
+  }, [totalPrice, vatPercentage, includeVat, dirtyFields.totalPrice, dirtyFields.vatPercentage, dirtyFields.includeVat, setValue]);
 
   const renderBookingInput = useBookingAutocomplete({
     disabled: true,

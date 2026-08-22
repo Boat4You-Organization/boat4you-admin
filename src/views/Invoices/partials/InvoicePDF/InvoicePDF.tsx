@@ -35,16 +35,20 @@ const InvoicePDF = ({ invoice, locale }: InvoicePDFProps) => {
   } = invoice || {};
 
   const t = i18n[locale];
+  // API money fields arrive as numbers, but a freshly edited invoice can hold
+  // strings/nulls for a moment — coerce so a stray value can't kill the PDF.
+  const money = (value: unknown) => (Number(value) || 0).toFixed(2);
+  const invoiceNumberLabel = invoiceNumber?.toString() ?? '';
 
   return (
-    <Document title={invoiceNumber.toString()}>
+    <Document title={invoiceNumberLabel}>
       <Page size="A4" style={styles.page}>
         {renderHeader({
           companyName: 'Cusmanich d.o.o.',
           companyAddress: 'Vrboran 37, HR-21000 Split',
           companyOib: '87394862517',
           companyIban: 'HR3924020061101202108',
-          invoiceNumber,
+          invoiceNumber: invoiceNumberLabel,
           invoiceDate: DateTime.formatHR(DateTime.date(invoiceDate)),
           invoiceLabel: t.invoice,
           invoiceDateLabel: t.date,
@@ -55,18 +59,18 @@ const InvoicePDF = ({ invoice, locale }: InvoicePDFProps) => {
           address: recipientStreet,
           oib: recipientVatCode,
         })}
-        {renderInvoiceTitle({ title: t.invoice, invoiceNumber })}
+        {renderInvoiceTitle({ title: t.invoice, invoiceNumber: invoiceNumberLabel })}
         {renderServicesTable({
           descriptionLabel: t.description,
           invoiceItem,
         })}
         {renderSummary({
           inTotalLabel: t.inTotal,
-          inTotalPrice: `${priceWithoutVat.toFixed(2)}`,
+          inTotalPrice: money(priceWithoutVat),
           taxLabel: t.tax,
-          taxValue: `${vatAmount.toFixed(2)}`,
+          taxValue: money(vatAmount),
           totalLabel: t.total,
-          totalPrice: `${totalPrice.toFixed(2)}`,
+          totalPrice: money(totalPrice),
           currency: invoiceLanguage === InvoiceLanguage.EN ? 'Euro' : 'Eur',
         })}
         {renderPaymentSection({

@@ -8,6 +8,7 @@ import Download from '@/components/SvgIcons/Download';
 import { Locale } from '@/i18nPdf';
 import colors from '@/styles/themes/colors';
 import useBreakpoint from '@/utils/hooks/useBreakpoint';
+import { showToast } from '@/valtio/global/global.actions';
 
 interface PDFDownloadButtonProps {
   fileName: string;
@@ -51,13 +52,25 @@ const PDFDownloadButton = ({ fileName, documents, disabled }: PDFDownloadButtonP
       try {
         const blob = await pdf(documents[selectedLocale]).toBlob();
         const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
 
-        link.href = URL.createObjectURL(blob);
+        link.href = url;
         link.download = `Invoice-${fileName}-${selectedLocale.toUpperCase()}.pdf`;
+        // Attach to the DOM before clicking — Safari/Firefox ignore clicks
+        // on detached anchors, which looked like "download does nothing".
+        document.body.appendChild(link);
         link.click();
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 10_000);
       } catch (err) {
-        return;
+        // A render failure used to be swallowed here — nothing happened and
+        // nobody knew why. Tell the broker and leave the cause in the console.
+        // eslint-disable-next-line no-console
+        console.error('Invoice PDF generation failed', err);
+        showToast({
+          status: 'error',
+          text: `PDF: ${err instanceof Error ? err.message : String(err)}`,
+        });
       } finally {
         setShouldDownload(false);
         setSelectedLocale(null);

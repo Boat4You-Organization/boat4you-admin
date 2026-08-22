@@ -341,6 +341,20 @@ return (
                         >
                           <Box component="td" sx={tdBase}>
                             <Stack direction="row" alignItems="center" gap={1.25}>
+                              <Typography
+                                component="span"
+                                sx={{
+                                  minWidth: 34,
+                                  fontSize: 11,
+                                  fontWeight: 700,
+                                  color: bbColors.gray500,
+                                  fontVariantNumeric: 'tabular-nums',
+                                  textAlign: 'right',
+                                  flexShrink: 0,
+                                }}
+                              >
+                                #{u.id}
+                              </Typography>
                               <Box
                                 sx={{
                                   width: 28,

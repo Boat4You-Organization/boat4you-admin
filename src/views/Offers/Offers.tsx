@@ -219,6 +219,9 @@ interface OfferResponse {
   listPriceInfo?: { amount: number; currency: string; rate?: number } | null;
   totalDiscountEur?: number | null;
   obligatoryExtrasKeys?: string[];
+  // Yacht-level obligatory rows that are wrong-period siblings of an obligatory
+  // row on THIS offer ("Comfort Pack 2 weeks" on a one-week charter).
+  supersededExtrasKeys?: string[];
   extras?: ExtraResponse[];
   checkin?: string;
   checkout?: string;
@@ -646,7 +649,16 @@ const Offers = () => {
 
       const extrasMap = new Map<string, ReturnType<typeof toCartExtra>['value']>();
 
+      // Partner models ONE obligatory charge as duration siblings ("Comfort
+      // Pack" / "… 2 weeks" / "… 3 weeks"), all flagged obligatory on the yacht;
+      // the offer carries the one that applies. The backend lists the others as
+      // supersededExtrasKeys — never show them (LUNA Lagoon 46 card stacked all
+      // three, Mario 23.8.2026).
+      const supersededKeys = new Set(matchedOffer.supersededExtrasKeys || []);
+
       (yachtDetails.services || []).forEach(s => {
+        if (s.key != null && supersededKeys.has(s.key)) return;
+
         const { key, value } = toCartExtra(s, false);
 
         extrasMap.set(key, value);

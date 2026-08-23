@@ -219,6 +219,8 @@ interface OfferResponse {
   listPriceInfo?: { amount: number; currency: string; rate?: number } | null;
   totalDiscountEur?: number | null;
   obligatoryExtrasKeys?: string[];
+  // Customer 4-state from the backend (FREE | OPTION | RESERVATION | SERVICE).
+  status?: string;
   // Yacht-level obligatory rows that are wrong-period siblings of an obligatory
   // row on THIS offer ("Comfort Pack 2 weeks" on a one-week charter).
   supersededExtrasKeys?: string[];
@@ -501,7 +503,29 @@ const Offers = () => {
         offers[0];
 
       if (!matchedOffer) {
-        showToast({ status: 'error', text: 'No offer available for this yacht in the selected period' });
+        // No single partner offer spans the searched period (long charters:
+        // partners often price at most 21 nights per offer — KARINA Elba 45,
+        // 28-night request, 23.8.2026). Tell the broker the longest bookable
+        // sub-period inside the window so they can send a two-card offer
+        // (e.g. 21 nights + 7 nights) or ask the operator for a custom quote.
+        let hint = '';
+
+        try {
+          const { data: windowOffers } = await api.get<OfferResponse[]>(
+            `/public/yachts/${row.yachtId}/standard-offers?dateFrom=${startDate.format('YYYY-MM-DD')}&dateTo=${endDate.format('YYYY-MM-DD')}&currency=${currency}`
+          );
+          const nightsOf = (o: OfferResponse) => dayjs(o.dateTo).diff(dayjs(o.dateFrom), 'day');
+          const longest = (windowOffers || [])
+            .filter(o => o.status === 'FREE')
+            .sort((a, b) => nightsOf(b) - nightsOf(a))[0];
+
+          if (longest) {
+            hint = ` Longest bookable: ${dayjs(longest.dateFrom).format('D MMM')} → ${dayjs(longest.dateTo).format('D MMM YYYY')} (${nightsOf(longest)} nights). Tip: add it, then change the dates to the remaining week(s) and add the yacht again — the offer email stacks both.`;
+          }
+        } catch {
+          // hint is best-effort only
+        }
+        showToast({ status: 'error', text: `No single partner offer spans the selected period.${hint}` });
 
         return;
       }

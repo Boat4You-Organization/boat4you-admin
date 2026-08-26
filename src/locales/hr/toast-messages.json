@@ -54,5 +54,9 @@
   "delete-invoice-successfullyy": "Račun je uspješno obrisan",
   "delete-invoice-failed": "Brisanje računa nije uspjelo",
   "mark-sent-invoice-successfully": "Račun je uspješno označen kao poslan",
-  "mark-sent-invoice-failed": "Neuspjelo označavanje računa kao poslanog"
+  "mark-sent-invoice-failed": "Neuspjelo označavanje računa kao poslanog",
+  "create-invoice-successfully": "Račun {{number}} kreiran",
+  "create-agency-successfully": "Agencija spremljena",
+  "create-agency-failed": "Spremanje agencije nije uspjelo",
+  "download-selected-failed": "Priprema ZIP preuzimanja nije uspjela"
 }

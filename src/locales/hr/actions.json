@@ -42,5 +42,8 @@
   "markAsSent": "Označi kao poslano",
   "download": "Preuzmi",
   "markAsSentInvoice": "Označi račun kao poslan",
-  "download-pdf": "Preuzmi PDF"
+  "download-pdf": "Preuzmi PDF",
+  "newInvoice": "Novi račun",
+  "download-selected": "Preuzmi odabrane",
+  "preparing-zip": "Pripremam ZIP…"
 }

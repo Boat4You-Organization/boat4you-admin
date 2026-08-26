@@ -1,30 +1,39 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
-import { Box, Button, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Checkbox as MuiCheckbox, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { pdf } from '@react-pdf/renderer';
 import dayjs from 'dayjs';
+import { saveAs } from 'file-saver';
+import JSZip from 'jszip';
 
 import Layout from '@/components/Layout';
 import { PAGE_NUMBER, PAGE_SIZE } from '@/config/constants.config';
 import {
   INVOICE_STATUS_TAB_LABEL_MAP,
   INVOICE_STATUS_TAB_VALUES,
+  InvoiceLanguage,
   InvoiceStatus,
 } from '@/models/invoices.model';
+import InvoicesService from '@/services/invoices.service';
 import { bbColors, bbFont, bbStatusPill } from '@/styles/bb';
 import useQueryParams from '@/utils/hooks/useQueryParams';
 import DateTime from '@/utils/static/DateTime';
 import { formatPrice } from '@/utils/static/formatNumber';
+import { showToast } from '@/valtio/global/global.actions';
 import {
   getInvoices,
   getSelectedInvoice,
+  toggleCreateInvoiceModal,
   toggleMarkAsPaidInvoiceModal,
   toggleUpdateInvoiceModal,
 } from '@/valtio/invoices/invoices.actions';
 import { useInvoicesStore } from '@/valtio/invoices/invoices.store';
 
+import CreateInvoiceModal from './partials/CreateInvoiceModal';
+import InvoicePDF from './partials/InvoicePDF';
 import MarkAsSentInvoiceModal from './partials/MarkAsSentInvoiceModal';
 import SingleInvoiceModal from './partials/SingleInvoiceModal';
 import UpdateInvoiceModal from './partials/UpdateInvoiceModal';
@@ -44,15 +53,24 @@ import useInvoicesView from './useInvoicesView';
 const statusToVariant = (s: InvoiceStatus): string =>
   s === InvoiceStatus.SENT ? 'pending' : 'draft';
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 const Invoices = () => {
   const { t } = useTranslation();
   const { params: queryParams, handlePageChange, setParam } = useQueryParams();
-  const { search, page, sortBy, sortDirection, invoiceStatus } = queryParams;
+  const { search, page, sortBy, sortDirection, invoiceStatus, year } = queryParams;
 
   const [statusFilter, setStatusFilter] = useState<string>(invoiceStatus || INVOICE_STATUS_TAB_VALUES[0]);
   const [searchInput, setSearchInput] = useState<string>(search || '');
+  // Year tabs (Mario 26.8.2026): invoices are organised per year of the
+  // invoice date — 2026, 2027… appear automatically as invoices exist.
+  const [yearFilter, setYearFilter] = useState<number>(Number(year) || CURRENT_YEAR);
+  const [availableYears, setAvailableYears] = useState<number[]>([CURRENT_YEAR]);
+  // Multi-select for the batch ZIP download.
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [zipping, setZipping] = useState(false);
 
-  const { isLoading, invoices, selectedInvoice, totalCount, updateInvoiceModalOpen, markAsPaidModalOpen } =
+  const { isLoading, invoices, selectedInvoice, totalCount, updateInvoiceModalOpen, markAsPaidModalOpen, createInvoiceModalOpen } =
     useInvoicesStore();
   const { closeInvoiceModal } = useInvoicesView();
 
@@ -68,14 +86,70 @@ const Invoices = () => {
   }, [id]);
 
   useEffect(() => {
+    (async () => {
+      const years = await InvoicesService.getInvoiceYears();
+      const merged = Array.from(new Set([CURRENT_YEAR, ...years])).sort((a, b) => a - b);
+
+      setAvailableYears(merged);
+    })();
+  }, [createInvoiceModalOpen]);
+
+  useEffect(() => {
     const pageNumber = page - PAGE_NUMBER;
     const status = (statusFilter === 'all' ? '' : statusFilter) as InvoiceStatus;
 
-    getInvoices(pageNumber, sortBy, sortDirection, status, search);
-  }, [page, sortBy, sortDirection, statusFilter, search]);
+    setSelectedIds([]);
+    getInvoices(pageNumber, sortBy, sortDirection, status, search, undefined, undefined, undefined, undefined, undefined, yearFilter);
+  }, [page, sortBy, sortDirection, statusFilter, search, yearFilter, createInvoiceModalOpen, updateInvoiceModalOpen]);
 
   const onSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') setParam({ search: searchInput, page: 1 });
+  };
+
+  const allOnPageSelected = useMemo(
+    () => invoices.length > 0 && invoices.every(inv => selectedIds.includes(inv.id)),
+    [invoices, selectedIds]
+  );
+
+  const toggleSelectAll = () => {
+    setSelectedIds(allOnPageSelected ? [] : invoices.map(inv => inv.id));
+  };
+
+  const toggleSelected = (invoiceId: number) => {
+    setSelectedIds(prev => (prev.includes(invoiceId) ? prev.filter(x => x !== invoiceId) : [...prev, invoiceId]));
+  };
+
+  // Batch download: render each selected invoice through the existing
+  // InvoicePDF template (in the invoice's own language) and pack everything
+  // into ONE zip — no more one-by-one downloads (Mario 26.8.2026).
+  const handleDownloadSelected = async () => {
+    if (!selectedIds.length || zipping) return;
+
+    setZipping(true);
+    try {
+      const zip = new JSZip();
+      const selected = invoices.filter(inv => selectedIds.includes(inv.id));
+
+      // Sequential on purpose — @react-pdf's WASM layouter is single-threaded
+      // and parallel renders just fight for the same thread.
+      // eslint-disable-next-line no-restricted-syntax
+      for (const invoice of selected) {
+        const locale = invoice.invoiceLanguage === InvoiceLanguage.HR ? 'hr' : 'en';
+        // eslint-disable-next-line no-await-in-loop
+        const blob = await pdf(<InvoicePDF invoice={invoice} locale={locale} />).toBlob();
+        const safeNumber = invoice.invoiceNumber.replace(/[/\\]/g, '-');
+
+        zip.file(`invoice-${safeNumber}.pdf`, blob);
+      }
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+      saveAs(zipBlob, `invoices-${yearFilter}-${dayjs().format('YYYY-MM-DD')}.zip`);
+    } catch {
+      showToast({ status: 'error', text: t('toast-messages.download-selected-failed') });
+    } finally {
+      setZipping(false);
+    }
   };
 
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -98,6 +172,7 @@ const Invoices = () => {
       )}
       <UpdateInvoiceModal isOpen={updateInvoiceModalOpen} onClose={toggleUpdateInvoiceModal} />
       <MarkAsSentInvoiceModal isOpen={markAsPaidModalOpen} onClose={toggleMarkAsPaidInvoiceModal} />
+      <CreateInvoiceModal isOpen={createInvoiceModalOpen} onClose={toggleCreateInvoiceModal} />
       <Layout>
         <Box
           sx={{
@@ -125,6 +200,33 @@ const Invoices = () => {
                 Issued invoices, drafts & sent
               </Typography>
             </Box>
+            <Stack direction="row" gap={1}>
+              {selectedIds.length > 0 && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  disabled={zipping}
+                  onClick={handleDownloadSelected}
+                  sx={{ textTransform: 'none', fontSize: 12.5, fontWeight: 700, borderColor: bbColors.gray300, color: bbColors.navy900 }}
+                >
+                  {zipping ? t('actions.preparing-zip') : `${t('actions.download-selected')} (${selectedIds.length})`}
+                </Button>
+              )}
+              <Button
+                variant="contained"
+                size="small"
+                onClick={() => toggleCreateInvoiceModal(true)}
+                sx={{
+                  textTransform: 'none',
+                  fontSize: 12.5,
+                  fontWeight: 700,
+                  backgroundColor: bbColors.navy900,
+                  '&:hover': { backgroundColor: bbColors.navy700 },
+                }}
+              >
+                + {t('actions.newInvoice')}
+              </Button>
+            </Stack>
           </Stack>
 
           <Box
@@ -141,16 +243,20 @@ const Invoices = () => {
               maxWidth: '100%',
             }}
           >
-            {INVOICE_STATUS_TAB_VALUES.map(v => {
-              const active = v === statusFilter;
+            {/* Year tabs replaced the old All/Draft/Sent strip (Mario
+                26.8.2026) — invoices live per calendar year of the invoice
+                date; new years appear automatically. Status moved to the
+                dropdown in the filter bar below. */}
+            {availableYears.map(y => {
+              const active = y === yearFilter;
 
-              
+
 return (
                 <Box
-                  key={v}
+                  key={y}
                   onClick={() => {
-                    setStatusFilter(v);
-                    setParam({ invoiceStatus: v === 'all' ? '' : v, page: 1 });
+                    setYearFilter(y);
+                    setParam({ year: y === CURRENT_YEAR ? '' : String(y), page: 1 });
                   }}
                   sx={{
                     padding: '7px 14px',
@@ -162,9 +268,10 @@ return (
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
                     userSelect: 'none',
+                    fontVariantNumeric: 'tabular-nums',
                   }}
                 >
-                  {t(INVOICE_STATUS_TAB_LABEL_MAP[v])}
+                  {y}
                 </Box>
               );
             })}
@@ -199,6 +306,29 @@ return (
                 },
               }}
             />
+            <TextField
+              select
+              size="small"
+              value={statusFilter}
+              onChange={e => {
+                setStatusFilter(e.target.value);
+                setParam({ invoiceStatus: e.target.value === 'all' ? '' : e.target.value, page: 1 });
+              }}
+              sx={{
+                minWidth: 130,
+                '& .MuiOutlinedInput-root': {
+                  fontSize: 12,
+                  borderRadius: '6px',
+                  '& fieldset': { borderColor: bbColors.gray300 },
+                },
+              }}
+            >
+              {INVOICE_STATUS_TAB_VALUES.map(v => (
+                <MenuItem key={v} value={v} sx={{ fontSize: 12 }}>
+                  {t(INVOICE_STATUS_TAB_LABEL_MAP[v])}
+                </MenuItem>
+              ))}
+            </TextField>
           </Stack>
 
           <Box
@@ -213,6 +343,23 @@ return (
               <Box component="table" sx={{ width: '100%', minWidth: 920, borderCollapse: 'collapse' }}>
                 <Box component="thead">
                   <Box component="tr">
+                    <Box
+                      component="th"
+                      sx={{
+                        width: 36,
+                        padding: '6px 4px 6px 10px',
+                        backgroundColor: bbColors.gray75,
+                        borderBottom: `1px solid ${bbColors.gray200}`,
+                      }}
+                    >
+                      <MuiCheckbox
+                        size="small"
+                        checked={allOnPageSelected}
+                        indeterminate={selectedIds.length > 0 && !allOnPageSelected}
+                        onChange={toggleSelectAll}
+                        sx={{ p: 0.5 }}
+                      />
+                    </Box>
                     {[
                       { label: 'Invoice', align: 'left' },
                       { label: 'Client', align: 'left' },
@@ -246,14 +393,14 @@ return (
                 <Box component="tbody">
                   {isLoading && (
                     <Box component="tr">
-                      <Box component="td" colSpan={7} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                      <Box component="td" colSpan={8} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
                         Loading…
                       </Box>
                     </Box>
                   )}
                   {!isLoading && invoices.length === 0 && (
                     <Box component="tr">
-                      <Box component="td" colSpan={7} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                      <Box component="td" colSpan={8} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
                         No invoices match the current filters.
                       </Box>
                     </Box>
@@ -279,6 +426,18 @@ return (
                           }}
                           sx={{ cursor: 'pointer', '&:hover': { backgroundColor: bbColors.gray75 } }}
                         >
+                          <Box
+                            component="td"
+                            onClick={e => e.stopPropagation()}
+                            sx={{ padding: '6px 4px 6px 10px', borderBottom: `1px solid ${bbColors.gray100}` }}
+                          >
+                            <MuiCheckbox
+                              size="small"
+                              checked={selectedIds.includes(inv.id)}
+                              onChange={() => toggleSelected(inv.id)}
+                              sx={{ p: 0.5 }}
+                            />
+                          </Box>
                           <Box component="td" sx={{ ...tdBase, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
                             {inv.invoiceNumber}
                           </Box>

@@ -141,6 +141,13 @@
     "invoice-item": "Opis stavke na računu",
     "input-invoice-item": "Unesi opis stavke na računu",
     "invoice-number": "Broj računa",
-    "input-invoice-number": "Unesite broj računa"
+    "input-invoice-number": "Unesite broj računa",
+    "agency": "Agencija",
+    "search-agency": "Pretraži agencije po imenu…",
+    "add-new-agency": "Dodaj novu agenciju",
+    "save-agency": "Spremi agenciju",
+    "invoice-date": "Datum računa",
+    "auto-number": "Automatski (sljedeći u godini)",
+    "agency-name-required": "Naziv agencije je obavezan"
   }
 }

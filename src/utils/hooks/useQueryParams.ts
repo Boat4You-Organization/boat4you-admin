@@ -21,6 +21,7 @@ export interface SearchParams {
   recipientType: string;
   departureDate: string;
   invoiceAgency: string;
+  year: string;
 }
 
 const defaultParams: SearchParams = {
@@ -42,6 +43,7 @@ const defaultParams: SearchParams = {
   recipientType: '',
   departureDate: '',
   invoiceAgency: '',
+  year: '',
 };
 
 const useQueryParams = () => {
@@ -80,6 +82,7 @@ const useQueryParams = () => {
     recipientType: getParam('recipientType', defaultParams.recipientType),
     departureDate: getParam('departureDate', defaultParams.departureDate),
     invoiceAgency: getParam('invoiceAgency', defaultParams.invoiceAgency),
+    year: getParam('year', defaultParams.year),
   });
 
   const params = getParamsFromUrl();

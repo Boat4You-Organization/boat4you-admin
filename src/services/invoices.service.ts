@@ -1,6 +1,6 @@
 import { api } from '@/config/axios.config';
 import { SortDirection } from '@/config/constants.config';
-import { UpdateInvoiceFormValues } from '@/config/forms/form-models.config';
+import { CreateInvoiceFormValues, UpdateInvoiceFormValues } from '@/config/forms/form-models.config';
 import { ErrorModel } from '@/models/error.model';
 import { InvoiceLanguage, InvoiceModel, InvoiceStatus, RecipientType } from '@/models/invoices.model';
 import { PaginatedResponse, PayloadResponse } from '@/types/response.type';
@@ -17,7 +17,8 @@ export default class InvoicesService {
     recipientType?: RecipientType | string,
     language?: InvoiceLanguage,
     departureDate?: string,
-    agencyId?: string
+    agencyId?: string,
+    year?: number
   ): Promise<PaginatedResponse<InvoiceModel>> {
     try {
       const queryParams = createQueryParamsWithPage({
@@ -31,6 +32,7 @@ export default class InvoicesService {
         language,
         departureDate,
         agencyId,
+        year,
       });
 
       const { data } = await api.get(`/admin/invoices${queryParams}`);
@@ -46,6 +48,35 @@ export default class InvoicesService {
           totalPages: 0,
         },
       };
+    }
+  }
+
+  /** Distinct invoice years (by invoice date), newest first — year tabs. */
+  public static async getInvoiceYears(): Promise<number[]> {
+    try {
+      const { data } = await api.get('/admin/invoices/years');
+
+      return data || [];
+    } catch {
+      return [];
+    }
+  }
+
+  public static async createInvoice(payload: CreateInvoiceFormValues): Promise<PayloadResponse<InvoiceModel | null>> {
+    try {
+      const { data } = await api.post('/admin/invoices', {
+        ...payload,
+        reservationId: payload.reservationId || null,
+        invoiceNumber: payload.invoiceNumber || null,
+        // Backend derives nothing from agencyId — it's picker-side only.
+        agencyId: undefined,
+      });
+
+      return { payload: data };
+    } catch (error) {
+      const { message } = error as ErrorModel;
+
+      return { payload: null, message };
     }
   }
 

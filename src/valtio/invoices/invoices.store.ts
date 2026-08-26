@@ -9,6 +9,7 @@ interface InvoicesStore {
   isLoading: boolean;
   updateInvoiceModalOpen: boolean;
   markAsPaidModalOpen: boolean;
+  createInvoiceModalOpen: boolean;
 }
 
 export const invoicesStore = proxy<InvoicesStore>({
@@ -18,6 +19,7 @@ export const invoicesStore = proxy<InvoicesStore>({
   isLoading: false,
   updateInvoiceModalOpen: false,
   markAsPaidModalOpen: false,
+  createInvoiceModalOpen: false,
 });
 
 export const useInvoicesStore = (): InvoicesStore => useSnapshot(invoicesStore);

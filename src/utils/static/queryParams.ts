@@ -74,6 +74,7 @@ export const createQueryParamsWithPage = ({
   invoiceStatus,
   departureDate,
   agencyId,
+  year,
 }: {
   pageNumber?: number;
   pageSize?: number;
@@ -102,6 +103,7 @@ export const createQueryParamsWithPage = ({
   invoiceStatus?: InvoiceStatus;
   departureDate?: string;
   agencyId?: string;
+  year?: number;
 }): string => {
   let sort: string | undefined;
 
@@ -139,6 +141,7 @@ export const createQueryParamsWithPage = ({
       invoiceStatus: invoiceStatus || undefined,
       departureDate: departureDate || undefined,
       agencyId: agencyId || undefined,
+      year: year || undefined,
     })
       .filter(([, value]) => value !== undefined)
       .map(([key, value]) => [key, String(value)])

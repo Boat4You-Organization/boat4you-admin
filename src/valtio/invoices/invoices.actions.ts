@@ -14,7 +14,8 @@ export async function getInvoices(
   recipientType?: RecipientType | string,
   agencyId?: string,
   departureDate?: string,
-  language?: InvoiceLanguage
+  language?: InvoiceLanguage,
+  year?: number
 ): Promise<void> {
   invoicesStore.isLoading = true;
 
@@ -28,7 +29,8 @@ export async function getInvoices(
     recipientType,
     language,
     departureDate,
-    agencyId
+    agencyId,
+    year
   );
 
   invoicesStore.isLoading = false;
@@ -64,4 +66,8 @@ export function toggleUpdateInvoiceModal(isOpen?: boolean | React.MouseEvent): v
 
 export function toggleMarkAsPaidInvoiceModal(isOpen?: boolean | React.MouseEvent): void {
   invoicesStore.markAsPaidModalOpen = typeof isOpen === 'boolean' ? isOpen : !invoicesStore.markAsPaidModalOpen;
+}
+
+export function toggleCreateInvoiceModal(isOpen?: boolean | React.MouseEvent): void {
+  invoicesStore.createInvoiceModalOpen = typeof isOpen === 'boolean' ? isOpen : !invoicesStore.createInvoiceModalOpen;
 }

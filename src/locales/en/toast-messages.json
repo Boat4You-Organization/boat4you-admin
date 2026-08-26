@@ -56,5 +56,8 @@
   "delete-invoice-successfully": "Delete invoice successfully",
   "delete-invoice-failed": "Failed to delete invoice",
   "mark-sent-invoice-successfully": "Mark as Sent invoice successfully",
-  "mark-sent-invoice-failed": "Failed to mark as sent invoice"
+  "mark-sent-invoice-failed": "Failed to mark as sent invoice",
+  "create-agency-successfully": "Agency saved",
+  "create-agency-failed": "Failed to save agency",
+  "download-selected-failed": "Failed to prepare the ZIP download"
 }

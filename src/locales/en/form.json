@@ -141,6 +141,13 @@
     "invoice-item": "Item description",
     "input-invoice-item": "Input item description",
     "invoice-number": "Invoice number",
-    "input-invoice-number": "Enter invoice number"
+    "input-invoice-number": "Enter invoice number",
+    "agency": "Agency",
+    "search-agency": "Search agency by name…",
+    "add-new-agency": "Add new agency",
+    "save-agency": "Save agency",
+    "invoice-date": "Invoice date",
+    "auto-number": "Automatic (next in year)",
+    "agency-name-required": "Agency name is required"
   }
 }

@@ -57,6 +57,23 @@ export default class AgenciesService {
     }
   }
 
+  /**
+   * Manual agency entry (invoice flow: "add the company if it isn't listed").
+   * Backend stores it sync-proof (skipExternalSystem) and active, so it shows
+   * up in every future agency search.
+   */
+  public static async createAgency(payload: Partial<UpdateAgencyFormValues>): Promise<PayloadResponse<AgencyModel | null>> {
+    try {
+      const { data } = await api.post('/admin/agencies', payload);
+
+      return { payload: data };
+    } catch (error) {
+      const { message } = error as ErrorModel;
+
+      return { payload: null, message };
+    }
+  }
+
   public static async updateAgency(id: number, payload: UpdateAgencyFormValues): Promise<PayloadResponse<boolean>> {
     try {
       await api.put(`/admin/agencies/${id}`, { id, ...payload });

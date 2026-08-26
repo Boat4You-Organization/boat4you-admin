@@ -47,9 +47,10 @@ export const INVOICE_STATUS_TAB_LABEL_MAP = {
 
 export interface InvoiceModel {
   id: number;
-  reservationId: number;
-  reservationNumber: string;
-  reservationFlowId: number;
+  /** Null for manual invoices without a booking link. */
+  reservationId: number | null;
+  reservationNumber: string | null;
+  reservationFlowId: number | null;
   recipientType: RecipientType;
   recipientName: string;
   recipientCity: string;

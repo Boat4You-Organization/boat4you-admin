@@ -164,6 +164,31 @@ export interface PaymentPhaseFormValues {
   paymentPhaseIds: number[];
 }
 
+export interface CreateInvoiceFormValues {
+  /** Optional booking link — empty string = standalone manual invoice. */
+  reservationId: string;
+  /** Picked agency (COMPANY recipients); '' = manual/typed recipient. */
+  agencyId: string;
+  recipientType: RecipientType;
+  recipientName: string;
+  recipientCity: string;
+  recipientStreet: string;
+  recipientZipCode: string;
+  recipientCountry: CountryIsoEnum;
+  recipientVatCode: string;
+  invoiceLanguage: InvoiceLanguage;
+  /** ISO date (YYYY-MM-DD). */
+  invoiceDate: string;
+  /** Blank → backend assigns the next NNNNNN/GGGG number for the year. */
+  invoiceNumber: string;
+  invoiceItem: string;
+  includeVat: boolean;
+  vatPercentage: number | null;
+  priceWithoutVat: number | null;
+  vatAmount: number | null;
+  totalPrice: number | null;
+}
+
 export interface UpdateInvoiceFormValues {
   reservationId: string;
   recipientType: RecipientType;

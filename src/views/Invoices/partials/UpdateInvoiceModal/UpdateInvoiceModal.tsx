@@ -53,7 +53,8 @@ const UpdateInvoiceModal = ({ isOpen, onClose }: UpdateInvoiceModalProps) => {
 
   const initialValues: UpdateInvoiceFormValues = selectedInvoice
     ? {
-        reservationId: selectedInvoice.reservationId.toString(),
+        // Manual invoices have no booking link — the field then stays empty.
+        reservationId: selectedInvoice.reservationId?.toString() ?? '',
         recipientType: selectedInvoice.recipientType,
         recipientName: selectedInvoice.recipientName,
         recipientCity: selectedInvoice.recipientCity,

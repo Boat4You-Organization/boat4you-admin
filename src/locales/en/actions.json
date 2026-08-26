@@ -42,5 +42,8 @@
   "markAsSent": "Mark as Sent",
   "download": "Download",
   "markAsSentInvoice": "Mark as Sent Invoice",
-  "download-pdf": "Download PDF"
+  "download-pdf": "Download PDF",
+  "newInvoice": "New invoice",
+  "download-selected": "Download selected",
+  "preparing-zip": "Preparing ZIP…"
 }

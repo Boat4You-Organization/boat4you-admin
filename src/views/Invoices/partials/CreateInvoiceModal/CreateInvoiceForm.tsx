@@ -54,6 +54,13 @@ const CreateInvoiceForm = () => {
   const { dirtyFields } = formState;
 
   const [agencies, setAgencies] = useState<AgencyModel[]>([]);
+  // The picked agency is pinned into the options list: selecting one makes
+  // MUI write its full label into the input, our debounced search then runs
+  // on that label, finds nothing, and the option set would no longer contain
+  // the picked id — the visible value flickered away (Mario's "glitch",
+  // 26.8.2026). Pinning keeps the selection renderable regardless of what
+  // the live search currently returns.
+  const [selectedAgency, setSelectedAgency] = useState<AgencyModel | null>(null);
   const [agencySearch, setAgencySearch] = useState('');
   const [showNewAgency, setShowNewAgency] = useState(false);
   const [newAgency, setNewAgency] = useState(emptyNewAgency);
@@ -109,9 +116,18 @@ const CreateInvoiceForm = () => {
   const handleAgencyPicked = (id: string) => {
     setValue('agencyId', id as never, { shouldDirty: true });
 
-    const agency = agencies.find(a => a.id.toString() === id);
+    if (!id) {
+      setSelectedAgency(null);
 
-    if (agency) prefillFromAgency(agency);
+      return;
+    }
+
+    const agency = agencies.find(a => a.id.toString() === id) || selectedAgency;
+
+    if (agency) {
+      setSelectedAgency(agency);
+      prefillFromAgency(agency);
+    }
   };
 
   const handleSaveNewAgency = async () => {
@@ -138,6 +154,7 @@ const CreateInvoiceForm = () => {
 
     showToast({ status: 'success', text: t('toast-messages.create-agency-successfully') });
     setAgencies(prev => [payload, ...prev]);
+    setSelectedAgency(payload);
     setShowNewAgency(false);
     setNewAgency(emptyNewAgency);
     setValue('agencyId', payload.id.toString() as never, { shouldDirty: true });
@@ -213,7 +230,10 @@ const CreateInvoiceForm = () => {
             <Box sx={{ width: '100%' }}>
               <Autocomplete
                 value={field.value}
-                options={agencies.map(agency => ({
+                options={[
+                  ...(selectedAgency ? [selectedAgency] : []),
+                  ...agencies.filter(agency => agency.id !== selectedAgency?.id),
+                ].map(agency => ({
                   id: agency.id.toString(),
                   label: [agency.name, agency.city, agency.country].filter(Boolean).join(' — '),
                 }))}

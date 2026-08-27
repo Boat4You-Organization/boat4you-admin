@@ -48,6 +48,10 @@ const RangeDay = ({ day, rangeStart, rangeEnd, ...other }: RangeDayProps) => {
   const isEnd = rangeEnd && day.isSame(rangeEnd, 'day');
   const inBetween =
     rangeStart && rangeEnd && day.isAfter(rangeStart, 'day') && day.isBefore(rangeEnd, 'day');
+  // Saturdays pop in red — charter turnover day, the one brokers scan for
+  // (Mario 26.8.2026). Selected endpoints keep the blue treatment.
+  const isSaturday = day.day() === 6;
+  const saturdaySx = isSaturday ? { color: colors.red600, fontWeight: 700 } : undefined;
 
   const endpointSx = {
     backgroundColor: colors.blue500,
@@ -59,6 +63,7 @@ const RangeDay = ({ day, rangeStart, rangeEnd, ...other }: RangeDayProps) => {
     backgroundColor: colors.blue50,
     borderRadius: 0,
     color: colors.black950,
+    ...saturdaySx,
   };
 
   return (
@@ -70,7 +75,7 @@ const RangeDay = ({ day, rangeStart, rangeEnd, ...other }: RangeDayProps) => {
           ? endpointSx
           : inBetween
             ? betweenSx
-            : undefined
+            : saturdaySx
       }
     />
   );
@@ -220,6 +225,14 @@ return;
             <DateCalendar
               value={null}
               onChange={handleDayPick}
+              // Open on the month of the committed range instead of today —
+              // reopening the picker for an Oct 2027 charter used to mean
+              // paging right from the current month all over again.
+              referenceDate={draftStart ?? startDate}
+              // Year + month views (header label click) so far-away dates are
+              // three clicks away, not ten presses on the next-month arrow.
+              views={['year', 'month', 'day']}
+              openTo="day"
               minDate={minDate ?? dayjs()}
               slots={{ day: RangeDay as any }}
               slotProps={{

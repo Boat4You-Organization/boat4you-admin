@@ -1125,9 +1125,37 @@ const Offers = () => {
                   setEndDate(e);
                 }}
               />
-              <Typography variant="body2" color={bbColors.gray500} sx={{ fontSize: 11, mt: 0.5 }}>
-                {nights} {nights === 1 ? 'night' : 'nights'}
-              </Typography>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mt: 0.5 }}>
+                <Typography variant="body2" color={bbColors.gray500} sx={{ fontSize: 11 }}>
+                  {nights} {nights === 1 ? 'night' : 'nights'}
+                </Typography>
+                {/* One-click "same charter, next/previous week" — clients often
+                    ask for the neighbouring week and repaging the calendar to
+                    a far-away month every time was maddening (Mario 26.8). */}
+                <Stack direction="row" spacing={0.5}>
+                  <Button
+                    size="small"
+                    disabled={startDate.subtract(7, 'day').isBefore(dayjs(), 'day')}
+                    onClick={() => {
+                      setStartDate(startDate.subtract(7, 'day'));
+                      setEndDate(endDate.subtract(7, 'day'));
+                    }}
+                    sx={{ minWidth: 0, px: 1, fontSize: 11, textTransform: 'none' }}
+                  >
+                    ‹ week
+                  </Button>
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      setStartDate(startDate.add(7, 'day'));
+                      setEndDate(endDate.add(7, 'day'));
+                    }}
+                    sx={{ minWidth: 0, px: 1, fontSize: 11, textTransform: 'none' }}
+                  >
+                    week ›
+                  </Button>
+                </Stack>
+              </Stack>
             </Section>
 
             <Section label="Destination">

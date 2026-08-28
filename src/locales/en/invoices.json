@@ -21,6 +21,7 @@
     "title": "Booking Details",
     "contract-number": "Contract number",
     "charter-period": "Charter period",
+    "charter-country": "Charter country",
     "booking-number": "Booking number",
     "client-name": "Client name",
     "client-email": "Client email",

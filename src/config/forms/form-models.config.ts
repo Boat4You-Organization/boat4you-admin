@@ -186,6 +186,8 @@ export interface CreateInvoiceFormValues {
   /** Charter departure / return, 'YYYY-MM-DD' ('' = not set). */
   charterDateFrom: string;
   charterDateTo: string;
+  /** Departure country of the charter (free text, e.g. 'Croatia'). */
+  charterCountry: string;
   invoiceItem: string;
   includeVat: boolean;
   vatPercentage: number | null;
@@ -211,6 +213,8 @@ export interface UpdateInvoiceFormValues {
   /** Charter departure / return, 'YYYY-MM-DD' ('' = not set). */
   charterDateFrom: string;
   charterDateTo: string;
+  /** Departure country of the charter (free text, e.g. 'Croatia'). */
+  charterCountry: string;
   invoiceItem: string;
   includeVat: boolean;
   vatPercentage: number | null;

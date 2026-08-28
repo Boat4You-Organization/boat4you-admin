@@ -376,6 +376,11 @@ const CreateInvoiceForm = () => {
           )}
         />
         <FormInput
+          name="charterCountry"
+          formLabel={t('form.invoice.charter-country')}
+          placeholder={t('form.invoice.input-charter-country')}
+        />
+        <FormInput
           name="invoiceItem"
           formLabel={t('form.invoice.invoice-item')}
           placeholder={t('form.invoice.input-invoice-item')}

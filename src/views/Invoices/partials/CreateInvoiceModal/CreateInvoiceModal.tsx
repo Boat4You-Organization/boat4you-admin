@@ -37,6 +37,7 @@ const defaultValues: CreateInvoiceFormValues = {
   contractNumber: '',
   charterDateFrom: '',
   charterDateTo: '',
+  charterCountry: '',
   invoiceItem: '',
   includeVat: false,
   vatPercentage: null,

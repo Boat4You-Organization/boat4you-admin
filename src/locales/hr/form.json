@@ -149,6 +149,8 @@
     "invoice-date": "Datum računa",
     "contract-number": "Broj ugovora",
     "input-contract-number": "Unesite broj ugovora",
+    "charter-country": "Država chartera",
+    "input-charter-country": "npr. Hrvatska",
     "charter-date-from": "Početak chartera",
     "charter-date-to": "Kraj chartera",
     "auto-number": "Automatski (sljedeći u godini)",

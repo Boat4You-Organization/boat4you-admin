@@ -405,6 +405,7 @@ return (
                       { label: 'Client', align: 'left' },
                       { label: 'Booking', align: 'left', sortKey: 'contractNumber' },
                       { label: 'Charter', align: 'left', sortKey: 'charterDateFrom' },
+                      { label: 'Country', align: 'left', sortKey: 'charterCountry' },
                       { label: 'Amount', align: 'right' },
                       { label: 'Issued', align: 'left', sortKey: 'invoiceDate' },
                       { label: 'Status', align: 'left' },
@@ -452,14 +453,14 @@ return (
                 <Box component="tbody">
                   {isLoading && (
                     <Box component="tr">
-                      <Box component="td" colSpan={9} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                      <Box component="td" colSpan={10} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
                         Loading…
                       </Box>
                     </Box>
                   )}
                   {!isLoading && invoices.length === 0 && (
                     <Box component="tr">
-                      <Box component="td" colSpan={9} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                      <Box component="td" colSpan={10} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
                         No invoices match the current filters.
                       </Box>
                     </Box>
@@ -522,6 +523,10 @@ return (
                                   inv.charterDateTo ? dayjs(inv.charterDateTo).format('DD MMM YYYY') : '…'
                                 }`
                               : '—'}
+                          </Box>
+                          <Box component="td" sx={{ ...tdBase, whiteSpace: 'nowrap' }}>
+                            {/* Charter departure country (Croatia / Greece / …). */}
+                            {inv.charterCountry ?? '—'}
                           </Box>
                           <Box
                             component="td"

@@ -149,6 +149,8 @@
     "invoice-date": "Invoice date",
     "contract-number": "Contract number",
     "input-contract-number": "Enter contract number",
+    "charter-country": "Charter country",
+    "input-charter-country": "e.g. Croatia",
     "charter-date-from": "Charter start",
     "charter-date-to": "Charter end",
     "auto-number": "Automatic (next in year)",

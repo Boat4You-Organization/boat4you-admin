@@ -158,6 +158,11 @@ const UpdateInvoiceForm = () => {
             />
           )}
         />
+        <FormInput
+          name="charterCountry"
+          formLabel={t('form.invoice.charter-country')}
+          placeholder={t('form.invoice.input-charter-country')}
+        />
       </Stack>
       <Stack direction={isMobile ? 'column' : 'row'} spacing={2} mb={3}>
         <FormInput

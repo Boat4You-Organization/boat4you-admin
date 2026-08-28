@@ -163,6 +163,20 @@ const UpdateInvoiceForm = () => {
           formLabel={t('form.invoice.charter-country')}
           placeholder={t('form.invoice.input-charter-country')}
         />
+        <Controller
+          name="bookingDate"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              fullWidth
+              type="date"
+              label={t('form.invoice.booking-date')}
+              value={field.value}
+              onChange={field.onChange}
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+          )}
+        />
       </Stack>
       <Stack direction={isMobile ? 'column' : 'row'} spacing={2} mb={3}>
         <FormInput

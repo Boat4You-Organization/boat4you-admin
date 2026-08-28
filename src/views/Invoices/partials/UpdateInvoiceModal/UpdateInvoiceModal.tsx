@@ -37,6 +37,7 @@ const defaultValues: UpdateInvoiceFormValues = {
   charterDateFrom: '',
   charterDateTo: '',
   charterCountry: '',
+  bookingDate: '',
   invoiceItem: '',
   includeVat: false,
   vatPercentage: null,
@@ -76,6 +77,7 @@ const UpdateInvoiceModal = ({ isOpen, onClose }: UpdateInvoiceModalProps) => {
         charterDateFrom: selectedInvoice.charterDateFrom ?? '',
         charterDateTo: selectedInvoice.charterDateTo ?? '',
         charterCountry: selectedInvoice.charterCountry ?? '',
+        bookingDate: selectedInvoice.bookingDate ?? '',
         invoiceItem: selectedInvoice.invoiceItem,
         includeVat: selectedInvoice.includeVat,
         vatPercentage: selectedInvoice.vatPercentage,
@@ -111,6 +113,7 @@ const UpdateInvoiceModal = ({ isOpen, onClose }: UpdateInvoiceModalProps) => {
       ...formValues,
       charterDateFrom: formValues.charterDateFrom || undefined,
       charterDateTo: formValues.charterDateTo || undefined,
+      bookingDate: formValues.bookingDate || undefined,
     } as never);
 
     showToast({

@@ -68,6 +68,7 @@ export interface InvoiceModel {
   charterDateFrom: string | null;
   charterDateTo: string | null;
   charterCountry: string | null;
+  bookingDate: string | null;
   invoiceDate: string;
   invoiceLanguage: InvoiceLanguage;
   invoiceStatus: InvoiceStatus;

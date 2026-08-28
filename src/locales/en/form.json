@@ -150,6 +150,7 @@
     "contract-number": "Contract number",
     "input-contract-number": "Enter contract number",
     "charter-country": "Charter country",
+    "booking-date": "Booking date (operator)",
     "input-charter-country": "e.g. Croatia",
     "charter-date-from": "Charter start",
     "charter-date-to": "Charter end",

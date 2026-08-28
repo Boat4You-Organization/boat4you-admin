@@ -380,6 +380,20 @@ const CreateInvoiceForm = () => {
           formLabel={t('form.invoice.charter-country')}
           placeholder={t('form.invoice.input-charter-country')}
         />
+        <Controller
+          name="bookingDate"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              fullWidth
+              type="date"
+              label={t('form.invoice.booking-date')}
+              value={field.value}
+              onChange={field.onChange}
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+          )}
+        />
         <FormInput
           name="invoiceItem"
           formLabel={t('form.invoice.invoice-item')}

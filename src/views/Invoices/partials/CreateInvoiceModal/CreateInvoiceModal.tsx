@@ -38,6 +38,7 @@ const defaultValues: CreateInvoiceFormValues = {
   charterDateFrom: '',
   charterDateTo: '',
   charterCountry: '',
+  bookingDate: '',
   invoiceItem: '',
   includeVat: false,
   vatPercentage: null,
@@ -57,6 +58,7 @@ const CreateInvoiceModal = ({ isOpen, onClose }: CreateInvoiceModalProps) => {
       ...formValues,
       charterDateFrom: formValues.charterDateFrom || undefined,
       charterDateTo: formValues.charterDateTo || undefined,
+      bookingDate: formValues.bookingDate || undefined,
     } as never);
 
     showToast({

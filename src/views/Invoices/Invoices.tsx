@@ -404,6 +404,7 @@ return (
                       { label: 'Invoice', align: 'left', sortKey: 'invoiceNumber' },
                       { label: 'Client', align: 'left' },
                       { label: 'Booking', align: 'left', sortKey: 'contractNumber' },
+                      { label: 'Booked', align: 'left', sortKey: 'bookingDate' },
                       { label: 'Charter', align: 'left', sortKey: 'charterDateFrom' },
                       { label: 'Country', align: 'left', sortKey: 'charterCountry' },
                       { label: 'Amount', align: 'right' },
@@ -453,14 +454,14 @@ return (
                 <Box component="tbody">
                   {isLoading && (
                     <Box component="tr">
-                      <Box component="td" colSpan={10} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                      <Box component="td" colSpan={11} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
                         Loading…
                       </Box>
                     </Box>
                   )}
                   {!isLoading && invoices.length === 0 && (
                     <Box component="tr">
-                      <Box component="td" colSpan={10} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                      <Box component="td" colSpan={11} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
                         No invoices match the current filters.
                       </Box>
                     </Box>
@@ -515,6 +516,11 @@ return (
                                 100205/2026). Auto invoices carry the
                                 reservation number in the same field. */}
                             {inv.contractNumber ?? inv.reservationNumber ?? '—'}
+                          </Box>
+                          <Box component="td" sx={{ ...tdBase, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', color: bbColors.gray500 }}>
+                            {/* Date the operator issued the booking confirmation
+                                — Mario's "when do reservations happen" axis. */}
+                            {inv.bookingDate ? dayjs(inv.bookingDate).format('DD MMM YYYY') : '—'}
                           </Box>
                           <Box component="td" sx={{ ...tdBase, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
                             {/* Charter period — departure → return. */}

@@ -59,6 +59,7 @@ const SingleInvoiceModal = ({ isOpen, onClose, onConfirm }: SingleInvoiceModalPr
     charterDateFrom,
     charterDateTo,
     charterCountry,
+    bookingDate,
   } = selectedInvoice;
 
   const invoiceItems = [
@@ -84,6 +85,7 @@ const SingleInvoiceModal = ({ isOpen, onClose, onConfirm }: SingleInvoiceModalPr
   const bookingItems = [
     { label: 'invoices.booking-details.contract-number', value: contractNumber },
     { label: 'invoices.booking-details.charter-country', value: charterCountry },
+    { label: 'invoices.booking-details.booking-date', value: bookingDate ? DateTime.formatHR(dayjs(bookingDate)) : null },
     {
       label: 'invoices.booking-details.charter-period',
       value: charterDateFrom

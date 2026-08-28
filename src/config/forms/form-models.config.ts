@@ -181,6 +181,8 @@ export interface CreateInvoiceFormValues {
   invoiceDate: string;
   /** Blank → backend assigns the next NNNNNN/GGGG number for the year. */
   invoiceNumber: string;
+  /** Paper contract / booking-confirmation number ('' = none). */
+  contractNumber: string;
   invoiceItem: string;
   includeVat: boolean;
   vatPercentage: number | null;
@@ -201,6 +203,8 @@ export interface UpdateInvoiceFormValues {
   invoiceLanguage: InvoiceLanguage;
   invoiceStatus: InvoiceStatus;
   invoiceNumber: string;
+  /** Paper contract / booking-confirmation number ('' clears it). */
+  contractNumber: string;
   invoiceItem: string;
   includeVat: boolean;
   vatPercentage: number | null;

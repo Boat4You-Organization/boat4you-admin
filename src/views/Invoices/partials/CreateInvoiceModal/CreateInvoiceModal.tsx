@@ -35,6 +35,7 @@ const defaultValues: CreateInvoiceFormValues = {
   invoiceLanguage: InvoiceLanguage.HR,
   invoiceDate: dayjs().format('YYYY-MM-DD'),
   invoiceNumber: '',
+  contractNumber: '',
   invoiceItem: '',
   includeVat: false,
   vatPercentage: null,

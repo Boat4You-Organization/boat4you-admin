@@ -36,6 +36,7 @@ const SingleInvoiceModal = ({ isOpen, onClose, onConfirm }: SingleInvoiceModalPr
   const {
     id,
     reservationNumber,
+    contractNumber,
     invoiceNumber,
     invoiceDate,
     invoiceLanguage,
@@ -78,6 +79,7 @@ const SingleInvoiceModal = ({ isOpen, onClose, onConfirm }: SingleInvoiceModalPr
   ];
 
   const bookingItems = [
+    { label: 'invoices.booking-details.contract-number', value: contractNumber ?? '—' },
     { label: 'invoices.booking-details.booking-number', value: reservationNumber },
     { label: 'invoices.booking-details.client-name', value: clientName },
     { label: 'invoices.booking-details.client-email', value: clientEmail },

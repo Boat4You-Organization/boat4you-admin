@@ -147,6 +147,8 @@
     "add-new-agency": "Dodaj novu agenciju",
     "save-agency": "Spremi agenciju",
     "invoice-date": "Datum računa",
+    "contract-number": "Broj ugovora",
+    "input-contract-number": "Unesite broj ugovora",
     "auto-number": "Automatski (sljedeći u godini)",
     "agency-name-required": "Naziv agencije je obavezan"
   }

@@ -147,6 +147,8 @@
     "add-new-agency": "Add new agency",
     "save-agency": "Save agency",
     "invoice-date": "Invoice date",
+    "contract-number": "Contract number",
+    "input-contract-number": "Enter contract number",
     "auto-number": "Automatic (next in year)",
     "agency-name-required": "Agency name is required"
   }

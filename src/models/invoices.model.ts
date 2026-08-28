@@ -59,6 +59,10 @@ export interface InvoiceModel {
   recipientCountry: CountryIsoEnum;
   recipientVatCode: string;
   invoiceNumber: string;
+  /** Mario's paper contract / booking-confirmation number the invoice belongs
+   *  to. Listing's Booking column shows this (auto invoices carry the
+   *  reservation number here). */
+  contractNumber: string | null;
   invoiceDate: string;
   invoiceLanguage: InvoiceLanguage;
   invoiceStatus: InvoiceStatus;

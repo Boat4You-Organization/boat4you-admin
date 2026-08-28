@@ -340,6 +340,13 @@ const CreateInvoiceForm = () => {
       <Stack spacing={3} mb={3}>
         {/* Optional booking link — leave empty for a standalone invoice. */}
         <FormInput name="reservationId" renderInput={renderBookingInput} />
+        {/* Mario's paper contract number — his filing key; shows in the
+            listing's Booking column and is searchable. */}
+        <FormInput
+          name="contractNumber"
+          formLabel={t('form.invoice.contract-number')}
+          placeholder={t('form.invoice.input-contract-number')}
+        />
         <FormInput
           name="invoiceItem"
           formLabel={t('form.invoice.invoice-item')}

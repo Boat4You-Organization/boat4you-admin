@@ -19,6 +19,7 @@
   },
   "booking-details": {
     "title": "Booking Details",
+    "contract-number": "Contract number",
     "booking-number": "Booking number",
     "client-name": "Client name",
     "client-email": "Client email",

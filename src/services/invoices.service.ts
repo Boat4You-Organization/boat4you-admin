@@ -26,7 +26,7 @@ export default class InvoicesService {
         sortBy,
         sortDirection,
         invoiceStatus: status,
-        recipientName: search,
+        search,
         reservationId,
         recipientType,
         language,

@@ -117,7 +117,15 @@ const UpdateInvoiceForm = () => {
         {t('form.invoice.reservation-information')}
       </Typography>
       <Stack spacing={3}>
-        <FormInput name="reservationId" renderInput={renderBookingInput} validate={FormValidator.isNotEmpty} />
+        {/* Booking link is OPTIONAL — manual/standalone invoices have none,
+            and a required disabled field made them unsavable. */}
+        <FormInput name="reservationId" renderInput={renderBookingInput} />
+        {/* Mario's paper contract number — filing key, searchable. */}
+        <FormInput
+          name="contractNumber"
+          formLabel={t('form.invoice.contract-number')}
+          placeholder={t('form.invoice.input-contract-number')}
+        />
         <FormInput
           name="invoiceItem"
           formLabel={t('form.invoice.invoice-item')}

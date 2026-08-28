@@ -19,6 +19,7 @@
   },
   "booking-details": {
     "title": "Detalji rezervacije",
+    "contract-number": "Broj ugovora",
     "booking-number": "Broj rezervacije",
     "client-name": "Ime klijenta",
     "client-email": "E-mail klijenta",

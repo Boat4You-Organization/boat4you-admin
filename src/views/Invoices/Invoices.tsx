@@ -291,7 +291,7 @@ return (
             }}
           >
             <TextField
-              placeholder="Search invoice, client, booking…"
+              placeholder="Search contract no., agency, invoice no.…"
               size="small"
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
@@ -446,7 +446,11 @@ return (
                             <Typography sx={{ fontSize: 11, color: bbColors.gray500 }}>{inv.clientEmail}</Typography>
                           </Box>
                           <Box component="td" sx={{ ...tdBase, fontVariantNumeric: 'tabular-nums' }}>
-                            {inv.reservationNumber ?? '—'}
+                            {/* Mario's paper contract number — his filing key
+                                (e.g. contract 1001105/2026 on invoice
+                                100205/2026). Auto invoices carry the
+                                reservation number in the same field. */}
+                            {inv.contractNumber ?? inv.reservationNumber ?? '—'}
                           </Box>
                           <Box
                             component="td"

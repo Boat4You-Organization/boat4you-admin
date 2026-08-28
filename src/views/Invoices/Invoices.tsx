@@ -50,15 +50,30 @@ import useInvoicesView from './useInvoicesView';
  * reservation.commission). Due/Paid date + PDF link are TODO placeholders.
  */
 
-const statusToVariant = (s: InvoiceStatus): string =>
-  s === InvoiceStatus.SENT ? 'pending' : 'draft';
+const statusToVariant = (s: InvoiceStatus): string => {
+  if (s === InvoiceStatus.SENT) return 'sent';
+
+  if (s === InvoiceStatus.READY) return 'ready';
+
+  return 'draft';
+};
+
+// Subtle full-row tint so the list scans by state at a glance (Mario
+// 28.8.2026): Ready = warm amber, Sent = green, Draft = plain white.
+const statusRowTint = (s: InvoiceStatus): string | undefined => {
+  if (s === InvoiceStatus.SENT) return '#f2fbf6';
+
+  if (s === InvoiceStatus.READY) return '#fdf9ec';
+
+  return undefined;
+};
 
 const CURRENT_YEAR = new Date().getFullYear();
 
 const Invoices = () => {
   const { t } = useTranslation();
   const { params: queryParams, handlePageChange, setParam } = useQueryParams();
-  const { search, page, sortBy, sortDirection, invoiceStatus, year } = queryParams;
+  const { search, page, sortBy, sortDirection, invoiceStatus, year, departureDate } = queryParams;
 
   const [statusFilter, setStatusFilter] = useState<string>(invoiceStatus || INVOICE_STATUS_TAB_VALUES[0]);
   const [searchInput, setSearchInput] = useState<string>(search || '');
@@ -99,8 +114,8 @@ const Invoices = () => {
     const status = (statusFilter === 'all' ? '' : statusFilter) as InvoiceStatus;
 
     setSelectedIds([]);
-    getInvoices(pageNumber, sortBy, sortDirection, status, search, undefined, undefined, undefined, undefined, undefined, yearFilter);
-  }, [page, sortBy, sortDirection, statusFilter, search, yearFilter, createInvoiceModalOpen, updateInvoiceModalOpen]);
+    getInvoices(pageNumber, sortBy, sortDirection, status, search, undefined, undefined, undefined, departureDate || undefined, undefined, yearFilter);
+  }, [page, sortBy, sortDirection, statusFilter, search, departureDate, yearFilter, createInvoiceModalOpen, updateInvoiceModalOpen]);
 
   const onSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') setParam({ search: searchInput, page: 1 });
@@ -329,6 +344,33 @@ return (
                 </MenuItem>
               ))}
             </TextField>
+            {/* Departure-date filter (Mario 28.8.2026): show only invoices
+                whose charter starts on the picked day. */}
+            <TextField
+              size="small"
+              type="date"
+              label="Departure"
+              value={departureDate || ''}
+              onChange={e => setParam({ departureDate: e.target.value, page: 1 })}
+              slotProps={{ inputLabel: { shrink: true } }}
+              sx={{
+                minWidth: 150,
+                '& .MuiOutlinedInput-root': {
+                  fontSize: 12,
+                  borderRadius: '6px',
+                  '& fieldset': { borderColor: bbColors.gray300 },
+                },
+              }}
+            />
+            {departureDate && (
+              <Button
+                size="small"
+                onClick={() => setParam({ departureDate: '', page: 1 })}
+                sx={{ textTransform: 'none', fontSize: 11.5, color: bbColors.gray500, minWidth: 0 }}
+              >
+                ✕ clear
+              </Button>
+            )}
           </Stack>
 
           <Box
@@ -361,46 +403,65 @@ return (
                       />
                     </Box>
                     {[
-                      { label: 'Invoice', align: 'left' },
+                      { label: 'Invoice', align: 'left', sortKey: 'invoiceNumber' },
                       { label: 'Client', align: 'left' },
-                      { label: 'Booking', align: 'left' },
+                      { label: 'Booking', align: 'left', sortKey: 'contractNumber' },
+                      { label: 'Charter', align: 'left', sortKey: 'charterDateFrom' },
                       { label: 'Amount', align: 'right' },
-                      { label: 'Issued', align: 'left' },
+                      { label: 'Issued', align: 'left', sortKey: 'invoiceDate' },
                       { label: 'Status', align: 'left' },
                       { label: '', align: 'right' },
-                    ].map((h, i) => (
-                      <Box
-                        component="th"
-                        key={h.label || `col-${i}`}
-                        sx={{
-                          fontSize: 10,
-                          letterSpacing: '0.14em',
-                          textTransform: 'uppercase',
-                          color: bbColors.gray500,
-                          fontWeight: 700,
-                          padding: '10px 14px',
-                          textAlign: h.align as 'left' | 'right',
-                          backgroundColor: bbColors.gray75,
-                          borderBottom: `1px solid ${bbColors.gray200}`,
-                          whiteSpace: 'nowrap',
-                        }}
-                      >
-                        {h.label}
-                      </Box>
-                    ))}
+                    ].map((h: { label: string; align: string; sortKey?: string }, i) => {
+                      const active = h.sortKey && sortBy === h.sortKey;
+
+                      
+return (
+                        <Box
+                          component="th"
+                          key={h.label || `col-${i}`}
+                          onClick={
+                            h.sortKey
+                              ? () =>
+                                  setParam({
+                                    sortBy: h.sortKey,
+                                    sortDirection: active && sortDirection === 'asc' ? 'desc' : 'asc',
+                                    page: 1,
+                                  })
+                              : undefined
+                          }
+                          sx={{
+                            fontSize: 10,
+                            letterSpacing: '0.14em',
+                            textTransform: 'uppercase',
+                            color: active ? bbColors.navy900 : bbColors.gray500,
+                            fontWeight: 700,
+                            padding: '10px 14px',
+                            textAlign: h.align as 'left' | 'right',
+                            backgroundColor: bbColors.gray75,
+                            borderBottom: `1px solid ${bbColors.gray200}`,
+                            whiteSpace: 'nowrap',
+                            cursor: h.sortKey ? 'pointer' : 'default',
+                            userSelect: 'none',
+                          }}
+                        >
+                          {h.label}
+                          {active && (sortDirection === 'asc' ? ' ▲' : ' ▼')}
+                        </Box>
+                      );
+                    })}
                   </Box>
                 </Box>
                 <Box component="tbody">
                   {isLoading && (
                     <Box component="tr">
-                      <Box component="td" colSpan={8} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                      <Box component="td" colSpan={9} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
                         Loading…
                       </Box>
                     </Box>
                   )}
                   {!isLoading && invoices.length === 0 && (
                     <Box component="tr">
-                      <Box component="td" colSpan={8} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                      <Box component="td" colSpan={9} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
                         No invoices match the current filters.
                       </Box>
                     </Box>
@@ -424,7 +485,11 @@ return (
 
                             navigate(`/invoices/${inv.id}${qs ? `?${qs}` : ''}`);
                           }}
-                          sx={{ cursor: 'pointer', '&:hover': { backgroundColor: bbColors.gray75 } }}
+                          sx={{
+                            cursor: 'pointer',
+                            backgroundColor: statusRowTint(inv.invoiceStatus),
+                            '&:hover': { backgroundColor: bbColors.gray75 },
+                          }}
                         >
                           <Box
                             component="td"
@@ -451,6 +516,14 @@ return (
                                 100205/2026). Auto invoices carry the
                                 reservation number in the same field. */}
                             {inv.contractNumber ?? inv.reservationNumber ?? '—'}
+                          </Box>
+                          <Box component="td" sx={{ ...tdBase, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+                            {/* Charter period — departure → return. */}
+                            {inv.charterDateFrom
+                              ? `${dayjs(inv.charterDateFrom).format('DD MMM')} → ${
+                                  inv.charterDateTo ? dayjs(inv.charterDateTo).format('DD MMM YYYY') : '…'
+                                }`
+                              : '—'}
                           </Box>
                           <Box
                             component="td"

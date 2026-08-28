@@ -35,6 +35,8 @@ const defaultValues: UpdateInvoiceFormValues = {
   invoiceStatus: InvoiceStatus.DRAFT,
   invoiceNumber: '',
   contractNumber: '',
+  charterDateFrom: '',
+  charterDateTo: '',
   invoiceItem: '',
   includeVat: false,
   vatPercentage: null,
@@ -71,6 +73,8 @@ const UpdateInvoiceModal = ({ isOpen, onClose }: UpdateInvoiceModalProps) => {
         invoiceStatus: selectedInvoice.invoiceStatus,
         invoiceNumber: selectedInvoice.invoiceNumber?.toString() ?? '',
         contractNumber: selectedInvoice.contractNumber ?? '',
+        charterDateFrom: selectedInvoice.charterDateFrom ?? '',
+        charterDateTo: selectedInvoice.charterDateTo ?? '',
         invoiceItem: selectedInvoice.invoiceItem,
         includeVat: selectedInvoice.includeVat,
         vatPercentage: selectedInvoice.vatPercentage,
@@ -101,7 +105,13 @@ const UpdateInvoiceModal = ({ isOpen, onClose }: UpdateInvoiceModalProps) => {
       return;
     }
 
-    const { payload, message } = await InvoicesService.updateInvoice(selectedInvoice.id, formValues);
+    // Empty date strings would fail LocalDate parsing server-side — absent
+    // keeps the stored value (same contract as invoiceNumber).
+    const { payload, message } = await InvoicesService.updateInvoice(selectedInvoice.id, {
+      ...formValues,
+      charterDateFrom: formValues.charterDateFrom || undefined,
+      charterDateTo: formValues.charterDateTo || undefined,
+    } as never);
 
     showToast({
       status: payload ? 'success' : 'error',

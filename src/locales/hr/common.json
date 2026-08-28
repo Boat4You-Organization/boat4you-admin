@@ -110,6 +110,7 @@
   "english": "Engleski",
   "invoice": "Račun",
   "draft": "Skica",
+  "ready": "Spremno",
   "sent": "Poslano",
   "mark-sent-text": "Jeste li sigurni da želite označiti {{value}} kao poslan? Ova radnja se ne može poništiti.",
   "recipientType": "Vrsta primatelja",

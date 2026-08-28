@@ -183,6 +183,9 @@ export interface CreateInvoiceFormValues {
   invoiceNumber: string;
   /** Paper contract / booking-confirmation number ('' = none). */
   contractNumber: string;
+  /** Charter departure / return, 'YYYY-MM-DD' ('' = not set). */
+  charterDateFrom: string;
+  charterDateTo: string;
   invoiceItem: string;
   includeVat: boolean;
   vatPercentage: number | null;
@@ -205,6 +208,9 @@ export interface UpdateInvoiceFormValues {
   invoiceNumber: string;
   /** Paper contract / booking-confirmation number ('' clears it). */
   contractNumber: string;
+  /** Charter departure / return, 'YYYY-MM-DD' ('' = not set). */
+  charterDateFrom: string;
+  charterDateTo: string;
   invoiceItem: string;
   includeVat: boolean;
   vatPercentage: number | null;

@@ -347,6 +347,36 @@ const CreateInvoiceForm = () => {
           formLabel={t('form.invoice.contract-number')}
           placeholder={t('form.invoice.input-contract-number')}
         />
+        <Controller
+          name="charterDateFrom"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              size="small"
+              fullWidth
+              type="date"
+              label={t('form.invoice.charter-date-from')}
+              value={field.value}
+              onChange={field.onChange}
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+          )}
+        />
+        <Controller
+          name="charterDateTo"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              size="small"
+              fullWidth
+              type="date"
+              label={t('form.invoice.charter-date-to')}
+              value={field.value}
+              onChange={field.onChange}
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+          )}
+        />
         <FormInput
           name="invoiceItem"
           formLabel={t('form.invoice.invoice-item')}

@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
-import { Divider, Grid, Stack, Typography } from '@mui/material';
+import { Divider, Grid, Stack, TextField, Typography } from '@mui/material';
 import { t } from 'i18next';
 
 import Checkbox from '@/components/Checkbox';
@@ -126,6 +126,42 @@ const UpdateInvoiceForm = () => {
           formLabel={t('form.invoice.contract-number')}
           placeholder={t('form.invoice.input-contract-number')}
         />
+      </Stack>
+      <Stack direction={isMobile ? 'column' : 'row'} spacing={2} mb={3}>
+        {/* Charter period (Mario 28.8.2026) — departure and return dates,
+            shown and sortable in the listing's Charter column. */}
+        <Controller
+          name="charterDateFrom"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              size="small"
+              fullWidth
+              type="date"
+              label={t('form.invoice.charter-date-from')}
+              value={field.value}
+              onChange={field.onChange}
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+          )}
+        />
+        <Controller
+          name="charterDateTo"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              size="small"
+              fullWidth
+              type="date"
+              label={t('form.invoice.charter-date-to')}
+              value={field.value}
+              onChange={field.onChange}
+              slotProps={{ inputLabel: { shrink: true } }}
+            />
+          )}
+        />
+      </Stack>
+      <Stack direction={isMobile ? 'column' : 'row'} spacing={2} mb={3}>
         <FormInput
           name="invoiceItem"
           formLabel={t('form.invoice.invoice-item')}

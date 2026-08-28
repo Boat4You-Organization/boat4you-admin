@@ -86,7 +86,9 @@ export type StatusVariant =
   | 'live'
   | 'active'
   | 'in_charter'
-  | 'ended';
+  | 'ended'
+  | 'ready'
+  | 'sent';
 
 interface PillSpec {
   bg: string;
@@ -107,6 +109,8 @@ const STATUS_MAP: Record<StatusVariant, PillSpec> = {
   option: { bg: '#eef3f9', fg: '#1a4fa8', bd: '#dce4ee', label: 'Option' },
   cancelled: { bg: '#fde8e4', fg: '#b03221', bd: '#f5c3bb', label: 'Cancelled' },
   draft: { bg: '#f1f3f5', fg: '#6b7684', bd: '#e1e5ea', label: 'Draft' },
+  ready: { bg: '#fef7e0', fg: '#8a6d00', bd: '#f4e7a8', label: 'Ready' },
+  sent: { bg: '#d1fae5', fg: '#047857', bd: '#a8e7c4', label: 'Sent' },
   viewed: { bg: '#e8f0fb', fg: '#0f3d82', bd: '#cfddf4', label: 'Viewed' },
   converted: { bg: '#d1fae5', fg: '#047857', bd: '#a8e7c4', label: 'Converted' },
   paid: { bg: '#d1fae5', fg: '#047857', bd: '#a8e7c4', label: 'Paid' },

@@ -149,6 +149,8 @@
     "invoice-date": "Datum računa",
     "contract-number": "Broj ugovora",
     "input-contract-number": "Unesite broj ugovora",
+    "charter-date-from": "Početak chartera",
+    "charter-date-to": "Kraj chartera",
     "auto-number": "Automatski (sljedeći u godini)",
     "agency-name-required": "Naziv agencije je obavezan"
   }

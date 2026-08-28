@@ -20,6 +20,7 @@
   "booking-details": {
     "title": "Detalji rezervacije",
     "contract-number": "Broj ugovora",
+    "charter-period": "Period chartera",
     "booking-number": "Broj rezervacije",
     "client-name": "Ime klijenta",
     "client-email": "E-mail klijenta",

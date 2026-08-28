@@ -28,11 +28,13 @@ export const INVOICE_LANGUAGE_ARRAY = Object.values(InvoiceLanguage);
 
 export enum InvoiceStatus {
   DRAFT = 'DRAFT',
+  READY = 'READY',
   SENT = 'SENT',
 }
 
 export const INVOICE_STATUS_LABEL_MAP = {
   [InvoiceStatus.DRAFT]: 'common.draft',
+  [InvoiceStatus.READY]: 'common.ready',
   [InvoiceStatus.SENT]: 'common.sent',
 } as const;
 
@@ -63,6 +65,8 @@ export interface InvoiceModel {
    *  to. Listing's Booking column shows this (auto invoices carry the
    *  reservation number here). */
   contractNumber: string | null;
+  charterDateFrom: string | null;
+  charterDateTo: string | null;
   invoiceDate: string;
   invoiceLanguage: InvoiceLanguage;
   invoiceStatus: InvoiceStatus;

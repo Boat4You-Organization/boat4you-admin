@@ -20,6 +20,7 @@
   "booking-details": {
     "title": "Booking Details",
     "contract-number": "Contract number",
+    "charter-period": "Charter period",
     "booking-number": "Booking number",
     "client-name": "Client name",
     "client-email": "Client email",

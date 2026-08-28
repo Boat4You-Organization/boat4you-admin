@@ -36,6 +36,8 @@ const defaultValues: CreateInvoiceFormValues = {
   invoiceDate: dayjs().format('YYYY-MM-DD'),
   invoiceNumber: '',
   contractNumber: '',
+  charterDateFrom: '',
+  charterDateTo: '',
   invoiceItem: '',
   includeVat: false,
   vatPercentage: null,
@@ -51,7 +53,11 @@ const CreateInvoiceModal = ({ isOpen, onClose }: CreateInvoiceModalProps) => {
   const { t } = useTranslation();
 
   const handleSubmit = async (formValues: CreateInvoiceFormValues) => {
-    const { payload, message } = await InvoicesService.createInvoice(formValues);
+    const { payload, message } = await InvoicesService.createInvoice({
+      ...formValues,
+      charterDateFrom: formValues.charterDateFrom || undefined,
+      charterDateTo: formValues.charterDateTo || undefined,
+    } as never);
 
     showToast({
       status: payload ? 'success' : 'error',

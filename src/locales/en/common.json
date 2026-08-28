@@ -110,6 +110,7 @@
   "english": "English",
   "invoice": "Invoice",
   "draft": "Draft",
+  "ready": "Ready",
   "sent": "Sent",
   "mark-sent-text": "Are you sure you want to mark as sent {{value}}? This action cannot be undone.",
   "recipientType": "Recipient Type",

@@ -4,7 +4,6 @@ import dayjs from 'dayjs';
 
 import Form from '@/components/Forms/Form';
 import ModalRoot from '@/components/ModalRoot';
-import { PAGE_NUMBER } from '@/config/constants.config';
 import { CountryIsoEnum } from '@/config/countries.config';
 import { CreateInvoiceFormValues } from '@/config/forms/form-models.config';
 import { CREATE_INVOICE } from '@/config/forms/form-names.config';
@@ -49,7 +48,7 @@ const defaultValues: CreateInvoiceFormValues = {
 const CreateInvoiceModal = ({ isOpen, onClose }: CreateInvoiceModalProps) => {
   const { isMobile } = useBreakpoint();
   const { params: queryParams } = useQueryParams();
-  const { page, sortBy, sortDirection } = queryParams;
+  const { sortBy, sortDirection } = queryParams;
   const { t } = useTranslation();
 
   const handleSubmit = async (formValues: CreateInvoiceFormValues) => {
@@ -68,7 +67,8 @@ const CreateInvoiceModal = ({ isOpen, onClose }: CreateInvoiceModalProps) => {
 
     if (payload) {
       onClose();
-      getInvoices(page - PAGE_NUMBER, sortBy, sortDirection);
+      // Invoices render unpaginated — refresh always reloads page 0 (=everything).
+      getInvoices(0, sortBy, sortDirection);
     }
   };
 

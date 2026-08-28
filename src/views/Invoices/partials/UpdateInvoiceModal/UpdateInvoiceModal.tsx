@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import Form from '@/components/Forms/Form';
 import ModalRoot from '@/components/ModalRoot';
-import { PAGE_NUMBER } from '@/config/constants.config';
 import { CountryIsoEnum, getCountryCodeFromName } from '@/config/countries.config';
 import { UpdateInvoiceFormValues } from '@/config/forms/form-models.config';
 import { UPDATE_INVOICE } from '@/config/forms/form-names.config';
@@ -50,7 +49,7 @@ const UpdateInvoiceModal = ({ isOpen, onClose }: UpdateInvoiceModalProps) => {
   const { isMobile } = useBreakpoint();
   const [searchParams] = useSearchParams();
   const { params: queryParams } = useQueryParams();
-  const { page, sortBy, sortDirection } = queryParams;
+  const { sortBy, sortDirection } = queryParams;
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -85,9 +84,8 @@ const UpdateInvoiceModal = ({ isOpen, onClose }: UpdateInvoiceModalProps) => {
     : defaultValues;
 
   const refreshView = () => {
-    const pageNumber = page - PAGE_NUMBER;
-
-    getInvoices(pageNumber, sortBy, sortDirection);
+    // Invoices render unpaginated — refresh always reloads page 0 (=everything).
+    getInvoices(0, sortBy, sortDirection);
 
     if (selectedInvoice) {
       getSelectedInvoice(selectedInvoice.id);

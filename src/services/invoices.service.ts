@@ -23,6 +23,9 @@ export default class InvoicesService {
     try {
       const queryParams = createQueryParamsWithPage({
         pageNumber,
+        // No pagination for invoices (Mario 28.8.2026) — the whole year's
+        // list renders on one page; 1000 comfortably covers a year.
+        pageSize: 1000,
         sortBy,
         sortDirection,
         invoiceStatus: status,

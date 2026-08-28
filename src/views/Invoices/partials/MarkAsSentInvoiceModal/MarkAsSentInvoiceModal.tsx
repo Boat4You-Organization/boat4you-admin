@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next';
 import { Typography } from '@mui/material';
 
 import ModalRoot from '@/components/ModalRoot';
-import { PAGE_NUMBER } from '@/config/constants.config';
 import InvoicesService from '@/services/invoices.service';
 import useQueryParams from '@/utils/hooks/useQueryParams';
 import { showToast } from '@/valtio/global/global.actions';
@@ -18,13 +17,12 @@ interface MarkAsSentInvoiceModalProps {
 const MarkAsSentInvoiceModal = ({ isOpen, onClose }: MarkAsSentInvoiceModalProps) => {
   const { selectedInvoice } = useInvoicesStore();
   const { params: queryParams } = useQueryParams();
-  const { page, sortBy, sortDirection } = queryParams;
+  const { sortBy, sortDirection } = queryParams;
   const { t } = useTranslation();
 
   const refreshView = () => {
-    const pageNumber = page - PAGE_NUMBER;
-
-    getInvoices(pageNumber, sortBy, sortDirection);
+    // Invoices render unpaginated — refresh always reloads page 0 (=everything).
+    getInvoices(0, sortBy, sortDirection);
   };
 
   const handleClose = () => {

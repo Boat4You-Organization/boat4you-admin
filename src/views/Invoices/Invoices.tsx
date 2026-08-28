@@ -10,7 +10,6 @@ import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
 
 import Layout from '@/components/Layout';
-import { PAGE_NUMBER, PAGE_SIZE } from '@/config/constants.config';
 import {
   INVOICE_STATUS_TAB_LABEL_MAP,
   INVOICE_STATUS_TAB_VALUES,
@@ -72,8 +71,8 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 const Invoices = () => {
   const { t } = useTranslation();
-  const { params: queryParams, handlePageChange, setParam } = useQueryParams();
-  const { search, page, sortBy, sortDirection, invoiceStatus, year, departureDate } = queryParams;
+  const { params: queryParams, setParam } = useQueryParams();
+  const { search, sortBy, sortDirection, invoiceStatus, year, departureDate } = queryParams;
 
   const [statusFilter, setStatusFilter] = useState<string>(invoiceStatus || INVOICE_STATUS_TAB_VALUES[0]);
   const [searchInput, setSearchInput] = useState<string>(search || '');
@@ -85,7 +84,7 @@ const Invoices = () => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [zipping, setZipping] = useState(false);
 
-  const { isLoading, invoices, selectedInvoice, totalCount, updateInvoiceModalOpen, markAsPaidModalOpen, createInvoiceModalOpen } =
+  const { isLoading, invoices, selectedInvoice, updateInvoiceModalOpen, markAsPaidModalOpen, createInvoiceModalOpen } =
     useInvoicesStore();
   const { closeInvoiceModal } = useInvoicesView();
 
@@ -110,12 +109,12 @@ const Invoices = () => {
   }, [createInvoiceModalOpen]);
 
   useEffect(() => {
-    const pageNumber = page - PAGE_NUMBER;
     const status = (statusFilter === 'all' ? '' : statusFilter) as InvoiceStatus;
 
     setSelectedIds([]);
-    getInvoices(pageNumber, sortBy, sortDirection, status, search, undefined, undefined, undefined, departureDate || undefined, undefined, yearFilter);
-  }, [page, sortBy, sortDirection, statusFilter, search, departureDate, yearFilter, createInvoiceModalOpen, updateInvoiceModalOpen]);
+    // Single page — the service requests the whole year at once (no paging).
+    getInvoices(0, sortBy, sortDirection, status, search, undefined, undefined, undefined, departureDate || undefined, undefined, yearFilter);
+  }, [sortBy, sortDirection, statusFilter, search, departureDate, yearFilter, createInvoiceModalOpen, updateInvoiceModalOpen]);
 
   const onSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') setParam({ search: searchInput, page: 1 });
@@ -167,7 +166,6 @@ const Invoices = () => {
     }
   };
 
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   return (
     <>
@@ -566,31 +564,6 @@ return (
             </Box>
           </Box>
 
-          {totalCount > PAGE_SIZE && (
-            <Stack direction="row" alignItems="center" justifyContent="center" gap={2} sx={{ mt: 2 }}>
-              <Button
-                variant="outlined"
-                size="small"
-                disabled={page <= PAGE_NUMBER}
-                onClick={() => handlePageChange(page - 1)}
-                sx={{ textTransform: 'none', fontSize: 12, borderColor: bbColors.gray300, color: bbColors.navy900 }}
-              >
-                ← Prev
-              </Button>
-              <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>
-                Page <strong>{page}</strong> of <strong>{totalPages}</strong>
-              </Typography>
-              <Button
-                variant="outlined"
-                size="small"
-                disabled={page >= totalPages}
-                onClick={() => handlePageChange(page + 1)}
-                sx={{ textTransform: 'none', fontSize: 12, borderColor: bbColors.gray300, color: bbColors.navy900 }}
-              >
-                Next →
-              </Button>
-            </Stack>
-          )}
         </Box>
       </Layout>
     </>

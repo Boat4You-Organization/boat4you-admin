@@ -16,7 +16,7 @@ const hr = {
   colAmount: 'Iznos',
   base: 'Osnovica',
   vat: 'PDV',
-  noVat: 'PDV nije obračunat.',
+  noVat: 'E10 Obavljena usluge unutar EU prema Čl.17 st.1 zakona, čl.196 Direktiva vijeća 2006/112/EZ',
   totalDue: 'UKUPNO ZA PLATITI',
   paymentDetails: 'Podaci za plaćanje',
   bank: 'Banka',

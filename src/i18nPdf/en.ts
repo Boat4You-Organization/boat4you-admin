@@ -16,7 +16,7 @@ const en = {
   colAmount: 'Amount',
   base: 'Net amount',
   vat: 'VAT',
-  noVat: 'VAT not charged.',
+  noVat: 'E10 Obavljena usluge unutar EU prema Čl.17 st.1 zakona, čl.196 Direktiva vijeća 2006/112/EZ',
   totalDue: 'TOTAL DUE',
   paymentDetails: 'Payment details',
   bank: 'Bank',

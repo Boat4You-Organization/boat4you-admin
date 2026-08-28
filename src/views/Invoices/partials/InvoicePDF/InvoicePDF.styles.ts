@@ -91,6 +91,9 @@ export const styles = StyleSheet.create({
   sumLabel: { fontSize: 9.5, color: MUTED },
   sumValue: { fontSize: 9.5, color: INK, fontWeight: 600 },
   sumNote: { fontSize: 8, color: MUTED, paddingHorizontal: 10, paddingTop: 2, fontStyle: 'italic' },
+  // Reverse-charge legal citation under the summary — full page width,
+  // pulled up into the summary's bottom margin.
+  vatExemptClause: { fontSize: 8.5, color: INK, fontStyle: 'italic', marginTop: -12, marginBottom: 18 },
   sumTotal: {
     flexDirection: 'row',
     justifyContent: 'space-between',

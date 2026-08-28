@@ -142,10 +142,15 @@ const InvoicePDF = ({ invoice, locale }: InvoicePDFProps) => {
             base: money(priceWithoutVat),
             vatLabel: hasVat ? `${t.vat} ${vatPctLabel} %` : null,
             vat: hasVat ? money(vatAmount) : null,
-            noVatNote: hasVat ? null : t.noVat,
+            noVatNote: null,
             totalLabel: t.totalDue,
             total: money(totalPrice),
           })}
+
+          {/* Statutory reverse-charge clause — REQUIRED verbatim on every
+              invoice issued without VAT (foreign recipients; Mario
+              28.8.2026). Full-width so the long citation stays readable. */}
+          {!hasVat && <Text style={styles.vatExemptClause}>{t.noVat}</Text>}
 
           {renderPaymentBox({
             title: t.paymentDetails,

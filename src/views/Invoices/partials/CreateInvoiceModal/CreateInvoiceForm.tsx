@@ -352,7 +352,6 @@ const CreateInvoiceForm = () => {
           control={control}
           render={({ field }) => (
             <TextField
-              size="small"
               fullWidth
               type="date"
               label={t('form.invoice.charter-date-from')}
@@ -367,7 +366,6 @@ const CreateInvoiceForm = () => {
           control={control}
           render={({ field }) => (
             <TextField
-              size="small"
               fullWidth
               type="date"
               label={t('form.invoice.charter-date-to')}

@@ -127,7 +127,7 @@ const UpdateInvoiceForm = () => {
           placeholder={t('form.invoice.input-contract-number')}
         />
       </Stack>
-      <Stack direction={isMobile ? 'column' : 'row'} spacing={2} mb={3}>
+      <Stack direction={isMobile ? 'column' : 'row'} spacing={2} mt={3} mb={3}>
         {/* Charter period (Mario 28.8.2026) — departure and return dates,
             shown and sortable in the listing's Charter column. */}
         <Controller
@@ -135,7 +135,6 @@ const UpdateInvoiceForm = () => {
           control={control}
           render={({ field }) => (
             <TextField
-              size="small"
               fullWidth
               type="date"
               label={t('form.invoice.charter-date-from')}
@@ -150,7 +149,6 @@ const UpdateInvoiceForm = () => {
           control={control}
           render={({ field }) => (
             <TextField
-              size="small"
               fullWidth
               type="date"
               label={t('form.invoice.charter-date-to')}

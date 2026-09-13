@@ -91,9 +91,20 @@ export default class UsersService {
     }
   }
 
-  public static async inviteUser(ids: number[]): Promise<PayloadResponse<boolean>> {
+  /**
+   * (Re)send the invite e-mail. The backend regenerates the invite code and
+   * timestamp on every call, so this also revives a link that expired (invites
+   * live 7 days) — the case that matters for guests who paid but never signed up.
+   *
+   * `forceEnglish` defaults to the backend's historic behaviour (English, for
+   * team/operational invites). Pass false for a paying guest so the e-mail is in
+   * the language they booked in.
+   */
+  public static async inviteUser(ids: number[], forceEnglish?: boolean): Promise<PayloadResponse<boolean>> {
     try {
-      await api.put(`/users/invite/${ids}`);
+      const query = forceEnglish === undefined ? '' : `?forceEnglish=${forceEnglish}`;
+
+      await api.put(`/users/invite/${ids}${query}`);
 
       return { payload: true };
     } catch (error) {

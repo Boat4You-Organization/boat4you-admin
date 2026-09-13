@@ -14,11 +14,14 @@ import {
   USER_ROLE_NAME_TAB_VALUES,
   USER_STATUS_LABEL_MAP,
   USER_STATUS_VALUES,
+  UserModel,
   UserRoleName,
   UserStatus,
 } from '@/models/user.model';
+import UsersService from '@/services/users.service';
 import { bbColors, bbFont, bbStatusPill } from '@/styles/bb';
 import useQueryParams from '@/utils/hooks/useQueryParams';
+import { showToast } from '@/valtio/global/global.actions';
 import {
   getSelectedUser,
   getUsers,
@@ -44,8 +47,7 @@ import useUsersView from './useUsersView';
  * Drop them in when CRM segments ship.
  */
 
-const statusToVariant = (s: UserStatus): string =>
-  s === UserStatus.ACTIVE ? 'active' : 'lost';
+const statusToVariant = (s: UserStatus): string => (s === UserStatus.ACTIVE ? 'active' : 'lost');
 
 const initialsOf = (n?: string, s?: string): string =>
   `${(n?.[0] ?? '').toUpperCase()}${(s?.[0] ?? '').toUpperCase()}` || '?';
@@ -60,6 +62,7 @@ const Users = () => {
   const [userRole, setUserRole] = useState<string>(urlUserRole || USER_ROLE_NAME_TAB_VALUES[0]);
   const [userStatus, setUserStatus] = useState<string>(urlUserStatus || USER_STATUS_VALUES[0]);
   const [searchInput, setSearchInput] = useState<string>(search || '');
+  const [invitingId, setInvitingId] = useState<number | undefined>(undefined);
 
   const { isLoading, selectedUser, users, totalCount, createUserModalOpen, updateUserModalOpen, deleteUserModalOpen } =
     useUsersStore();
@@ -81,6 +84,47 @@ const Users = () => {
 
     getUsers(pageNumber, search, sortBy, sortDirection, role, status);
   }, [page, search, sortBy, sortDirection, userRole, userStatus]);
+
+  /**
+   * Resend (or send) the sign-up invite for one user.
+   *
+   * Mario, 13.9.2026: guests who paid through the booking flow get an invite
+   * automatically, but the link dies after 7 days — so a client who paid and
+   * never signed up has no way in. The backend regenerates code + timestamp on
+   * every call, so this both revives an expired link and covers a lost e-mail.
+   * `forceEnglish: false` keeps the resend in the language the client booked in
+   * (the admin default is English, which is for team/operational invites).
+   * Confirm first: this puts an e-mail in a customer's inbox.
+   */
+  const handleInvite = async (u: UserModel): Promise<void> => {
+    if (invitingId) {
+      return;
+    }
+
+    // eslint-disable-next-line no-alert -- outward-facing (e-mails a customer); no confirm primitive in this view
+    if (!window.confirm(t('actions.confirmInvite', { email: u.email }))) {
+      return;
+    }
+
+    setInvitingId(u.id);
+
+    const { payload, message } = await UsersService.inviteUser([u.id], false);
+
+    setInvitingId(undefined);
+
+    showToast({
+      status: payload ? 'success' : 'error',
+      text: payload ? t('toast-messages.invite-user-successfully') : message || t('toast-messages.invite-user-failed'),
+    });
+
+    if (payload) {
+      const pageNumber = page - PAGE_NUMBER;
+      const role = (userRole === USER_ROLE_NAME_TAB_VALUES[0] ? '' : userRole) as UserRoleName;
+      const status = (userStatus === USER_STATUS_VALUES[0] ? '' : userStatus) as UserStatus;
+
+      getUsers(pageNumber, search, sortBy, sortDirection, role, status);
+    }
+  };
 
   const onSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') handleSearch(searchInput);
@@ -129,7 +173,10 @@ const Users = () => {
             sx={{ mb: 2 }}
           >
             <Box>
-              <Typography component="h1" sx={{ fontSize: { xs: 20, sm: 22 }, fontWeight: 800, letterSpacing: '-0.01em' }}>
+              <Typography
+                component="h1"
+                sx={{ fontSize: { xs: 20, sm: 22 }, fontWeight: 800, letterSpacing: '-0.01em' }}
+              >
                 {t('common.users')}
               </Typography>
               <Typography sx={{ fontSize: 12.5, color: bbColors.gray500, mt: 0.5 }}>
@@ -175,8 +222,7 @@ const Users = () => {
             {USER_ROLE_NAME_TAB_VALUES.map(v => {
               const active = v === userRole;
 
-              
-return (
+              return (
                 <Box
                   key={v}
                   onClick={() => {
@@ -238,8 +284,7 @@ return (
               {USER_STATUS_VALUES.map(v => {
                 const active = v === userStatus;
 
-                
-return (
+                return (
                   <Box
                     key={v}
                     onClick={() => {
@@ -304,14 +349,22 @@ return (
                 <Box component="tbody">
                   {isLoading && (
                     <Box component="tr">
-                      <Box component="td" colSpan={5} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                      <Box
+                        component="td"
+                        colSpan={5}
+                        sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}
+                      >
                         Loading…
                       </Box>
                     </Box>
                   )}
                   {!isLoading && users.length === 0 && (
                     <Box component="tr">
-                      <Box component="td" colSpan={5} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                      <Box
+                        component="td"
+                        colSpan={5}
+                        sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}
+                      >
                         No users match the current filters.
                       </Box>
                     </Box>
@@ -332,8 +385,7 @@ return (
                         ? t(`common.${u.roles[0].roleName.toLowerCase()}`, u.roles[0].roleName)
                         : '—';
 
-                      
-return (
+                      return (
                         <Box
                           component="tr"
                           key={u.id}
@@ -383,7 +435,10 @@ return (
                           <Box component="td" sx={tdBase}>
                             {roleLabel}
                           </Box>
-                          <Box component="td" sx={{ ...tdBase, color: bbColors.gray500, fontVariantNumeric: 'tabular-nums' }}>
+                          <Box
+                            component="td"
+                            sx={{ ...tdBase, color: bbColors.gray500, fontVariantNumeric: 'tabular-nums' }}
+                          >
                             {u.phoneNumber || '—'}
                           </Box>
                           <Box component="td" sx={tdBase}>
@@ -392,22 +447,46 @@ return (
                             </Box>
                           </Box>
                           <Box component="td" sx={{ ...tdBase, textAlign: 'right' }}>
-                            <Typography
-                              component="a"
-                              sx={{ color: bbColors.navy700, fontWeight: 700, fontSize: 12, cursor: 'pointer' }}
-                              onClick={() => {
-                                // Mirror the Agencies / Invoices pattern —
-                                // fetch the row detail into the store AND
-                                // push the id into the URL so the nested
-                                // <Routes path=":id"> renders UserModal on
-                                // top of the list. Without navigate() the
-                                // store fills but the modal never shows.
-                                getSelectedUser(u.id);
-                                navigate(`/users/${u.id}?${searchParamsQs.toString()}`);
-                              }}
-                            >
-                              Open →
-                            </Typography>
+                            <Stack direction="row" alignItems="center" justifyContent="flex-end" gap={2}>
+                              {/* Sign-up invite. Hidden once accepted — the backend
+                                rejects those, and the user already has a password. */}
+                              {u.inviteStatus !== InviteUserStatus.ACCEPTED && (
+                                <Typography
+                                  component="a"
+                                  sx={{
+                                    color: invitingId === u.id ? bbColors.gray500 : bbColors.navy700,
+                                    fontWeight: 700,
+                                    fontSize: 12,
+                                    cursor: invitingId === u.id ? 'default' : 'pointer',
+                                    whiteSpace: 'nowrap',
+                                    opacity: invitingId && invitingId !== u.id ? 0.4 : 1,
+                                  }}
+                                  onClick={() => handleInvite(u)}
+                                >
+                                  {invitingId === u.id
+                                    ? t('actions.sendingInvite')
+                                    : u.inviteStatus === InviteUserStatus.INVITED
+                                      ? t('actions.resendInvite')
+                                      : t('actions.sendInvite')}
+                                </Typography>
+                              )}
+                              <Typography
+                                component="a"
+                                sx={{ color: bbColors.navy700, fontWeight: 700, fontSize: 12, cursor: 'pointer' }}
+                                onClick={() => {
+                                  // Mirror the Agencies / Invoices pattern —
+                                  // fetch the row detail into the store AND
+                                  // push the id into the URL so the nested
+                                  // <Routes path=":id"> renders UserModal on
+                                  // top of the list. Without navigate() the
+                                  // store fills but the modal never shows.
+                                  getSelectedUser(u.id);
+                                  navigate(`/users/${u.id}?${searchParamsQs.toString()}`);
+                                }}
+                              >
+                                Open →
+                              </Typography>
+                            </Stack>
                           </Box>
                         </Box>
                       );

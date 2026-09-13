@@ -45,5 +45,9 @@
   "download-pdf": "Download PDF",
   "newInvoice": "New invoice",
   "download-selected": "Download selected",
-  "preparing-zip": "Preparing ZIP…"
+  "preparing-zip": "Preparing ZIP…",
+  "resendInvite": "Resend invite",
+  "sendInvite": "Send invite",
+  "sendingInvite": "Sending…",
+  "confirmInvite": "Send the sign-up invite e-mail to {{email}}?"
 }

@@ -45,5 +45,9 @@
   "download-pdf": "Preuzmi PDF",
   "newInvoice": "Novi račun",
   "download-selected": "Preuzmi odabrane",
-  "preparing-zip": "Pripremam ZIP…"
+  "preparing-zip": "Pripremam ZIP…",
+  "resendInvite": "Pošalji poziv ponovno",
+  "sendInvite": "Pošalji poziv",
+  "sendingInvite": "Šaljem…",
+  "confirmInvite": "Poslati e-mail s pozivom na registraciju na {{email}}?"
 }

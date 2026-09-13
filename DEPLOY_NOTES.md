@@ -1,5 +1,28 @@
 # boat4you-admin — deploy notes
 
+## 2026-09-13 — Users: resend the sign-up invite (9959473, DEPLOYED)
+
+Mario: a client paid through the booking flow but never registered, and there was no way
+to get them back in — the invite is sent once, automatically, and its link dies after 7 days.
+
+Users list, action column: a **Send invite** / **Resend invite** link on every row whose
+`inviteStatus` is not `ACCEPTED` (accepted users already have a password and the backend
+rejects them). Confirm dialog with the recipient's address first — it puts an e-mail in a
+customer's inbox. While one send is in flight the row shows "Sending…" and the other rows dim;
+on success the list reloads so the status pill flips to Invited. Toast reuses the existing
+`toast-messages.invite-user-*` keys. New `actions.*` labels in en + hr, `resources.d.ts`
+regenerated (`yarn i18next-resources-for-ts`).
+
+`UsersService.inviteUser(ids, forceEnglish?)` now appends the query param; the list passes
+`false` so a paying guest gets the mail in the language they booked in. Backend side is
+`9401056` + `75e1e81` (see backend notes) — the endpoint already regenerated code +
+timestamp on every call, which is what revives an expired link.
+
+Build `.env.production.local` (api.boat4you.com + www.boat4you.com) → `yarn build` → tar →
+cusma1 staged swap (`html.staging` → verify `index.html` + asset hash → `mv`) → chown www-data.
+Live entry `index-BCnXL1SW.js`, 0× localhost:8443, root + `/users` 200. Rollback: `html.prev`,
+backup `/home/cusma1/admin-dist.bak-resend-invite-20260913-192124.tar.gz`.
+
 ## 2026-07-06 — Agencies: "Inquiry mode" checkbox (cc9b0f7, DEPLOYED)
 
 New Controller checkbox in the agency edit modal GeneralTab, right of "Recommended"

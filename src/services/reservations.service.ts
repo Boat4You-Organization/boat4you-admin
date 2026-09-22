@@ -531,6 +531,10 @@ return { payload: null as unknown as ReservationModel, message };
     // assigned this yacht to the same customer over phone). Default omitted =
     // backend filters to available rows only.
     includeUnavailable?: boolean;
+    // The offers workspace walks every page of a search; there a swallowed
+    // error would read as "100 boats fewer" with no trace, so it asks for
+    // the rejection instead of the empty-page fallback below.
+    throwOnError?: boolean;
   }): Promise<PaginatedResponse<{
     // The backend returns YachtSearchResponseDto. We type the fields the
     // Offers workspace actually consumes so TypeScript catches a server-side
@@ -607,9 +611,8 @@ return { payload: null as unknown as ReservationModel, message };
       if (params.includeUnavailable) qs.set('includeUnavailable', 'true');
 
       // Backend `YachtQueryingService.MAX_PAGE_SIZE = 100` — requesting
-      // more silently caps. The offers workspace paginates 100-at-a-time
-      // with Prev/Next buttons; admin can flip pages through the 300+
-      // yacht bucket when their search is wide.
+      // more silently caps. The offers workspace walks the pages itself and
+      // shows them on one list (22.9.2026).
       qs.set('size', String(params.size ?? 100));
       qs.set('page', String(params.page ?? 0));
       // `sortBy` is a bespoke custom param — NOT the Spring Pageable
@@ -625,7 +628,9 @@ return { payload: null as unknown as ReservationModel, message };
 
       
 return data;
-    } catch {
+    } catch (e) {
+      if (params.throwOnError) throw e;
+
       return { content: [], page: { size: 0, totalElements: 0, totalPages: 0, number: 0 } };
     }
   }

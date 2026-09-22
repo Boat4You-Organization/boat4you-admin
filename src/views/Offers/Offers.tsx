@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define, no-nested-ternary, @typescript-eslint/no-shadow, no-duplicate-imports */
 import type { ReactNode } from 'react';
-import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -95,6 +95,22 @@ const getBoatImageUrl = (id: number | null | undefined, width = 200): string | n
   id == null ? null : `${API_URL}/public/image/${id}?width=${width}`;
 
 /**
+ * Backend page size is hard-capped at 100; 50 pages = 5,000 rows on one list.
+ * The largest country + week search measured 22.9.2026 was Croatia, all
+ * types, 3,884 rows — a filter-less search (13,577) is what this cap is for.
+ */
+const MAX_SEARCH_PAGES = 50;
+/** Pages fetched side by side while walking a search (≈1.3 s per page at 3 in flight, 0 Hikari timeouts measured). */
+const PAGE_FETCH_CONCURRENCY = 3;
+/** One retry per page before the walk gives up (cusma2 is the only API node). */
+const PAGE_RETRY_DELAY_MS = 1500;
+
+/** How the last page walk ended; null while idle or running. */
+type WalkEnd = 'complete' | 'truncated' | 'stopped' | 'failed';
+
+type SearchPage = Awaited<ReturnType<typeof ReservationsService.searchYachtsForAdmin>>;
+
+/**
  * Retry schedule for a list thumbnail the API shed with 503. The resize gate
  * on cusma2 answers `Retry-After: 2`, so the first retry waits that long and
  * the next ones back off; after the last one the tile stays grey.
@@ -183,9 +199,13 @@ const BoatThumb = memo(({ url, label }: { url: string | null; label: string }) =
         textAlign: 'center',
         p: 0.5,
         cursor: failed ? 'pointer' : undefined,
+        // The model name as generated content, not a text node: the row
+        // prints it right next to the tile, and a second DOM copy would give
+        // find-in-page two hits per boat — Cmd+F is how the broker scans the
+        // one-page list. The picture, when it loads, simply covers it.
+        '&::after': { content: JSON.stringify(label) },
       }}
     >
-      {label}
       {showImage && (
         // Decorative: the model name is printed right next to the tile.
         <img
@@ -200,6 +220,8 @@ const BoatThumb = memo(({ url, label }: { url: string | null; label: string }) =
     </Box>
   );
 });
+
+BoatThumb.displayName = 'BoatThumb';
 
 // Broker-supported currencies. Backend CurrencyEnum has ~15 more but these
 // are the ones the business actually invoices in today (per Mario). Add a
@@ -354,6 +376,302 @@ interface YachtDetailsResponse {
   offers?: OfferResponse[];
 }
 
+interface ResultRowProps {
+  row: SearchRow;
+  nights: number;
+  inCart: boolean;
+  adding: boolean;
+  onAdd: (row: SearchRow) => void;
+  onOpen: (row: SearchRow) => void;
+}
+
+/**
+ * One result card. Memoized because the list is no longer paged (Mario
+ * 22.9.2026): a country + week search renders up to ~4,000 rows, and without
+ * memo every cart click or keystroke re-rendered all of them. Everything the
+ * card needs arrives as primitive props (plus the row object and a stable
+ * `onAdd`), so a row re-renders only when its own data or cart state changes.
+ */
+const ResultRow = memo(({ row, nights, inCart, adding, onAdd, onOpen }: ResultRowProps) => {
+  const periodTotal = row.clientPriceEur * nights;
+  const listPeriodTotal = row.listPriceEur != null ? row.listPriceEur * nights : null;
+  const hasDiscount = listPeriodTotal != null && listPeriodTotal > periodTotal;
+  const rowSymbol = getCurrencySymbol(row.currency);
+
+  // Format `2026-04-25T23:59:00` → `25.04.2026 23:59` for the
+  // option-expires line. Defensive against backend strings with
+  // missing time portion (falls back to date-only).
+  const optionExpiresText = row.optionExpiresAt
+    ? (() => {
+        const [datePart, timePart = ''] = row.optionExpiresAt.split('T');
+        const [y, m, d] = datePart.split('-');
+        const hm = timePart ? timePart.slice(0, 5) : '';
+
+        return hm ? `${d}.${m}.${y} ${hm}` : `${d}.${m}.${y}`;
+      })()
+    : null;
+
+  const thumbUrl = getBoatImageUrl(row.mainImageId, 200);
+  const statsPills: Array<{ label: string; value: string }> = [];
+
+  if (row.cabins != null) statsPills.push({ label: 'Cab', value: String(row.cabins) });
+
+  if (row.maxPersons != null) statsPills.push({ label: 'Pax', value: String(row.maxPersons) });
+
+  if (row.lengthMeters != null) statsPills.push({ label: 'L', value: `${row.lengthMeters.toFixed(2)} m` });
+
+  if (row.buildYear != null) statsPills.push({ label: 'Year', value: String(row.buildYear) });
+
+  return (
+    <Box
+      sx={{
+        border: `1px solid ${inCart ? '#a8e7c4' : row.isOption ? '#f4e7a8' : bbColors.cardBorder}`,
+        backgroundColor: inCart ? '#f6fdf9' : row.isOption ? '#fffdf2' : colors.white,
+        borderRadius: '12px',
+        p: 1.5,
+        // Thousands of cards on one list: let Chrome skip layout and paint
+        // for the ones off-screen (find-in-page still searches them).
+        contentVisibility: 'auto',
+        containIntrinsicSize: 'auto 128px',
+      }}
+    >
+      <Stack direction="row" alignItems="stretch" gap={1.5}>
+        {/* Thumbnail — square-ish tile so a row of cards reads
+            like a consistent grid. Falls back to a grey tile
+            with model name when the yacht has no synced image
+            or the API kept shedding the resize (see BoatThumb). */}
+        <BoatThumb url={thumbUrl} label={row.modelName} />
+
+        {/* Middle: identity + location + agency + specs pills */}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Stack direction="row" alignItems="center" gap={1} sx={{ flexWrap: 'wrap' }}>
+            <Typography sx={{ fontSize: 15, fontWeight: 700, color: bbColors.navy900 }}>
+              {row.modelName}
+              <Box component="span" sx={{ color: bbColors.gray500, fontWeight: 600, mx: 0.75 }}>
+                /
+              </Box>
+              <Box
+                component="span"
+                sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.3 }}
+              >
+                {row.name}
+              </Box>
+            </Typography>
+            {row.isOption && (
+              <Box
+                component="span"
+                sx={{
+                  display: 'inline-block',
+                  backgroundColor: '#fef7e0',
+                  color: '#8a6d00',
+                  border: '1px solid #f4e7a8',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
+                  textTransform: 'uppercase',
+                  px: 0.75,
+                  py: 0.25,
+                  borderRadius: '999px',
+                }}
+              >
+                Under option
+              </Box>
+            )}
+            {row.matchKind && row.matchKind !== 'EXACT' && row.offerDateFrom && row.offerDateTo && (
+              <Box
+                component="span"
+                title="The searched dates are not offered for this yacht — the price shown is for the closest free period. Adjust the offer dates to this window."
+                sx={{
+                  display: 'inline-block',
+                  backgroundColor: '#fdecec',
+                  color: '#a83232',
+                  border: '1px solid #f5c2c2',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: 0.5,
+                  textTransform: 'uppercase',
+                  px: 0.75,
+                  py: 0.25,
+                  borderRadius: '999px',
+                }}
+              >
+                {`Free ${formatIsoDateDMY(row.offerDateFrom)} – ${formatIsoDateDMY(row.offerDateTo)}`}
+              </Box>
+            )}
+          </Stack>
+          <Stack direction="row" alignItems="center" gap={0.75} sx={{ mt: 0.5, flexWrap: 'wrap' }}>
+            <Box
+              component="span"
+              sx={{
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                backgroundColor: bbColors.yellow500,
+                display: 'inline-block',
+              }}
+            />
+            <Typography sx={{ fontSize: 13, color: '#2c3e56', fontWeight: 500 }}>
+              {row.locationName}
+              {row.locationCountryCode ? ` · ${row.locationCountryCode}` : ''}
+            </Typography>
+            <Typography component="span" sx={{ fontSize: 13, color: bbColors.gray500, mx: 0.25 }}>
+              🏕
+            </Typography>
+            <Typography sx={{ fontSize: 13, color: bbColors.navy700, fontWeight: 600 }}>
+              {row.agencyName}
+            </Typography>
+            {row.sourceSystem && (
+              <Box
+                component="span"
+                sx={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: 0.3,
+                  px: 0.6,
+                  py: 0.1,
+                  borderRadius: 0.75,
+                  color: row.sourceSystem === 'MMK' ? '#7c3aed' : '#0369a1',
+                  backgroundColor: row.sourceSystem === 'MMK' ? '#ede9fe' : '#e0f2fe',
+                }}
+              >
+                {row.sourceSystem}
+              </Box>
+            )}
+            <Typography component="span" sx={{ fontSize: 11, color: bbColors.gray600 }}>
+              (hidden when sent to client)
+            </Typography>
+          </Stack>
+          <Stack direction="row" gap={0.5} sx={{ mt: 1, flexWrap: 'wrap' }}>
+            {statsPills.map(p => (
+              <Box
+                key={p.label}
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 0.5,
+                  px: 0.9,
+                  py: 0.3,
+                  borderRadius: 4,
+                  backgroundColor: bbColors.gray100,
+                  fontSize: 11,
+                  color: '#2c3e56',
+                  fontWeight: 500,
+                }}
+              >
+                <Box component="span" sx={{ color: bbColors.gray500 }}>
+                  {p.label}
+                </Box>
+                <Box component="span" sx={{ fontWeight: 700 }}>
+                  {p.value}
+                </Box>
+              </Box>
+            ))}
+          </Stack>
+          <Button
+            size="small"
+            variant="text"
+            onClick={() => onOpen(row)}
+            sx={{ p: 0, minWidth: 0, fontSize: 11, textTransform: 'none', mt: 0.75, color: bbColors.navy700, fontWeight: 700 }}
+          >
+            View on customer site ↗
+          </Button>
+        </Box>
+
+        {/* Right: pricing + action */}
+        <Stack alignItems="flex-end" spacing={0.5} sx={{ minWidth: 180 }}>
+          {hasDiscount && (
+            <Typography sx={{ fontSize: 12, color: bbColors.gray500, textDecoration: 'line-through' }}>
+              List:{' '}
+              {listPeriodTotal!.toLocaleString('hr-HR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}{' '}
+              {rowSymbol}
+            </Typography>
+          )}
+          <Typography
+            sx={{
+              fontSize: 18,
+              fontWeight: 800,
+              color: bbColors.green600,
+              lineHeight: 1.15,
+              fontVariantNumeric: 'tabular-nums',
+            }}
+          >
+            {periodTotal.toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
+            {rowSymbol}
+          </Typography>
+          {(() => {
+            if (row.agencyCommissionEur == null || row.clientPriceEur <= 0) return null;
+
+            const commissionTotal = row.agencyCommissionEur * nights;
+            const pctBase = listPeriodTotal ?? periodTotal;
+            const pct = pctBase > 0 ? (commissionTotal / pctBase) * 100 : 0;
+            const isZero = commissionTotal === 0;
+
+            return (
+              <Box
+                sx={{
+                  backgroundColor: isZero ? bbColors.gray100 : '#fef7e0',
+                  color: isZero ? bbColors.gray500 : '#8a6d00',
+                  border: `1px solid ${isZero ? bbColors.gray200 : '#f4e7a8'}`,
+                  fontSize: 11,
+                  fontWeight: 700,
+                  px: 0.9,
+                  py: 0.3,
+                  borderRadius: '999px',
+                }}
+              >
+                {isZero
+                  ? 'Commission: —'
+                  : `Commission ${pct.toFixed(1)}% · ${commissionTotal.toLocaleString('hr-HR', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })} ${rowSymbol}`}
+              </Box>
+            );
+          })()}
+          {row.isOption && (
+            <Typography
+              sx={{
+                fontSize: 11,
+                color: '#8a6d00',
+                fontWeight: 600,
+                mt: 0.25,
+                textAlign: 'right',
+              }}
+            >
+              {optionExpiresText ? `Option expires: ${optionExpiresText}` : 'Under option — expiry unknown'}
+            </Typography>
+          )}
+          <Button
+            variant="contained"
+            size="small"
+            disabled={adding || inCart}
+            onClick={() => onAdd(row)}
+            sx={{
+              mt: 0.5,
+              textTransform: 'none',
+              backgroundColor: inCart ? bbColors.green600 : bbColors.navy900,
+              boxShadow: 'none',
+              fontWeight: 700,
+              borderRadius: '8px',
+              '&:hover': {
+                backgroundColor: inCart ? bbColors.green600 : '#13283d',
+                boxShadow: 'none',
+              },
+            }}
+          >
+            {inCart ? '✓ In offer' : adding ? 'Adding…' : '+ Add to offer'}
+          </Button>
+        </Stack>
+      </Stack>
+    </Box>
+  );
+});
+
+ResultRow.displayName = 'ResultRow';
+
 const Offers = () => {
   const { t } = useTranslation();
 
@@ -424,22 +742,29 @@ const Offers = () => {
 
     setCurrency(next);
     // Drop stale results — their prices are in the old currency and would
-    // confuse the admin; a re-search is always the right next step.
+    // confuse the admin; a re-search is always the right next step. A walk
+    // still running would keep streaming old-currency rows into the cleared
+    // list, so it is superseded here too.
+    searchSeq.current += 1;
+    setSearching(false);
     setResults([]);
     setSearched(false);
+    setTotalCount(0);
+    setWalkEnd(null);
   };
 
   // ---- search state ------------------------------------------------------
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState<SearchRow[]>([]);
   const [searched, setSearched] = useState(false);
-  // Pagination. Backend caps page size at 100 so we walk through pages for
-  // wide searches (300+ yachts). `page` is 0-based. `totalPages` / `totalCount`
-  // come from the /public/yachts PagedModel response. Any filter change
-  // resets page to 0 via a fresh search.
-  const [page, setPage] = useState(0);
-  const [totalPages, setTotalPages] = useState(0);
+  // `totalCount` comes from the /public/yachts PagedModel response; `walkEnd`
+  // says how the page walk finished (see handleSearch) and drives the note
+  // under the header and after the last row.
   const [totalCount, setTotalCount] = useState(0);
+  const [walkEnd, setWalkEnd] = useState<WalkEnd | null>(null);
+  // Bumped per search so a walk still appending pages for the PREVIOUS search
+  // notices it was superseded and stops touching state.
+  const searchSeq = useRef(0);
 
   // ---- cart state (persisted) --------------------------------------------
   const [cart, setCart] = useState<CartYacht[]>(() => {
@@ -470,19 +795,25 @@ const Offers = () => {
   }, [cart]);
 
   // ---- search ------------------------------------------------------------
-  // `pageOverride` is only passed by the pagination buttons — a brand new
-  // search from the Search button always resets to page 0. Typed as
-  // `number | undefined` only; DO NOT let a MouseEvent sneak in via
-  // `onClick={handleSearch}` — that would coerce to "[object PointerEvent]"
-  // and the backend would silently 400 → empty results.
-  const handleSearch = async (pageOverride?: number) => {
-    const targetPage = typeof pageOverride === 'number' ? pageOverride : 0;
+  // Everything on one page (Mario 22.9.2026): the backend hard-caps a page at
+  // 100 rows, so a search walks every page and appends them in the backend's
+  // global price order — the broker Cmd+F's one list for a specific boat
+  // instead of hunting through "page 7 of 39". Rows show up as pages land.
+  // MAX_SEARCH_PAGES bounds a filter-less search (13,577 rows / 136 pages
+  // measured 22.9.) at what a browser still renders; every country + week
+  // search measured that day fit under it (largest: Croatia, all types, 3,884).
+  // Called as `handleSearch()` only — never `onClick={handleSearch}`, the
+  // MouseEvent would be ignored here but keep the call sites explicit.
+  const handleSearch = async () => {
+    searchSeq.current += 1;
 
-    if (typeof pageOverride !== 'number') setPage(0);
+    const seq = searchSeq.current;
 
     setSearching(true);
     setSearched(true);
     setResults([]);
+    setTotalCount(0);
+    setWalkEnd(null);
 
     // Region ids take precedence when picked — otherwise fall back to the
     // country id so backend's location filter scopes the result set at
@@ -492,88 +823,156 @@ const Offers = () => {
     // carries BOTH provider ids, so one pick searches both yacht pools.
     const did: string[] = regions.length > 0 ? regions.flatMap(r => r.ids) : country ? [country.id] : [];
 
-    try {
-      const res = await ReservationsService.searchYachtsForAdmin({
-        did,
-        startDate: startDate.format('YYYY-MM-DD'),
-        endDate: endDate.format('YYYY-MM-DD'),
-        vesselType: vesselTypes.length > 0 ? vesselTypes : undefined,
-        amenities: amenities.length > 0 ? amenities : undefined,
-        agencyId: agencies.length > 0 ? agencies.map(a => a.id) : undefined,
-        // Flatten canonical manufacturer groups back to their raw ids so
-        // "Lagoon" (which holds 2 backend rows) filters against both.
-        manufacturerId: manufacturers.length > 0 ? manufacturers.flatMap(m => m.ids) : undefined,
-        modelId: models.length > 0 ? models.map(m => m.id) : undefined,
-        minBuildYear: Number(buildYearFrom) || undefined,
-        maxBuildYear: Number(buildYearTo) || undefined,
-        minCabins: Number(minCabins) || undefined,
-        minPersons: Number(minPersons) || undefined,
-        currency,
-        page: targetPage,
+  const params = {
+      did,
+      startDate: startDate.format('YYYY-MM-DD'),
+      endDate: endDate.format('YYYY-MM-DD'),
+      vesselType: vesselTypes.length > 0 ? vesselTypes : undefined,
+      amenities: amenities.length > 0 ? amenities : undefined,
+      agencyId: agencies.length > 0 ? agencies.map(a => a.id) : undefined,
+      // Flatten canonical manufacturer groups back to their raw ids so
+      // "Lagoon" (which holds 2 backend rows) filters against both.
+      manufacturerId: manufacturers.length > 0 ? manufacturers.flatMap(m => m.ids) : undefined,
+      modelId: models.length > 0 ? models.map(m => m.id) : undefined,
+      minBuildYear: Number(buildYearFrom) || undefined,
+      maxBuildYear: Number(buildYearTo) || undefined,
+      minCabins: Number(minCabins) || undefined,
+      minPersons: Number(minPersons) || undefined,
+      currency,
+  };
+
+    // One page, one retry. The service normally swallows a failure into an
+    // empty page; a 40-request walk meets cusma2's hiccups 40× more often
+    // than a single search did, and an empty page here would silently read
+    // as "100 boats fewer" — so the walk asks the service to throw, retries
+    // once, and otherwise lets the catch below flag the list as incomplete.
+    const fetchPage = async (pageIndex: number): Promise<SearchPage> => {
+      try {
+        return await ReservationsService.searchYachtsForAdmin({ ...params, page: pageIndex, throwOnError: true });
+      } catch (e) {
+        // A superseded walk does not retry — its result would be discarded.
+        if (seq !== searchSeq.current) throw e;
+
+        await new Promise(resolve => {
+          setTimeout(resolve, PAGE_RETRY_DELAY_MS);
+        });
+
+        return ReservationsService.searchYachtsForAdmin({ ...params, page: pageIndex, throwOnError: true });
+      }
+    };
+
+    // The search endpoint returns a wider row than the admin-reservation
+    // flow needs; pick out just what the offer card actually shows.
+    const mapRows = (content: SearchPage['content']): SearchRow[] =>
+  (content || []).map(y => ({
+    yachtId: y.id ?? y.yachtId ?? 0,
+    slug: y.slug || '',
+    name: y.name,
+    modelName: y.modelName,
+    // Display in the active currency: read the converted amount from
+    // clientPriceInfo/listPriceInfo (backend leaves *Eur in EUR). Commission
+    // has no converted field, so scale it by the same EUR→currency rate so
+    // the commission % (commission/price) and its displayed amount stay
+    // correct. EUR → rate 1 / info.amount == *Eur, so no change.
+    clientPriceEur: y.clientPriceInfo?.amount ?? (Number(y.clientPriceEur) || 0),
+    listPriceEur: y.listPriceInfo?.amount ?? (y.listPriceEur != null ? Number(y.listPriceEur) : null),
+    agencyCommissionEur:
+      y.agencyCommissionEur != null ? Number(y.agencyCommissionEur) * (y.clientPriceInfo?.rate ?? 1) : null,
+    currency,
+    agencyName: y.agencyName,
+    sourceSystem: y.sourceSystem ?? null,
+    locationName: y.location?.name || '',
+    locationCountryCode: y.location?.countryCode ?? null,
+    cabins: y.cabins ?? null,
+    maxPersons: y.maxPersons ?? null,
+    buildYear: y.buildYear ?? null,
+    lengthMeters: y.length != null ? Number(y.length) : null,
+    vesselType: y.vesselType ?? null,
+    mainImageId: y.mainImageId ?? null,
+    isOption: y.isOption === true,
+    optionExpiresAt: y.optionExpiresAt ?? null,
+    offerDateFrom: y.offerDateFrom ?? null,
+    offerDateTo: y.offerDateTo ?? null,
+    matchKind: y.matchKind ?? null,
+  }));
+
+    // The backend orders by price with no tiebreak, so at equal prices the
+    // same row can come back on two neighbouring pages while another row is
+    // never returned (3 of 897 Croatian catamarans, identical on two runs,
+    // 22.9.2026). Keep the first occurrence so row keys stay unique; the
+    // shortfall against totalCount is shown, not hidden.
+    const seen = new Set<string>();
+    const fresh = (rows: SearchRow[]) =>
+      rows.filter(r => {
+        const key = `${r.yachtId}-${r.slug}`;
+
+        if (seen.has(key)) return false;
+
+        seen.add(key);
+
+        return true;
       });
 
-      setTotalPages(res.page?.totalPages ?? 0);
-      setTotalCount(res.page?.totalElements ?? 0);
+    let loaded = 0;
 
-      // The search endpoint returns a wider row than the admin-reservation
-      // flow needs; pick out just what the offer card actually shows.
-      const mapped: SearchRow[] = (res.content || []).map(y => ({
-        yachtId: y.id ?? y.yachtId ?? 0,
-        slug: y.slug || '',
-        name: y.name,
-        modelName: y.modelName,
-        // Display in the active currency: read the converted amount from
-        // clientPriceInfo/listPriceInfo (backend leaves *Eur in EUR). Commission
-        // has no converted field, so scale it by the same EUR→currency rate so
-        // the commission % (commission/price) and its displayed amount stay
-        // correct. EUR → rate 1 / info.amount == *Eur, so no change.
-        clientPriceEur: y.clientPriceInfo?.amount ?? (Number(y.clientPriceEur) || 0),
-        listPriceEur: y.listPriceInfo?.amount ?? (y.listPriceEur != null ? Number(y.listPriceEur) : null),
-        agencyCommissionEur:
-          y.agencyCommissionEur != null ? Number(y.agencyCommissionEur) * (y.clientPriceInfo?.rate ?? 1) : null,
-        currency,
-        agencyName: y.agencyName,
-        sourceSystem: y.sourceSystem ?? null,
-        locationName: y.location?.name || '',
-        locationCountryCode: y.location?.countryCode ?? null,
-        cabins: y.cabins ?? null,
-        maxPersons: y.maxPersons ?? null,
-        buildYear: y.buildYear ?? null,
-        lengthMeters: y.length != null ? Number(y.length) : null,
-        vesselType: y.vesselType ?? null,
-        mainImageId: y.mainImageId ?? null,
-        isOption: y.isOption === true,
-        optionExpiresAt: y.optionExpiresAt ?? null,
-        offerDateFrom: y.offerDateFrom ?? null,
-        offerDateTo: y.offerDateTo ?? null,
-        matchKind: y.matchKind ?? null,
-      }));
+    try {
+      const first = await fetchPage(0);
 
-      // Trust backend ordering. A client-side re-sort over the 100 rows of
-      // this page would shuffle them against the GLOBAL ascending order —
-      // you'd see the last item on page 1 priced higher than the first on
-      // page 2, and vice-versa. Backend's `sortBy=asc` orders by total
-      // price (clientPrice × days) across all 5K+ rows consistently.
-      setResults(mapped);
+      if (seq !== searchSeq.current) return;
+
+      const totalPages = first.page?.totalPages ?? 0;
+      const firstRows = fresh(mapRows(first.content));
+
+      loaded = firstRows.length;
+      setTotalCount(first.page?.totalElements ?? 0);
+      // Trust backend ordering (`sortBy=asc` = total price across the whole
+      // result set); appending pages in order keeps it.
+      setResults(firstRows);
+
+      const lastPage = Math.min(totalPages, MAX_SEARCH_PAGES);
+
+      // Sequential batches on purpose: PAGE_FETCH_CONCURRENCY pages in flight,
+      // never the whole walk at once (cusma2 is the only API node).
+      for (let start = 1; start < lastPage; start += PAGE_FETCH_CONCURRENCY) {
+        const pages = Array.from({ length: Math.min(PAGE_FETCH_CONCURRENCY, lastPage - start) }, (_, k) => start + k);
+        // eslint-disable-next-line no-await-in-loop -- bounded concurrency is the point
+        const responses = await Promise.all(pages.map(fetchPage));
+
+        if (seq !== searchSeq.current) return;
+
+        const rows = fresh(responses.flatMap(r => mapRows(r.content)));
+
+        loaded += rows.length;
+        setResults(prev => [...prev, ...rows]);
+      }
+
+      setWalkEnd(totalPages > MAX_SEARCH_PAGES ? 'truncated' : 'complete');
+    } catch {
+      if (seq !== searchSeq.current) return;
+
+      // What did load stays on screen, flagged as incomplete — never shown
+      // as the full result.
+      setWalkEnd('failed');
+      showToast({
+        status: 'error',
+        text:
+          loaded === 0
+            ? 'Search failed — the API did not answer. Click Search to try again.'
+            : `Loading stopped at ${loaded.toLocaleString('en')} yachts — some pages failed. Click Search to retry.`,
+      });
     } finally {
-      setSearching(false);
+      // A superseded walk leaves `searching` to the search that replaced it.
+      if (seq === searchSeq.current) setSearching(false);
     }
   };
 
-  const handlePageChange = (nextPage: number) => {
-    if (nextPage < 0 || nextPage >= totalPages || nextPage === page) return;
-
-    setPage(nextPage);
-    handleSearch(nextPage);
-    // Scroll the middle panel back to the top so the broker sees the new
-    // page's first rows without having to hunt. `<main>` (Layout) is the
-    // sole scroll container (100vh + overflow-y: scroll) — the document
-    // body never scrolls, so `window.scrollTo` was a silent no-op here.
-    try {
-      document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch {
-      // older browsers — no-op
-    }
+  // Stop = keep what is loaded, abandon the rest. Superseding the sequence
+  // makes the in-flight batch (at most PAGE_FETCH_CONCURRENCY requests)
+  // discard itself on its next checkpoint.
+  const stopSearch = () => {
+    searchSeq.current += 1;
+    setSearching(false);
+    setWalkEnd('stopped');
   };
 
   const handleResetFilters = () => {
@@ -1174,12 +1573,59 @@ const Offers = () => {
 
   // ---- render ------------------------------------------------------------
   const nights = Math.max(1, endDate.diff(startDate, 'day'));
+  const dateFromStr = startDate.format('YYYY-MM-DD');
+  const dateToStr = endDate.format('YYYY-MM-DD');
+  // O(1) "is this yacht in the cart for these dates" for thousands of rows.
+  const cartKeys = useMemo(() => new Set(cart.map(c => `${c.yachtId}|${c.dateFrom}`)), [cart]);
+  // Stable callback so a cart change does not re-render every ResultRow; the
+  // ref always points at the latest handleAddToOffer closure.
+  const addToOfferRef = useRef(handleAddToOffer);
+
+  useEffect(() => {
+    addToOfferRef.current = handleAddToOffer;
+  });
+
+  const onAddToOffer = useCallback((row: SearchRow) => addToOfferRef.current(row), []);
+  // Same trick for the customer-site link: the dates and currency it needs
+  // change with every "‹ week ›" click, and as props they would re-render
+  // all loaded rows for a URL only built on click.
+  const openCustomerSiteRef = useRef<(row: SearchRow) => void>(() => undefined);
+
+  useEffect(() => {
+    openCustomerSiteRef.current = row =>
+      window.open(
+        `${CUSTOMER_WEB_URL}/boat/${row.slug}?startDate=${dateFromStr}&endDate=${dateToStr}&currency=${currency}`,
+        '_blank',
+        'noopener,noreferrer'
+      );
+  });
+
+  const onOpenCustomerSite = useCallback((row: SearchRow) => openCustomerSiteRef.current(row), []);
+
+  // One sentence about the walk, shown under the header and again after the
+  // last row (the header scrolls away long before a 3,000-row list ends).
+  const loadedText = results.length.toLocaleString('en');
+  const totalText = totalCount.toLocaleString('en');
+  const walkNote =
+    totalCount === 0 && results.length === 0
+      ? null
+      : searching && results.length > 0
+      ? `Loading ${loadedText} of ${Math.min(totalCount, MAX_SEARCH_PAGES * 100).toLocaleString('en')}…`
+      : walkEnd === 'truncated'
+        ? `Showing the ${loadedText} cheapest of ${totalText} — narrow the filters (dates, region, type) to reach the pricier boats.`
+        : walkEnd === 'stopped'
+          ? `Stopped at ${loadedText} of ${totalText} — click Search to load everything.`
+          : walkEnd === 'failed'
+            ? `Stopped at ${loadedText} of ${totalText} — some pages failed, click Search to retry.`
+            : walkEnd === 'complete' && results.length < totalCount
+              ? `${loadedText} of ${totalText} loaded — ${(totalCount - results.length).toLocaleString('en')} could not be fetched (the API's paging can return some rows twice and skip others).`
+              : null;
 
   return (
     <Layout>
       <Stack
         direction="row"
-        sx={{ backgroundColor: bbColors.gray50, minHeight: 600, alignItems: 'stretch', pt: '54px', fontFamily: bbFont.stack }}
+        sx={{ backgroundColor: bbColors.gray50, minHeight: 600, alignItems: 'flex-start', pt: '54px', fontFamily: bbFont.stack }}
       >
         {/* === LEFT PANEL: filters ============================================ */}
         {/* Filters are grouped into labelled SECTIONs (uppercase small caps) so
@@ -1193,6 +1639,15 @@ const Offers = () => {
             backgroundColor: colors.white,
             borderRight: `1px solid ${bbColors.gray200}`,
             p: 2,
+            // The list is one page of up to 5,000 rows inside the single
+            // <main> scroller; the panels stay put so Search, the filters
+            // and the cart are reachable from any depth.
+            position: 'sticky',
+            top: '54px',
+            alignSelf: 'flex-start',
+            minHeight: 'calc(100vh - 54px)',
+            maxHeight: 'calc(100vh - 54px)',
+            overflowY: 'auto',
             // Uniform control typography across the whole filter panel: MUI
             // inputs (Select/Autocomplete/TextField) default to 16px while
             // chips render 13px, so Destination read bigger than the region
@@ -1344,11 +1799,30 @@ const Offers = () => {
               </Stack>
             </CollapsibleSection>
 
-            <Stack direction="row" spacing={1} sx={{ pt: 1 }}>
+            {/* Sticky footer: the panel is now its own scroller (see its sx),
+                and on a 900px-tall window the amenity chips push this row
+                below the fold — Search must never need a hunt. */}
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 1,
+                backgroundColor: colors.white,
+                borderTop: `1px solid ${bbColors.gray200}`,
+                pt: 1.5,
+                pb: 2,
+                mb: -2,
+                mx: -2,
+                px: 2,
+              }}
+            >
               <Button
                 variant="contained"
-                onClick={() => handleSearch()}
-                disabled={searching}
+                // Doubles as Stop while a walk is running — a 40-page walk is
+                // too long to lock the broker out of the button.
+                onClick={() => (searching ? stopSearch() : handleSearch())}
                 fullWidth
                 sx={{
                   backgroundColor: bbColors.yellow500,
@@ -1360,7 +1834,7 @@ const Offers = () => {
                   fontWeight: 800,
                 }}
               >
-                {searching ? 'Searching…' : 'Search'}
+                {searching ? 'Stop' : 'Search'}
               </Button>
               <Button
                 variant="outlined"
@@ -1388,12 +1862,20 @@ const Offers = () => {
           >
             <Stack direction="row" alignItems="baseline" gap={1} sx={{ flexWrap: 'wrap' }}>
               <Typography variant="h4" fontWeight={700} sx={{ fontSize: 20 }}>
-                {searched ? `${totalCount} yacht${totalCount === 1 ? '' : 's'} found` : 'No search yet'}
+                {!searched
+                  ? 'No search yet'
+                  : searching && totalCount === 0
+                    ? 'Searching…'
+                    : walkEnd === 'failed' && totalCount === 0
+                      ? 'Search failed'
+                      : walkEnd === 'stopped' && totalCount === 0
+                        ? 'Search stopped'
+                        : `${totalCount.toLocaleString('en')} yacht${totalCount === 1 ? '' : 's'} found`}
               </Typography>
               {searched && (
                 <Typography variant="body2" color={bbColors.gray500} sx={{ fontSize: 13 }}>
                   matching your filters
-                  {totalPages > 1 ? ` · page ${page + 1} of ${totalPages}` : ''}
+                  {walkNote ? ` · ${walkNote}` : ''}
                 </Typography>
               )}
             </Stack>
@@ -1479,7 +1961,7 @@ const Offers = () => {
             />
           )}
 
-          {searched && !searching && results.length === 0 && (
+          {searched && !searching && results.length === 0 && walkEnd === 'complete' && (
             <EmptyState
               icon={<SailingOutlinedIcon sx={{ fontSize: 22 }} />}
               title="No yachts match"
@@ -1487,323 +1969,55 @@ const Offers = () => {
             />
           )}
 
+          {searched && !searching && results.length === 0 && walkEnd === 'stopped' && (
+            <EmptyState
+              icon={<SearchOutlinedIcon sx={{ fontSize: 22 }} />}
+              title="Search stopped"
+              sub="Nothing was loaded yet — click Search to run it."
+            />
+          )}
+
+          {searched && !searching && results.length === 0 && walkEnd === 'failed' && (
+            <EmptyState
+              icon={<SearchOutlinedIcon sx={{ fontSize: 22 }} />}
+              title="Search failed"
+              sub="The API did not answer. Click Search to try again."
+            />
+          )}
+
+          {searching && results.length === 0 && (
+            <Typography sx={{ py: 4, textAlign: 'center', fontSize: 13, color: bbColors.gray500 }}>
+              Loading the first 100 boats…
+            </Typography>
+          )}
+
           <Stack spacing={1}>
-            {results.map(row => {
-              const periodTotal = row.clientPriceEur * nights;
-              const listPeriodTotal = row.listPriceEur != null ? row.listPriceEur * nights : null;
-              const hasDiscount = listPeriodTotal != null && listPeriodTotal > periodTotal;
-              const inCart = cart.some(c => c.yachtId === row.yachtId && c.dateFrom === startDate.format('YYYY-MM-DD'));
-              const rowSymbol = getCurrencySymbol(row.currency);
-              const stats = [
-                row.cabins != null ? `${row.cabins} cab` : null,
-                row.maxPersons != null ? `${row.maxPersons} pax` : null,
-                row.lengthMeters != null ? `${row.lengthMeters.toFixed(2)} m` : null,
-                row.buildYear != null ? `${row.buildYear}` : null,
-              ].filter(Boolean);
-
-              // Format `2026-04-25T23:59:00` → `25.04.2026 23:59` for the
-              // option-expires line. Defensive against backend strings with
-              // missing time portion (falls back to date-only).
-              const optionExpiresText = row.optionExpiresAt
-                ? (() => {
-                    const [datePart, timePart = ''] = row.optionExpiresAt.split('T');
-                    const [y, m, d] = datePart.split('-');
-                    const hm = timePart ? timePart.slice(0, 5) : '';
-
-                    return hm ? `${d}.${m}.${y} ${hm}` : `${d}.${m}.${y}`;
-                  })()
-                : null;
-
-              const thumbUrl = getBoatImageUrl(row.mainImageId, 200);
-              const statsPills: Array<{ label: string; value: string }> = [];
-
-              if (row.cabins != null) statsPills.push({ label: 'Cab', value: String(row.cabins) });
-
-              if (row.maxPersons != null) statsPills.push({ label: 'Pax', value: String(row.maxPersons) });
-
-              if (row.lengthMeters != null) statsPills.push({ label: 'L', value: `${row.lengthMeters.toFixed(2)} m` });
-
-              if (row.buildYear != null) statsPills.push({ label: 'Year', value: String(row.buildYear) });
-
-              return (
-                <Box
-                  key={`${row.yachtId}-${row.slug}`}
-                  sx={{
-                    border: `1px solid ${inCart ? '#a8e7c4' : row.isOption ? '#f4e7a8' : bbColors.cardBorder}`,
-                    backgroundColor: inCart ? '#f6fdf9' : row.isOption ? '#fffdf2' : colors.white,
-                    borderRadius: '12px',
-                    p: 1.5,
-                  }}
-                >
-                  <Stack direction="row" alignItems="stretch" gap={1.5}>
-                    {/* Thumbnail — square-ish tile so a row of cards reads
-                        like a consistent grid. Falls back to a grey tile
-                        with model name when the yacht has no synced image
-                        or the API kept shedding the resize (see BoatThumb). */}
-                    <BoatThumb url={thumbUrl} label={row.modelName} />
-
-                    {/* Middle: identity + location + agency + specs pills */}
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Stack direction="row" alignItems="center" gap={1} sx={{ flexWrap: 'wrap' }}>
-                        <Typography sx={{ fontSize: 15, fontWeight: 700, color: bbColors.navy900 }}>
-                          {row.modelName}
-                          <Box component="span" sx={{ color: bbColors.gray500, fontWeight: 600, mx: 0.75 }}>
-                            /
-                          </Box>
-                          <Box
-                            component="span"
-                            sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.3 }}
-                          >
-                            {row.name}
-                          </Box>
-                        </Typography>
-                        {row.isOption && (
-                          <Box
-                            component="span"
-                            sx={{
-                              display: 'inline-block',
-                              backgroundColor: '#fef7e0',
-                              color: '#8a6d00',
-                              border: '1px solid #f4e7a8',
-                              fontSize: 10,
-                              fontWeight: 700,
-                              letterSpacing: 0.5,
-                              textTransform: 'uppercase',
-                              px: 0.75,
-                              py: 0.25,
-                              borderRadius: '999px',
-                            }}
-                          >
-                            Under option
-                          </Box>
-                        )}
-                        {row.matchKind && row.matchKind !== 'EXACT' && row.offerDateFrom && row.offerDateTo && (
-                          <Box
-                            component="span"
-                            title="The searched dates are not offered for this yacht — the price shown is for the closest free period. Adjust the offer dates to this window."
-                            sx={{
-                              display: 'inline-block',
-                              backgroundColor: '#fdecec',
-                              color: '#a83232',
-                              border: '1px solid #f5c2c2',
-                              fontSize: 10,
-                              fontWeight: 700,
-                              letterSpacing: 0.5,
-                              textTransform: 'uppercase',
-                              px: 0.75,
-                              py: 0.25,
-                              borderRadius: '999px',
-                            }}
-                          >
-                            {`Free ${formatIsoDateDMY(row.offerDateFrom)} – ${formatIsoDateDMY(row.offerDateTo)}`}
-                          </Box>
-                        )}
-                      </Stack>
-                      <Stack direction="row" alignItems="center" gap={0.75} sx={{ mt: 0.5, flexWrap: 'wrap' }}>
-                        <Box
-                          component="span"
-                          sx={{
-                            width: 8,
-                            height: 8,
-                            borderRadius: '50%',
-                            backgroundColor: bbColors.yellow500,
-                            display: 'inline-block',
-                          }}
-                        />
-                        <Typography sx={{ fontSize: 13, color: '#2c3e56', fontWeight: 500 }}>
-                          {row.locationName}
-                          {row.locationCountryCode ? ` · ${row.locationCountryCode}` : ''}
-                        </Typography>
-                        <Typography component="span" sx={{ fontSize: 13, color: bbColors.gray500, mx: 0.25 }}>
-                          🏕
-                        </Typography>
-                        <Typography sx={{ fontSize: 13, color: bbColors.navy700, fontWeight: 600 }}>
-                          {row.agencyName}
-                        </Typography>
-                        {row.sourceSystem && (
-                          <Box
-                            component="span"
-                            sx={{
-                              fontSize: 10,
-                              fontWeight: 700,
-                              letterSpacing: 0.3,
-                              px: 0.6,
-                              py: 0.1,
-                              borderRadius: 0.75,
-                              color: row.sourceSystem === 'MMK' ? '#7c3aed' : '#0369a1',
-                              backgroundColor: row.sourceSystem === 'MMK' ? '#ede9fe' : '#e0f2fe',
-                            }}
-                          >
-                            {row.sourceSystem}
-                          </Box>
-                        )}
-                        <Typography component="span" sx={{ fontSize: 11, color: bbColors.gray600 }}>
-                          (hidden when sent to client)
-                        </Typography>
-                      </Stack>
-                      <Stack direction="row" gap={0.5} sx={{ mt: 1, flexWrap: 'wrap' }}>
-                        {statsPills.map(p => (
-                          <Box
-                            key={p.label}
-                            sx={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: 0.5,
-                              px: 0.9,
-                              py: 0.3,
-                              borderRadius: 4,
-                              backgroundColor: bbColors.gray100,
-                              fontSize: 11,
-                              color: '#2c3e56',
-                              fontWeight: 500,
-                            }}
-                          >
-                            <Box component="span" sx={{ color: bbColors.gray500 }}>
-                              {p.label}
-                            </Box>
-                            <Box component="span" sx={{ fontWeight: 700 }}>
-                              {p.value}
-                            </Box>
-                          </Box>
-                        ))}
-                      </Stack>
-                      <Button
-                        size="small"
-                        variant="text"
-                        onClick={() =>
-                          window.open(
-                            `${CUSTOMER_WEB_URL}/boat/${row.slug}?startDate=${startDate.format('YYYY-MM-DD')}&endDate=${endDate.format('YYYY-MM-DD')}&currency=${currency}`,
-                            '_blank',
-                            'noopener,noreferrer'
-                          )
-                        }
-                        sx={{ p: 0, minWidth: 0, fontSize: 11, textTransform: 'none', mt: 0.75, color: bbColors.navy700, fontWeight: 700 }}
-                      >
-                        View on customer site ↗
-                      </Button>
-                    </Box>
-
-                    {/* Right: pricing + action */}
-                    <Stack alignItems="flex-end" spacing={0.5} sx={{ minWidth: 180 }}>
-                      {hasDiscount && (
-                        <Typography sx={{ fontSize: 12, color: bbColors.gray500, textDecoration: 'line-through' }}>
-                          List:{' '}
-                          {listPeriodTotal!.toLocaleString('hr-HR', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}{' '}
-                          {rowSymbol}
-                        </Typography>
-                      )}
-                      <Typography
-                        sx={{
-                          fontSize: 18,
-                          fontWeight: 800,
-                          color: bbColors.green600,
-                          lineHeight: 1.15,
-                          fontVariantNumeric: 'tabular-nums',
-                        }}
-                      >
-                        {periodTotal.toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
-                        {rowSymbol}
-                      </Typography>
-                      {(() => {
-                        if (row.agencyCommissionEur == null || row.clientPriceEur <= 0) return null;
-
-                        const commissionTotal = row.agencyCommissionEur * nights;
-                        const pctBase = listPeriodTotal ?? periodTotal;
-                        const pct = pctBase > 0 ? (commissionTotal / pctBase) * 100 : 0;
-                        const isZero = commissionTotal === 0;
-
-                        return (
-                          <Box
-                            sx={{
-                              backgroundColor: isZero ? bbColors.gray100 : '#fef7e0',
-                              color: isZero ? bbColors.gray500 : '#8a6d00',
-                              border: `1px solid ${isZero ? bbColors.gray200 : '#f4e7a8'}`,
-                              fontSize: 11,
-                              fontWeight: 700,
-                              px: 0.9,
-                              py: 0.3,
-                              borderRadius: '999px',
-                            }}
-                          >
-                            {isZero
-                              ? 'Commission: —'
-                              : `Commission ${pct.toFixed(1)}% · ${commissionTotal.toLocaleString('hr-HR', {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })} ${rowSymbol}`}
-                          </Box>
-                        );
-                      })()}
-                      {row.isOption && (
-                        <Typography
-                          sx={{
-                            fontSize: 11,
-                            color: '#8a6d00',
-                            fontWeight: 600,
-                            mt: 0.25,
-                            textAlign: 'right',
-                          }}
-                        >
-                          {optionExpiresText ? `Option expires: ${optionExpiresText}` : 'Under option — expiry unknown'}
-                        </Typography>
-                      )}
-                      <Button
-                        variant="contained"
-                        size="small"
-                        disabled={addingSlug === row.slug || inCart}
-                        onClick={() => handleAddToOffer(row)}
-                        sx={{
-                          mt: 0.5,
-                          textTransform: 'none',
-                          backgroundColor: inCart ? bbColors.green600 : bbColors.navy900,
-                          boxShadow: 'none',
-                          fontWeight: 700,
-                          borderRadius: '8px',
-                          '&:hover': {
-                            backgroundColor: inCart ? bbColors.green600 : '#13283d',
-                            boxShadow: 'none',
-                          },
-                        }}
-                      >
-                        {inCart ? '✓ In offer' : addingSlug === row.slug ? 'Adding…' : '+ Add to offer'}
-                      </Button>
-                    </Stack>
-                  </Stack>
-                </Box>
-              );
-            })}
+            {results.map(row => (
+              <ResultRow
+                key={`${row.yachtId}-${row.slug}`}
+                row={row}
+                nights={nights}
+                inCart={cartKeys.has(`${row.yachtId}|${dateFromStr}`)}
+                adding={addingSlug === row.slug}
+                onAdd={onAddToOffer}
+                onOpen={onOpenCustomerSite}
+              />
+            ))}
           </Stack>
 
-          {/* Pagination footer — only visible when there's more than one page
-              worth of results for the current filters. Page size is fixed
-              at 100 on the backend (hard cap). */}
-          {totalPages > 1 && (
-            <Stack direction="row" alignItems="center" justifyContent="center" spacing={2} sx={{ mt: 3, mb: 2 }}>
-              <Button
-                variant="outlined"
-                size="small"
-                disabled={page === 0 || searching}
-                onClick={() => handlePageChange(page - 1)}
-                sx={{ color: bbColors.navy900, borderColor: bbColors.gray300 }}
-              >
-                ← Prev
-              </Button>
-              <Typography variant="body2" color={bbColors.gray500}>
-                Page <strong>{page + 1}</strong> of <strong>{totalPages}</strong>
-              </Typography>
-              <Button
-                variant="outlined"
-                size="small"
-                disabled={page >= totalPages - 1 || searching}
-                onClick={() => handlePageChange(page + 1)}
-                sx={{ color: bbColors.navy900, borderColor: bbColors.gray300 }}
-              >
-                Next →
-              </Button>
-            </Stack>
+          {walkNote && results.length > 0 && (
+            <Typography
+              sx={{
+                mt: 1.5,
+                py: 1.5,
+                textAlign: 'center',
+                fontSize: 13,
+                fontWeight: 600,
+                color: walkEnd === 'failed' ? '#b42318' : bbColors.gray500,
+              }}
+            >
+              {walkNote}
+            </Typography>
           )}
         </Box>
 
@@ -1817,6 +2031,12 @@ const Offers = () => {
             p: 2,
             display: 'flex',
             flexDirection: 'column',
+            position: 'sticky',
+            top: '54px',
+            alignSelf: 'flex-start',
+            minHeight: 'calc(100vh - 54px)',
+            maxHeight: 'calc(100vh - 54px)',
+            overflowY: 'auto',
           }}
         >
           <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
@@ -1924,7 +2144,12 @@ const Offers = () => {
             disabled={cart.length === 0 || openingModal}
             onClick={handleOpenOfferModal}
             sx={{
-              mt: 2,
+              mt: 'auto',
+              // Pinned to the panel's bottom edge so a long cart never scrolls
+              // the only way to produce the offer out of reach.
+              position: 'sticky',
+              bottom: 16,
+              zIndex: 1,
               textTransform: 'none',
               backgroundColor: bbColors.yellow500,
               color: bbColors.yellowText,

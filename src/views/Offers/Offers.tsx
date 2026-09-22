@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-use-before-define, no-nested-ternary, @typescript-eslint/no-shadow, no-duplicate-imports */
 import type { ReactNode } from 'react';
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -94,6 +94,113 @@ const UNIT_LABEL: Record<string, string> = {
 const getBoatImageUrl = (id: number | null | undefined, width = 200): string | null =>
   id == null ? null : `${API_URL}/public/image/${id}?width=${width}`;
 
+/**
+ * Retry schedule for a list thumbnail the API shed with 503. The resize gate
+ * on cusma2 answers `Retry-After: 2`, so the first retry waits that long and
+ * the next ones back off; after the last one the tile stays grey.
+ */
+const THUMB_RETRY_DELAYS_MS = [2000, 4000, 8000];
+
+/**
+ * List thumbnail. Until 22.9.2026 this was a CSS `background-image`, which
+ * fired one origin request per row the moment a page rendered — 100 rows =
+ * 100 concurrent `/public/image/{id}?width=200` resizes over HTTP/2, and
+ * `width=200` is an admin-only variant, so the nginx image cache is cold.
+ * The image resize gate on cusma2 (4 permits / 32 waiters / 2 s wait, since
+ * 18.9.2026) shed the overflow with 503 + Retry-After, and a background-image
+ * never retries, so those rows stayed grey (Mario 22.9.2026: 62 of 101 tiles
+ * 503 on a cold cache). `loading="lazy"` limits the burst to the rows near
+ * the viewport, and a failed load is hidden and re-requested on the SAME URL
+ * after the delay — no cache-buster, that would bypass the nginx cache and
+ * cost a fresh resize per retry.
+ */
+const BoatThumb = memo(({ url, label }: { url: string | null; label: string }) => {
+  const [attempt, setAttempt] = useState(0);
+  const [pendingRetry, setPendingRetry] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const retryTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+  // Defensive reset: the list is cleared before every search (setResults([])),
+  // so today `url` never changes in place. The live part is the cleanup — a
+  // tile that unmounts mid-wait must not fire its timer.
+  useEffect(() => {
+    setAttempt(0);
+    setPendingRetry(false);
+    setFailed(false);
+
+    return () => clearTimeout(retryTimer.current);
+  }, [url]);
+
+  const handleError = () => {
+    const delay = THUMB_RETRY_DELAYS_MS[attempt];
+
+    if (delay == null) {
+      setFailed(true);
+
+      return;
+    }
+
+    // Unmount the broken <img> while waiting; mounting it again re-requests.
+    setPendingRetry(true);
+    clearTimeout(retryTimer.current);
+    // Jittered: every shed tile gets its 503 in the same instant, and an
+    // un-jittered wave would hit the gate with the exact shape that was just shed.
+    retryTimer.current = setTimeout(
+      () => {
+        setAttempt(attempt + 1);
+        setPendingRetry(false);
+      },
+      delay * (0.75 + Math.random() * 0.5),
+    );
+  };
+
+  // The tile gave up; the broker can ask again without re-running the search.
+  const retryNow = () => {
+    setAttempt(0);
+    setFailed(false);
+  };
+
+  const showImage = url != null && !failed && !pendingRetry;
+
+  return (
+    <Box
+      title={failed ? 'Image unavailable — click to retry' : undefined}
+      onClick={failed ? retryNow : undefined}
+      sx={{
+        position: 'relative',
+        width: 96,
+        height: 96,
+        flexShrink: 0,
+        borderRadius: '8px',
+        overflow: 'hidden',
+        backgroundColor: bbColors.gray100,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: colors.black500,
+        fontSize: 11,
+        fontWeight: 600,
+        textAlign: 'center',
+        p: 0.5,
+        cursor: failed ? 'pointer' : undefined,
+      }}
+    >
+      {label}
+      {showImage && (
+        // Decorative: the model name is printed right next to the tile.
+        <img
+          loading="lazy"
+          decoding="async"
+          src={url}
+          alt=""
+          onError={handleError}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      )}
+    </Box>
+  );
+});
+
 // Broker-supported currencies. Backend CurrencyEnum has ~15 more but these
 // are the ones the business actually invoices in today (per Mario). Add a
 // new entry here + it's just visible in the dropdown — everything below
@@ -143,9 +250,10 @@ interface SearchRow {
   buildYear: number | null;
   lengthMeters: number | null;
   vesselType: string | null;
-  // Backend catalogue image id. Thumbnail URL is built via
-  // `${VITE_BOAT_API_URL}/public/image/{id}?width=200` — same pattern the
-  // customer site uses so the admin card reuses the already-cached asset.
+  // Backend catalogue image id. The list tile builds
+  // `${VITE_BOAT_API_URL}/public/image/{id}?width=200` from it — an
+  // admin-only width, so the origin's nginx cache is cold for it; see
+  // BoatThumb for why that matters.
   mainImageId: number | null;
   // Pre-reservation state — true when the yacht's best matching offer is
   // OPTION / OPTION_WAITING. The broker CAN still add it to the offer,
@@ -1428,29 +1536,9 @@ const Offers = () => {
                   <Stack direction="row" alignItems="stretch" gap={1.5}>
                     {/* Thumbnail — square-ish tile so a row of cards reads
                         like a consistent grid. Falls back to a grey tile
-                        with model name when the yacht has no synced image. */}
-                    <Box
-                      sx={{
-                        width: 96,
-                        height: 96,
-                        flexShrink: 0,
-                        borderRadius: '8px',
-                        backgroundColor: bbColors.gray100,
-                        backgroundImage: thumbUrl ? `url(${thumbUrl})` : 'none',
-                        backgroundSize: 'cover',
-                        backgroundPosition: 'center',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: colors.black500,
-                        fontSize: 11,
-                        fontWeight: 600,
-                        textAlign: 'center',
-                        p: 0.5,
-                      }}
-                    >
-                      {!thumbUrl && row.modelName}
-                    </Box>
+                        with model name when the yacht has no synced image
+                        or the API kept shedding the resize (see BoatThumb). */}
+                    <BoatThumb url={thumbUrl} label={row.modelName} />
 
                     {/* Middle: identity + location + agency + specs pills */}
                     <Box sx={{ flex: 1, minWidth: 0 }}>

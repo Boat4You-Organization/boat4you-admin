@@ -1,5 +1,26 @@
 # boat4you-admin — deploy notes
 
+## 2026-09-22 — Offers: Prev/Next scrolls the middle panel back to the top (5b67fb9, DEPLOYED)
+
+`handlePageChange` called `window.scrollTo({ top: 0 })`, but `<main>` in `Layout` is the only
+scroll container (`height: 100vh; overflow-y: scroll` in `Layout.module.scss`) and the document
+body never scrolls, so the call was a silent no-op — after "Next" the broker stayed at the old
+offset and saw row ~45 of the new page instead of row 1. Now
+`document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' })`; one line in
+`Offers.tsx`, no other files, thumbnail component untouched.
+
+Build `.env.production.local` (api.boat4you.com + www.boat4you.com) → `yarn build` → tar →
+cusma1 staged swap (`html.staging` → verify entry + Offers chunk + 0× localhost:8443 → `mv`) →
+chown www-data. Live entry `index-Dnbuel49.js`, Offers chunk `index-ZzXkXxDu.js` (served copy
+contains `querySelector("main")`), root + `/offers` 200. Rollback: `html.prev` (= this morning's
+thumbnail build `9009e17`, entry `index-Cy24pJtS.js`), backup
+`/home/cusma1/admin-dist.bak-scrollfix-20260922-0843.tar.gz`.
+
+Deploy-script gotcha: under `set -e`, `grep -c` exits 1 when it finds 0 matches — the
+"0× localhost" check itself aborted the first run right before the swap (staging was left in
+place, live untouched, second run finished it). Count via `grep -o … | wc -l` or add `|| true`.
+`html.prev` must be removed before `mv html html.prev`, otherwise `mv` nests it inside.
+
 ## 2026-09-13 — Users: resend the sign-up invite (9959473, DEPLOYED)
 
 Mario: a client paid through the booking flow but never registered, and there was no way

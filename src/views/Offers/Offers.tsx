@@ -566,9 +566,11 @@ const Offers = () => {
     setPage(nextPage);
     handleSearch(nextPage);
     // Scroll the middle panel back to the top so the broker sees the new
-    // page's first rows without having to hunt.
+    // page's first rows without having to hunt. `<main>` (Layout) is the
+    // sole scroll container (100vh + overflow-y: scroll) — the document
+    // body never scrolls, so `window.scrollTo` was a silent no-op here.
     try {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.querySelector('main')?.scrollTo({ top: 0, behavior: 'smooth' });
     } catch {
       // older browsers — no-op
     }

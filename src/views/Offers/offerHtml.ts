@@ -6,8 +6,9 @@
  * block on paste, so media queries never reach the client. Each card band
  * holds two inline-block columns (width:100% + max-width): side by side when
  * the band is wide enough, stacked on phones, inline styles only.
- *   hero band:   photo 266 (248 + 18 gutter) | text 322          = 588
- *   bottom band: services 360 (344 + 16 gutter) | price box 230  = 590
+ *   hero band:   photo 266 (248 + 18 gutter) | text 300          = 566
+ *   bottom band: services 300 (284 + 16 gutter) | price box 290  = 590
+ *   (every column ≤ 300 px: Apple Mail bakes px widths on paste, see `column`)
  * Both fit the 606px band of a 640px card (640 − 2 border − 2×16 padding);
  * any card narrower than 624px (every phone) stacks.
  *
@@ -478,13 +479,18 @@ const truncateLine = (s: string, max = 90): string => {
 };
 
 /**
- * Fluid-hybrid column (Nicole Merlin's pattern): inline-block, full width up
- * to `maxWidth`, so two columns sit side by side when the band is wide enough
- * and stack otherwise. Padding lives on the inner <td> (box-sizing is not
- * reliable in email); the <td> style also resets the band's font-size:0.
+ * Fluid-hybrid column: inline-block with a FIXED px width + max-width:100%.
+ * Two columns sit side by side when the band is wide enough and wrap (stack)
+ * otherwise. Why fixed px and not width:100%/max-width:Npx: Apple Mail bakes
+ * computed widths on paste (`width:100%` became `width:360px` in a sent
+ * mail, 24.9.2026), so a percentage never survives — but `max-width:100%`
+ * does (percentages are kept for max-width) and it lets the column shrink on
+ * a phone narrower than `width`. Every column is ≤ 300 px so nothing
+ * overflows a 375 px phone. Padding lives on the inner <td> (box-sizing is
+ * not reliable in email); the <td> style also resets the band's font-size:0.
  */
-const column = (maxWidth: number, tdStyle: string, inner: string, tableStyle = ''): string =>
-  `<div style="display:inline-block;vertical-align:top;width:100%;max-width:${maxWidth}px">${TABLE}${
+const column = (width: number, tdStyle: string, inner: string, tableStyle = ''): string =>
+  `<div style="display:inline-block;vertical-align:top;width:${width}px;max-width:100%">${TABLE}${
     tableStyle ? ` style="${tableStyle}"` : ''
   }><tr><td style="${tdStyle}">${inner}</td></tr></table></div>`;
 
@@ -639,7 +645,7 @@ const renderYachtBlock = (
   const servicesColumn =
     serviceRows.length > 0
       ? column(
-          360,
+          300,
           'padding:0 16px 12px 0;font-size:13px',
           `<div style="font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:${BRAND.textMuted};padding-bottom:4px">Selected services <span style="font-weight:400;letter-spacing:0;text-transform:none">(payable separately, not included in the charter price)</span></div>${TABLE} style="font-size:13px;line-height:1.35">${serviceRows.join('')}</table>`
         )
@@ -690,7 +696,7 @@ const renderYachtBlock = (
       : '',
   ].join('');
   const priceColumn = column(
-    230,
+    290,
     'padding:12px 14px 14px;font-size:12px;line-height:1.4',
     priceBox,
     `background:${BRAND.successSoft};border:1px solid ${BRAND.successBorder};border-radius:10px`
@@ -703,7 +709,7 @@ const renderYachtBlock = (
   return `${TABLE} style="margin:0 0 16px;border:1px solid ${BRAND.border};border-radius:12px;background:${BRAND.cardBg};font-family:${FONT_STACK};color:${BRAND.text}">${band(
     '14px 16px 0',
     column(266, 'padding:0 18px 12px 0;line-height:0', photoCell) +
-      column(322, 'padding:0 0 12px;font-size:13px;line-height:1.45', textColumn)
+      column(300, 'padding:0 0 12px;font-size:13px;line-height:1.45', textColumn)
   )}${band('0 16px 16px', servicesColumn + priceColumn)}</table>`;
 };
 

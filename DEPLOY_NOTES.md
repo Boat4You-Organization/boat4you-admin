@@ -29,6 +29,17 @@ newline (`printf '%s\n'`), a bare file redirect hung silently; (3) never pass a 
 `ssh host "sudo bash -c \"…$(…)…\""` — the login shell expands `$()` locally in $HOME; upload the
 script with scp and run `sudo -S bash /tmp/script.sh` instead.
 
+### 2026-09-24 addendum — fixed px columns (91bbe33, DEPLOYED 07:2x UTC)
+
+Mario's first real send (08:52 local, 1 yacht, 41 KB total of which 24 KB is his signature; the
+card itself 6.4 KB = almost no Apple Mail bloat) proved the layout survives the paste, but Apple
+Mail **bakes computed widths**: `width:100%; max-width:360px` was sent as `width:360px`, so on a
+375 px phone the services column overflowed and clipped the right edge. Percentages die on paste,
+`max-width:100%` survives. Columns are now `width:Npx; max-width:100%`, all N ≤ 300 (photo 266 |
+text 300, services 300 | price 290). Live entry `index-DSc-DOwS.js`, Offers chunk
+`index-CmDSS8rI.js`. Rollback `html.prev` = `ae51e8c` build (`index-D_gV8az9.js`).
+Sent-mail evidence: `boat4you-delivery/_offer-email-audit-2026-09-23/mail_new/1002138.html`.
+
 ## 2026-09-22 — Offers: Prev/Next scrolls the middle panel back to the top (5b67fb9, DEPLOYED)
 
 `handlePageChange` called `window.scrollTo({ top: 0 })`, but `<main>` in `Layout` is the only

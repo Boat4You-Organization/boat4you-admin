@@ -1,5 +1,34 @@
 # boat4you-admin — deploy notes
 
+## 2026-09-24 — Offers: fluid two-column client offer card + closing block (ae51e8c, DEPLOYED)
+
+Why: the offer HTML is copy-pasted into Apple Mail, which strips `<style>`, so the media-query
+layout never reached clients — on a phone the price card sat off-screen right. Gmail clips mails
+over 102 KB; a 12-yacht offer was 155 KB as sent (36 % of all offers in 90 days were clipped).
+
+`offerHtml.ts` only. Fluid-hybrid columns (`display:inline-block; width:100%; max-width`) sit side
+by side at 640 px (photo | text, services | price) and stack on phones, no `<style>` at all.
+Compact card (numbered title, one specs line, one amenities line, one-line descriptions, total on
+arrival + deposit line, full-width "View & book online" button), ~5.9 KB per yacht (12 yachts =
+70 KB raw). Mainsail enum humanised (was `ROLLING_SAIL` / `UNKNOWN` in client mails). One "Route
+ideas" line per offer. Closing block appended to the copied HTML: HOLD next-step box
+(`HOLD_OPTION_HOURS = 72`) + trust line; no greeting/signature (Apple Mail adds them). Hero photo
+stays `?width=800` (cached by the customer web; a new width = fresh resize per photo = 503 risk).
+Money logic, WhatsApp variant and exports unchanged. Renders + harness in
+`boat4you-delivery/_offer-email-audit-2026-09-23/render/`.
+
+Deploy: `.env.production.local` → `npx vite build` → tar → cusma1 `html.staging` → checks
+(index.html, 0× localhost:8443, entry hash) → backup → `mv html html.prev` → `mv html.staging html`
+→ chown www-data. Live entry `index-D_gV8az9.js`, Offers chunk `index-CV80kwCq.js` (contains
+"non-binding option", no `b4y-price-col`), root + `/offers` 200. Rollback: `html.prev` (= `cd1c807`
+build, entry `index-B6VneYFF.js`) or `/home/cusma1/admin-dist.bak-offercard-20260924-062734.tar.gz`.
+
+Gotchas this time: (1) `grep -o … | wc -l` still aborts under `pipefail` when grep finds nothing —
+wrap as `(… | grep … || true) | wc -l`; (2) `sudo -S` over ssh needs the password WITH a trailing
+newline (`printf '%s\n'`), a bare file redirect hung silently; (3) never pass a remote script as
+`ssh host "sudo bash -c \"…$(…)…\""` — the login shell expands `$()` locally in $HOME; upload the
+script with scp and run `sudo -S bash /tmp/script.sh` instead.
+
 ## 2026-09-22 — Offers: Prev/Next scrolls the middle panel back to the top (5b67fb9, DEPLOYED)
 
 `handlePageChange` called `window.scrollTo({ top: 0 })`, but `<main>` in `Layout` is the only

@@ -1,11 +1,20 @@
 /**
- * Builds the HTML snippet the broker copy-pastes into their own email
- * client. Layout: a horizontal hero band (half-width photo left · date /
- * title / location / amenities right), then spec chips, then obligatory
- * services + price — kept low so several yachts stack readably in one
- * offer. Agency identity is intentionally OMITTED from the output — the
- * broker wants the customer to stay on boat4you, not learn which partner
- * runs the fleet.
+ * Builds the HTML snippet the broker copy-pastes into their email client
+ * (mostly Apple Mail) and sends to the client.
+ *
+ * Layout: "fluid hybrid" with ZERO <style> — Apple Mail strips the <style>
+ * block on paste, so media queries never reach the client. Each card band
+ * holds two inline-block columns (width:100% + max-width): side by side when
+ * the band is wide enough, stacked on phones, inline styles only.
+ *   hero band:   photo 266 (248 + 18 gutter) | text 322          = 588
+ *   bottom band: services 360 (344 + 16 gutter) | price box 230  = 590
+ * Both fit the 606px band of a 640px card (640 − 2 border − 2×16 padding);
+ * any card narrower than 624px (every phone) stacks.
+ *
+ * Bytes matter: Gmail clips messages over 102 KB and offers carry 8–15
+ * yachts, so markup stays flat (no chip tables) and styles stay short.
+ * Agency identity is intentionally OMITTED — the customer should stay on
+ * boat4you, not learn which partner runs the fleet.
  */
 import { itineraryAreaUrl } from '@/utils/static/itineraryArea';
 
@@ -109,6 +118,10 @@ export interface OfferRenderOptions {
 // builds when it stores the fetched rows.
 export const offerYachtKey = (y: Pick<CartYacht, 'yachtId' | 'dateFrom'>): string => `${y.yachtId}-${y.dateFrom}`;
 
+// Hours the free, non-binding HOLD option lasts — quoted in the closing
+// "Next step" box of every HTML offer. Owner-adjustable.
+export const HOLD_OPTION_HOURS = 72;
+
 /**
  * Append this offer's charter week + currency to the public boat URL so the
  * link opens the detail page pre-priced for THESE dates — not the page's
@@ -139,22 +152,9 @@ const withOfferDates = (y: CartYacht): string | null => {
   return qs ? `${base}?${qs}` : base;
 };
 
-const MONTHS = [
-  'January',
-  'February',
-  'March',
-  'April',
-  'May',
-  'June',
-  'July',
-  'August',
-  'September',
-  'October',
-  'November',
-  'December',
-];
-
 const MONTHS_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const WEEKDAYS_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const formatDateShort = (isoDate: string): string => {
   // "2026-06-20" → "20 Jun 2026"
@@ -208,19 +208,16 @@ const findExtraByKeyword = (extras: CartExtra[], keyword: string): CartExtra | n
   );
 };
 
-const formatDateLong = (isoDate: string, time?: string): string => {
-  // "2026-05-23" → "May 23, 2026 17:00"
-  if (!isoDate) return '';
+// "2027-07-10", "17:00" → "Sat 10 Jul 17:00" ("Sat 10 Jul 2027 17:00" withYear).
+const formatPeriodDate = (isoDate: string, time: string, withYear: boolean): string => {
+  const [y, m, d] = (isoDate || '').split('-').map(Number);
 
-  const parts = isoDate.split('-');
+  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d)) return isoDate;
 
-  if (parts.length !== 3) return isoDate;
+  const weekday = WEEKDAYS_SHORT[new Date(Date.UTC(y, m - 1, d)).getUTCDay()] || '';
+  const mi = Math.max(0, Math.min(11, m - 1));
 
-  const [y, m, d] = parts;
-  const mi = Math.max(0, Math.min(11, Number(m) - 1));
-  const base = `${MONTHS[mi]} ${Number(d)}, ${y}`;
-
-  return time ? `${base} ${time}` : base;
+  return [weekday, String(d), MONTHS_SHORT[mi], withYear ? String(y) : '', time].filter(Boolean).join(' ');
 };
 
 const formatPrice = (v: number | null | undefined): string => {
@@ -253,6 +250,21 @@ const humanizeVesselType = (t: string | null | undefined): string => {
   return map[t] || t;
 };
 
+// Mainsail enum → client wording. Unknown codes (incl. UNKNOWN / null) return
+// null so the raw enum never leaks into the offer ("Mainsail ROLLING_SAIL").
+const humanizeMainsail = (code: string | null | undefined): string | null => {
+  const map: Record<string, string> = {
+    ROLLING_SAIL: 'rolling mainsail',
+    CLASSIC_SAIL: 'classic mainsail',
+    FULL_BATTEN: 'full-batten mainsail',
+    LAZY_JACK: 'lazy jack mainsail',
+    LAZY_BAG: 'lazy jack mainsail',
+    IN_MAST: 'in-mast furling mainsail',
+  };
+
+  return (code && map[code]) || null;
+};
+
 const escapeHtml = (s: string): string =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
@@ -280,26 +292,6 @@ const BRAND = {
 } as const;
 
 const FONT_STACK = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
-
-// Modern display face for the yacht title (model + name). Pulled via @import
-// in the responsive <style> block — renders in clients that honour web fonts
-// (Apple Mail, most webmail); Gmail/Outlook fall back to the system stack.
-const POPPINS_STACK = "'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-
-/**
- * One specs chip (e.g. "Length 15.35 m"). Pill-shaped with a soft brand
- * background — uses an inline-block table cell so it survives Gmail's
- * aggressive style stripping. `whiteSpace: nowrap` keeps "15.35 m" from
- * wrapping mid-value on narrow Gmail mobile.
- */
-const renderChip = (label: string, value: string): string => `
-<td style="padding: 0 6px 6px 0;" valign="top">
-  <table border="0" cellpadding="0" cellspacing="0" role="presentation"><tr>
-    <td style="background: ${BRAND.primarySoft}; border: 1px solid ${BRAND.primaryBorder}; border-radius: 14px; padding: 5px 11px; font-family: ${FONT_STACK}; font-size: 12px; line-height: 1.2; color: ${BRAND.text}; white-space: nowrap;">
-      <span style="color: ${BRAND.textMuted};">${escapeHtml(label)}</span>&nbsp;<b>${escapeHtml(value)}</b>
-    </td>
-  </tr></table>
-</td>`;
 
 // Curated amenity → unicode icon map — same 16 label_codes as
 // BoatListingItemCard's AMENITY_ICON_MAP on the public listing, but
@@ -351,14 +343,12 @@ const AMENITY_SHORT_LABEL: Record<string, string> = {
   watermaker: 'Watermaker',
 };
 
-// Amenities as a compact inline strip ("☀ Solar · 🛥 Dinghy · ❄ AC · …")
-// instead of the old 54x54 boxes — keeps the hero band's right column low
-// so each card stays short when several yachts stack in one offer.
+// Amenities as one compact inline line ("☀ Solar · 🛥 Dinghy · ❄ AC · …").
 const renderAmenitiesInline = (items: { labelCode: string; label: string }[]): string =>
   items
     .slice(0, 4)
     .map(a => `${AMENITY_ICON_MAP[a.labelCode] || '•'} ${escapeHtml(AMENITY_SHORT_LABEL[a.labelCode] || a.label)}`)
-    .join(' &nbsp;&middot;&nbsp; ');
+    .join(' · ');
 
 /**
  * Builds the "Selected services" stack for one yacht: partner obligatory rows
@@ -462,31 +452,83 @@ const computeServicesTotal = (
   return { amount, partial, payableCount };
 };
 
-const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}, autoObligatory: CartExtra[] = []): string => {
-  const periodHeader = `${formatDateLong(y.dateFrom, y.checkin)}  →  ${formatDateLong(y.dateTo, y.checkout)}`;
-  const title = `${y.modelName} (${y.name})`;
-  const sym = y.currencySymbol || '€';
+// Every layout table: cellpadding/cellspacing 0 (HTML defaults are 1 / 2 px)
+// and role=presentation so screen readers skip the grid.
+const TABLE = '<table role="presentation" width="100%" cellpadding="0" cellspacing="0"';
+
+// Hero photo source width. Stays 800 on purpose: the customer web already
+// requests every yacht photo at ?width=800, so the resize is cached on the
+// API (0 × 503 in 14 days, checked 22.9.2026). A new width would trigger a
+// fresh OpenCV resize per photo when the client opens the mail and the
+// resize gate returns 503 under load = broken photos in the offer.
+const HERO_IMG_WIDTH = 800;
+
+const heroImageSrc = (url: string): string => url.replace(/([?&])width=\d+/, `$1width=${HERO_IMG_WIDTH}`);
+
+// Partner descriptions can be long / multi-line: one line, max `max` chars.
+// Runs BEFORE escapeHtml so an entity is never cut in half.
+const truncateLine = (s: string, max = 90): string => {
+  const chars = Array.from(s.replace(/\s+/g, ' ').trim());
+
+  if (chars.length <= max) return chars.join('');
+
+  const head = chars.slice(0, max - 1).join('');
+
+  return `${head.trimEnd()}…`;
+};
+
+/**
+ * Fluid-hybrid column (Nicole Merlin's pattern): inline-block, full width up
+ * to `maxWidth`, so two columns sit side by side when the band is wide enough
+ * and stack otherwise. Padding lives on the inner <td> (box-sizing is not
+ * reliable in email); the <td> style also resets the band's font-size:0.
+ */
+const column = (maxWidth: number, tdStyle: string, inner: string, tableStyle = ''): string =>
+  `<div style="display:inline-block;vertical-align:top;width:100%;max-width:${maxWidth}px">${TABLE}${
+    tableStyle ? ` style="${tableStyle}"` : ''
+  }><tr><td style="${tdStyle}">${inner}</td></tr></table></div>`;
+
+// font-size:0 kills the whitespace gap between the inline-block columns;
+// callers still concatenate the two columns with NO whitespace between them.
+const band = (padding: string, columns: string): string =>
+  `<tr><td style="font-size:0;text-align:left;padding:${padding}">${columns}</td></tr>`;
+
+const mutedSpan = (html: string): string => `<span style="color:${BRAND.textMuted}">${html}</span>`;
+
+const renderYachtBlock = (
+  y: CartYacht,
+  position: number,
+  options: OfferRenderOptions = {},
+  autoObligatory: CartExtra[] = []
+): string => {
+  // Escaped once here — every HTML price string below goes through priceWithCurrency(…, sym).
+  const sym = escapeHtml(y.currencySymbol || '€');
   // Date-aware public link so the client lands on this week's price (see withOfferDates).
   const detailUrl = withOfferDates(y);
+  const href = detailUrl ? escapeHtml(detailUrl) : '';
+  const nights = daysBetween(y.dateFrom, y.dateTo);
+  const nightsLabel = `${nights} ${nights === 1 ? 'night' : 'nights'}`;
+  const sameYear = (y.dateFrom || '').slice(0, 4) === (y.dateTo || '').slice(0, 4);
+  const periodLine = `${formatPeriodDate(y.dateFrom, y.checkin, !sameYear)} → ${formatPeriodDate(
+    y.dateTo,
+    y.checkout,
+    true
+  )} · ${nightsLabel}`;
 
-  // Specs chips — only render values we actually have so the row never
-  // shows "Length —". Order matches what brokers said matters most:
-  // type → year → length → cabins → berths → WC.
-  const chips: Array<[string, string]> = [];
-
-  if (y.vesselType) chips.push(['Type', humanizeVesselType(y.vesselType)]);
-
-  if (y.buildYear != null) chips.push(['Year', String(y.buildYear)]);
-
-  if (y.lengthMeters != null) chips.push(['Length', `${y.lengthMeters.toFixed(2)} m`]);
-
-  if (y.cabins != null) chips.push(['Cabins', String(y.cabins)]);
-
-  if (y.berths != null) chips.push(['Berths', String(y.berths)]);
-
-  if (y.wc != null) chips.push(['WC', String(y.wc)]);
-
-  if (y.mainSailType) chips.push(['Mainsail', humanizeVesselType(y.mainSailType)]);
+  // One specs line — only values we actually have, so it never shows "—".
+  const specs = [
+    humanizeVesselType(y.vesselType),
+    y.buildYear != null ? String(y.buildYear) : '',
+    y.lengthMeters != null ? `${y.lengthMeters.toFixed(2)} m` : '',
+    y.cabins != null ? `${y.cabins} ${y.cabins === 1 ? 'cabin' : 'cabins'}` : '',
+    y.berths != null ? `${y.berths} ${y.berths === 1 ? 'berth' : 'berths'}` : '',
+    y.wc != null ? `${y.wc} WC` : '',
+    humanizeMainsail(y.mainSailType),
+  ]
+    .filter(Boolean)
+    .join(' · ');
+  const amenities = renderAmenitiesInline(y.keyAmenities || []);
+  const locationLine = [y.country, y.base].filter(Boolean).join(' · ');
 
   // Pricing — line-through old, big new, savings badge if discount > 0.
   const hasDiscount = y.listPriceEur != null && y.listPriceEur > y.clientPriceEur;
@@ -496,250 +538,173 @@ const renderYachtBlock = (y: CartYacht, options: OfferRenderOptions = {}, autoOb
       : 0;
   const discountAmount = hasDiscount && y.listPriceEur != null ? y.listPriceEur - y.clientPriceEur : 0;
 
-  // Title — model + name in a modern Poppins face. Clickable when a public
-  // detail URL exists; the font is re-declared on the <a> because some
-  // clients (Apple Mail, Outlook) inject default link styles that ignore
-  // inherited font rules.
-  const titleStyle = `font-family: ${POPPINS_STACK}; font-size: 22px; font-weight: 600; color: ${BRAND.text}; line-height: 1.18; letter-spacing: -0.2px; -webkit-text-size-adjust: 100%;`;
-  const titleHtml = detailUrl
-    ? `<a href="${escapeHtml(detailUrl)}" style="${titleStyle} text-decoration: none;" target="_blank" rel="noopener">${escapeHtml(title)}</a>`
-    : `<span style="${titleStyle}">${escapeHtml(title)}</span>`;
-
-  // Hero image cell — half-width (248px) and near-landscape (248x192) so the
-  // mostly-square partner photos show far more of the boat than the old
-  // full-width 640x220 letterbox crop. Labelled placeholder when no image.
-  const heroCell = y.imageUrl
-    ? `<img src="${escapeHtml(y.imageUrl)}" alt="${escapeHtml(y.modelName)}" width="248" height="192" class="b4y-img" style="display: block; width: 248px; height: 192px; object-fit: cover; border-radius: 10px;" />`
-    : `<table border="0" cellpadding="0" cellspacing="0" width="248" role="presentation" class="b4y-img" style="width: 248px;"><tr><td align="center" valign="middle" height="192" style="height: 192px; background: ${BRAND.primarySoft}; border: 1px solid ${BRAND.primaryBorder}; border-radius: 10px; color: ${BRAND.textMuted}; font-family: ${FONT_STACK}; font-size: 11px; letter-spacing: 0.6px; text-transform: uppercase; font-weight: 700;">Yacht photo</td></tr></table>`;
-
-  // Compact inline amenities (icon + short label) for the hero right column.
-  const amenitiesInline = renderAmenitiesInline(y.keyAmenities || []);
+  // Hero photo — 248x192 near-landscape crop (shows more of the mostly-square
+  // partner photos than a letterbox); labelled placeholder when no image.
+  const photo = y.imageUrl
+    ? `<img src="${escapeHtml(heroImageSrc(y.imageUrl))}" alt="${escapeHtml(`${y.modelName} ${y.name}`)}" width="248" height="192" style="display:block;width:100%;max-width:248px;height:192px;object-fit:cover;border-radius:10px;border:0">`
+    : `${TABLE} style="max-width:248px"><tr><td align="center" height="192" style="height:192px;background:${BRAND.primarySoft};border:1px solid ${BRAND.primaryBorder};border-radius:10px;color:${BRAND.textMuted};font-size:11px;line-height:1.3;font-weight:700;letter-spacing:.6px;text-transform:uppercase">Yacht photo</td></tr></table>`;
+  const photoCell = y.imageUrl && href ? `<a href="${href}" target="_blank">${photo}</a>` : photo;
 
   // Option badge — time-sensitive offers render "Under option until …" under
-  // the period date in the hero right column.
-  const optionBadge = y.isOption
-    ? (() => {
-        const formatted = y.optionExpiresAt
-          ? (() => {
-              const [datePart, timePart = ''] = y.optionExpiresAt!.split('T');
-              const [yy, mm, dd] = datePart.split('-');
-              const hm = timePart ? timePart.slice(0, 5) : '';
+  // the period line so the client sees the deadline.
+  let optionBadge = '';
 
-              return hm ? `${dd}.${mm}.${yy} ${hm}` : `${dd}.${mm}.${yy}`;
-            })()
-          : null;
-        const badgeText = formatted ? `Under option until ${formatted}` : 'Under option';
+  if (y.isOption) {
+    let formatted: string | null = null;
 
-        return `<div style="margin-top: 6px;"><span style="display: inline-block; background: ${BRAND.warnSoft}; color: ${BRAND.warn}; font-family: ${FONT_STACK}; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.3px;">${escapeHtml(badgeText)}</span></div>`;
-      })()
-    : '';
+    if (y.optionExpiresAt) {
+      const [datePart, timePart = ''] = y.optionExpiresAt.split('T');
+      const [yy, mm, dd] = datePart.split('-');
+      const hm = timePart ? timePart.slice(0, 5) : '';
 
-  // Location line under title — country, base, joined with a middle-dot
-  // separator. Stays one line on desktop, wraps on mobile.
-  const locationLine = [y.country, y.base].filter(Boolean).join(' · ');
+      formatted = hm ? `${dd}.${mm}.${yy} ${hm}` : `${dd}.${mm}.${yy}`;
+    }
 
-  // "Suggested itinerary" — deep link to the boat4you sailing-area routes
-  // for THIS yacht's waters (7- & 14-day options live on the landing).
-  // Resolves by marina-name keywords; null (uncovered waters) renders nothing.
-  const itineraryUrl = itineraryAreaUrl([y.base, y.locationName], y.country);
+    const badgeText = formatted ? `Under option until ${formatted}` : 'Under option';
 
-  // Only obligatory extras surface in the client offer — optional add-ons
-  // were dropped (23.4.2026) because brokers found them noisy and customers
-  // routinely asked "is this included in the price?" when scanning a long
-  // optional list. Non-obligatory extras still stay on the public boat
-  // detail page for customers who follow the "More info" link.
-  //
-  // Mario explicitly wants ALL obligatory rows visible (1.5.2026), including
-  // free/"included" ones like "WiFi GRATIS ON BOAT". The renderer below shows
-  // those with a green "included" badge so customers see the value without
-  // confusing them about price.
-  const obligatory = buildObligatoryStack(y, options, autoObligatory);
-  const servicesTotal = computeServicesTotal(obligatory, y.dateFrom, y.dateTo);
-
-  const renderExtraRow = (e: CartExtra): string => {
-    // "Included" is reserved for items that are TRULY free (e.priceEur=0 →
-    // mapper sets included=true). priceEur=null means data is missing — show
-    // a dash, NOT "included" (avoids the Captain/Chef/Stewardess false-
-    // positives Mario flagged on crewed yachts where every item read as
-    // "included").
-    // eslint-disable-next-line no-nested-ternary
-    const priceStr = e.included
-      ? `<span style="color: ${BRAND.success}; font-weight: 600;">included</span>`
-      : e.priceEur == null
-        ? `<span style="color: ${BRAND.textFaint};">—</span>`
-        : `<b>${priceWithCurrency(e.priceEur, sym)}</b>`;
-    const unitSuffix = e.unit
-      ? ` <span style="color: ${BRAND.textMuted}; font-weight: 400;">${escapeHtml(e.unit)}</span>`
-      : '';
-    const descriptionLine = e.description
-      ? `<div style="font-size: 11px; color: ${BRAND.textMuted}; margin-top: 2px; line-height: 1.4;">${escapeHtml(e.description)}</div>`
-      : '';
-
-    return `<tr>
-      <td style="padding: 6px 12px 6px 0; font-size: 13px; color: ${BRAND.text};">
-        <div>${escapeHtml(e.name)}</div>
-        ${descriptionLine}
-      </td>
-      <td valign="top" style="padding: 6px 0; font-size: 13px; text-align: right; white-space: nowrap;">${priceStr}${unitSuffix}</td>
-    </tr>`;
-  };
-
-  // Security deposit renders as a final row inside "Selected services" to
-  // mirror the public ExtrasTab (web) — refundable, paid at the marina,
-  // always mandatory. Styled muted (opacity 0.7) like the web row so it
-  // reads as part of the obligatory stack without dominating it.
-  const hasSecurityDeposit = y.securityDepositEur != null && y.securityDepositEur > 0;
-  const securityDepositRow = hasSecurityDeposit
-    ? `<tr>
-        <td style="padding: 6px 12px 6px 0; font-size: 13px; color: ${BRAND.text}; opacity: 0.7;">
-          <div>Refundable Security Deposit</div>
-          <div style="font-size: 11px; color: ${BRAND.textMuted}; margin-top: 2px; line-height: 1.4;">Refundable, settled at the marina</div>
-        </td>
-        <td valign="top" style="padding: 6px 0; font-size: 13px; text-align: right; white-space: nowrap; opacity: 0.7;">
-          <b>${priceWithCurrency(y.securityDepositEur, sym)}</b>
-          <span style="color: ${BRAND.textMuted}; font-weight: 400;"> per booking</span>
-        </td>
-      </tr>`
-    : '';
-
-  // Sum row under the services list — before the deposit row, which is
-  // refundable and deliberately NOT part of the sum. "from X" when a row
-  // couldn't be priced (on request / per person / %).
-  const servicesTotalRow =
-    servicesTotal.payableCount > 0
-      ? `<tr>
-          <td style="padding: 8px 12px 2px 0; border-top: 1px solid ${BRAND.border}; font-size: 13px; font-weight: 700; color: ${BRAND.text};">Selected services total</td>
-          <td valign="top" style="padding: 8px 0 2px 0; border-top: 1px solid ${BRAND.border}; font-size: 13px; text-align: right; white-space: nowrap;">
-            <b>${servicesTotal.partial && servicesTotal.amount === 0 ? 'on request' : `${servicesTotal.partial ? 'from ' : ''}${priceWithCurrency(servicesTotal.amount, sym)}`}</b>
-          </td>
-        </tr>`
-      : '';
-
-  const extrasSection: string[] = [];
-
-  if (obligatory.length > 0 || hasSecurityDeposit) {
-    extrasSection.push(`
-      <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="margin-bottom: 12px;">
-        <tr><td colspan="2" style="font-family: ${FONT_STACK}; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: ${BRAND.textMuted}; -webkit-text-size-adjust: 100%; padding-bottom: 6px;">Selected services <span style="font-weight: 400; text-transform: none; letter-spacing: 0;">(payable separately &mdash; not included in the total price)</span></td></tr>
-        ${obligatory.map(renderExtraRow).join('')}
-        ${servicesTotalRow}
-        ${securityDepositRow}
-      </table>`);
+    optionBadge = `<div style="margin-top:6px"><span style="display:inline-block;background:${BRAND.warnSoft};color:${BRAND.warn};font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;letter-spacing:.3px">${escapeHtml(badgeText)}</span></div>`;
   }
 
-  // Bottom EQUIPMENT grid was removed (1.5.2026) — its render was conditional
-  // on per-yacht equipmentByCategory rows being synced, which made adjacent
-  // yachts in the same offer look very different ("Bali 4.3" had no grid,
-  // "Excess 11" had a 7-column wall). Top-4 amenity pills next to the title
-  // already convey the marquee features (AC / Generator / Dinghy / Cooker /
-  // …) and stay visually consistent across every yacht in the cart.
-  const equipmentSection = '';
+  const title = escapeHtml(`${position}. ${y.modelName} · ${y.name}`);
+  const titleHtml = href
+    ? `<a href="${href}" target="_blank" style="color:${BRAND.text};text-decoration:none">${title}</a>`
+    : title;
 
-  // Right-hand price card — soft green bg, big number, optional savings
-  // badge above. Renders as its own table-cell so it sits flush with the
-  // extras column to its left. Security deposit NO LONGER shows here —
-  // moved into the "Selected services" list to match the web ExtrasTab.
-  const priceCard = `
-    <td class="b4y-price-col" valign="top" width="220" style="width: 220px; padding-left: 16px; vertical-align: top;">
-      <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="background: ${BRAND.successSoft}; border: 1px solid ${BRAND.successBorder}; border-radius: 10px;">
-        <tr><td style="padding: 16px 16px 14px 16px;">
-          ${
-            hasDiscount
-              ? `
-          <div style="display: inline-block; background: ${BRAND.saveBg}; color: ${BRAND.saveText}; font-family: ${FONT_STACK}; font-size: 11px; font-weight: 700; padding: 4px 9px; border-radius: 10px; margin-bottom: 8px; letter-spacing: 0.3px;">
-            SAVE ${discountPct.toFixed(0)}% &nbsp;·&nbsp; -${priceWithCurrency(discountAmount, sym)}
-          </div>
-          <div style="font-family: ${FONT_STACK}; font-size: 13px; color: ${BRAND.textFaint}; text-decoration: line-through; margin-bottom: 2px;">${priceWithCurrency(y.listPriceEur, sym)}</div>`
-              : ''
-          }
-          <div style="font-family: ${FONT_STACK}; font-size: 24px; font-weight: 800; color: ${BRAND.success}; line-height: 1.1;">${priceWithCurrency(y.clientPriceEur, sym)}</div>
-          <div style="font-family: ${FONT_STACK}; font-size: 11px; color: ${BRAND.textMuted}; margin-top: 4px;">total for the period</div>
-          ${
-            servicesTotal.payableCount > 0
-              ? `
-          <div style="font-family: ${FONT_STACK}; font-size: 12px; color: ${BRAND.text}; margin-top: 10px; padding-top: 8px; border-top: 1px solid ${BRAND.successBorder};">
-            ${
-              servicesTotal.partial && servicesTotal.amount === 0
-                ? `+ selected services <span style="color: ${BRAND.textMuted};">&middot; on request &middot; payable separately</span>`
-                : `+ <b>${servicesTotal.partial ? 'from ' : ''}${priceWithCurrency(servicesTotal.amount, sym)}</b> <span style="color: ${BRAND.textMuted};">selected services &middot; payable separately</span>`
-            }
-          </div>${
-            !servicesTotal.partial
-              ? `
-          <div style="font-family: ${FONT_STACK}; font-size: 12px; color: ${BRAND.text}; margin-top: 4px;">
-            = <b>${priceWithCurrency(y.clientPriceEur + servicesTotal.amount, sym)}</b> <span style="color: ${BRAND.textMuted};">total on arrival${hasSecurityDeposit ? ' (excl. refundable deposit)' : ''}</span>
-          </div>`
-              : ''
-          }`
-              : ''
-          }
-          ${
-            detailUrl
-              ? `
-          <div style="margin-top: 14px;">
-            <a href="${escapeHtml(detailUrl)}" target="_blank" rel="noopener" style="display: inline-block; background: ${BRAND.primary}; color: #ffffff; font-family: ${FONT_STACK}; font-size: 13px; font-weight: 600; text-decoration: none; padding: 9px 14px; border-radius: 6px;">More info  →</a>
-          </div>`
-              : ''
-          }
-        </td></tr>
-      </table>
-    </td>`;
+  const textColumn = [
+    `<div style="font-size:12px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:${BRAND.warn}">${escapeHtml(periodLine)}</div>`,
+    optionBadge,
+    `<div style="font-size:20px;font-weight:700;line-height:1.25;margin:6px 0 2px">${titleHtml}</div>`,
+    locationLine ? `<div style="color:${BRAND.textMuted}">${escapeHtml(locationLine)}</div>` : '',
+    specs ? `<div style="margin-top:8px">${escapeHtml(specs)}</div>` : '',
+    amenities ? `<div style="color:${BRAND.textMuted}">${amenities}</div>` : '',
+  ].join('');
 
-  // Card-level wrapper — outer border + radius. Each yacht is wrapped in its
-  // own outer table so spacing between cards stays consistent.
-  return `
-<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="margin: 0 0 20px 0; font-family: ${FONT_STACK};">
-  <tr><td>
-    <table class="b4y-card" border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="background: ${BRAND.cardBg}; border: 1px solid ${BRAND.border}; border-radius: 12px;">
+  // Only obligatory extras surface in the client offer (optional add-ons were
+  // dropped 23.4.2026 — noisy, "is this included?"). ALL obligatory rows stay
+  // visible (Mario 1.5.2026), free ones with a green "included".
+  const obligatory = buildObligatoryStack(y, options, autoObligatory);
+  const servicesTotal = computeServicesTotal(obligatory, y.dateFrom, y.dateTo);
+  const hasSecurityDeposit = y.securityDepositEur != null && y.securityDepositEur > 0;
 
-      <!-- Hero band — image left · date / title / location / amenities / specs chips all stacked right -->
-      <tr><td style="padding: 14px 16px 8px 16px;">
-        <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation"><tr>
-          <td class="col-img" width="248" valign="top" style="width: 248px; padding: 0; line-height: 0;">${heroCell}</td>
-          <td class="col-text" valign="top" style="vertical-align: top; padding-left: 18px;">
-            <div style="font-family: ${FONT_STACK}; font-size: 12px; line-height: 1.3; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: ${BRAND.warn}; -webkit-text-size-adjust: 100%;">${escapeHtml(periodHeader)}</div>
-            ${optionBadge}
-            <p style="margin: 5px 0 1px 0; padding: 0;">${titleHtml}</p>
-            ${
-              locationLine
-                ? `<div style="font-family: ${FONT_STACK}; font-size: 13px; color: ${BRAND.textMuted}; line-height: 1.3;">${escapeHtml(locationLine)}</div>`
-                : ''
-            }
-            ${
-              itineraryUrl
-                ? `<div style="font-family: ${FONT_STACK}; font-size: 12px; line-height: 1.4; margin-top: 3px;">🗺️ <a href="${itineraryUrl}" target="_blank" style="color: ${BRAND.primary}; font-weight: 600; text-decoration: underline;">Suggested itineraries from ${escapeHtml(y.base || y.locationName)}</a> — 1- &amp; 2-week routes</div>`
-                : ''
-            }
-            ${
-              amenitiesInline
-                ? `<div style="font-family: ${FONT_STACK}; font-size: 12px; color: ${BRAND.textMuted}; line-height: 1.6; margin-top: 9px;">${amenitiesInline}</div>`
-                : ''
-            }
-            ${
-              chips.length > 0
-                ? `<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin-top: 8px;">${Array.from(
-                    { length: Math.ceil(chips.length / 3) },
-                    (_, i) => chips.slice(i * 3, i * 3 + 3)
-                  )
-                    .map(row => `<tr>${row.map(([k, v]) => renderChip(k, v)).join('')}</tr>`)
-                    .join('')}</table>`
-                : ''
-            }
-          </td>
-        </tr></table>
-      </td></tr>
+  // "included" is reserved for TRULY free rows (priceEur 0 → mapper sets
+  // included); priceEur null = missing data → a dash, never "included".
+  const rowPrice = (e: CartExtra): string => {
+    if (e.included) return `<span style="color:${BRAND.success};font-weight:600">included</span>`;
 
-      <tr><td class="b4y-pad-x" style="padding: 6px 16px 16px 16px;">
-        <table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation"><tr>
-          <td class="b4y-extras-col" valign="top" style="vertical-align: top;">${extrasSection.join('')}</td>
-          ${priceCard}
-        </tr></table>
-        ${equipmentSection}
-      </td></tr>
+    if (e.priceEur == null) return `<span style="color:${BRAND.textFaint}">—</span>`;
 
-    </table>
-  </td></tr>
-</table>`;
+    return `<b>${priceWithCurrency(e.priceEur, sym)}</b>`;
+  };
+  const row = (left: string, right: string, extraStyle = ''): string =>
+    `<tr><td style="padding:3px 10px 3px 0${extraStyle}">${left}</td><td align="right" valign="top" style="padding:3px 0;white-space:nowrap${extraStyle}">${right}</td></tr>`;
+
+  const serviceRows = obligatory.map(e => {
+    const description = e.description ? truncateLine(e.description) : '';
+
+    return row(
+      `${escapeHtml(e.name)}${description ? `<div style="font-size:11px;color:${BRAND.textMuted}">${escapeHtml(description)}</div>` : ''}`,
+      `${rowPrice(e)}${e.unit ? ` ${mutedSpan(escapeHtml(e.unit))}` : ''}`
+    );
+  });
+
+  // Sum row — before the deposit row, which is refundable and deliberately
+  // NOT part of the sum. "from X" when a row couldn't be priced.
+  if (servicesTotal.payableCount > 0) {
+    const totalText =
+      servicesTotal.partial && servicesTotal.amount === 0
+        ? 'on request'
+        : `${servicesTotal.partial ? 'from ' : ''}${priceWithCurrency(servicesTotal.amount, sym)}`;
+
+    serviceRows.push(
+      row(
+        '<b>Selected services total</b>',
+        `<b>${totalText}</b>`,
+        `;padding-top:6px;border-top:1px solid ${BRAND.border}`
+      )
+    );
+  }
+
+  // Security deposit — last, muted row (mirrors the web ExtrasTab):
+  // refundable, paid at the marina, always mandatory.
+  if (hasSecurityDeposit) {
+    serviceRows.push(
+      row(
+        'Refundable Security Deposit<div style="font-size:11px">Refundable, settled at the marina</div>',
+        `<b>${priceWithCurrency(y.securityDepositEur, sym)}</b> per booking`,
+        `;color:${BRAND.textMuted}`
+      )
+    );
+  }
+
+  const servicesColumn =
+    serviceRows.length > 0
+      ? column(
+          360,
+          'padding:0 16px 12px 0;font-size:13px',
+          `<div style="font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:${BRAND.textMuted};padding-bottom:4px">Selected services <span style="font-weight:400;letter-spacing:0;text-transform:none">(payable separately, not included in the charter price)</span></div>${TABLE} style="font-size:13px;line-height:1.35">${serviceRows.join('')}</table>`
+        )
+      : '';
+
+  // Price box lines under the charter price: services (never part of the
+  // charter price), the arrival total when every row could be priced, and
+  // the refundable deposit.
+  const arrivalLines: string[] = [];
+
+  if (servicesTotal.payableCount > 0) {
+    arrivalLines.push(
+      servicesTotal.partial && servicesTotal.amount === 0
+        ? `+ selected services ${mutedSpan('· on request · payable separately')}`
+        : `+ <b>${servicesTotal.partial ? 'from ' : ''}${priceWithCurrency(servicesTotal.amount, sym)}</b> ${mutedSpan('selected services · payable separately')}`
+    );
+
+    if (!servicesTotal.partial) {
+      arrivalLines.push(
+        `= <b>${priceWithCurrency(y.clientPriceEur + servicesTotal.amount, sym)}</b> ${mutedSpan(
+          `total on arrival${hasSecurityDeposit ? ' (excl. refundable deposit)' : ''}`
+        )}`
+      );
+    }
+  }
+
+  if (hasSecurityDeposit) {
+    arrivalLines.push(
+      mutedSpan(
+        `+ ${priceWithCurrency(y.securityDepositEur, sym)} refundable security deposit, returned after the charter`
+      )
+    );
+  }
+
+  const priceBox = [
+    hasDiscount
+      ? `<span style="display:inline-block;background:${BRAND.saveBg};color:${BRAND.saveText};font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:.3px">SAVE ${discountPct.toFixed(0)}% · -${priceWithCurrency(discountAmount, sym)}</span><div style="font-size:13px;color:${BRAND.textFaint};text-decoration:line-through;margin-top:6px">${priceWithCurrency(y.listPriceEur, sym)}</div>`
+      : '',
+    `<div style="font-size:24px;font-weight:800;color:${BRAND.success};line-height:1.15">${priceWithCurrency(y.clientPriceEur, sym)}</div>`,
+    `<div style="color:${BRAND.textMuted}">charter, ${nightsLabel}</div>`,
+    arrivalLines.length > 0
+      ? `<div style="margin-top:8px;padding-top:6px;border-top:1px solid ${BRAND.successBorder}">${arrivalLines
+          .map(line => `<div style="margin-top:2px">${line}</div>`)
+          .join('')}</div>`
+      : '',
+    href
+      ? `<a href="${href}" target="_blank" style="display:block;margin-top:12px;padding:10px 8px;border-radius:8px;background:${BRAND.primary};color:#ffffff;font-size:13px;font-weight:600;text-align:center;text-decoration:none">View ${escapeHtml(y.name)} &amp; book online →</a>`
+      : '',
+  ].join('');
+  const priceColumn = column(
+    230,
+    'padding:12px 14px 14px;font-size:12px;line-height:1.4',
+    priceBox,
+    `background:${BRAND.successSoft};border:1px solid ${BRAND.successBorder};border-radius:10px`
+  );
+
+  // Card — one bordered table, two fluid-hybrid bands. The gutters live in
+  // the LEFT column's right/bottom padding, so stacked columns stay flush left
+  // with a 12px gap. font-family/color set here inherit into nested tables
+  // (unlike font-size, which quirks mode resets per table).
+  return `${TABLE} style="margin:0 0 16px;border:1px solid ${BRAND.border};border-radius:12px;background:${BRAND.cardBg};font-family:${FONT_STACK};color:${BRAND.text}">${band(
+    '14px 16px 0',
+    column(266, 'padding:0 18px 12px 0;line-height:0', photoCell) +
+      column(322, 'padding:0 0 12px;font-size:13px;line-height:1.45', textColumn)
+  )}${band('0 16px 16px', servicesColumn + priceColumn)}</table>`;
 };
 
 /**
@@ -900,46 +865,40 @@ export const buildClientOfferHtml = (
     return '<p><em>No yachts added to offer yet.</em></p>';
   }
 
-  const blocks = cart.map(y => renderYachtBlock(y, options, autoObligatoryByYacht[offerYachtKey(y)] ?? [])).join('\n');
+  const blocks = cart
+    .map((y, i) => renderYachtBlock(y, i + 1, options, autoObligatoryByYacht[offerYachtKey(y)] ?? []))
+    .join('\n');
 
-  // Responsive style block — collapses the right-hand price card under the
-  // extras list on screens narrower than ~600px (Gmail iOS/Android, Apple
-  // Mail on iPhone). Gmail web preserves <style> blocks pasted via the
-  // rich-text clipboard path; Outlook desktop ignores them but our inline
-  // widths already give it the right desktop layout. The class names below
-  // are the MUST-MATCH hooks for the inline <td> tags we render in
-  // renderYachtBlock — keep in sync.
-  const responsiveStyles = `
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-  @media only screen and (max-width: 600px) {
-    .b4y-outer { width: 100% !important; }
-    .b4y-card { width: 100% !important; }
-    .col-img, .col-text, .b4y-extras-col, .b4y-price-col {
-      display: block !important;
-      width: 100% !important;
-      padding-left: 0 !important;
-      padding-right: 0 !important;
-      box-sizing: border-box;
-    }
-    .b4y-img { width: 100% !important; height: 200px !important; }
-    .col-text { padding: 12px 0 0 0 !important; }
-    .b4y-price-col { padding-top: 12px !important; }
-    .b4y-pad-x { padding-left: 14px !important; padding-right: 14px !important; }
-  }
-</style>`;
+  // One "route ideas" line for the whole offer (was one per card): distinct
+  // boat4you sailing areas, max 3, labelled by the first yacht's marina there.
+  const areas = new Map<string, string>();
 
-  // Outer wrapper — fluid (width="100%" + max-width:640px). Centered via
-  // the table align attribute which works in Outlook where margin: auto
-  // fails on table elements.
-  return `${responsiveStyles}
-<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="background: #f6f7fb;">
-  <tr><td align="center" style="padding: 16px;">
-    <table class="b4y-outer" border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation" style="max-width: 640px;">
-      <tr><td>
-        ${blocks}
-      </td></tr>
-    </table>
-  </td></tr>
-</table>`;
+  cart.forEach(y => {
+    const url = itineraryAreaUrl([y.base, y.locationName], y.country);
+
+    if (url && !areas.has(url)) areas.set(url, y.base || y.locationName);
+  });
+
+  const routeLinks = Array.from(areas)
+    .slice(0, 3)
+    .map(
+      ([url, label]) =>
+        `<a href="${escapeHtml(url)}" target="_blank" style="color:${BRAND.primary};font-weight:600">${escapeHtml(label)}</a>`
+    )
+    .join(' · ');
+  const itineraryLine = routeLinks
+    ? `<p style="margin:0 0 16px;font-size:14px;line-height:1.5">Route ideas for your week: ${routeLinks}</p>`
+    : '';
+
+  // Closing — English, no greeting and no signature (the broker's mail
+  // client adds those).
+  const closing = `${TABLE} style="margin:0 0 10px"><tr><td style="background:${BRAND.primarySoft};border:1px solid ${BRAND.primaryBorder};border-radius:10px;padding:14px 16px;font-size:15px;line-height:1.5"><b>Next step:</b> reply with <b>HOLD</b> and the yacht name, for example <i>“HOLD ${escapeHtml(cart[0].name)}”</i>, and I will place a <b>free, non-binding option</b> on it for <b>${HOLD_OPTION_HOURS} hours</b> while you decide. No payment is needed for the option.</td></tr></table>
+<p style="margin:0 0 14px;font-size:13px;line-height:1.5;color:${BRAND.textMuted}">✓ Free cancellation within 72 hours of booking &nbsp;·&nbsp; ✓ Lowest rate guaranteed &nbsp;·&nbsp; ✓ Secure online booking on boat4you.com, our booking platform</p>`;
+
+  // Outer wrapper — fluid (width 100% + max-width 640), centred via the align
+  // attribute (margin:auto fails on tables in Outlook).
+  return `${TABLE}><tr><td align="center">${TABLE} align="center" style="max-width:640px;font-family:${FONT_STACK};color:${BRAND.text};text-align:left"><tr><td>
+${blocks}
+${itineraryLine}${closing}
+</td></tr></table></td></tr></table>`;
 };

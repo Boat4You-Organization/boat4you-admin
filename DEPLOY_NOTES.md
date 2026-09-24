@@ -40,6 +40,15 @@ text 300, services 300 | price 290). Live entry `index-DSc-DOwS.js`, Offers chun
 `index-CmDSS8rI.js`. Rollback `html.prev` = `ae51e8c` build (`index-D_gV8az9.js`).
 Sent-mail evidence: `boat4you-delivery/_offer-email-audit-2026-09-23/mail_new/1002138.html`.
 
+### 2026-09-24 addendum 2 — route-ideas line names every marina (2a25441, DEPLOYED ~07:50 UTC)
+
+Mario: a 4-yacht Ionian offer showed "Route ideas for your week: Preveza Marina | Preveza" only.
+All four (Preveza ×2, Lefkas ×2) resolve to `/itineraries/ionian`, and the single link carried the
+first yacht's marina as label. Now grouped by area: area label ("Ionian Islands", "Šibenik", else
+title-cased slug) + every distinct marina in the offer, max 5 areas × 4 marinas. Live entry
+`index-Der3kZrn.js`, Offers chunk `index-DoGIfGnw.js`. Rollback `html.prev` = `91bbe33` build
+(`index-DSc-DOwS.js`).
+
 ## 2026-09-22 — Offers: Prev/Next scrolls the middle panel back to the top (5b67fb9, DEPLOYED)
 
 `handlePageChange` called `window.scrollTo({ top: 0 })`, but `<main>` in `Layout` is the only

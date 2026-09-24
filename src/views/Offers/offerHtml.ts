@@ -862,6 +862,46 @@ export const buildClientOfferWhatsApp = (
   return sections.join('\n\n────────\n\n');
 };
 
+// Route-ideas line: at most this many sailing areas / marinas per area, so
+// a 15-yacht offer does not end in a paragraph of marina names.
+const MAX_ROUTE_AREAS = 5;
+const MAX_ROUTE_MARINAS = 4;
+
+// Human labels for itinerary area slugs that Title Case gets wrong; every
+// other slug ("split", "dubrovnik", "athens") is title-cased.
+const AREA_LABELS: Record<string, string> = {
+  sibenik: 'Šibenik',
+  ionian: 'Ionian Islands',
+  cyclades: 'Cyclades',
+  sporades: 'Sporades',
+  dodecanese: 'Dodecanese',
+  'cote-azur': "Côte d'Azur",
+  bvi: 'British Virgin Islands',
+  kvarner: 'Kvarner',
+  istria: 'Istria',
+  dalmacija: 'Dalmatia',
+  sardinia: 'Sardinia',
+  sicily: 'Sicily',
+  corsica: 'Corsica',
+  'atlantic-france': 'Atlantic France',
+};
+
+const areaLabel = (url: string): string => {
+  const slug = url.split('/').pop() ?? '';
+
+  return (
+    AREA_LABELS[slug] ??
+    slug
+      .split('-')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ')
+  );
+};
+
+// "Preveza Marina | Preveza" → "Preveza Marina": the marina part of a base
+// label, as the card shows it, without the town suffix.
+const shortMarina = (label: string | null | undefined): string => (label ?? '').split('|')[0].trim();
+
 export const buildClientOfferHtml = (
   cart: CartYacht[],
   options: OfferRenderOptions = {},
@@ -875,23 +915,37 @@ export const buildClientOfferHtml = (
     .map((y, i) => renderYachtBlock(y, i + 1, options, autoObligatoryByYacht[offerYachtKey(y)] ?? []))
     .join('\n');
 
-  // One "route ideas" line for the whole offer (was one per card): distinct
-  // boat4you sailing areas, max 3, labelled by the first yacht's marina there.
-  const areas = new Map<string, string>();
+  // One "route ideas" line for the whole offer (was one per card). Yachts are
+  // grouped by boat4you sailing area (several marinas share one landing, e.g.
+  // Preveza + Lefkas → /itineraries/ionian) and EVERY marina in the offer is
+  // named, so the client sees the line applies to all boats — the first
+  // version labelled the link with the first yacht's marina only, which read
+  // as if the other boats had no routes (Mario, 24.9.2026).
+  const areas = new Map<string, string[]>();
 
   cart.forEach(y => {
     const url = itineraryAreaUrl([y.base, y.locationName], y.country);
 
-    if (url && !areas.has(url)) areas.set(url, y.base || y.locationName);
+    if (!url) return;
+
+    const marina = shortMarina(y.base || y.locationName);
+    const marinas = areas.get(url) ?? [];
+
+    if (marina && !marinas.some(m => m.toLowerCase() === marina.toLowerCase())) marinas.push(marina);
+
+    areas.set(url, marinas);
   });
 
   const routeLinks = Array.from(areas)
-    .slice(0, 3)
-    .map(
-      ([url, label]) =>
-        `<a href="${escapeHtml(url)}" target="_blank" style="color:${BRAND.primary};font-weight:600">${escapeHtml(label)}</a>`
-    )
-    .join(' · ');
+    .slice(0, MAX_ROUTE_AREAS)
+    .map(([url, marinas]) => {
+      const shown = marinas.slice(0, MAX_ROUTE_MARINAS);
+      const more = marinas.length > shown.length ? ` +${marinas.length - shown.length} more` : '';
+      const marinaList = shown.length ? ` ${mutedSpan(`(${escapeHtml(shown.join(', '))}${more})`)}` : '';
+
+      return `<a href="${escapeHtml(url)}" target="_blank" style="color:${BRAND.primary};font-weight:600">${escapeHtml(areaLabel(url))}</a>${marinaList}`;
+    })
+    .join(' &nbsp;·&nbsp; ');
   const itineraryLine = routeLinks
     ? `<p style="margin:0 0 16px;font-size:14px;line-height:1.5">Route ideas for your week: ${routeLinks}</p>`
     : '';

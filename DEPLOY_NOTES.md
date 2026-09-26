@@ -1,5 +1,11 @@
 # boat4you-admin — deploy notes
 
+## 2026-09-26 — Offers: client e-mail + WhatsApp split obligatory services by how they are paid (81865f7, DEPLOYED 18:38 UTC, `index-Be7e2_Ua.js`)
+
+Why: since 26.9. the backend charges obligatory extras the partner bills with the booking (MMK payableInBase=false, NauSys ADVANCE_PAYMENT → `paymentType` WITH_BOOKING) online with the charter, on the same payment schedule; the e-mail still called every obligatory service "payable separately" with a "total on arrival" (Mario: "popravi").
+What: `CartExtra.paymentType` from the backend DTO (checkout fallback for unclassified rows); card groups "Paid with your booking" (price box: + services · paid with booking, = total payable with booking) and "Other services" (payable separately, = total charter cost) — or exactly the old wording when a yacht has no such rows; deposit-only → "At the marina". WhatsApp mirrors it, list-price strike moved into the charter part. Offer rows kept one per partner charge (`key#offerExtraId`; supersede removes only catalogue twins) so Skipper + "Skipper's liability insurance" both show, as the checkout charges both (backend f467270). Per-week services paid with booking count whole weeks (checkout rule). Skipper toggle ignores insurance/surcharge rows. Carts saved before today get paymentType topped up when the offer modal opens.
+Verified: local render of 5 carts (Elda fixed part + port tax; marina-only unchanged; Skipper + insurance; 10-night per-week; pre-change cart unchanged) and WhatsApp text; lint 0 errors, tsc 0; live chunk carries the new wording.
+
 ## 2026-09-24 — Offers: fluid two-column client offer card + closing block (ae51e8c, DEPLOYED)
 
 Why: the offer HTML is copy-pasted into Apple Mail, which strips `<style>`, so the media-query

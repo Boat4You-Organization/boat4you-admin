@@ -47,7 +47,14 @@ import {
   RegionMultiSelect,
   VesselTypeDropdown,
 } from './filters';
-import { CartExtra, CartYacht, buildClientOfferHtml, buildClientOfferWhatsApp, offerYachtKey } from './offerHtml';
+import {
+  CartExtra,
+  CartYacht,
+  ExtraPaymentType,
+  buildClientOfferHtml,
+  buildClientOfferWhatsApp,
+  offerYachtKey,
+} from './offerHtml';
 
 /**
  * Internal broker workspace for building a multi-yacht client offer.
@@ -333,6 +340,8 @@ interface ExtraResponse {
   priceInfo?: { amount: number; currency?: string; rate?: number } | null;
   obligatory?: boolean;
   payableInBase?: boolean;
+  // How the client pays it (WITH_BOOKING = charged online with the charter).
+  paymentType?: ExtraPaymentType | null;
   unit?: string | null;
   description?: string | null;
   extras?: { labelCode?: string };
@@ -1148,6 +1157,7 @@ const Offers = () => {
           obligatory: boolean;
           description?: string | null;
           unit?: string | null;
+          paymentType?: ExtraPaymentType | null;
         };
       } => {
         // Converted amount first (active currency), EUR as fallback — priceEur
@@ -1176,6 +1186,9 @@ const Offers = () => {
               (e.key != null && (matchedOffer.obligatoryExtrasKeys || []).includes(e.key)),
             description: e.description ?? null,
             unit: e.unit ? (UNIT_LABEL[e.unit] ?? null) : null,
+            // Same fallback as the checkout (foldedIntoOurPayment): an unclassified
+            // row not payable in base is charged online with the charter.
+            paymentType: e.paymentType ?? (e.payableInBase === false ? 'WITH_BOOKING' : null),
           },
         };
       };
@@ -1219,8 +1232,23 @@ const Offers = () => {
           .replace(/\s+/g, ' ')
           .trim();
 
+      // The offer's extras list is already one row per partner charge (backend
+      // Offer.filterDuplicateExtras): two obligatory rows under one catalogue
+      // key ("Skipper" + "Skipper's liability insurance") are two charges and
+      // the checkout bills both since 26.9.2026 — so a later offer row must not
+      // overwrite an earlier one that shares its key.
+      const offerRowKeys = new Set<string>();
+
       (matchedOffer.extras || []).forEach(e => {
-        const { key, value } = toCartExtra(e, false);
+        const converted = toCartExtra(e, false);
+        const { value } = converted;
+        const key =
+          value.obligatory && offerRowKeys.has(converted.key)
+            ? `${converted.key}#${e.id ?? value.name.toLowerCase().trim()}`
+            : converted.key;
+
+        offerRowKeys.add(key);
+
         // Merge: keep richer description when offer-level lacks one.
         const existing = extrasMap.get(key);
 
@@ -1237,6 +1265,7 @@ const Offers = () => {
             .filter(
               ([k, v]) =>
                 k !== key &&
+                !offerRowKeys.has(k) && // only catalogue (yacht) twins — never another offer charge
                 v.obligatory &&
                 v.priceEur === value.priceEur &&
                 v.unit === value.unit &&
@@ -1375,7 +1404,13 @@ const Offers = () => {
     // before the /public/image fallback landed, so the offer rendered the
     // "Yacht photo" placeholder). Only the missing field is re-fetched;
     // prices / extras stay snapshotted at add-time.
-    const missing = cart.filter(c => !c.keyAmenities || c.keyAmenities.length === 0 || !c.imageUrl);
+    // paymentType (26.9.2026): carts saved before it existed would put every
+    // obligatory service under "payable separately" in the client e-mail.
+    const lacksPaymentType = (c: CartYacht): boolean =>
+      c.extras.some(x => x.obligatory && x.paymentType === undefined);
+    const missing = cart.filter(
+      c => !c.keyAmenities || c.keyAmenities.length === 0 || !c.imageUrl || lacksPaymentType(c)
+    );
 
     if (missing.length === 0) {
       setOfferModalOpen(true);
@@ -1387,7 +1422,9 @@ const Offers = () => {
     try {
       const hydrated = await Promise.all(
         cart.map(async entry => {
-          if (entry.keyAmenities && entry.keyAmenities.length > 0 && entry.imageUrl) return entry;
+          if (entry.keyAmenities && entry.keyAmenities.length > 0 && entry.imageUrl && !lacksPaymentType(entry)) {
+            return entry;
+          }
 
           try {
             const { data } = await api.get<YachtDetailsResponse>(
@@ -1421,8 +1458,24 @@ const Offers = () => {
             const mainImg = imgs.find(i => i?.mainImage) || imgs[0];
             const imageUrl = entry.imageUrl || mainImg?.url || getBoatImageUrl(mainImg?.id, 800);
 
+            // paymentType by name — the offer row wins over the yacht row, as
+            // in handleAddToOffer. A name that doesn't match stays null, which
+            // renders under "payable separately" (today's wording).
+            const paymentTypeByName = new Map<string, ExtraPaymentType | null>();
+            const normName = (n?: string | null) => (n || '').trim().toLowerCase();
+
+            (data.services || []).forEach(sv => paymentTypeByName.set(normName(sv.name), sv.paymentType ?? null));
+            (data.offers?.find(o => o.id === entry.offerId)?.extras || []).forEach(ex =>
+              paymentTypeByName.set(normName(ex.name), ex.paymentType ?? null)
+            );
+
+            const extras = entry.extras.map(x =>
+              x.paymentType !== undefined ? x : { ...x, paymentType: paymentTypeByName.get(normName(x.name)) ?? null }
+            );
+
             return {
               ...entry,
+              extras,
               keyAmenities: entry.keyAmenities?.length ? entry.keyAmenities : keyAccum.slice(0, 4),
               imageUrl,
             };
@@ -1489,9 +1542,14 @@ const Offers = () => {
 
           if (!calc) return null;
 
-          const rows: CartExtra[] = [...(calc.selectedExtrasInPrice || []), ...(calc.selectedExtrasAtBase || [])]
-            .filter(e => e.obligatory)
-            .map(e => {
+          // Keep which bucket a row came from: in-price rows are charged online
+          // with the charter (the same split the checkout makes).
+          const rows: CartExtra[] = [
+            ...(calc.selectedExtrasInPrice || []).map(e => ({ e, inPrice: true })),
+            ...(calc.selectedExtrasAtBase || []).map(e => ({ e, inPrice: false })),
+          ]
+            .filter(({ e }) => e.obligatory)
+            .map(({ e, inPrice }) => {
               const amount = e.priceInfo?.amount ?? (e.priceEur != null ? Number(e.priceEur) : null);
 
               return {
@@ -1501,6 +1559,7 @@ const Offers = () => {
                 obligatory: true,
                 description: null,
                 unit: e.unit ? (UNIT_LABEL[e.unit] ?? null) : null,
+                paymentType: inPrice ? 'WITH_BOOKING' : (e.paymentType ?? null),
               };
             });
 

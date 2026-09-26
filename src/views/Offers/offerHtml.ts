@@ -19,6 +19,11 @@
  */
 import { itineraryAreaUrl } from '@/utils/static/itineraryArea';
 
+// Backend ExtraPaymentType: how the client pays an extra. WITH_BOOKING = the
+// partner bills it with the booking, so boat4you charges it online together
+// with the charter (MMK/NauSys offer obligatory rows since 26.9.2026).
+export type ExtraPaymentType = 'INCLUDED' | 'WITH_BOOKING' | 'ADVANCE_TO_OPERATOR' | 'ON_SITE';
+
 export interface CartExtra {
   name: string;
   priceEur: number | null;
@@ -32,6 +37,9 @@ export interface CartExtra {
   // Unit suffix ("per week", "per booking") — surfaces the partner billing
   // period so the customer understands what the price covers.
   unit?: string | null;
+  // null = unknown / on-request placeholder; undefined = cart saved before the
+  // field existed (topped up when the offer modal opens).
+  paymentType?: ExtraPaymentType | null;
 }
 
 export interface CartYacht {
@@ -370,7 +378,13 @@ const buildObligatoryStack = (y: CartYacht, options: OfferRenderOptions, autoObl
     unit: null,
   });
   const ensureCrewExtra = (keyword: string, label: string) => {
-    const alreadyShown = obligatory.some(e => (e.name || '').toLowerCase().includes(keyword.toLowerCase()));
+    // Same exclusions as findExtraByKeyword: "Skipper's liability insurance" or a
+    // skipper surcharge is not the skipper itself.
+    const alreadyShown = obligatory.some(e => {
+      const n = (e.name || '').toLowerCase();
+
+      return n.includes(keyword.toLowerCase()) && !/insurance|additional fee|surcharge/.test(n);
+    });
 
     if (alreadyShown) return;
 
@@ -408,10 +422,14 @@ const buildObligatoryStack = (y: CartYacht, options: OfferRenderOptions, autoObl
 const computeServicesTotal = (
   rows: CartExtra[],
   dateFrom: string,
-  dateTo: string
+  dateTo: string,
+  // 'floor' mirrors the checkout (PriceCalculations: whole weeks, min 1) for
+  // services charged with the booking; the marina estimate bills a started
+  // week whole, as it always has.
+  weekRounding: 'ceil' | 'floor' = 'ceil'
 ): { amount: number; partial: boolean; payableCount: number } => {
   const days = Math.max(1, daysBetween(dateFrom, dateTo));
-  const weeks = Math.max(1, Math.ceil(days / 7));
+  const weeks = Math.max(1, weekRounding === 'floor' ? Math.floor(days / 7) : Math.ceil(days / 7));
   let amount = 0;
   let partial = false;
   let payableCount = 0;
@@ -452,6 +470,18 @@ const computeServicesTotal = (
 
   return { amount, partial, payableCount };
 };
+
+type ServicesTotal = ReturnType<typeof computeServicesTotal>;
+
+// Charged online with the charter when the client books: the partner bills it
+// with the booking, so the checkout folds it into the online total
+// (PriceCalculationService.foldedIntoOurPayment). Everything else — marina /
+// operator payments, free rows, on-request placeholders, unknown — stays
+// "payable separately".
+const paidWithBooking = (e: CartExtra): boolean => e.paymentType === 'WITH_BOOKING' && !e.included;
+
+const servicesTotalText = (t: ServicesTotal, fmt: (n: number) => string): string =>
+  t.partial && t.amount === 0 ? 'on request' : `${t.partial ? 'from ' : ''}${fmt(t.amount)}`;
 
 // Every layout table: cellpadding/cellspacing 0 (HTML defaults are 1 / 2 px)
 // and role=presentation so screen readers skip the grid.
@@ -588,8 +618,17 @@ const renderYachtBlock = (
   // Only obligatory extras surface in the client offer (optional add-ons were
   // dropped 23.4.2026 — noisy, "is this included?"). ALL obligatory rows stay
   // visible (Mario 1.5.2026), free ones with a green "included".
+  // Split by how the client pays: extras the partner bills with the booking
+  // are charged online together with the charter; the rest are paid at the
+  // marina / to the operator, as before.
   const obligatory = buildObligatoryStack(y, options, autoObligatory);
-  const servicesTotal = computeServicesTotal(obligatory, y.dateFrom, y.dateTo);
+  const bookingRows = obligatory.filter(paidWithBooking);
+  const separateRows = obligatory.filter(e => !paidWithBooking(e));
+  const bookingTotal = computeServicesTotal(bookingRows, y.dateFrom, y.dateTo, 'floor');
+  const servicesTotal = computeServicesTotal(separateRows, y.dateFrom, y.dateTo);
+  // With a booking group present, the rest are "other" obligatory services;
+  // without one the card reads exactly as before.
+  const hasBookingGroup = bookingRows.length > 0;
   const hasSecurityDeposit = y.securityDepositEur != null && y.securityDepositEur > 0;
 
   // "included" is reserved for TRULY free rows (priceEur 0 → mapper sets
@@ -604,30 +643,31 @@ const renderYachtBlock = (
   const row = (left: string, right: string, extraStyle = ''): string =>
     `<tr><td style="padding:3px 10px 3px 0${extraStyle}">${left}</td><td align="right" valign="top" style="padding:3px 0;white-space:nowrap${extraStyle}">${right}</td></tr>`;
 
-  const serviceRows = obligatory.map(e => {
+  const serviceRow = (e: CartExtra): string => {
     const description = e.description ? truncateLine(e.description) : '';
 
     return row(
       `${escapeHtml(e.name)}${description ? `<div style="font-size:11px;color:${BRAND.textMuted}">${escapeHtml(description)}</div>` : ''}`,
       `${rowPrice(e)}${e.unit ? ` ${mutedSpan(escapeHtml(e.unit))}` : ''}`
     );
-  });
+  };
+  const sumRow = (label: string, t: ServicesTotal): string =>
+    row(
+      `<b>${label}</b>`,
+      `<b>${servicesTotalText(t, n => priceWithCurrency(n, sym))}</b>`,
+      `;padding-top:6px;border-top:1px solid ${BRAND.border}`
+    );
+
+  const bookingServiceRows = bookingRows.map(serviceRow);
+
+  if (bookingTotal.payableCount > 0) bookingServiceRows.push(sumRow('Paid with booking', bookingTotal));
+
+  const serviceRows = separateRows.map(serviceRow);
 
   // Sum row — before the deposit row, which is refundable and deliberately
   // NOT part of the sum. "from X" when a row couldn't be priced.
   if (servicesTotal.payableCount > 0) {
-    const totalText =
-      servicesTotal.partial && servicesTotal.amount === 0
-        ? 'on request'
-        : `${servicesTotal.partial ? 'from ' : ''}${priceWithCurrency(servicesTotal.amount, sym)}`;
-
-    serviceRows.push(
-      row(
-        '<b>Selected services total</b>',
-        `<b>${totalText}</b>`,
-        `;padding-top:6px;border-top:1px solid ${BRAND.border}`
-      )
-    );
+    serviceRows.push(sumRow(hasBookingGroup ? 'Other services total' : 'Selected services total', servicesTotal));
   }
 
   // Security deposit — last, muted row (mirrors the web ExtrasTab):
@@ -642,31 +682,70 @@ const renderYachtBlock = (
     );
   }
 
+  const groupHeader = (heading: string, note: string, extraStyle = ''): string =>
+    `<div style="font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:${BRAND.textMuted};padding-bottom:4px${extraStyle}">${heading} <span style="font-weight:400;letter-spacing:0;text-transform:none">(${note})</span></div>`;
+  const groupTable = (rows: string[]): string =>
+    `${TABLE} style="font-size:13px;line-height:1.35">${rows.join('')}</table>`;
+
+  // Header over the "payable separately" rows: today's wording when nothing is
+  // paid with the booking; "Other services" next to a booking group; and a
+  // plain "At the marina" when only the refundable deposit is left there.
+  let separateHeader = groupHeader('Selected services', 'payable separately, not included in the charter price');
+
+  if (hasBookingGroup) {
+    separateHeader =
+      separateRows.length > 0
+        ? groupHeader('Other services', 'payable separately, not included in the booking payment', ';padding-top:10px')
+        : groupHeader('At the marina', 'refundable, settled at the base', ';padding-top:10px');
+  }
+
   const servicesColumn =
-    serviceRows.length > 0
+    bookingServiceRows.length > 0 || serviceRows.length > 0
       ? column(
           300,
           'padding:0 16px 12px 0;font-size:13px',
-          `<div style="font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:${BRAND.textMuted};padding-bottom:4px">Selected services <span style="font-weight:400;letter-spacing:0;text-transform:none">(payable separately, not included in the charter price)</span></div>${TABLE} style="font-size:13px;line-height:1.35">${serviceRows.join('')}</table>`
+          (bookingServiceRows.length > 0
+            ? groupHeader(
+                'Paid with your booking',
+                'added to the charter price and paid with it, on the same payment schedule'
+              ) + groupTable(bookingServiceRows)
+            : '') + (serviceRows.length > 0 ? separateHeader + groupTable(serviceRows) : '')
         )
       : '';
 
-  // Price box lines under the charter price: services (never part of the
-  // charter price), the arrival total when every row could be priced, and
-  // the refundable deposit.
+  // Price box lines under the charter price: services paid with the booking
+  // and what that booking payment comes to, services payable separately and
+  // the overall total when every row could be priced, then the refundable
+  // deposit.
   const arrivalLines: string[] = [];
+
+  if (bookingTotal.payableCount > 0) {
+    arrivalLines.push(
+      bookingTotal.partial && bookingTotal.amount === 0
+        ? `+ obligatory services ${mutedSpan('· on request · paid with booking')}`
+        : `+ <b>${bookingTotal.partial ? 'from ' : ''}${priceWithCurrency(bookingTotal.amount, sym)}</b> ${mutedSpan('obligatory services · paid with booking')}`
+    );
+
+    if (!bookingTotal.partial) {
+      arrivalLines.push(
+        `= <b>${priceWithCurrency(y.clientPriceEur + bookingTotal.amount, sym)}</b> ${mutedSpan('total payable with booking')}`
+      );
+    }
+  }
 
   if (servicesTotal.payableCount > 0) {
     arrivalLines.push(
       servicesTotal.partial && servicesTotal.amount === 0
-        ? `+ selected services ${mutedSpan('· on request · payable separately')}`
-        : `+ <b>${servicesTotal.partial ? 'from ' : ''}${priceWithCurrency(servicesTotal.amount, sym)}</b> ${mutedSpan('selected services · payable separately')}`
+        ? `+ ${hasBookingGroup ? 'other obligatory' : 'selected'} services ${mutedSpan('· on request · payable separately')}`
+        : `+ <b>${servicesTotal.partial ? 'from ' : ''}${priceWithCurrency(servicesTotal.amount, sym)}</b> ${mutedSpan(
+            `${hasBookingGroup ? 'other obligatory' : 'selected'} services · payable separately`
+          )}`
     );
 
-    if (!servicesTotal.partial) {
+    if (!servicesTotal.partial && !bookingTotal.partial) {
       arrivalLines.push(
-        `= <b>${priceWithCurrency(y.clientPriceEur + servicesTotal.amount, sym)}</b> ${mutedSpan(
-          `total on arrival${hasSecurityDeposit ? ' (excl. refundable deposit)' : ''}`
+        `= <b>${priceWithCurrency(y.clientPriceEur + bookingTotal.amount + servicesTotal.amount, sym)}</b> ${mutedSpan(
+          `${bookingTotal.payableCount > 0 ? 'total charter cost' : 'total on arrival'}${hasSecurityDeposit ? ' (excl. refundable deposit)' : ''}`
         )}`
       );
     }
@@ -810,28 +889,48 @@ export const buildClientOfferWhatsApp = (
       lines.push(`✓ ${nm} ${priceTxt}`);
     });
 
-    // Price
-    lines.push('');
-    lines.push(`💰 *Total: ${formatPrice(y.clientPriceEur)} ${sym}*`);
-
-    // Same stack + sum as the HTML card, so WhatsApp answers the "are the
-    // services included?" question too. One line — WA messages stay tight.
+    // Price — same stack and split as the HTML card, so WhatsApp answers the
+    // "are the services included?" question too. Lines stay tight.
+    const waStack = buildObligatoryStack(y, options, autoObligatoryByYacht[offerYachtKey(y)] ?? []);
+    const waBooking = computeServicesTotal(waStack.filter(paidWithBooking), y.dateFrom, y.dateTo, 'floor');
     const waServicesTotal = computeServicesTotal(
-      buildObligatoryStack(y, options, autoObligatoryByYacht[offerYachtKey(y)] ?? []),
+      waStack.filter(e => !paidWithBooking(e)),
       y.dateFrom,
       y.dateTo
     );
+    const waFmt = (n: number): string => `${formatPrice(n)} ${sym}`;
 
-    if (waServicesTotal.payableCount > 0) {
-      const amountTxt =
-        waServicesTotal.partial && waServicesTotal.amount === 0
-          ? 'on request'
-          : `${waServicesTotal.partial ? 'from ' : ''}${formatPrice(waServicesTotal.amount)} ${sym}`;
+    lines.push('');
 
-      lines.push(`➕ Obligatory services: ${amountTxt} (payable separately, not included)`);
+    const hasListDiscount = y.listPriceEur != null && y.listPriceEur > y.clientPriceEur;
+    const bookingHeadline = waBooking.payableCount > 0 && !waBooking.partial;
+
+    if (bookingHeadline) {
+      // The list price is a charter price: strike it inside the charter part,
+      // not under a headline that already includes the services.
+      const charterPart = hasListDiscount
+        ? `~${waFmt(y.listPriceEur as number)}~ ${waFmt(y.clientPriceEur)}`
+        : waFmt(y.clientPriceEur);
+
+      lines.push(`💰 *Total payable with booking: ${waFmt(y.clientPriceEur + waBooking.amount)}*`);
+      lines.push(`(charter ${charterPart} + obligatory services ${waFmt(waBooking.amount)})`);
+    } else {
+      lines.push(`💰 *Total: ${waFmt(y.clientPriceEur)}*`);
+
+      if (waBooking.payableCount > 0) {
+        lines.push(`➕ Obligatory services paid with booking: ${servicesTotalText(waBooking, waFmt)}`);
+      }
     }
 
-    if (y.listPriceEur != null && y.listPriceEur > y.clientPriceEur) {
+    if (waServicesTotal.payableCount > 0) {
+      lines.push(
+        waBooking.payableCount > 0
+          ? `➕ Other obligatory services: ${servicesTotalText(waServicesTotal, waFmt)} (payable separately, not in the total above)`
+          : `➕ Obligatory services: ${servicesTotalText(waServicesTotal, waFmt)} (payable separately, not included)`
+      );
+    }
+
+    if (!bookingHeadline && y.listPriceEur != null && y.listPriceEur > y.clientPriceEur) {
       const save = y.listPriceEur - y.clientPriceEur;
 
       lines.push(`~${formatPrice(y.listPriceEur)} ${sym}~ · save ${formatPrice(save)} ${sym}`);

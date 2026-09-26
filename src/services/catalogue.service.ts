@@ -15,6 +15,7 @@ export interface CalcExtraRow {
   priceInfo?: { amount: number; currency?: string; rate?: number } | null;
   obligatory: boolean;
   unit: string | null;
+  paymentType?: 'INCLUDED' | 'WITH_BOOKING' | 'ADVANCE_TO_OPERATOR' | 'ON_SITE' | null;
 }
 
 export interface OfferPriceCalc {

@@ -330,7 +330,7 @@ interface AmenityResponse {
 }
 interface ExtraResponse {
   id?: number;
-  externalId?: number;
+  externalId?: number | string | null;
   key?: string;
   name?: string;
   priceEur?: number | null;
@@ -1164,15 +1164,17 @@ const Offers = () => {
         // is ALWAYS EUR while the card renders with the cart currency symbol.
         const priceNum = e.priceInfo?.amount ?? (e.priceEur != null ? Number(e.priceEur) : null);
         const name = e.name || e.extras?.labelCode || e.key || 'Extra';
-        // Stable de-dup key: externalId first, then partner row id (`e.key`),
-        // then catalogue labelCode, then name+price. The partner row id wins
-        // over labelCode because the same partner row appears on BOTH
-        // yacht.services (with labelCode mapped) and offer.extras (with
-        // labelCode null) — keying on labelCode broke the merge and rendered
-        // "Charter package" twice. obligatoryExtrasKeys uses `e.key` too.
-        const key = String(
-          e.externalId ?? e.key ?? e.extras?.labelCode ?? `${name.toLowerCase().trim()}-${priceNum ?? '-'}`
-        );
+        // Stable de-dup key: partner row id (`e.key`), then catalogue labelCode,
+        // then name+price. The partner row id wins over labelCode because the
+        // same partner row appears on BOTH yacht.services (with labelCode
+        // mapped) and offer.extras (with labelCode null) — keying on labelCode
+        // broke the merge and rendered "Charter package" twice.
+        // obligatoryExtrasKeys uses `e.key` too. NOT externalId: NauSys
+        // obligatory offer rows carry synthetic per-offer ids, so keying on it
+        // split catalogue/offer twins; the partner id (sent to admins only, as a
+        // string) is used below only to drop a renamed catalogue twin, like the
+        // price calc's mergeYachtAndOfferExtras.
+        const key = String(e.key ?? e.extras?.labelCode ?? `${name.toLowerCase().trim()}-${priceNum ?? '-'}`);
 
         return {
           key,
@@ -1202,12 +1204,20 @@ const Offers = () => {
       // three, Mario 23.8.2026).
       const supersededKeys = new Set(matchedOffer.supersededExtrasKeys || []);
 
+      // Catalogue row key by partner id: the partner renames a charge in place
+      // ("Premium Line Pack (… Outboard Engine)" -> "(… Outboard Engine; 1 SUP)",
+      // same id); an older offer keeps the old name while the catalogue has the
+      // new one, and the client e-mail listed the pack twice (29.9.2026).
+      const catalogueKeyByExternalId = new Map<string, string>();
+
       (yachtDetails.services || []).forEach(s => {
         if (s.key != null && supersededKeys.has(s.key)) return;
 
         const { key, value } = toCartExtra(s, false);
 
         extrasMap.set(key, value);
+
+        if (s.externalId != null) catalogueKeyByExternalId.set(String(s.externalId), key);
       });
 
       // Offer-level data wins where the partner sent period-specific values,
@@ -1248,6 +1258,19 @@ const Offers = () => {
             : converted.key;
 
         offerRowKeys.add(key);
+
+        // Same partner charge under another catalogue name: the offer row replaces
+        // it (mirrors PriceCalculationService.mergeYachtAndOfferExtras). Never a row
+        // another offer charge already holds.
+        const renamedTwinKey = e.externalId != null ? catalogueKeyByExternalId.get(String(e.externalId)) : undefined;
+
+        if (renamedTwinKey != null && renamedTwinKey !== key && !offerRowKeys.has(renamedTwinKey)) {
+          const twin = extrasMap.get(renamedTwinKey);
+
+          if (twin && !value.description && twin.description) value.description = twin.description;
+
+          extrasMap.delete(renamedTwinKey);
+        }
 
         // Merge: keep richer description when offer-level lacks one.
         const existing = extrasMap.get(key);

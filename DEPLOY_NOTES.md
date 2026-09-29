@@ -1,5 +1,11 @@
 # boat4you-admin — deploy notes
 
+## 2026-09-29 — Offers: a renamed partner charge is listed once in the client offer (4d3fa3f, DEPLOYED 10:21 UTC, `index-DpT16WrA.js`)
+
+Why: Mario — the client offer for Fico - Premium line (13311, 11–18.9.2027) listed "Premium Line Pack" twice (old and new partner name, same MMK id; the catalogue has the new name, an older offer the old one).
+What: cart key stays `e.key` → labelCode → name-price (NOT `externalId`: NauSys obligatory offer rows carry synthetic per-offer ids and keying on it splits catalogue/offer twins). New: an offer row whose partner id equals a catalogue row's partner id under a different key drops that catalogue row (unless another offer row owns that key), keeping its description when the offer row has none — the same identity `PriceCalculationService.mergeYachtAndOfferExtras` uses for the price. `externalId` reaches the admin only (backend 1d0ac4a serves it to SYSTEM_ADMIN, as a string); this build had to go live BEFORE that backend.
+Notes: re-login once after the deploy (a stale token = anonymous = no id = old behaviour); re-add yachts already in a saved cart (localStorage carts are not re-merged).
+
 ## 2026-09-26 — Offers: client e-mail + WhatsApp split obligatory services by how they are paid (81865f7, DEPLOYED 18:38 UTC, `index-Be7e2_Ua.js`)
 
 Why: since 26.9. the backend charges obligatory extras the partner bills with the booking (MMK payableInBase=false, NauSys ADVANCE_PAYMENT → `paymentType` WITH_BOOKING) online with the charter, on the same payment schedule; the e-mail still called every obligatory service "payable separately" with a "total on arrival" (Mario: "popravi").

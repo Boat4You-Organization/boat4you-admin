@@ -4,6 +4,8 @@ import { ReservationModel, ReservationModelShortInfo, ReservationSysStatus } fro
 import { ErrorModel } from '@/models/error.model';
 import { PaginatedResponse, PayloadResponse } from '@/types/response.type';
 import { createQueryParamsWithPage } from '@/utils/static/queryParams';
+import { CapacityDto } from '@/utils/yachtCapacity';
+import { BrokerNotes } from '@/utils/yachtCapacityEn';
 import { showToast } from '@/valtio/global/global.actions';
 
 export interface YachtSwapInfoAdminDto {
@@ -564,7 +566,14 @@ return { payload: null as unknown as ReservationModel, message };
     mainImageId?: number;
     cabins?: number;
     berths?: number;
+    wc?: number | null;
     maxPersons?: number;
+    charterType?: string | null;       // the row's charter type (one CharterType name)
+    // Capacity contract v1 (6.10.2026): partner figures with short sanitized notes / splits (brief form), and
+    // for admins the raw notes + internal remark (admin-only, never copied into a client offer). Both absent
+    // on a backend without the capacity release.
+    capacity?: CapacityDto | null;
+    brokerNotes?: BrokerNotes | null;
     buildYear?: number;
     length?: number;                   // backend field name is `length`, NOT `lengthMeters`
     vesselType?: string;               // CATAMARAN / SAILING_YACHT / MOTOR_YACHT / ...

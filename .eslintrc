@@ -157,5 +157,17 @@
     "react/static-property-placement": ["off"],
     "react/react-in-jsx-scope": "off",
     "react/jsx-uses-react": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/utils/yachtCapacity.ts"],
+      "rules": {
+        "padding-line-between-statements": "off",
+        "no-unneeded-ternary": "off",
+        "no-control-regex": "off",
+        "no-restricted-syntax": "off",
+        "@typescript-eslint/no-use-before-define": "off"
+      }
+    }
+  ]
 }

@@ -18,6 +18,8 @@
  * boat4you, not learn which partner runs the fleet.
  */
 import { itineraryAreaUrl } from '@/utils/static/itineraryArea';
+import { CapacityDto, RigDto } from '@/utils/yachtCapacity';
+import { CAPACITY_ROW_KEYS, RIG_ROW_KEYS, capacityChipsEn, capacityRowsEn } from '@/utils/yachtCapacityEn';
 
 // Backend ExtraPaymentType: how the client pays an extra. WITH_BOOKING = the
 // partner bills it with the booking, so boat4you charges it online together
@@ -59,7 +61,17 @@ export interface CartYacht {
   berths: number | null;
   cabins: number | null;
   wc: number | null;
-  mainSailType: string | null;
+  // Capacity contract v1 (6.10.2026): the public detail's `capacity` / `rig` blocks as sent (their notes and labels
+  // are backend-sanitized) plus what the shared formatter needs to gate and fall back. null = the detail had none
+  // (flat numbers only); undefined = cart saved before these fields existed (topped up when the offer modal opens).
+  capacity?: CapacityDto | null;
+  rig?: RigDto | null;
+  maxPersons?: number | null;
+  crewNumber?: number | null;
+  charterType?: string[] | null; // CharterType names: the crew count shows for crewed charters only
+  custom?: boolean | null; // custom yachts: customDetails.engineText / enginePower are their engine row
+  customDetails?: { engineText?: string | null } | null;
+  enginePower?: number | null;
   dateFrom: string; // YYYY-MM-DD
   dateTo: string;
   checkin: string; // "17:00" etc
@@ -257,21 +269,6 @@ const humanizeVesselType = (t: string | null | undefined): string => {
   };
 
   return map[t] || t;
-};
-
-// Mainsail enum → client wording. Unknown codes (incl. UNKNOWN / null) return
-// null so the raw enum never leaks into the offer ("Mainsail ROLLING_SAIL").
-const humanizeMainsail = (code: string | null | undefined): string | null => {
-  const map: Record<string, string> = {
-    ROLLING_SAIL: 'rolling mainsail',
-    CLASSIC_SAIL: 'classic mainsail',
-    FULL_BATTEN: 'full-batten mainsail',
-    LAZY_JACK: 'lazy jack mainsail',
-    LAZY_BAG: 'lazy jack mainsail',
-    IN_MAST: 'in-mast furling mainsail',
-  };
-
-  return (code && map[code]) || null;
 };
 
 const escapeHtml = (s: string): string =>
@@ -556,13 +553,18 @@ const renderYachtBlock = (
     humanizeVesselType(y.vesselType),
     y.buildYear != null ? String(y.buildYear) : '',
     y.lengthMeters != null ? `${y.lengthMeters.toFixed(2)} m` : '',
-    y.cabins != null ? `${y.cabins} ${y.cabins === 1 ? 'cabin' : 'cabins'}` : '',
-    y.berths != null ? `${y.berths} ${y.berths === 1 ? 'berth' : 'berths'}` : '',
-    y.wc != null ? `${y.wc} WC` : '',
-    humanizeMainsail(y.mainSailType),
   ]
     .filter(Boolean)
     .join(' · ');
+  // Then the partner's own capacity and rig figures in the full form of the shared formatter, each with its label
+  // ("Cabins 4 · Berths 10 (8+2) · WC 2 · Max. people on board 12" / "Mainsail Full batten · Engine 2x30 HP"), so
+  // the client sees cabins, berths and people together. Notes come only from the public detail (backend-sanitized),
+  // never from the admin-only broker notes. Without the backend blocks: numbers only, no sail or partner engine
+  // (the flat mainSailType is a filter value, not the sail kind).
+  const rowsLine = (rows: { label: string; value: string }[]): string =>
+    rows.map(r => `${r.label} ${r.value}`).join(' · ');
+  const capacityLine = rowsLine(capacityRowsEn(y, CAPACITY_ROW_KEYS));
+  const rigLine = rowsLine(capacityRowsEn(y, RIG_ROW_KEYS));
   const amenities = renderAmenitiesInline(y.keyAmenities || []);
   const locationLine = [y.country, y.base].filter(Boolean).join(' · ');
 
@@ -612,6 +614,8 @@ const renderYachtBlock = (
     `<div style="font-size:20px;font-weight:700;line-height:1.25;margin:6px 0 2px">${titleHtml}</div>`,
     locationLine ? `<div style="color:${BRAND.textMuted}">${escapeHtml(locationLine)}</div>` : '',
     specs ? `<div style="margin-top:8px">${escapeHtml(specs)}</div>` : '',
+    capacityLine ? `<div style="margin-top:${specs ? 2 : 8}px">${escapeHtml(capacityLine)}</div>` : '',
+    rigLine ? `<div style="margin-top:2px">${escapeHtml(rigLine)}</div>` : '',
     amenities ? `<div style="color:${BRAND.textMuted}">${amenities}</div>` : '',
   ].join('');
 
@@ -803,7 +807,8 @@ const renderYachtBlock = (
  *   ⛵ *Lagoon 39 | Sole*
  *   📍 ACI Marina Split, Croatia
  *   📅 20 Jun 2026 – 27 Jun 2026 (7 nights)
- *   ✓ Catamaran · Year 2023 · 4 cabins · 13.99 m
+ *   ✓ Catamaran · Year 2023 · 13.99 m
+ *   ✓ 4 cabins · 10 berths (8+2) · 2 WC · max. 12 people
  *   ✓ Skipper +200 € (per day)
  *   💰 *Total: 8,400 €*
  *   🔗 https://www.boat4you.com/hr/boat/...
@@ -849,13 +854,15 @@ export const buildClientOfferWhatsApp = (
 
     if (y.buildYear != null) specs.push(`Year ${y.buildYear}`);
 
-    if (y.cabins != null) specs.push(`${y.cabins} cabins`);
-
-    if (y.berths != null) specs.push(`${y.berths} berths`);
-
     if (y.lengthMeters != null) specs.push(`${y.lengthMeters.toFixed(2)} m`);
 
     if (specs.length > 0) lines.push(`✓ ${specs.join(' · ')}`);
+
+    // Capacity in the compact form ("4 cabins · 10 berths (8+2) · 2 WC · max. 12 people"): numbers, short
+    // language-neutral notes and labelled splits only — never a partner word note, never the broker notes.
+    const capacity = capacityChipsEn(y).map(chip => chip.text);
+
+    if (capacity.length > 0) lines.push(`✓ ${capacity.join(' · ')}`);
 
     // Skipper / Hostess (only when toggle ON)
     const renderCrewLine = (label: string, keyword: string) => {

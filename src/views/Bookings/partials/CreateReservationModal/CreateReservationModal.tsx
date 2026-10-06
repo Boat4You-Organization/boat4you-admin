@@ -23,6 +23,8 @@ import { api } from '@/config/axios.config';
 import ReservationsService from '@/services/reservations.service';
 import UsersService from '@/services/users.service';
 import colors from '@/styles/themes/colors';
+import { CapacityDto } from '@/utils/yachtCapacity';
+import { capacityChipsEn } from '@/utils/yachtCapacityEn';
 import { getBookings, toggleCreateReservationModal } from '@/valtio/bookings/bookings.actions';
 import { useBookingsStore } from '@/valtio/bookings/bookings.store';
 import { showToast } from '@/valtio/global/global.actions';
@@ -61,7 +63,11 @@ interface PickedYacht {
   locationName: string;
   cabins?: number;
   berths?: number;
+  wc?: number | null;
   maxPersons?: number;
+  charterType?: string | null;
+  // Capacity contract v1: the partner's figures (null / absent before the backend release → flat numbers).
+  capacity?: CapacityDto | null;
   buildYear?: number;
   // The exact offer window the search view matched for this yacht. Can
   // differ from the admin's requested dates by up to the backend's
@@ -254,7 +260,10 @@ return;
       locationName: y.location?.name || '',
       cabins: y.cabins,
       berths: y.berths,
+      wc: y.wc,
       maxPersons: y.maxPersons,
+      charterType: y.charterType,
+      capacity: y.capacity,
       buildYear: y.buildYear,
       offerDateFrom: (y as any).offerDateFrom ?? undefined,
       offerDateTo: (y as any).offerDateTo ?? undefined,
@@ -622,12 +631,11 @@ return true;
           const nights = Math.max(1, endDate.diff(startDate, 'day'));
           const hasPrice = typeof y.clientPriceEur === 'number' && Number.isFinite(y.clientPriceEur);
           const periodTotal = hasPrice ? y.clientPriceEur * nights : 0;
-          // Meta row: cabins / berths / persons / build year — mirror the
-          // Nausys card's stat row so admin quickly scans the key specs.
+          // Meta row: capacity in the compact form of the shared formatter
+          // (cabins, crew cabins, berths, WC, crew WC, max. people, crew for
+          // crewed charters — the partner's own figures) + build year.
           const stats = [
-            y.cabins != null ? `${y.cabins} cab` : null,
-            y.berths != null ? `${y.berths} berths` : null,
-            y.maxPersons != null ? `${y.maxPersons} pax` : null,
+            ...capacityChipsEn(y).map(chip => chip.text),
             y.buildYear != null ? `${y.buildYear}` : null,
           ].filter(Boolean);
 

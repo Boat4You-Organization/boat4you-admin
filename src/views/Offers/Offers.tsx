@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import SailingOutlinedIcon from '@mui/icons-material/SailingOutlined';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 import {
@@ -18,6 +19,7 @@ import {
   Select,
   Stack,
   TextField,
+  Tooltip,
   Typography,
 } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
@@ -29,6 +31,8 @@ import CatalogueService from '@/services/catalogue.service';
 import ReservationsService from '@/services/reservations.service';
 import { bbColors, bbFont, bbShadow } from '@/styles/bb';
 import colors from '@/styles/themes/colors';
+import { CapacityDto, RigDto } from '@/utils/yachtCapacity';
+import { BrokerNotes, brokerNoteLines, capacityChipsEn } from '@/utils/yachtCapacityEn';
 import { showToast } from '@/valtio/global/global.actions';
 import AgencyPicker, { Agency } from '@/views/Bookings/partials/CreateReservationModal/AgencyPicker';
 import DateRangeField from '@/views/Bookings/partials/CreateReservationModal/DateRangeField';
@@ -275,7 +279,16 @@ interface SearchRow {
   locationName: string;
   locationCountryCode: string | null;
   cabins: number | null;
+  berths: number | null;
+  wc: number | null;
   maxPersons: number | null;
+  // The search row's charter type (one name): the crew chip shows for crewed charters only.
+  charterType: string | null;
+  // Capacity contract v1: the partner's figures with short notes / splits (null until the backend sends it — the
+  // pills then fall back to the flat numbers) and the admin-only raw notes + internal remark (info icon only,
+  // never copied into the client offer).
+  capacity: CapacityDto | null;
+  brokerNotes: BrokerNotes | null;
   buildYear: number | null;
   lengthMeters: number | null;
   vesselType: string | null;
@@ -374,7 +387,14 @@ interface YachtDetailsResponse {
   berths?: number | null;
   cabins?: number | null;
   wc?: number | null;
-  mainSailType?: string | null;
+  maxPersons?: number | null;
+  crewNumber?: number | null;
+  charterType?: string[] | null;
+  capacity?: CapacityDto | null;
+  rig?: RigDto | null;
+  custom?: boolean | null;
+  customDetails?: { engineText?: string | null } | null;
+  enginePower?: number | null;
   defaultCheckin?: string | null;
   defaultCheckout?: string | null;
   securityDeposit?: number | null;
@@ -384,6 +404,25 @@ interface YachtDetailsResponse {
   services?: ExtraResponse[];
   offers?: OfferResponse[];
 }
+
+// What a cart entry snapshots for the capacity / rig lines of the client offer (add to offer, and the top-up of carts
+// saved before these fields existed). Only the public detail's blocks, whose notes the backend has sanitized — never
+// the search row's admin-only brokerNotes.
+const cartCapacityFields = (
+  d: YachtDetailsResponse
+): Pick<
+  CartYacht,
+  'capacity' | 'rig' | 'maxPersons' | 'crewNumber' | 'charterType' | 'custom' | 'customDetails' | 'enginePower'
+> => ({
+  capacity: d.capacity ?? null,
+  rig: d.rig ?? null,
+  maxPersons: d.maxPersons ?? null,
+  crewNumber: d.crewNumber ?? null,
+  charterType: d.charterType ?? null,
+  custom: d.custom ?? null,
+  customDetails: d.customDetails ? { engineText: d.customDetails.engineText ?? null } : null,
+  enginePower: d.enginePower ?? null,
+});
 
 interface ResultRowProps {
   row: SearchRow;
@@ -421,15 +460,22 @@ const ResultRow = memo(({ row, nights, inCart, adding, onAdd, onOpen }: ResultRo
     : null;
 
   const thumbUrl = getBoatImageUrl(row.mainImageId, 200);
-  const statsPills: Array<{ label: string; value: string }> = [];
+  // Capacity in the compact form of the shared formatter: cabins, NauSys crew cabins, berths, WC, crew WC, max.
+  // people and (crewed charters only) the crew, each the partner's own figure, hidden when unknown — so berths and
+  // max. people show side by side ("10 berths (8+2) · max. 12 people"). Then length and year.
+  const statsPills: Array<{ key: string; label?: string; value: string }> = capacityChipsEn(row).map(chip => ({
+    key: chip.key,
+    value: chip.text,
+  }));
 
-  if (row.cabins != null) statsPills.push({ label: 'Cab', value: String(row.cabins) });
+  if (row.lengthMeters != null) {
+    statsPills.push({ key: 'length', label: 'L', value: `${row.lengthMeters.toFixed(2)} m` });
+  }
 
-  if (row.maxPersons != null) statsPills.push({ label: 'Pax', value: String(row.maxPersons) });
+  if (row.buildYear != null) statsPills.push({ key: 'year', label: 'Year', value: String(row.buildYear) });
 
-  if (row.lengthMeters != null) statsPills.push({ label: 'L', value: `${row.lengthMeters.toFixed(2)} m` });
-
-  if (row.buildYear != null) statsPills.push({ label: 'Year', value: String(row.buildYear) });
+  // Admin-only partner notes (raw capacity notes + internal remark) behind the info icon.
+  const noteLines = brokerNoteLines(row.brokerNotes);
 
   return (
     <Box
@@ -550,10 +596,10 @@ const ResultRow = memo(({ row, nights, inCart, adding, onAdd, onOpen }: ResultRo
               (hidden when sent to client)
             </Typography>
           </Stack>
-          <Stack direction="row" gap={0.5} sx={{ mt: 1, flexWrap: 'wrap' }}>
+          <Stack direction="row" alignItems="center" gap={0.5} sx={{ mt: 1, flexWrap: 'wrap' }}>
             {statsPills.map(p => (
               <Box
-                key={p.label}
+                key={p.key}
                 sx={{
                   display: 'inline-flex',
                   alignItems: 'center',
@@ -567,14 +613,40 @@ const ResultRow = memo(({ row, nights, inCart, adding, onAdd, onOpen }: ResultRo
                   fontWeight: 500,
                 }}
               >
-                <Box component="span" sx={{ color: bbColors.gray500 }}>
-                  {p.label}
-                </Box>
+                {p.label && (
+                  <Box component="span" sx={{ color: bbColors.gray500 }}>
+                    {p.label}
+                  </Box>
+                )}
                 <Box component="span" sx={{ fontWeight: 700 }}>
                   {p.value}
                 </Box>
               </Box>
             ))}
+            {noteLines.length > 0 && (
+              <Tooltip
+                arrow
+                title={
+                  <Box sx={{ fontSize: 12, lineHeight: 1.4 }}>
+                    <Box sx={{ fontWeight: 700, mb: 0.5 }}>Partner notes · admin only, never sent to the client</Box>
+                    {noteLines.map(line => (
+                      <Box key={line.label}>
+                        <b>{line.label}:</b> {line.text}
+                      </Box>
+                    ))}
+                  </Box>
+                }
+              >
+                <Box
+                  component="span"
+                  tabIndex={0}
+                  aria-label="Partner notes (admin only)"
+                  sx={{ display: 'inline-flex', color: bbColors.navy700, cursor: 'help' }}
+                >
+                  <InfoOutlinedIcon sx={{ fontSize: 16 }} />
+                </Box>
+              </Tooltip>
+            )}
           </Stack>
           <Button
             size="small"
@@ -893,7 +965,12 @@ const Offers = () => {
     locationName: y.location?.name || '',
     locationCountryCode: y.location?.countryCode ?? null,
     cabins: y.cabins ?? null,
+    berths: y.berths ?? null,
+    wc: y.wc ?? null,
     maxPersons: y.maxPersons ?? null,
+    charterType: y.charterType ?? null,
+    capacity: y.capacity ?? null,
+    brokerNotes: y.brokerNotes ?? null,
     buildYear: y.buildYear ?? null,
     lengthMeters: y.length != null ? Number(y.length) : null,
     vesselType: y.vesselType ?? null,
@@ -1344,7 +1421,7 @@ const Offers = () => {
         berths: yachtDetails.berths ?? null,
         cabins: yachtDetails.cabins ?? row.cabins ?? null,
         wc: yachtDetails.wc ?? null,
-        mainSailType: yachtDetails.mainSailType ?? null,
+        ...cartCapacityFields(yachtDetails),
         dateFrom: startDate.format('YYYY-MM-DD'),
         dateTo: endDate.format('YYYY-MM-DD'),
         checkin,
@@ -1431,8 +1508,11 @@ const Offers = () => {
     // obligatory service under "payable separately" in the client e-mail.
     const lacksPaymentType = (c: CartYacht): boolean =>
       c.extras.some(x => x.obligatory && x.paymentType === undefined);
+    // capacity (6.10.2026): carts saved before it existed lack max. people,
+    // crew, the partner notes and the sail / engine lines.
+    const lacksCapacity = (c: CartYacht): boolean => c.capacity === undefined;
     const missing = cart.filter(
-      c => !c.keyAmenities || c.keyAmenities.length === 0 || !c.imageUrl || lacksPaymentType(c)
+      c => !c.keyAmenities || c.keyAmenities.length === 0 || !c.imageUrl || lacksPaymentType(c) || lacksCapacity(c)
     );
 
     if (missing.length === 0) {
@@ -1445,7 +1525,13 @@ const Offers = () => {
     try {
       const hydrated = await Promise.all(
         cart.map(async entry => {
-          if (entry.keyAmenities && entry.keyAmenities.length > 0 && entry.imageUrl && !lacksPaymentType(entry)) {
+          if (
+            entry.keyAmenities &&
+            entry.keyAmenities.length > 0 &&
+            entry.imageUrl &&
+            !lacksPaymentType(entry) &&
+            !lacksCapacity(entry)
+          ) {
             return entry;
           }
 
@@ -1498,6 +1584,7 @@ const Offers = () => {
 
             return {
               ...entry,
+              ...(lacksCapacity(entry) ? cartCapacityFields(data) : {}),
               extras,
               keyAmenities: entry.keyAmenities?.length ? entry.keyAmenities : keyAccum.slice(0, 4),
               imageUrl,

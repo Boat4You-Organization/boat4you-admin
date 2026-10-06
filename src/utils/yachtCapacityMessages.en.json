@@ -1,0 +1,54 @@
+{
+  "label": {
+    "cabins": "Cabins",
+    "crewCabins": "Crew cabins",
+    "berths": "Berths",
+    "heads": "WC",
+    "crewHeads": "Crew WC",
+    "showers": "Showers",
+    "crewShowers": "Crew showers",
+    "maxPeople": "Max. people on board",
+    "recommendedPeople": "Recommended number of people",
+    "crew": "Crew",
+    "crewCrewedCharter": "Crew (crewed charter)",
+    "mainsail": "Mainsail",
+    "headsail": "Headsail",
+    "engine": "Engine",
+    "draught": "Draught"
+  },
+  "card": {
+    "cabins": "Cabins",
+    "berths": "Berths",
+    "maxPeople": "Max. people"
+  },
+  "part": {
+    "inCabins": "{count} in cabins",
+    "saloon": "{count} in the saloon",
+    "crew": "{count} crew",
+    "skipper": "{count, plural, one {# skipper} other {# skippers}}"
+  },
+  "value": {
+    "recommended": "recommended {count}",
+    "enginePower": "{power} hp",
+    "engineCountPower": "{count} × {power} hp",
+    "draught": "{value} m"
+  },
+  "compact": {
+    "cabins": "{count, plural, one {# cabin} other {# cabins}}",
+    "crewCabins": "{count, plural, one {# crew cabin} other {# crew cabins}}",
+    "berths": "{count, plural, one {# berth} other {# berths}}",
+    "heads": "{count} WC",
+    "crewHeads": "{count} crew WC",
+    "maxPeople": "{count, plural, one {max. # person} other {max. # people}}",
+    "crew": "{count, plural, one {# crew member} other {# crew members}}"
+  },
+  "sail": {
+    "FULL_BATTEN": "Full batten",
+    "SEMI_FULL_BATTEN": "Semi-full batten",
+    "HALF_BATTEN": "Half batten",
+    "CLASSIC": "Classic",
+    "FURLING": "Furling",
+    "SELF_TACKING_JIB": "Self-tacking jib",
+    "JIB": "Jib"
+  }
+}

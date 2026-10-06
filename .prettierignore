@@ -1,0 +1,3 @@
+# Shared capacity formatter: a byte-identical copy of the capacity contract module
+# (same file in boat4you-web and the 6 sister sites), so it is never reformatted here.
+src/utils/yachtCapacity.ts

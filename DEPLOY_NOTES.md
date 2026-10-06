@@ -1,5 +1,56 @@
 # boat4you-admin — deploy notes
 
+## 2026-10-06 — Offers: the partner's own capacity (cabins, berths, WC, people, notes, sails, engine) in the card, client offer, WhatsApp and reservation picker (9d3edc1 + review fix 4c9f299) — ⏳ NOT DEPLOYED; deploy only AFTER the backend capacity release and its gate SQL
+
+Why: Mario (6.10.) — cabins / berths / layout exactly as MMK and NauSys send them on every surface, so a client never has to ask (capacity contract v1, 6.10.2026). The admin showed a different subset of the same figures on each surface: the Offers card cabins + "Pax", the client e-mail cabins + berths + WC and "rolling mainsail" for full-batten boats (Jangada 11399: "Pax 12" in admin, "10 berths" in the e-mail), CreateReservationModal no berths.
+
+What:
+
+- `9d3edc1`: the shared formatter `src/utils/yachtCapacity.ts` (byte-identical to the contract copy and b4y; prettier-ignored and 5 eslint style rules off so it stays identical), the EN `capacity` messages, `yachtCapacityEn.ts`.
+  - Offers card: pills in the compact form (cabins, NauSys crew cabins, berths with the short note / split, WC, crew WC, max. people, crew only for crewed charters) + L + Year. The admin-only `brokerNotes` (raw partner notes + the partner's internal remark) sit behind an info icon only — never in the cart, the client e-mail or WhatsApp.
+  - Cart: capacity, rig, maxPersons, crewNumber, charterType and the custom-yacht engine fields from the public detail (notes already sanitized by the backend); carts saved before are topped up when the offer modal opens (the paymentType pattern).
+  - Client e-mail: specs line vessel · year · length, then the full capacity line and the mainsail / headsail / engine / draught line. `humanizeMainsail` is gone (the flat enum is a filter value). Hero `?width=800` untouched. WhatsApp: the compact chips. CreateReservationModal: the compact chips.
+  - Until the backend sends `capacity` / `rig`: the flat cabins / berths / wc / maxPersons / crewNumber, numbers only, no sail, no partner engine.
+- `4c9f299` (review): an entry stored with `capacity: null` (added or topped up while the backend did not send the block) is now topped up too (`== null`, was `=== undefined`), so such a cart gets the notes and the sail / engine line once the backend is live. The public detail always carries the block from then on, so it is fetched at most once more per entry.
+- Untouched: price and extras logic (no admin price code reads `maxPersons`; prices / extras stay snapshotted at add time), the hero width, the inquiry templates.
+
+Verified:
+
+- Formatter byte-identical in contract / b4y / admin (sha256 `502365cc08c9…`); contract `node --test` 22/22; the 7 reference boats' rows and chips equal `reference_boats.json`; live detail payloads 8351 / 11399 / 1161 and a live search page through the formatter: no `null` / `NaN` / `undefined`.
+- Independent review (6.10.): `brokerNotes` only in the search-row tooltip; the cart is built from explicit fields (no `...row` spread); `offerHtml` never reads it; old-cart top-up keeps the broker's extras; `maxPersons` in no price code; no `cabins*2+2`, "certified", "with shower" or "bathrooms" in live code.
+- `tsc` 0; eslint 0 errors (Offers.tsx keeps its 3 pre-existing warnings); vite build OK at `9d3edc1`; `4c9f299` = one comparison, tsc + eslint re-run.
+- Not yet seen in a real browser: the card pills and the info-icon tooltip — check on the first admin session after the deploy.
+
+**REQUIRED DEPLOY ORDER (the whole capacity release):**
+
+1. **Backend cusma2** (`c374579`…`a96efe8` + its review fixes): hand-apply the idempotent `V9_72__yacht_partner_capacity.sql` as `boat4you_owner` first (a second run returns at the column guard without a lock), then the jar + restart — outside ALL sync slots (server time, UTC): MMK availability 08:40 / 12:40 / 16:40 / 20:40 (~17 min each), MMK near-term 10:50 / 16:50, MMK full 06:00–07:30, NauSys availability 10:20 / 16:20 / 22:20, NauSys near-term 10:40 / 16:40, NauSys nightly 23:20 → ~06:00, NauSys search-retry drain every 15 min, matview refresh every 10 min (an ALTER competes with it).
+2. **Backend cusma3** (scheduler), hard gate in the same script: `n=$(journalctl --since '10 minutes ago' | grep -ci 'nausys\|mmk'); [ "$n" -gt 0 ] && { echo ABORT; exit 1; }`.
+3. **Wait one full sync cycle on the new jar:** NauSys (23:20) and MMK (06:10). Until the first NauSys sync the API serves crew WC from the old, buggy `crew_wc` — no frontend before step 4.
+4. **Gate SQL** (read-only, contract §4) must pass:
+
+   ```sql
+   WITH s AS (SELECT y.*, em.external_system_id AS sys
+                FROM yacht y JOIN external_mapping em ON em.system_id = y.id AND em.type = 'Yacht'
+               WHERE y.sys_active)
+   SELECT sys,                                                         -- 1 = MMK, 2 = NauSys
+          count(*)                                                       AS active,
+          count(*) FILTER (WHERE sys = 2 AND salon_berths IS NULL)       AS ns_salon_null,     -- expect ~0
+          count(*) FILTER (WHERE sys = 2 AND wc > 0 AND crew_wc = wc)    AS ns_crew_wc_eq_wc,  -- was ~7.6k, expect small
+          count(*) FILTER (WHERE sys = 1 AND mainsail_label IS NULL)     AS mmk_mainsail_null, -- expect ~0
+          count(*) FILTER (WHERE sys = 1 AND berths_note IS NOT NULL)    AS mmk_berths_note,   -- expect 40-50 %
+          count(*) FILTER (WHERE mainsail_type = 'ROLLING_SAIL')         AS rolling,           -- furling only now
+          count(*) FILTER (WHERE mainsail_type = 'CLASSIC_SAIL')         AS classic
+     FROM s GROUP BY sys;
+   ```
+
+   plus the contract's two follow-ups (NauSys agencies with `salon_berths IS NULL`; `mainsail_label` values = EN / no-language labels only).
+
+5. **Admin** (this entry) → 6. **b4y** (`2183ac26f`, `6cc0d6e4e`, `c0071d987`) → 7. **the 6 sisters** → 8. **later, only once b4y and the 6 sisters render the new blocks:** migration B8 (`B8_trigger_later.sql`, today only in the session scratchpad `capacity/contract/` — it must become a backend `V9_<next>` migration first). It stamps `yacht_content_modified` for ~13.6k active boats → sitemap `<lastmod>` recrawl wave; tell Mario / GSC monitoring.
+
+Deploy (admin, as before): `.env.production.local` → `npx vite build` → tar → cusma1 `html.staging` → checks (index.html, 0× `localhost:8443`, entry hash, Offers chunk contains `Crew WC` from the capacity messages) → backup → `mv html html.prev` → `mv html.staging html` → chown www-data. After the deploy: log in again once (a stale token = anonymous = no `brokerNotes`).
+
+Rollback: `git revert 4c9f299 9d3edc1` + redeploy, or the `html.prev` swap. Carts saved by the new build carry extra fields the old build ignores.
+
 ## 2026-09-29 — Offers: a renamed partner charge is listed once in the client offer (4d3fa3f, DEPLOYED 10:21 UTC, `index-DpT16WrA.js`)
 
 Why: Mario — the client offer for Fico - Premium line (13311, 11–18.9.2027) listed "Premium Line Pack" twice (old and new partner name, same MMK id; the catalogue has the new name, an older offer the old one).
@@ -177,6 +228,7 @@ add_header X-Content-Type-Options "nosniff" always;
 add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
 ```
+
 CSP rationale (verified against the build): only one external module script
 (`script-src 'self'`, no inline/eval/wasm), MUI/emotion inline styles
 (`style-src 'unsafe-inline'`), @react-pdf worker (`worker-src blob:`) + blob

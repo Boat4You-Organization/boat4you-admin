@@ -1509,8 +1509,10 @@ const Offers = () => {
     const lacksPaymentType = (c: CartYacht): boolean =>
       c.extras.some(x => x.obligatory && x.paymentType === undefined);
     // capacity (6.10.2026): carts saved before it existed lack max. people,
-    // crew, the partner notes and the sail / engine lines.
-    const lacksCapacity = (c: CartYacht): boolean => c.capacity === undefined;
+    // crew, the partner notes and the sail / engine lines. null too: an entry
+    // added while the backend did not send the block yet is topped up once it
+    // does (the detail always carries it from then on).
+    const lacksCapacity = (c: CartYacht): boolean => c.capacity == null;
     const missing = cart.filter(
       c => !c.keyAmenities || c.keyAmenities.length === 0 || !c.imageUrl || lacksPaymentType(c) || lacksCapacity(c)
     );

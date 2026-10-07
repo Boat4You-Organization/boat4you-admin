@@ -1,6 +1,6 @@
 # boat4you-admin — deploy notes
 
-## 2026-10-06 — Offers: the partner's own capacity (cabins, berths, WC, people, notes, sails, engine) in the card, client offer, WhatsApp and reservation picker (9d3edc1 + review fix 4c9f299) — ⏳ NOT DEPLOYED; deploy only AFTER the backend capacity release and its gate SQL
+## 2026-10-06 — Offers: the partner's own capacity (cabins, berths, WC, people, notes, sails, engine) in the card, client offer, WhatsApp and reservation picker (9d3edc1 + review fix 4c9f299) — ✅ DEPLOYANO 7.10.2026 (live bce0dfb; backend gate prošao)
 
 Why: Mario (6.10.) — cabins / berths / layout exactly as MMK and NauSys send them on every surface, so a client never has to ask (capacity contract v1, 6.10.2026). The admin showed a different subset of the same figures on each surface: the Offers card cabins + "Pax", the client e-mail cabins + berths + WC and "rolling mainsail" for full-batten boats (Jangada 11399: "Pax 12" in admin, "10 berths" in the e-mail), CreateReservationModal no berths.
 

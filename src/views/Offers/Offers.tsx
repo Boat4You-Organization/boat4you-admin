@@ -52,6 +52,13 @@ import {
   VesselTypeDropdown,
 } from './filters';
 import {
+  OFFER_CHARTER_COLORS,
+  OFFER_CHARTER_LABEL,
+  OfferCharter,
+  offerCharterReason,
+  toOfferCharter,
+} from './offerCharter';
+import {
   CartExtra,
   CartYacht,
   ExtraPaymentType,
@@ -289,6 +296,8 @@ interface SearchRow {
   // never copied into the client offer).
   capacity: CapacityDto | null;
   brokerNotes: BrokerNotes | null;
+  // Admin-only pill: Bareboat / Skippered / Crewed for the offer "Add to offer" adds (null on an older backend).
+  offerCharter: OfferCharter | null;
   buildYear: number | null;
   lengthMeters: number | null;
   vesselType: string | null;
@@ -512,6 +521,27 @@ const ResultRow = memo(({ row, nights, inCart, adding, onAdd, onOpen }: ResultRo
                 {row.name}
               </Box>
             </Typography>
+            {row.offerCharter && (
+              <Tooltip arrow title={`Admin only: ${offerCharterReason(row.offerCharter)}`}>
+                <Box
+                  component="span"
+                  sx={{
+                    display: 'inline-block',
+                    ...OFFER_CHARTER_COLORS[row.offerCharter.kind],
+                    fontSize: 10,
+                    fontWeight: 700,
+                    letterSpacing: 0.5,
+                    textTransform: 'uppercase',
+                    px: 0.75,
+                    py: 0.25,
+                    borderRadius: '999px',
+                    cursor: 'help',
+                  }}
+                >
+                  {OFFER_CHARTER_LABEL[row.offerCharter.kind]}
+                </Box>
+              </Tooltip>
+            )}
             {row.isOption && (
               <Box
                 component="span"
@@ -971,6 +1001,7 @@ const Offers = () => {
     charterType: y.charterType ?? null,
     capacity: y.capacity ?? null,
     brokerNotes: y.brokerNotes ?? null,
+    offerCharter: toOfferCharter(y.offerCharter),
     buildYear: y.buildYear ?? null,
     lengthMeters: y.length != null ? Number(y.length) : null,
     vesselType: y.vesselType ?? null,
@@ -1413,6 +1444,7 @@ const Offers = () => {
         vesselType: yachtDetails.vesselType || row.vesselType || null,
         agencyName: row.agencyName,
         sourceSystem: row.sourceSystem,
+        offerCharter: row.offerCharter?.kind ?? null,
         locationName: row.locationName,
         country: yachtDetails.location?.country || null,
         base: yachtDetails.location?.name || row.locationName,
@@ -2284,6 +2316,24 @@ const Offers = () => {
                         }}
                       >
                         {y.sourceSystem}
+                      </Box>
+                    )}
+                    {y.offerCharter && (
+                      <Box
+                        component="span"
+                        sx={{
+                          fontSize: 9,
+                          fontWeight: 700,
+                          letterSpacing: 0.3,
+                          textTransform: 'uppercase',
+                          px: 0.5,
+                          py: 0.1,
+                          borderRadius: 0.75,
+                          ...OFFER_CHARTER_COLORS[y.offerCharter],
+                          border: 'none',
+                        }}
+                      >
+                        {OFFER_CHARTER_LABEL[y.offerCharter]}
                       </Box>
                     )}
                   </Stack>

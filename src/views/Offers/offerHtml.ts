@@ -21,6 +21,8 @@ import { itineraryAreaUrl } from '@/utils/static/itineraryArea';
 import { CapacityDto, RigDto } from '@/utils/yachtCapacity';
 import { CAPACITY_ROW_KEYS, RIG_ROW_KEYS, capacityChipsEn, capacityRowsEn } from '@/utils/yachtCapacityEn';
 
+import type { OfferCharterKind } from './offerCharter';
+
 // Backend ExtraPaymentType: how the client pays an extra. WITH_BOOKING = the
 // partner bills it with the booking, so boat4you charges it online together
 // with the charter (MMK/NauSys offer obligatory rows since 26.9.2026).
@@ -53,6 +55,9 @@ export interface CartYacht {
   vesselType: string | null;
   agencyName: string; // admin-only, never rendered in output
   sourceSystem: string | null; // admin-only ("MMK" / "NauSys"), never rendered in output
+  // Admin-only (9.10.2026): Bareboat / Skippered / Crewed of the added offer, from the search row's pill; never
+  // rendered in output. undefined = cart saved before the field existed or an older backend.
+  offerCharter?: OfferCharterKind | null;
   locationName: string;
   country: string | null;
   base: string;

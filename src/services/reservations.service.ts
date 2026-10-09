@@ -574,6 +574,9 @@ return { payload: null as unknown as ReservationModel, message };
     // on a backend without the capacity release.
     capacity?: CapacityDto | null;
     brokerNotes?: BrokerNotes | null;
+    // Admin-only (9.10.2026): how the offer behind the card is chartered - BAREBOAT | SKIPPERED | CREWED, why, and
+    // the obligatory skipper / crew charge's name. Absent on a backend without it and for non-admin callers.
+    offerCharter?: { kind: string; basis: string; obligatoryExtra?: string | null } | null;
     buildYear?: number;
     length?: number;                   // backend field name is `length`, NOT `lengthMeters`
     vesselType?: string;               // CATAMARAN / SAILING_YACHT / MOTOR_YACHT / ...

@@ -1,5 +1,29 @@
 # boat4you-admin — deploy notes
 
+## 2026-10-09 — Offers charter pill: review fixes (6d9e8ac, on f27984b) — ⏳ NOT DEPLOYED
+
+Deploy together with `f27984b` (entry below), and only after the backend `2269c75` + its review `68d3a9e` (backend DEPLOY_NOTES 9.10.: one jar ≥ `68d3a9e`).
+
+What changed (review 9.10.):
+
+- **Stale pill (F4):** "‹ week ›" / the calendar change the dates without a new search, so the pill described another week than the one "Add to offer" adds. Now the last search's dates are kept: a row whose pill belongs to other dates shows it faded and struck through ("search again" on hover), and "Add to offer" stores no charter label in the cart for it.
+- **Look and texts (F6):** Skippered is orange (was teal, too close to Crewed's green; orange also stays apart from the yellow "Under option" pill). Bareboat no longer claims "a skipper can still be added". New backend bases: `OBLIGATORY_CREW_MEMBER` (Bareboat — the client skippers, but a hostess / cook / deckhand is an obligatory charge, named on hover) and `BAREBOAT_UNCONFIRMED` (NauSys offer without a charter type on a boat listed both ways — confirm with the partner). An unknown basis reads its kind's own text (was: the Bareboat text, even on a Crewed / Skippered pill). The pill is focusable, so the hover text also opens from the keyboard.
+- **Backend side (`68d3a9e`, no admin change needed):** Skippered only when the obligatory skipper is really charged at the boat's base (NauSys `valid_for_bases`), skipper names found anywhere in the charge ("Wintersailing | Skipper | …", "Tour leader 53") but not in conditions / insurances / certificates; a skipper with anyone else (e.g. "Skipper & Chef", or Skipper + Hostess charges) is **Crewed** — default, Mario to confirm; the offer is the boat page's FREE one when a live option holds another; a multi-week card has no pill when its weeks differ.
+- Untouched: the client e-mail / WhatsApp (no label there), hero `?width=800`, inquiry templates, prices and extras.
+
+Verified: `tsc` 0; eslint 0 errors (Offers.tsx keeps its 3 pre-existing warnings; prettier deviations of Offers.tsx unchanged at the pre-existing count, `offerCharter.ts` clean); `vite build` OK; `offerCharter.ts` checked with esbuild + node (all bases, unknown basis per kind, `constructor` as basis, malformed → no pill). Not seen in a real browser yet.
+
+Deploy (order: backend cusma2 → cusma3 with the hard sync gate → admin):
+
+- [ ] Backend jar ≥ `68d3a9e` live on cusma2, then cusma3 (gate: `n=$(journalctl --since '10 minutes ago' | grep -ci 'nausys\|mmk'); [ "$n" -gt 0 ] && { echo ABORT; exit 1; }`). With the old backend nothing breaks — rows just have no pill.
+- [ ] Usual admin manual deploy of `6d9e8ac` (test before the swap).
+- [ ] Check in Offers:
+  - Italy, 1.6.–8.6.2027 → **8165 ITALIA IV** reads **Skippered** (orange), hover `Bareboat offer with an obligatory skipper: "Skipper"` (or French Polynesia, same week → 6595 Molokoi). If that week sold meanwhile: any orange row whose hover names an obligatory skipper.
+  - Spain, 5.6.–12.6.2027 → **2583** (Palma) is **not** Skippered (its "Skipper" is for Nassau / Road Town only).
+  - Gulets **18886 Sylvia R** and **11771 Gallant** (their country, a week they have an offer) → **Crewed**, hover "Gulet - always chartered with its crew, never bareboat."
+  - Click "week ›" without searching → every pill faded and struck through, hover says search again; "Add to offer" → the cart row has no charter label. Search again → pills normal.
+  - Tab onto a pill → the hover text opens.
+
 ## 2026-10-09 — Offers: Bareboat / Skippered / Crewed pill per search row (f27984b) — ⏳ NOT DEPLOYED
 
 Why: Mario (9.10.) — when searching yachts for a client, every row must say whether the OFFER is Bareboat, Skippered (a bareboat offer whose skipper / captain is an obligatory charge) or Crewed (crewed product, crew-only boat, obligatory crew, or any gulet — a gulet is never bareboat).

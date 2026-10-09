@@ -1,6 +1,6 @@
 # boat4you-admin — deploy notes
 
-## 2026-10-09 — Offers charter pill: review fixes (6d9e8ac, on f27984b) — ⏳ NOT DEPLOYED
+## 2026-10-09 — Offers charter pill: review fixes (6d9e8ac, on f27984b) — ✅ DEPLOYED 9.10.2026 17:55 UTC (entry index-m4yN4j6c.js)
 
 Deploy together with `f27984b` (entry below), and only after the backend `2269c75` + its review `68d3a9e` (backend DEPLOY_NOTES 9.10.: one jar ≥ `68d3a9e`).
 
@@ -24,7 +24,7 @@ Deploy (order: backend cusma2 → cusma3 with the hard sync gate → admin):
   - Click "week ›" without searching → every pill faded and struck through, hover says search again; "Add to offer" → the cart row has no charter label. Search again → pills normal.
   - Tab onto a pill → the hover text opens.
 
-## 2026-10-09 — Offers: Bareboat / Skippered / Crewed pill per search row (f27984b) — ⏳ NOT DEPLOYED
+## 2026-10-09 — Offers: Bareboat / Skippered / Crewed pill per search row (f27984b) — ✅ DEPLOYED 9.10.2026 17:55 UTC (entry index-m4yN4j6c.js)
 
 Why: Mario (9.10.) — when searching yachts for a client, every row must say whether the OFFER is Bareboat, Skippered (a bareboat offer whose skipper / captain is an obligatory charge) or Crewed (crewed product, crew-only boat, obligatory crew, or any gulet — a gulet is never bareboat).
 

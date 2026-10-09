@@ -1,5 +1,24 @@
 # boat4you-admin — deploy notes
 
+## 2026-10-09 — Offers: Bareboat / Skippered / Crewed pill per search row (f27984b) — ⏳ NOT DEPLOYED
+
+Why: Mario (9.10.) — when searching yachts for a client, every row must say whether the OFFER is Bareboat, Skippered (a bareboat offer whose skipper / captain is an obligatory charge) or Crewed (crewed product, crew-only boat, obligatory crew, or any gulet — a gulet is never bareboat).
+
+What:
+
+- Reads the backend's admin-only `offerCharter` from `/public/yachts` (backend `2269c75`): `{ kind, basis, obligatoryExtra }`. The offer is the one "Add to offer" adds for the card's dates.
+- `src/views/Offers/offerCharter.ts`: labels, colours (Bareboat blue, Skippered teal, Crewed green), hover text with the reason and the obligatory charge's name (cut at 120 chars), `toOfferCharter` (anything malformed / absent → no pill).
+- Card: pill right after the boat name, before "Under option". Cart list: the same label next to MMK / NauSys (`CartYacht.offerCharter`, admin-only, never rendered by `offerHtml` / WhatsApp).
+- Not in the client e-mail on purpose: the "+ Skipper" toggle can make a Bareboat row a skippered offer, so a fixed label there could contradict the services below it. Hero `?width=800` and the inquiry templates untouched.
+
+Verified: `tsc` 0; eslint 0 errors (Offers.tsx keeps its 3 pre-existing warnings); `vite build` OK; helper checked with esbuild + node (labels, reasons, malformed input → null). Not seen in a real browser yet — check on the first admin session after the deploy.
+
+Deploy:
+
+- [ ] AFTER the backend `2269c75` (cusma2). With the old backend nothing breaks — the rows just have no pill.
+- [ ] Usual admin manual deploy (test before the swap).
+- [ ] Check: Offers → Croatia, a Saturday week → pills on every row; a gulet (e.g. 20213 Entre Cielos, 11771 Gallant) reads Crewed; hover shows the reason; add a Skippered boat → the cart shows "Skippered".
+
 ## 2026-10-06 — Offers: the partner's own capacity (cabins, berths, WC, people, notes, sails, engine) in the card, client offer, WhatsApp and reservation picker (9d3edc1 + review fix 4c9f299) — ✅ DEPLOYANO 7.10.2026 (live bce0dfb; backend gate prošao)
 
 Why: Mario (6.10.) — cabins / berths / layout exactly as MMK and NauSys send them on every surface, so a client never has to ask (capacity contract v1, 6.10.2026). The admin showed a different subset of the same figures on each surface: the Offers card cabins + "Pax", the client e-mail cabins + berths + WC and "rolling mainsail" for full-batten boats (Jangada 11399: "Pax 12" in admin, "10 berths" in the e-mail), CreateReservationModal no berths.

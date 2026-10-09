@@ -436,6 +436,9 @@ const cartCapacityFields = (
 interface ResultRowProps {
   row: SearchRow;
   nights: number;
+  // The dates moved ("‹ week ›", calendar) since the search: the row's Bareboat / Skippered / Crewed pill speaks for
+  // the searched dates, not the ones "Add to offer" would now add.
+  charterStale: boolean;
   inCart: boolean;
   adding: boolean;
   onAdd: (row: SearchRow) => void;
@@ -449,7 +452,7 @@ interface ResultRowProps {
  * card needs arrives as primitive props (plus the row object and a stable
  * `onAdd`), so a row re-renders only when its own data or cart state changes.
  */
-const ResultRow = memo(({ row, nights, inCart, adding, onAdd, onOpen }: ResultRowProps) => {
+const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOpen }: ResultRowProps) => {
   const periodTotal = row.clientPriceEur * nights;
   const listPeriodTotal = row.listPriceEur != null ? row.listPriceEur * nights : null;
   const hasDiscount = listPeriodTotal != null && listPeriodTotal > periodTotal;
@@ -522,9 +525,18 @@ const ResultRow = memo(({ row, nights, inCart, adding, onAdd, onOpen }: ResultRo
               </Box>
             </Typography>
             {row.offerCharter && (
-              <Tooltip arrow title={`Admin only: ${offerCharterReason(row.offerCharter)}`}>
+              // tabIndex: focusable, so the reason opens from the keyboard too
+              <Tooltip
+                arrow
+                title={
+                  charterStale
+                    ? 'Admin only: the dates changed since this search - search again to see how the new dates are chartered.'
+                    : `Admin only: ${offerCharterReason(row.offerCharter)}`
+                }
+              >
                 <Box
                   component="span"
+                  tabIndex={0}
                   sx={{
                     display: 'inline-block',
                     ...OFFER_CHARTER_COLORS[row.offerCharter.kind],
@@ -536,6 +548,8 @@ const ResultRow = memo(({ row, nights, inCart, adding, onAdd, onOpen }: ResultRo
                     py: 0.25,
                     borderRadius: '999px',
                     cursor: 'help',
+                    opacity: charterStale ? 0.4 : 1,
+                    textDecoration: charterStale ? 'line-through' : 'none',
                   }}
                 >
                   {OFFER_CHARTER_LABEL[row.offerCharter.kind]}
@@ -867,6 +881,8 @@ const Offers = () => {
   // ---- search state ------------------------------------------------------
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState<SearchRow[]>([]);
+  // "from|to" of the last search: the rows' charter pills speak for these dates only.
+  const [searchedPeriod, setSearchedPeriod] = useState('');
   const [searched, setSearched] = useState(false);
   // `totalCount` comes from the /public/yachts PagedModel response; `walkEnd`
   // says how the page walk finished (see handleSearch) and drives the note
@@ -951,6 +967,8 @@ const Offers = () => {
       minPersons: Number(minPersons) || undefined,
       currency,
   };
+
+    setSearchedPeriod(`${params.startDate}|${params.endDate}`);
 
     // One page, one retry. The service normally swallows a failure into an
     // empty page; a 40-request walk meets cusma2's hiccups 40× more often
@@ -1444,7 +1462,11 @@ const Offers = () => {
         vesselType: yachtDetails.vesselType || row.vesselType || null,
         agencyName: row.agencyName,
         sourceSystem: row.sourceSystem,
-        offerCharter: row.offerCharter?.kind ?? null,
+        // Only for the searched dates: after "‹ week ›" the pill describes another week than the one added here.
+        offerCharter:
+          searchedPeriod === `${startDate.format('YYYY-MM-DD')}|${endDate.format('YYYY-MM-DD')}`
+            ? (row.offerCharter?.kind ?? null)
+            : null,
         locationName: row.locationName,
         country: yachtDetails.location?.country || null,
         base: yachtDetails.location?.name || row.locationName,
@@ -2200,6 +2222,7 @@ const Offers = () => {
                 key={`${row.yachtId}-${row.slug}`}
                 row={row}
                 nights={nights}
+                charterStale={searchedPeriod !== `${dateFromStr}|${dateToStr}`}
                 inCart={cartKeys.has(`${row.yachtId}|${dateFromStr}`)}
                 adding={addingSlug === row.slug}
                 onAdd={onAddToOffer}

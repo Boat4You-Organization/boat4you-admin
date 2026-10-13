@@ -1,5 +1,28 @@
 # boat4you-admin — deploy notes
 
+## 2026-10-13 — Chat inbox: IRIS guard (b0c6af6) — ⏳ NOT DEPLOYED
+
+Why: the 4.10. prompt-injection / XSS probes from 31.22.91.227 (sessions 48, 50–53 — evidence, never delete). Review `infra/docs/ai-chat-security-review-2026-10-11.md` A1–A8 (admin side).
+
+What:
+
+- ⚠️ "Suspicious" chip + red left edge on a row with `flagged: true` or `status: "LOCKED"`; "Suspicious only" switch sends `?flaggedOnly=true` and also filters client-side (an older backend ignores the param).
+- Header banner for such a session: status, `lockReason`, `lockedAt` (all plain text).
+- A1: the "Viewing" link is built only for a same-site path (`new URL(page, 'https://www.boat4you.com')` + origin check). `.evil.tld/x`, `@evil.tld/x`, `//evil`, `/\evil` → plain text + red "suspicious" tag, no link.
+- Flagged sessions: no Delete button, checkbox disabled, never in the bulk-delete ids; a failed delete shows a toast (the new backend may refuse it / soft-deletes).
+- A8: `/chat` route + menu are SYSTEM_ADMIN only (backend `AdminAiChatController` `@PreAuthorize` is the authority). A MANAGER no longer sees the menu item and gets 403 on `/chat`.
+- Rendering unchanged: everything is a React text node; `.eslintrc` now makes `react/no-danger` an error for `src/views/Chat/**` and `chat.service.ts`.
+- `flagged` / `lockReason` / `lockedAt` are optional in `ChatSessionDto`: works against the old backend (no badges) and the new one. Unknown status / role → raw value instead of an i18n key.
+
+Verified: `tsc` 0; eslint 0 on the changed files (whole `src/`: the 8 pre-existing warnings elsewhere); `vite build` OK (chat chunk: 0 `innerHTML` / `__html`); `react/no-danger` fires in `src/views/Chat`. Rendered with a mocked API (6 sessions, transcript with `<img src=x onerror=alert(1)>`, `[x](javascript:…)`, markdown image): payloads shown literally, 0 `<img>`, 0 alerts; bulk select sends only the unflagged ids; `@evil.tld/login` / `.evil.tld/x` not a link; same-site path → `https://www.boat4you.com/hr/boat/…` with `rel="noopener noreferrer"`; garbage `lockedAt` hidden; `?flaggedOnly=true` sent. Not seen against the real backend yet.
+
+Deploy:
+
+- [ ] Safe before or after the backend guard (old backend: no badges, everything else as before). Best right after the backend jar with B1–B10 so the badges show at once.
+- [ ] Usual admin manual deploy (test before the swap).
+- [ ] Check as SYSTEM_ADMIN: Chat → "Suspicious only" → sessions 48, 50–53 listed once the backend flags them (if the backend back-fills them), no Delete on them, banner shows reason / time. Unflagged session: Viewing link opens www.boat4you.com.
+- [ ] Check as MANAGER (if such a user exists): no "Chat" in the menu, `/chat` → 403 page.
+
 ## 2026-10-09 — Offers charter pill: review fixes (6d9e8ac, on f27984b) — ✅ DEPLOYED 9.10.2026 17:55 UTC (entry index-m4yN4j6c.js)
 
 Deploy together with `f27984b` (entry below), and only after the backend `2269c75` + its review `68d3a9e` (backend DEPLOY_NOTES 9.10.: one jar ≥ `68d3a9e`).

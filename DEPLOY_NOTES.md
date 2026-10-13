@@ -1,6 +1,6 @@
 # boat4you-admin — deploy notes
 
-## 2026-10-13 — Chat inbox: IRIS guard (f9ff274, branch `feat/chat-flagged`) — ⏳ NOT DEPLOYED (waiting for Mario's „da")
+## 2026-10-13 — Chat inbox: IRIS guard (f9ff274) — ✅ DEPLOYED 13.10.2026 ~06:56 UTC (`936c26b`, entry `index-G_75O8qh.js`, tag `live/2026-10-13`)
 
 Why: the 4.10. prompt-injection / XSS probes from 31.22.91.227 (sessions 48, 50–53 — evidence, never delete). Review `infra/docs/ai-chat-security-review-2026-10-11.md` A1–A8 (admin side).
 
@@ -20,6 +20,7 @@ Verified: `tsc` 0; eslint 0 on the changed files (whole `src/`: the 8 pre-existi
 
 Deploy:
 
+- Deployed with `infra/deploy-scripts/admin_deploy.sh` (`ADMIN_REPO=…/wt-chat-flagged`; the script's swap step was fixed first, infra `ac71019`): live entry == new, `/` 200, `/offers` 200, asset 200; the live bundle contains `flaggedOnly` and the HR chat strings. Backend with the guard was live since 06:49 UTC (V9_76 back-filled sessions 48, 50–53 as flagged/LOCKED; test session 56 locked live). Not yet looked at as SYSTEM_ADMIN in the browser (no login from here) — Mario: Chat → „Samo sumnjivi".
 - [ ] Safe before or after the backend guard (old backend: no badges, everything else as before). Best right after the backend jar `feat/chat-security-guard` so the badges show at once (V9_76 back-fills sessions 48, 50–53 as flagged/LOCKED).
 - [ ] Usual admin manual deploy (test before the swap).
 - [ ] Check as SYSTEM_ADMIN: Chat → "Suspicious only" → sessions 48, 50–53 listed once the backend flags them (if the backend back-fills them), no Delete on them, banner shows reason / time. Unflagged session: Viewing link opens www.boat4you.com.

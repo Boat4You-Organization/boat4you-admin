@@ -47,15 +47,11 @@ const AppRouter: React.FC = () => (
             />
           }
         />
+        {/* SYSTEM_ADMIN only, same as the backend (AdminAiChatController @PreAuthorize):
+            transcripts carry visitor IPs, e-mails and security evidence. */}
         <Route
           path="/chat"
-          element={
-            <AppRoute
-              variant="protected"
-              accessLevel={[UserRoleName.MANAGER, UserRoleName.SYSTEM_ADMIN]}
-              component={<Chat />}
-            />
-          }
+          element={<AppRoute variant="protected" accessLevel={[UserRoleName.SYSTEM_ADMIN]} component={<Chat />} />}
         />
         <Route path="/login" element={<AppRoute variant="anonymous" component={<Login />} />} />
         <Route path="/signup" element={<AppRoute variant="anonymous" component={<SignUp />} />} />

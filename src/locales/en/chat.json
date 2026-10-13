@@ -10,7 +10,8 @@
     "AI": "AI",
     "HUMAN_REQUESTED": "Wants a human",
     "HUMAN": "With team",
-    "CLOSED": "Closed"
+    "CLOSED": "Closed",
+    "LOCKED": "Locked"
   },
   "role": {
     "USER": "Visitor",
@@ -28,5 +29,15 @@
   "deleteSelected": "Delete selected ({{count}})",
   "selectAll": "Select all",
   "confirmDelete": "Permanently delete this conversation?",
-  "confirmDeleteMany": "Permanently delete the selected conversations ({{count}})?"
+  "confirmDeleteMany": "Permanently delete the selected conversations ({{count}})?",
+  "flaggedOnly": "Suspicious only",
+  "emptyFlagged": "No suspicious conversations.",
+  "suspicious": "Suspicious",
+  "suspiciousBanner": "Suspicious conversation: the AI is off and the visitor was handed over to a live agent. Kept as evidence, it cannot be deleted.",
+  "statusLabel": "Status",
+  "lockReason": "Reason",
+  "lockedAt": "Locked at",
+  "suspiciousLink": "suspicious",
+  "suspiciousLinkHint": "Not a boat4you.com path, so it is not shown as a link. Do not open it.",
+  "deleteFailed": "The conversation could not be deleted."
 }

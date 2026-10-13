@@ -1,8 +1,12 @@
 import { api } from '@/config/axios.config';
 
+// LOCKED (IRIS guard, 11.10.2026): the backend stopped the AI for good after a
+// suspicious message; the visitor got the live-agent handoff text.
+export type ChatSessionStatus = 'AI' | 'HUMAN_REQUESTED' | 'HUMAN' | 'CLOSED' | 'LOCKED';
+
 export interface ChatSessionDto {
   id: number;
-  status: 'AI' | 'HUMAN_REQUESTED' | 'HUMAN' | 'CLOSED';
+  status: ChatSessionStatus;
   locale: string;
   visitorName: string | null;
   visitorEmail: string | null;
@@ -16,6 +20,11 @@ export interface ChatSessionDto {
   countryCode: string | null;
   country: string | null;
   ip: string | null;
+  // Guard fields, optional: a backend from before 11.10.2026 sends none of
+  // them (then only a LOCKED status marks a session as suspicious).
+  flagged?: boolean;
+  lockReason?: string | null;
+  lockedAt?: string | null;
 }
 
 export interface ChatMessageDto {
@@ -27,8 +36,9 @@ export interface ChatMessageDto {
   createdAt: string;
 }
 
-export const getChatSessions = (needsHumanOnly: boolean) =>
-  api.get<ChatSessionDto[]>('/admin/chat/sessions', { params: { needsHumanOnly, size: 100 } });
+// An older backend ignores flaggedOnly; the inbox filters client-side too.
+export const getChatSessions = (needsHumanOnly: boolean, flaggedOnly: boolean) =>
+  api.get<ChatSessionDto[]>('/admin/chat/sessions', { params: { needsHumanOnly, flaggedOnly, size: 100 } });
 
 export const getChatTranscript = (id: number) => api.get<ChatMessageDto[]>(`/admin/chat/sessions/${id}/messages`);
 

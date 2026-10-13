@@ -10,7 +10,8 @@
     "AI": "AI",
     "HUMAN_REQUESTED": "Traži čovjeka",
     "HUMAN": "Kod tima",
-    "CLOSED": "Zatvoren"
+    "CLOSED": "Zatvoren",
+    "LOCKED": "Zaključan"
   },
   "role": {
     "USER": "Posjetitelj",
@@ -28,5 +29,15 @@
   "deleteSelected": "Obriši označene ({{count}})",
   "selectAll": "Označi sve",
   "confirmDelete": "Trajno obrisati ovaj razgovor?",
-  "confirmDeleteMany": "Trajno obrisati označene razgovore ({{count}})?"
+  "confirmDeleteMany": "Trajno obrisati označene razgovore ({{count}})?",
+  "flaggedOnly": "Samo sumnjivi",
+  "emptyFlagged": "Nema sumnjivih razgovora.",
+  "suspicious": "Sumnjivo",
+  "suspiciousBanner": "Sumnjiv razgovor: AI je isključen, a posjetitelj je prebačen na agenta uživo. Čuva se kao dokaz i ne može se obrisati.",
+  "statusLabel": "Status",
+  "lockReason": "Razlog",
+  "lockedAt": "Zaključan u",
+  "suspiciousLink": "sumnjivo",
+  "suspiciousLinkHint": "Nije putanja na boat4you.com pa se ne prikazuje kao link. Ne otvarajte je.",
+  "deleteFailed": "Razgovor se nije mogao obrisati."
 }

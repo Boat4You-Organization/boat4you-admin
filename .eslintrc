@@ -160,6 +160,12 @@
   },
   "overrides": [
     {
+      "files": ["src/views/Chat/**", "src/services/chat.service.ts"],
+      "rules": {
+        "react/no-danger": "error"
+      }
+    },
+    {
       "files": ["src/utils/yachtCapacity.ts"],
       "rules": {
         "padding-line-between-statements": "off",

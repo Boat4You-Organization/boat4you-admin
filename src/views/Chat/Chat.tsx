@@ -2,7 +2,13 @@
  * www.boat4you.com; sessions where the visitor asked for a person land here
  * and a broker answers in the same thread (session flips to HUMAN — the AI
  * stays out from then on). Polling keeps both panes fresh; no SSE needed at
- * this volume. */
+ * this volume.
+ * IRIS guard (11.10.2026, after the 4.10. injection/XSS probes): the backend
+ * flags suspicious sessions and locks them (status LOCKED, AI off for good).
+ * Flagged sessions carry a ⚠️ badge, have their own filter and cannot be
+ * deleted from here (they are evidence). Every visitor-, bot- or
+ * metadata-derived value is rendered as a React text node: never
+ * dangerouslySetInnerHTML, markdown or linkify (.eslintrc: react/no-danger). */
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -11,9 +17,9 @@ import dayjs from 'dayjs';
 
 import Layout from '@/components/Layout';
 import {
-  bulkDeleteChats,
   ChatMessageDto,
   ChatSessionDto,
+  bulkDeleteChats,
   closeChat,
   deleteChat,
   getChatSessions,
@@ -21,12 +27,35 @@ import {
   replyToChat,
 } from '@/services/chat.service';
 import { bbColors } from '@/styles/bb';
+import { showToast } from '@/valtio/global/global.actions';
 
-const STATUS_COLOR: Record<ChatSessionDto['status'], 'default' | 'info' | 'warning' | 'success'> = {
+// Keyed by string: a status this build does not know gets a grey chip.
+const STATUS_COLOR: Record<string, 'default' | 'info' | 'warning' | 'success' | 'error'> = {
   AI: 'info',
   HUMAN_REQUESTED: 'warning',
   HUMAN: 'success',
   CLOSED: 'default',
+  LOCKED: 'error',
+};
+
+const SITE_ORIGIN = 'https://www.boat4you.com';
+
+// Older backends send no `flagged`; a LOCKED status alone still counts.
+const isSuspicious = (s: ChatSessionDto) => s.flagged === true || s.status === 'LOCKED';
+
+// currentPage comes from an anonymous API call: '.evil.tld/x' or '@evil.tld/x'
+// glued after the domain would open another host. Only a same-site path
+// becomes a link; anything else is shown as text with a warning.
+const pageHref = (page: string | null): string | null => {
+  if (!page || !/^\/(?![/\\])[^\s\\]*$/.test(page)) return null;
+
+  try {
+    const url = new URL(page, SITE_ORIGIN);
+
+    return url.origin === SITE_ORIGIN ? url.href : null;
+  } catch {
+    return null;
+  }
 };
 
 // Widget heartbeats every 30s — under 90s since the last ping = the visitor
@@ -54,6 +83,7 @@ const Chat = () => {
   // Default = ALL conversations (Mario 20.7.2026: "zelim da vidim sve chatove");
   // the toggle narrows to needs-human when triaging.
   const [needsHumanOnly, setNeedsHumanOnly] = useState(false);
+  const [flaggedOnly, setFlaggedOnly] = useState(false);
   const [sessions, setSessions] = useState<ChatSessionDto[]>([]);
   const [selected, setSelected] = useState<ChatSessionDto | null>(null);
   const [messages, setMessages] = useState<ChatMessageDto[]>([]);
@@ -65,13 +95,13 @@ const Chat = () => {
 
   const loadSessions = useCallback(async () => {
     try {
-      const { data } = await getChatSessions(needsHumanOnly);
+      const { data } = await getChatSessions(needsHumanOnly, flaggedOnly);
 
       setSessions(data);
     } catch {
       /* transient — next poll retries */
     }
-  }, [needsHumanOnly]);
+  }, [needsHumanOnly, flaggedOnly]);
 
   const loadTranscript = useCallback(async (id: number) => {
     try {
@@ -124,31 +154,57 @@ const Chat = () => {
     await loadSessions();
   };
 
-  const handleDelete = async (id: number) => {
-    // eslint-disable-next-line no-alert -- destructive, no toast/confirm primitive in this view
+  // The flagged filter is applied here as well, so an older backend that
+  // ignores ?flaggedOnly still shows only suspicious rows.
+  const visible = flaggedOnly ? sessions.filter(isSuspicious) : sessions;
+  // Flagged sessions are evidence: never ticked, never sent to delete.
+  const deletableIds = visible.filter(s => !isSuspicious(s)).map(s => s.id);
+  const checkedDeletable = checked.filter(id => deletableIds.includes(id));
+
+  const handleDelete = async (s: ChatSessionDto) => {
+    if (isSuspicious(s)) return;
+
+    // eslint-disable-next-line no-alert -- destructive, no confirm primitive in this view
     if (!window.confirm(t('confirmDelete'))) return;
 
-    await deleteChat(id);
-    setChecked(prev => prev.filter(x => x !== id));
+    try {
+      await deleteChat(s.id);
+    } catch {
+      showToast({ status: 'error', text: t('deleteFailed') });
 
-    if (selected?.id === id) setSelected(null);
+      return;
+    }
+
+    setChecked(prev => prev.filter(x => x !== s.id));
+
+    if (selected?.id === s.id) setSelected(null);
 
     await loadSessions();
   };
 
   const handleBulkDelete = async () => {
-    // eslint-disable-next-line no-alert -- destructive, no toast/confirm primitive in this view
-    if (!checked.length || !window.confirm(t('confirmDeleteMany', { count: checked.length }))) return;
+    const ids = checkedDeletable;
 
-    await bulkDeleteChats(checked);
+    // eslint-disable-next-line no-alert -- destructive, no confirm primitive in this view
+    if (!ids.length || !window.confirm(t('confirmDeleteMany', { count: ids.length }))) return;
 
-    if (selected && checked.includes(selected.id)) setSelected(null);
+    try {
+      await bulkDeleteChats(ids);
+    } catch {
+      showToast({ status: 'error', text: t('deleteFailed') });
+      await loadSessions();
+
+      return;
+    }
+
+    if (selected && ids.includes(selected.id)) setSelected(null);
 
     setChecked([]);
     await loadSessions();
   };
 
-  const toggleChecked = (id: number) => setChecked(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
+  const toggleChecked = (id: number) =>
+    setChecked(prev => (prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]));
 
   const bubbleSx = (role: ChatMessageDto['role']) => ({
     alignSelf: role === 'USER' ? 'flex-start' : 'flex-end',
@@ -171,29 +227,49 @@ const Chat = () => {
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
           <Typography sx={{ fontSize: 24, fontWeight: 800, color: bbColors.navy900 }}>{t('title')}</Typography>
           <Stack direction="row" alignItems="center" gap={1}>
-            <Typography sx={{ fontSize: 13, color: bbColors.gray500 }}>{t('needsHumanOnly')}</Typography>
+            <Typography sx={{ fontSize: 13, color: bbColors.gray500 }}>{t('flaggedOnly')}</Typography>
+            <Switch checked={flaggedOnly} onChange={e => setFlaggedOnly(e.target.checked)} size="small" color="error" />
+            <Typography sx={{ fontSize: 13, color: bbColors.gray500, ml: 1 }}>{t('needsHumanOnly')}</Typography>
             <Switch checked={needsHumanOnly} onChange={e => setNeedsHumanOnly(e.target.checked)} size="small" />
           </Stack>
         </Stack>
 
         <Stack direction="row" gap={2} sx={{ height: 'calc(100vh - 220px)', minHeight: 420 }}>
           {/* Session list */}
-          <Box sx={{ width: 340, flexShrink: 0, overflowY: 'auto', bgcolor: '#fff', borderRadius: 2, border: `1px solid ${bbColors.cardBorder}` }}>
-            {sessions.length > 0 && (
+          <Box
+            sx={{
+              width: 340,
+              flexShrink: 0,
+              overflowY: 'auto',
+              bgcolor: '#fff',
+              borderRadius: 2,
+              border: `1px solid ${bbColors.cardBorder}`,
+            }}
+          >
+            {visible.length > 0 && (
               <Stack
                 direction="row"
                 alignItems="center"
                 gap={0.5}
-                sx={{ px: 1, py: 0.5, borderBottom: `1px solid ${bbColors.cardBorder}`, position: 'sticky', top: 0, bgcolor: '#fff', zIndex: 1 }}
+                sx={{
+                  px: 1,
+                  py: 0.5,
+                  borderBottom: `1px solid ${bbColors.cardBorder}`,
+                  position: 'sticky',
+                  top: 0,
+                  bgcolor: '#fff',
+                  zIndex: 1,
+                }}
               >
                 <Checkbox
                   size="small"
-                  checked={checked.length === sessions.length}
-                  indeterminate={checked.length > 0 && checked.length < sessions.length}
-                  onChange={e => setChecked(e.target.checked ? sessions.map(x => x.id) : [])}
+                  disabled={deletableIds.length === 0}
+                  checked={deletableIds.length > 0 && checkedDeletable.length === deletableIds.length}
+                  indeterminate={checkedDeletable.length > 0 && checkedDeletable.length < deletableIds.length}
+                  onChange={e => setChecked(e.target.checked ? deletableIds : [])}
                 />
                 <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>{t('selectAll')}</Typography>
-                {checked.length > 0 && (
+                {checkedDeletable.length > 0 && (
                   <Button
                     size="small"
                     color="error"
@@ -201,15 +277,17 @@ const Chat = () => {
                     onClick={handleBulkDelete}
                     sx={{ ml: 'auto', fontSize: 11, py: 0.2, minWidth: 0 }}
                   >
-                    {t('deleteSelected', { count: checked.length })}
+                    {t('deleteSelected', { count: checkedDeletable.length })}
                   </Button>
                 )}
               </Stack>
             )}
-            {sessions.length === 0 && (
-              <Typography sx={{ p: 2, fontSize: 14, color: bbColors.gray500 }}>{t('empty')}</Typography>
+            {visible.length === 0 && (
+              <Typography sx={{ p: 2, fontSize: 14, color: bbColors.gray500 }}>
+                {t(flaggedOnly ? 'emptyFlagged' : 'empty')}
+              </Typography>
             )}
-            {sessions.map(s => (
+            {visible.map(s => (
               <Box
                 key={s.id}
                 onClick={() => setSelected(s)}
@@ -217,6 +295,7 @@ const Chat = () => {
                   p: 1.5,
                   cursor: 'pointer',
                   borderBottom: `1px solid ${bbColors.cardBorder}`,
+                  borderLeft: `3px solid ${isSuspicious(s) ? bbColors.red600 : 'transparent'}`,
                   bgcolor: selected?.id === s.id ? '#eef1fb' : 'transparent',
                   '&:hover': { bgcolor: '#f6f8ff' },
                 }}
@@ -225,23 +304,91 @@ const Chat = () => {
                   <Checkbox
                     size="small"
                     sx={{ p: 0.3, mr: 0.3 }}
-                    checked={checked.includes(s.id)}
+                    disabled={isSuspicious(s)}
+                    checked={!isSuspicious(s) && checked.includes(s.id)}
                     onClick={e => e.stopPropagation()}
                     onChange={() => toggleChecked(s.id)}
                   />
-                  <Typography sx={{ flex: 1, fontSize: 13, fontWeight: 700, color: bbColors.navy900 }}>
-                    {isLive(s) && <Box component="span" title={t('live')} sx={{ mr: 0.7, display: 'inline-block', width: 8, height: 8, borderRadius: '50%', bgcolor: '#22c55e' }} />}
+                  <Typography
+                    sx={{
+                      flex: 1,
+                      minWidth: 0,
+                      fontSize: 13,
+                      fontWeight: 700,
+                      color: bbColors.navy900,
+                      overflowWrap: 'anywhere',
+                    }}
+                  >
+                    {isLive(s) && (
+                      <Box
+                        component="span"
+                        title={t('live')}
+                        sx={{
+                          mr: 0.7,
+                          display: 'inline-block',
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: '#22c55e',
+                        }}
+                      />
+                    )}
                     {s.visitorName || s.visitorEmail || `#${s.id}`}
-                    {s.adminUnread && <Box component="span" sx={{ ml: 0.8, display: 'inline-block', width: 8, height: 8, borderRadius: '50%', bgcolor: '#e8622a' }} />}
+                    {s.adminUnread && (
+                      <Box
+                        component="span"
+                        sx={{
+                          ml: 0.8,
+                          display: 'inline-block',
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          bgcolor: '#e8622a',
+                        }}
+                      />
+                    )}
                   </Typography>
-                  <Chip label={t(`status.${s.status}`)} color={STATUS_COLOR[s.status]} size="small" sx={{ fontSize: 11 }} />
+                  {isSuspicious(s) && (
+                    <Chip
+                      label={`⚠️ ${t('suspicious')}`}
+                      title={s.lockReason ?? undefined}
+                      color="error"
+                      variant="outlined"
+                      size="small"
+                      sx={{ fontSize: 11 }}
+                    />
+                  )}
+                  <Chip
+                    label={t(`status.${s.status}`, { defaultValue: s.status })}
+                    color={STATUS_COLOR[s.status]}
+                    size="small"
+                    sx={{ fontSize: 11 }}
+                  />
                 </Stack>
                 {isLive(s) && s.currentPage && (
-                  <Typography sx={{ fontSize: 11, color: '#15803d', mt: 0.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <Typography
+                    sx={{
+                      fontSize: 11,
+                      color: '#15803d',
+                      mt: 0.2,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
                     {t('viewing')}: {s.currentPage}
                   </Typography>
                 )}
-                <Typography sx={{ fontSize: 12, color: bbColors.gray500, mt: 0.4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    color: bbColors.gray500,
+                    mt: 0.4,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
                   {s.lastMessage || '—'}
                 </Typography>
                 <Typography sx={{ fontSize: 11, color: bbColors.gray500, mt: 0.2 }}>
@@ -254,7 +401,17 @@ const Chat = () => {
           </Box>
 
           {/* Transcript + reply */}
-          <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', bgcolor: '#fff', borderRadius: 2, border: `1px solid ${bbColors.cardBorder}` }}>
+          <Box
+            sx={{
+              flex: 1,
+              minWidth: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              bgcolor: '#fff',
+              borderRadius: 2,
+              border: `1px solid ${bbColors.cardBorder}`,
+            }}
+          >
             {!selected ? (
               <Typography sx={{ m: 'auto', fontSize: 14, color: bbColors.gray500 }}>{t('pickSession')}</Typography>
             ) : (
@@ -264,34 +421,117 @@ const Chat = () => {
                   // fresh row for live presence so the header doesn't go stale.
                   const sel = sessions.find(x => x.id === selected.id) ?? selected;
                   const trail = trailOf(sel);
+                  const suspicious = isSuspicious(sel);
+                  const href = pageHref(sel.currentPage);
+                  const lockedAt =
+                    sel.lockedAt && dayjs(sel.lockedAt).isValid()
+                      ? dayjs(sel.lockedAt).format('DD.MM.YYYY HH:mm')
+                      : null;
 
                   return (
                     <Stack sx={{ p: 1.5, borderBottom: `1px solid ${bbColors.cardBorder}`, gap: 0.4 }}>
                       <Stack direction="row" alignItems="center" justifyContent="space-between">
                         <Typography sx={{ fontSize: 14, fontWeight: 700, color: bbColors.navy900 }}>
-                          {isLive(sel) && <Box component="span" sx={{ mr: 0.7, display: 'inline-block', width: 9, height: 9, borderRadius: '50%', bgcolor: '#22c55e' }} />}
+                          {isLive(sel) && (
+                            <Box
+                              component="span"
+                              sx={{
+                                mr: 0.7,
+                                display: 'inline-block',
+                                width: 9,
+                                height: 9,
+                                borderRadius: '50%',
+                                bgcolor: '#22c55e',
+                              }}
+                            />
+                          )}
                           {sel.visitorName || sel.visitorEmail || `#${sel.id}`}
-                          <Box component="span" sx={{ ml: 1, fontSize: 12, fontWeight: 500, color: isLive(sel) ? '#15803d' : bbColors.gray500 }}>
+                          <Box
+                            component="span"
+                            sx={{
+                              ml: 1,
+                              fontSize: 12,
+                              fontWeight: 500,
+                              color: isLive(sel) ? '#15803d' : bbColors.gray500,
+                            }}
+                          >
                             {isLive(sel) && t('live')}
-                            {!isLive(sel) && sel.lastSeenAt && `${t('lastSeen')} ${dayjs(sel.lastSeenAt).format('DD.MM. HH:mm')}`}
+                            {!isLive(sel) &&
+                              sel.lastSeenAt &&
+                              `${t('lastSeen')} ${dayjs(sel.lastSeenAt).format('DD.MM. HH:mm')}`}
                           </Box>
                         </Typography>
                         <Stack direction="row" gap={1}>
                           <Button size="small" variant="outlined" onClick={handleClose}>
                             {t('close')}
                           </Button>
-                          <Button size="small" color="error" variant="outlined" onClick={() => handleDelete(sel.id)}>
-                            {t('delete')}
-                          </Button>
+                          {!suspicious && (
+                            <Button size="small" color="error" variant="outlined" onClick={() => handleDelete(sel)}>
+                              {t('delete')}
+                            </Button>
+                          )}
                         </Stack>
                       </Stack>
-                      <Typography sx={{ fontSize: 12, color: bbColors.gray500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {suspicious && (
+                        <Typography
+                          sx={{
+                            fontSize: 12,
+                            color: bbColors.red600,
+                            bgcolor: bbColors.red100,
+                            borderRadius: 1,
+                            px: 1,
+                            py: 0.6,
+                            overflowWrap: 'anywhere',
+                          }}
+                        >
+                          ⚠️ {t('suspiciousBanner')}
+                          {` · ${t('statusLabel')}: ${t(`status.${sel.status}`, { defaultValue: sel.status })}`}
+                          {sel.lockReason && ` · ${t('lockReason')}: ${sel.lockReason}`}
+                          {lockedAt && ` · ${t('lockedAt')}: ${lockedAt}`}
+                        </Typography>
+                      )}
+                      <Typography
+                        sx={{
+                          fontSize: 12,
+                          color: bbColors.gray500,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
                         {sel.currentPage && (
                           <>
                             {t('viewing')}:{' '}
-                            <Box component="a" href={`https://www.boat4you.com${sel.currentPage}`} target="_blank" rel="noreferrer" sx={{ color: '#2856ff' }}>
-                              {sel.currentPage}
-                            </Box>
+                            {href ? (
+                              <Box
+                                component="a"
+                                href={href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                sx={{ color: '#2856ff' }}
+                              >
+                                {sel.currentPage}
+                              </Box>
+                            ) : (
+                              <>
+                                {sel.currentPage}
+                                <Box
+                                  component="span"
+                                  title={t('suspiciousLinkHint')}
+                                  sx={{
+                                    ml: 0.6,
+                                    px: 0.6,
+                                    borderRadius: 1,
+                                    bgcolor: bbColors.red600,
+                                    color: '#fff',
+                                    fontSize: 10,
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  {t('suspiciousLink')}
+                                </Box>
+                              </>
+                            )}
                           </>
                         )}
                         {` · ${sel.locale}`}
@@ -303,19 +543,39 @@ const Chat = () => {
                         {` · ${t('cameFrom')}: ${sel.referrer || t('direct')}`}
                       </Typography>
                       {trail.length > 1 && (
-                        <Typography sx={{ fontSize: 11, color: bbColors.gray500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <Typography
+                          sx={{
+                            fontSize: 11,
+                            color: bbColors.gray500,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
                           {t('trail')}: {trail.join(' → ')}
                         </Typography>
                       )}
                     </Stack>
                   );
                 })()}
-                <Box ref={listRef} sx={{ flex: 1, overflowY: 'auto', p: 2, display: 'flex', flexDirection: 'column', gap: 1, bgcolor: '#fafbff' }}>
+                <Box
+                  ref={listRef}
+                  sx={{
+                    flex: 1,
+                    overflowY: 'auto',
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1,
+                    bgcolor: '#fafbff',
+                  }}
+                >
                   {messages.map(m => (
                     <Box key={m.id} sx={bubbleSx(m.role)}>
                       <Typography sx={{ fontSize: 11, fontWeight: 700, opacity: 0.7, mb: 0.3 }}>
-                        {t(`role.${m.role}`)} · {dayjs(m.createdAt).format('HH:mm')}
+                        {t(`role.${m.role}`, { defaultValue: m.role })} · {dayjs(m.createdAt).format('HH:mm')}
                       </Typography>
+                      {/* Plain text node: '<img onerror>' or '[x](javascript:)' must show literally. */}
                       {m.content}
                     </Box>
                   ))}

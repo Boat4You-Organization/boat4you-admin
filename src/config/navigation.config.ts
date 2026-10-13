@@ -64,7 +64,8 @@ const navigation: NavigationLink[] = [
     id: 'chat',
     icon: Contact,
     path: '/chat',
-    accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
+    // Backend /admin/chat/** is SYSTEM_ADMIN only; a MANAGER would see an empty inbox.
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
   },
   {
     id: 'agencies',

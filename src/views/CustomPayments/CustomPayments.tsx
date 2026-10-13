@@ -182,6 +182,7 @@ const CustomPayments = () => {
                     key={id}
                     component="button"
                     type="button"
+                    aria-pressed={active}
                     onClick={() => {
                       setTab(id);
                       setPage(0);
@@ -212,6 +213,7 @@ const CustomPayments = () => {
                 setSite(e.target.value);
                 setPage(0);
               }}
+              slotProps={{ htmlInput: { 'aria-label': t('columns.site') } }}
               sx={{
                 minWidth: 200,
                 backgroundColor: bbColors.white,
@@ -283,7 +285,8 @@ const CustomPayments = () => {
                         {t(`columns.${col}`)}
                       </Box>
                     ))}
-                    <Box component="th" sx={thBase} />
+                    {/* No header text: the refresh buttons carry their own aria-label. */}
+                    <Box component="td" sx={thBase} />
                   </Box>
                 </Box>
                 <Box component="tbody">

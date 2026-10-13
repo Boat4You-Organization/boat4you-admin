@@ -34,10 +34,10 @@ export const CUSTOM_PAYMENT_STATUS_PILL: Record<CustomPaymentStatus, StatusVaria
 export const CUSTOM_PAYMENT_SITES = [
   { key: 'boat4you', label: 'Boat4You' },
   { key: 'catamaran-charter-greece', label: 'Catamaran Charter Greece' },
-  { key: 'catamaran-croatia-charter', label: 'Catamaran Croatia Charter' },
+  { key: 'catamaran-croatia-charter', label: 'Catamaran Charter Croatia' },
   { key: 'catamarancharteritaly', label: 'Catamaran Charter Italy' },
   { key: 'catamaran-charter-caribbean', label: 'Catamaran Charter Caribbean' },
-  { key: 'europe-yachts', label: 'Europe Yachts' },
+  { key: 'europe-yachts', label: 'Europe Yachts Charter' },
   { key: 'croatia-yachting', label: 'Yacht Charter Croatia' },
 ] as const;
 

@@ -153,7 +153,7 @@ const AppRouter: React.FC = () => (
           element={
             <AppRoute
               variant="protected"
-              accessLevel={[UserRoleName.MANAGER, UserRoleName.SYSTEM_ADMIN]}
+              accessLevel={[UserRoleName.SYSTEM_ADMIN]}
               component={<CustomPayments />}
             />
           }

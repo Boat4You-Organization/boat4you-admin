@@ -785,6 +785,44 @@ interface Resources {
     unread: 'Unread';
     viewLabel: 'View';
     viewing: 'Viewing';
+  'custom-payments': {
+    all: 'All';
+    allSites: 'All sites';
+    booking: 'Booking';
+    columns: {
+      amount: 'Amount';
+      date: 'Date';
+      email: 'Payer e-mail';
+      note: 'Note';
+      orderId: 'Revolut order';
+      reference: 'Reference';
+      site: 'Site';
+      status: 'Status';
+    };
+    editNote: 'Edit note';
+    empty: 'No custom payments.';
+    loadFailed: 'Custom payments could not be loaded.';
+    loading: 'Loading…';
+    next: 'Next →';
+    noteFailed: 'The note could not be saved.';
+    notePlaceholder: 'Internal note for the office; the client never sees it.';
+    noteSaved: 'Note saved.';
+    pageOf: 'Page {{page}} of {{total}}';
+    prev: '← Prev';
+    refresh: 'Refresh from Revolut';
+    refreshFailed: 'The payment could not be refreshed.';
+    refunded: 'Refunded';
+    searchPlaceholder: 'Search reference or e-mail… (Enter)';
+    status: {
+      CANCELLED: 'Cancelled';
+      COMPLETED: 'Completed';
+      FAILED: 'Failed';
+      NEEDS_REVIEW: 'Needs review';
+      PENDING: 'Pending';
+    };
+    subtitle: 'Card payments made through the secret /pay link on the 7 sites (Revolut)';
+    title: 'Custom payments';
+    totalReceived: 'Total received';
   };
   extras: {
     'adrenalin-pack': 'Adrenaline pack';
@@ -1135,6 +1173,7 @@ interface Resources {
     chat: 'Chat';
     contactCenter: 'Contact Center';
     customBoats: 'Custom boats';
+    customPayments: 'Custom payments';
     dashboard: 'Dashboard';
     extras: 'Extras';
     heatmaps: 'Heatmaps';

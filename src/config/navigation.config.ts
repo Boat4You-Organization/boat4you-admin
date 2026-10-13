@@ -43,6 +43,12 @@ const navigation: NavigationLink[] = [
     accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
   },
   {
+    id: 'customPayments',
+    icon: Invoices,
+    path: '/custom-payments',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
+  },
+  {
     id: 'customBoats',
     icon: Boat,
     path: '/custom-boats',

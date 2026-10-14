@@ -1,5 +1,10 @@
 # boat4you-admin — deploy notes
 
+## 2026-10-14 — 🔤 Emoji „tofu“ kvadratići → MUI ikone (Broker Desk: ikona agencije i datumska pilja; Create reservation: pin lokacije) — ✅ DEPLOYANO 14.10.2026 12:38:53 UTC (`007174e`, entry `assets/index-CEJ6TS7P.js`), tag `live/2026-10-14`
+
+Mario 14.10. (screenshot admina): na uređaju bez emoji fonta Chrome je umjesto 🏕 (U+1F3D5) ispred imena agencije i 📅 (U+1F4C5) u datumskoj pilji crtao kvadratić s hex kodom. Zamjena: `BusinessOutlined`, `CalendarMonthOutlined`, `PlaceOutlined` iz `@mui/icons-material` (ista veličina/boja, aria-hidden). BMP simboli (✓ ⚠ ⛵ ☀) ostaju. **Ostaje otvoreno (Mariova odluka):** `offerHtml.ts` (HTML/WhatsApp ponuda kupcu) i dalje nosi emoji (📶 🔥 🧭 🗺 📍 📅 💰 🔗) — e-mail klijenti ih uglavnom iscrtavaju, WhatsApp plain text nema SVG alternativu.
+Provjere: eslint 0, tsc 0, hook prošao; build iz worktreea (`ADMIN_REPO`), staging → test → swap, live == new, root/deep/asset 200.
+
 ## 2026-10-13 — Chat inbox: IRIS guard (f9ff274) — ✅ DEPLOYED 13.10.2026 ~06:56 UTC (`936c26b`, entry `index-G_75O8qh.js`, tag `live/2026-10-13`)
 
 Why: the 4.10. prompt-injection / XSS probes from 31.22.91.227 (sessions 48, 50–53 — evidence, never delete). Review `infra/docs/ai-chat-security-review-2026-10-11.md` A1–A8 (admin side).

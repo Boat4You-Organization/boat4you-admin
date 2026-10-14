@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import BusinessOutlinedIcon from '@mui/icons-material/BusinessOutlined';
+import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
@@ -613,9 +615,7 @@ const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOp
               {row.locationName}
               {row.locationCountryCode ? ` · ${row.locationCountryCode}` : ''}
             </Typography>
-            <Typography component="span" sx={{ fontSize: 13, color: bbColors.gray500, mx: 0.25 }}>
-              🏕
-            </Typography>
+            <BusinessOutlinedIcon aria-hidden sx={{ fontSize: 13, color: bbColors.gray500, mx: 0.25 }} />
             <Typography sx={{ fontSize: 13, color: bbColors.navy700, fontWeight: 600 }}>
               {row.agencyName}
             </Typography>
@@ -2120,9 +2120,7 @@ const Offers = () => {
                   color: bbColors.navy900,
                 }}
               >
-                <Box component="span" sx={{ fontSize: 13 }}>
-                  📅
-                </Box>
+                <CalendarMonthOutlinedIcon aria-hidden sx={{ fontSize: 13 }} />
                 {startDate.format('DD MMM')} → {endDate.format('DD MMM YYYY')}
               </Box>
               <Box

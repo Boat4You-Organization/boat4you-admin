@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
 import {
   Alert,
   Box,
@@ -659,7 +660,8 @@ return (
                     {y.modelName} | {y.name}
                   </Typography>
                   <Typography variant="body2" color={colors.black600} sx={{ mt: 0.25 }}>
-                    📍 {y.locationName} · {y.agencyName}
+                    <PlaceOutlinedIcon aria-hidden sx={{ fontSize: '1em', verticalAlign: '-0.125em' }} />{' '}
+                    {y.locationName} · {y.agencyName}
                   </Typography>
                   {stats.length > 0 && (
                     <Typography color={colors.black500} sx={{ ...captionSx, display: 'block', mt: 0.5 }}>

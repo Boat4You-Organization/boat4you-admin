@@ -334,7 +334,17 @@ interface YachtImageResponse {
   url?: string | null;
   mainImage?: boolean;
   position?: number;
+  layout?: boolean;
+  // PARTNER | LAYOUT | MODEL_SAMPLE | MARINA — sent only with the backend's
+  // GALLERY_EXTENDED switch ON (marina photos never are the boat photo).
+  kind?: string;
 }
+
+// Hero pool for the offer e-mail: the boat's own or model photos only —
+// never a marina photo or a layout drawing.
+const heroPool = (images: YachtImageResponse[]): YachtImageResponse[] =>
+  images.filter(i => i?.kind !== 'MARINA' && i?.kind !== 'LAYOUT' && !i?.layout);
+
 interface AmenityResponse {
   id?: number;
   name?: string;
@@ -1257,7 +1267,8 @@ const Offers = () => {
       // the public image URL from the id exactly like the cart thumbnail does
       // (`/public/image/{id}` is auth-free, so it loads inside the client's email
       // client too). Prefer an explicit `.url` if a row ever carries one.
-      const mainImg = images.find(i => i?.mainImage) || images[0];
+      const pool = heroPool(images);
+      const mainImg = pool.find(i => i?.mainImage) || pool[0];
       const imageUrl: string | null =
         mainImg?.url || getBoatImageUrl(row.mainImageId, 800) || getBoatImageUrl(mainImg?.id, 800);
 
@@ -1619,7 +1630,7 @@ const Offers = () => {
             // the sync leaves yachtImages[].url null, so build the auth-free
             // /public/image/{id} URL from the mainImage-flagged row (it
             // renders inside the client's email too). Keep an existing one.
-            const imgs = data.yachtImages || [];
+            const imgs = heroPool(data.yachtImages || []);
             const mainImg = imgs.find(i => i?.mainImage) || imgs[0];
             const imageUrl = entry.imageUrl || mainImg?.url || getBoatImageUrl(mainImg?.id, 800);
 

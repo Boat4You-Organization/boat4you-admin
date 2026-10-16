@@ -1,5 +1,9 @@
 # boat4you-admin — deploy notes
 
+## 2026-10-16 — 🖼️ Offers: hero slika e-maila ponude nikad fotka marine/tlocrt (kind-aware) — ✅ DEPLOYANO 16.10.2026 08:27 UTC (main `7563470`, entry `index-DXDtJIny.js`), tag `live/2026-10-16`
+
+Backend `feat/catalogue-images` (večeras) dodaje u `/public/yachts/{slug}` slike s `kind` MODEL_SAMPLE (fotke istog modela za brodove bez prave fotke) i MARINA (2–3 fotke polazne marine) iza prekidača `GALLERY_EXTENDED`. Offers hero (`Offers.tsx`) sad bira prvu PARTNER/MODEL_SAMPLE fotku, nikad tlocrt ni marinu; bez `kind` (danas) ponašanje isto. Deploy iz worktreea `wt-gallery` (`admin_deploy.sh`, ADMIN_REPO), verify root/deep/asset 200, 0× localhost:8443.
+
 ## 2026-10-14 — 🔤 Emoji „tofu“ kvadratići → MUI ikone (Broker Desk: ikona agencije i datumska pilja; Create reservation: pin lokacije) — ✅ DEPLOYANO 14.10.2026 12:38:53 UTC (`007174e`, entry `assets/index-CEJ6TS7P.js`), tag `live/2026-10-14`
 
 Mario 14.10. (screenshot admina): na uređaju bez emoji fonta Chrome je umjesto 🏕 (U+1F3D5) ispred imena agencije i 📅 (U+1F4C5) u datumskoj pilji crtao kvadratić s hex kodom. Zamjena: `BusinessOutlined`, `CalendarMonthOutlined`, `PlaceOutlined` iz `@mui/icons-material` (ista veličina/boja, aria-hidden). BMP simboli (✓ ⚠ ⛵ ☀) ostaju. **Ostaje otvoreno (Mariova odluka):** `offerHtml.ts` (HTML/WhatsApp ponuda kupcu) i dalje nosi emoji (📶 🔥 🧭 🗺 📍 📅 💰 🔗) — e-mail klijenti ih uglavnom iscrtavaju, WhatsApp plain text nema SVG alternativu.

@@ -693,6 +693,7 @@ interface Resources {
       title: 'About';
     };
     agencies: 'Agencies';
+    boatsMedia: 'Boats · Media';
     bookings: 'Bookings';
     chat: 'Chat';
     customBoats: 'Custom boats';

@@ -55,6 +55,13 @@ const navigation: NavigationLink[] = [
     accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
   },
   {
+    // Own photos / video / crew profile for any boat + image hygiene; the backend endpoints are SYSTEM_ADMIN only.
+    id: 'boatsMedia',
+    icon: Boat,
+    path: '/boats/media',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
     id: 'extras',
     icon: Extras,
     path: '/extras',

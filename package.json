@@ -40,6 +40,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "test": "node --test 'tests/*.test.ts'",
     "lint:base": "eslint --ext .ts,.tsx src/",
     "lint:styles": "stylelint '**/*.scss' --fix",
     "lint": "pretty-quick && yarn lint:base --fix --cache --cache-location=./node_modules/.cache/ && yarn lint:styles",

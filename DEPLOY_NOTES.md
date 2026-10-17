@@ -1,5 +1,26 @@
 # boat4you-admin — deploy notes
 
+## 2026-10-17 — Boats · Media: vlastite fotke, video i crew profile za BILO KOJI brod + image hygiene alati — ⏳ NIJE DEPLOYANO (grana `feat/yacht-media`)
+
+Mario 17.10. (gulet Allure 11769, `gulet-allure-11769`): naše 54 fotke, Vimeo https://vimeo.com/982130882 i crew-profile PDF na svih 7 sajtova. Nova stranica **Boats · Media** (`/boats/media`, izbornik odmah iza „Custom boats“, samo SYSTEM_ADMIN kao backend):
+
+- Traži brod (`GET /admin/yachts/lookup?q=&limit=20`, ime ili id) → kartica broda (main slika `?width=400`, „Manufacturer Model Name“, entry type).
+- **Own photos:** drag-and-drop / odabir (JPEG/PNG/WebP, ≤ 10 MB po datoteci = FileSystemService limit), slanje u serijama ≤ 20 datoteka i ≤ 40 MB (`POST /admin/yachts/{id}/images`, polje `files`), napredak po datoteci; mreža slika broda iz javnog detalja (samo PARTNER/LAYOUT redovi tog broda — MODEL_SAMPLE donora i MARINA se ne diraju), chipovi MAIN/OWN/PARTNER/LAYOUT/HIDDEN, „Set as main“ (`PATCH /admin/yacht-images/{id} {main:true}`), Layout/Hidden toggle, redoslijed povlačenjem ili strelicama (`PUT …/images/order`, sprema odmah), brisanje (`DELETE`, partner → 409 poruka).
+- **Video:** YouTube (watch / youtu.be / embed) ili Vimeo (vimeo.com/<id>, player.vimeo.com/video/<id>) → `PATCH /admin/yachts/{id}/media`, embed pregled.
+- **Crew profile (PDF):** ≤ 15 MB, provjera `%PDF` u pregledniku → `POST /admin/yachts/{id}/crew-profile` (polje `file`), zamjena uz potvrdu, brisanje, link na javni PDF.
+- **Image hygiene:** detect-blocked, fix-layout, detect-layout (stranice s `onlyMain`, sličice + kvačice) — uvijek dry run → potvrda → rezultat. Detect-layout apply šalje pregledane `imageIds` u tijelu kao form polje (`imageIds=1,2,3`, x-www-form-urlencoded) jer ih endpoint čita kao `@RequestParam`.
+- Twin: ako javni detalj servira kanonski twin, stranica to kaže i nudi „Open #twin“ (uređivanje sakriveno — mediji ne bi bili vidljivi).
+
+Provjere: `tsc` 0, eslint 0 na promijenjenim datotekama, `yarn build` OK, `yarn test` 24/24 (novo: `node --test`, Node ≥ 22.18 zbog type strippinga; `tests/yacht-media.test.ts`). Lokalno renderirano s mock API-jem (login, 25 fotki + 1 HEIC odbijen → 2 zahtjeva 20+5, main/hidden/layout/order/delete-409, Vimeo pregled, PDF magic, twin upozorenje, hygiene dry run → apply), mobilno 546 px bez horizontalnog skrola. Nije viđeno protiv pravog backenda.
+
+Deploy:
+
+- [ ] TEK NAKON backend jara s V9_92 + novim endpointima (backend `feat/own-media`); sa starim backendom stranica se otvori, ali lookup/upload vraćaju grešku (toast).
+- [ ] Uobičajeni admin ručni deploy (test prije swapa).
+- [ ] Provjera kao SYSTEM_ADMIN: Boats · Media → „Allure“ → upload 54 fotke → „Set as main“ na našu → video link → PDF → otvori `www.boat4you.com/boat/gulet-allure-11769` + jedan sister.
+
+Poznata ograničenja (backend ugovor): javni detalj ne vraća skrivene slike ni izvor (OWN/PARTNER) — mreža zna OWN/PARTNER samo za slike uploadane/mijenjane u ovoj sesiji, a skrivene samo iz ove sesije; za puni prikaz treba admin `GET /admin/yachts/{id}/images` (s `source`, `hidden`). Javni PDF link je isti nakon zamjene i keširan 24 h. Header izbornik se već prije prelijevao ispod ~1060 px širine; s novom stavkom ispod ~1170 px (pre-existing, nije dirano).
+
 ## 2026-10-16 — 🖼️ Offers: hero slika e-maila ponude nikad fotka marine/tlocrt (kind-aware) — ✅ DEPLOYANO 16.10.2026 08:27 UTC (main `7563470`, entry `index-DXDtJIny.js`), tag `live/2026-10-16`
 
 Backend `feat/catalogue-images` (večeras) dodaje u `/public/yachts/{slug}` slike s `kind` MODEL_SAMPLE (fotke istog modela za brodove bez prave fotke) i MARINA (2–3 fotke polazne marine) iza prekidača `GALLERY_EXTENDED`. Offers hero (`Offers.tsx`) sad bira prvu PARTNER/MODEL_SAMPLE fotku, nikad tlocrt ni marinu; bez `kind` (danas) ponašanje isto. Deploy iz worktreea `wt-gallery` (`admin_deploy.sh`, ADMIN_REPO), verify root/deep/asset 200, 0× localhost:8443.

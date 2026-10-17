@@ -13,6 +13,7 @@ const Bookings = lazy(() => import('@/views/Bookings'));
 const Dashboard = lazy(() => import('@/views/Dashboard'));
 const SingleBooking = lazy(() => import('@/views/Bookings/SingleBooking'));
 const CustomBoats = lazy(() => import('@/views/CustomBoats'));
+const BoatsMedia = lazy(() => import('@/views/BoatsMedia'));
 const Extras = lazy(() => import('@/views/Extras'));
 const Invoices = lazy(() => import('@/views/Invoices'));
 const Offers = lazy(() => import('@/views/Offers'));
@@ -75,6 +76,13 @@ const AppRouter: React.FC = () => (
               accessLevel={[UserRoleName.MANAGER, UserRoleName.SYSTEM_ADMIN]}
               component={<CustomBoats />}
             />
+          }
+        />
+        {/* SYSTEM_ADMIN only, like the backend /admin/yachts/** media and image-hygiene endpoints. */}
+        <Route
+          path="/boats/media"
+          element={
+            <AppRoute variant="protected" accessLevel={[UserRoleName.SYSTEM_ADMIN]} component={<BoatsMedia />} />
           }
         />
         <Route

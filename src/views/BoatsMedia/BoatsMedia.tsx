@@ -2,7 +2,7 @@
  * photos, a video and the crew-profile PDF for ANY boat, partner-synced ones included, shown on all 7 sites through
  * GET /public/yachts/{slug}. SYSTEM_ADMIN only, like the backend /admin/yachts/** endpoints. Plus the catalogue-wide
  * image-hygiene repairs (V9_91). All boat- and backend-derived values render as React text nodes. */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, SetStateAction, useCallback, useEffect, useRef, useState } from 'react';
 
 import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
@@ -24,9 +24,9 @@ import Layout from '@/components/Layout';
 import {
   MediaImage,
   YachtLookupItem,
+  YachtMediaDto,
   errorMessage,
-  mergeMedia,
-  publicImagesOf,
+  mediaImagesOf,
   yachtLabel,
 } from '@/services/yacht-media.api';
 import YachtMediaService, { CUSTOMER_WEB_URL, imageUrl } from '@/services/yacht-media.service';
@@ -40,18 +40,26 @@ import VideoSection from './partials/VideoSection';
 
 interface MediaState {
   loading: boolean;
+  /** GET /admin/yachts/{id}/media failed. */
   error: string | null;
+  /** GET /public/yachts/{slug} failed (an inactive boat has no public page): the twin check could not run. */
+  publicError: string | null;
   /** The boat the public page really serves (a cross-source twin resolves to its canonical copy). */
   servedYachtId: number | null;
+  /** yacht.video_url. */
   videoUrl: string | null;
+  /** A custom boat's own video (Custom boats page): the sites show it while videoUrl is empty. */
+  customVideoUrl: string | null;
   crewProfileUrl: string | null;
 }
 
 const EMPTY_MEDIA: MediaState = {
   loading: false,
   error: null,
+  publicError: null,
   servedYachtId: null,
   videoUrl: null,
+  customVideoUrl: null,
   crewProfileUrl: null,
 };
 
@@ -65,22 +73,11 @@ const BoatsMedia = () => {
   const [yacht, setYacht] = useState<YachtLookupItem | null>(null);
   const [images, setImages] = useState<MediaImage[]>([]);
   const [media, setMedia] = useState<MediaState>(EMPTY_MEDIA);
-  // What this session learned per boat (uploads = OWN, PATCH answers): the public detail does not say it.
-  const known = useRef(new Map<number, Map<number, Partial<MediaImage>>>());
   const lookupSeq = useRef(0);
-  // The boat whose public detail is awaited: a slower answer for a boat no longer selected is dropped.
-  const mediaFor = useRef<number | null>(null);
-
-  const knownFor = useCallback((yachtId: number) => {
-    let map = known.current.get(yachtId);
-
-    if (!map) {
-      map = new Map();
-      known.current.set(yachtId, map);
-    }
-
-    return map;
-  }, []);
+  // The selected boat, set by select() only: an answer (load, upload, order, delete, video, crew profile) that arrives
+  // after the admin picked another boat is dropped, so one boat's media never shows under another boat's card.
+  const selectedId = useRef<number | null>(null);
+  const loadSeq = useRef(0);
 
   const search = useCallback(async (q: string) => {
     lookupSeq.current += 1;
@@ -133,37 +130,57 @@ const BoatsMedia = () => {
     };
   }, []);
 
-  const loadMedia = useCallback(
-    async (target: YachtLookupItem) => {
-      mediaFor.current = target.id;
-      setMedia(prev => ({ ...prev, loading: true, error: null }));
-      try {
-        const detail = await YachtMediaService.getPublicDetail(target.slug);
+  const loadMedia = useCallback(async (target: YachtLookupItem) => {
+    // e.g. the reload at the end of an upload that finished after another boat was picked
+    if (selectedId.current !== target.id) return;
 
-        if (mediaFor.current !== target.id) return;
+    loadSeq.current += 1;
 
-        setImages(mergeMedia(publicImagesOf(detail), knownFor(target.id)));
-        setMedia({
-          loading: false,
-          error: null,
-          servedYachtId: detail.id,
-          videoUrl: detail.videoUrl ?? detail.customDetails?.videoUrl ?? null,
-          crewProfileUrl: detail.crewProfileUrl ?? null,
-        });
-      } catch (error) {
-        if (mediaFor.current !== target.id) return;
+    const seq = loadSeq.current;
 
-        setImages(mergeMedia([], knownFor(target.id)));
-        setMedia({
-          ...EMPTY_MEDIA,
-          error: errorMessage(error, 'The public boat page could not be read.'),
-        });
-      }
+    setMedia(prev => ({ ...prev, loading: true, error: null }));
+
+    const [admin, site] = await Promise.allSettled([
+      YachtMediaService.getMedia(target.id),
+      YachtMediaService.getPublicDetail(target.slug),
+    ]);
+
+    if (seq !== loadSeq.current || selectedId.current !== target.id) return;
+
+    if (admin.status === 'fulfilled') setImages(mediaImagesOf(admin.value));
+
+    setMedia(prev => ({
+      ...prev,
+      loading: false,
+      error: admin.status === 'rejected' ? errorMessage(admin.reason, 'The boat media could not be read.') : null,
+      publicError:
+        site.status === 'rejected' ? errorMessage(site.reason, 'The public boat page could not be read.') : null,
+      servedYachtId: site.status === 'fulfilled' ? site.value.id : null,
+      customVideoUrl: site.status === 'fulfilled' ? (site.value.customDetails?.videoUrl ?? null) : null,
+      ...(admin.status === 'fulfilled'
+        ? { videoUrl: admin.value.videoUrl, crewProfileUrl: admin.value.crewProfileUrl }
+        : {}),
+    }));
+  }, []);
+
+  /** A media answer (upload, order, delete, video, crew profile): applied only while its boat is still selected. */
+  const applyMedia = useCallback((dto: YachtMediaDto) => {
+    if (selectedId.current !== dto.yachtId) return;
+
+    setImages(mediaImagesOf(dto));
+    setMedia(prev => ({ ...prev, videoUrl: dto.videoUrl, crewProfileUrl: dto.crewProfileUrl }));
+  }, []);
+
+  /** Grid changes made for one boat: dropped once another boat is selected. */
+  const setImagesOf = useCallback(
+    (yachtId: number) => (action: SetStateAction<MediaImage[]>) => {
+      if (selectedId.current === yachtId) setImages(action);
     },
-    [knownFor]
+    []
   );
 
   const select = (item: YachtLookupItem) => {
+    selectedId.current = item.id;
     setYacht(item);
     setImages([]);
     setMedia({ ...EMPTY_MEDIA, loading: true });
@@ -382,8 +399,13 @@ const BoatsMedia = () => {
 
             {media.error && (
               <Alert severity="warning" sx={{ mb: 2, fontSize: 12.5 }}>
-                The public boat page could not be read ({media.error}), so the grid is empty. Uploads, video and crew
-                profile still work.
+                The boat media could not be read ({media.error}), so the grid is empty. Reload to try again.
+              </Alert>
+            )}
+            {media.publicError && (
+              <Alert severity="info" sx={{ mb: 2, fontSize: 12.5 }}>
+                The public boat page could not be read ({media.publicError}) - an inactive boat has none - so the twin
+                check was skipped. Media added here shows on the sites once the boat page is public.
               </Alert>
             )}
             {twinId != null && (
@@ -404,37 +426,26 @@ const BoatsMedia = () => {
         )}
 
         {yacht && twinId == null && (
-          <>
+          // one key for the three sections: a new boat mounts them afresh (no upload list, draft or dialog carried over)
+          <Fragment key={yacht.id}>
             <OwnPhotos
-              key={yacht.id}
               yacht={yacht}
               label={label}
               images={images}
-              setImages={setImages}
+              setImages={setImagesOf(yacht.id)}
+              onMedia={applyMedia}
               reload={() => loadMedia(yacht)}
-              remember={(id, state) => {
-                const map = knownFor(yacht.id);
-
-                map.set(id, { ...map.get(id), ...state });
-              }}
-              forget={id => knownFor(yacht.id).delete(id)}
               loading={media.loading}
             />
             <VideoSection
-              key={yacht.id}
               yacht={yacht}
               label={label}
               videoUrl={media.videoUrl}
-              onSaved={videoUrl => setMedia(prev => ({ ...prev, videoUrl }))}
+              customVideoUrl={media.customVideoUrl}
+              onMedia={applyMedia}
             />
-            <CrewProfileSection
-              key={yacht.id}
-              yacht={yacht}
-              label={label}
-              url={media.crewProfileUrl}
-              onChanged={crewProfileUrl => setMedia(prev => ({ ...prev, crewProfileUrl }))}
-            />
-          </>
+            <CrewProfileSection yacht={yacht} label={label} url={media.crewProfileUrl} onMedia={applyMedia} />
+          </Fragment>
         )}
 
         <ImageHygiene />

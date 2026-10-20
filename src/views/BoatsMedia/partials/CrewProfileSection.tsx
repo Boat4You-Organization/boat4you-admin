@@ -4,8 +4,8 @@ import OpenInNewRoundedIcon from '@mui/icons-material/OpenInNewRounded';
 import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import { Button, Link, Stack, Typography } from '@mui/material';
 
-import { YachtLookupItem, errorMessage, isPdfMagic, pdfFileProblem } from '@/services/yacht-media.api';
-import YachtMediaService, { crewProfileUrl } from '@/services/yacht-media.service';
+import { YachtLookupItem, YachtMediaDto, errorMessage, isPdfMagic, pdfFileProblem } from '@/services/yacht-media.api';
+import YachtMediaService from '@/services/yacht-media.service';
 import { bbColors } from '@/styles/bb';
 import { showToast } from '@/valtio/global/global.actions';
 
@@ -14,14 +14,14 @@ import { SectionCard, dangerButtonSx, primaryButtonSx, useConfirm } from './ui';
 interface CrewProfileSectionProps {
   yacht: YachtLookupItem;
   label: string;
-  /** Public link of the stored PDF (public detail crewProfileUrl), null = none. */
+  /** Public link of the stored PDF (admin media crewProfileUrl), null = none. */
   url: string | null;
-  onChanged: (url: string | null) => void;
+  onMedia: (media: YachtMediaDto) => void;
 }
 
 const readHead = async (file: File) => new Uint8Array(await file.slice(0, 5).arrayBuffer());
 
-const CrewProfileSection = ({ yacht, label, url, onChanged }: CrewProfileSectionProps) => {
+const CrewProfileSection = ({ yacht, label, url, onMedia }: CrewProfileSectionProps) => {
   const [busy, setBusy] = useState(false);
   const [replacedAt, setReplacedAt] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -30,12 +30,10 @@ const CrewProfileSection = ({ yacht, label, url, onChanged }: CrewProfileSection
   const upload = async (file: File) => {
     setBusy(true);
     try {
-      await YachtMediaService.uploadCrewProfile(yacht.id, file);
+      const media = await YachtMediaService.uploadCrewProfile(yacht.id, file);
 
-      const now = Date.now();
-
-      setReplacedAt(url ? now : null);
-      onChanged(crewProfileUrl(yacht.id, now));
+      setReplacedAt(url ? Date.now() : null);
+      onMedia(media);
       showToast({ status: 'success', text: url ? 'Crew profile replaced.' : 'Crew profile uploaded.' });
     } catch (error) {
       showToast({ status: 'error', text: errorMessage(error, 'The PDF could not be uploaded.') });
@@ -85,9 +83,10 @@ const CrewProfileSection = ({ yacht, label, url, onChanged }: CrewProfileSection
       onConfirm: async () => {
         setBusy(true);
         try {
-          await YachtMediaService.deleteCrewProfile(yacht.id);
+          const media = await YachtMediaService.deleteCrewProfile(yacht.id);
+
           setReplacedAt(null);
-          onChanged(null);
+          onMedia(media);
           showToast({ status: 'success', text: 'Crew profile deleted.' });
         } catch (error) {
           showToast({ status: 'error', text: errorMessage(error, 'The PDF could not be deleted.') });
@@ -107,7 +106,8 @@ const CrewProfileSection = ({ yacht, label, url, onChanged }: CrewProfileSection
       <Stack direction={{ xs: 'column', sm: 'row' }} gap={1.5} alignItems={{ xs: 'flex-start', sm: 'center' }}>
         {url ? (
           <Link
-            href={url}
+            // after a replace the link is the same: `v` makes this browser fetch the new file instead of its cached copy
+            href={replacedAt ? `${url}${url.includes('?') ? '&' : '?'}v=${replacedAt}` : url}
             target="_blank"
             rel="noopener noreferrer"
             sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5, fontSize: 13, fontWeight: 700 }}

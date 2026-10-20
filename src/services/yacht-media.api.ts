@@ -1,13 +1,14 @@
 /* Boats · Media (Mario 17.10.2026, gulet Allure 11769): our own photos, a video and the crew-profile PDF for ANY boat,
  * partner-synced ones included (the syncs never touch yacht_image.source = 'OWN', V9_92). The public boat page shows
  * them on all 7 sites: own photos arrive there as kind PARTNER, first by position; videoUrl / crewProfileUrl are
- * top-level fields of GET /public/yachts/{slug}.
+ * top-level fields of GET /public/yachts/{slug}. This page reads and changes them through GET /admin/yachts/{id}/media
+ * (every image, hidden ones and the source included): every media call answers that same YachtMediaDto.
  *
  * No runtime imports on purpose: tests/yacht-media.test.ts runs this file with plain `node --test` (Node's type
  * stripping) against a fake HTTP client. yacht-media.service.ts binds it to the app's axios instance.
  *
- * Errors: the axios interceptor rejects with the backend body ({code, message}) or undefined, never the status, so
- * callers show errorMessage(e, fallback). */
+ * Errors: the axios interceptor rejects with the response body (the backend's {code, message}, or a proxy's HTML page as
+ * a string) or undefined (no readable answer), never the status, so callers show errorMessage(e, fallback). */
 import type { AxiosInstance, AxiosProgressEvent } from 'axios';
 
 export type ImageSource = 'OWN' | 'PARTNER';
@@ -31,15 +32,14 @@ export interface YachtLookupItem {
 export interface MediaImage {
   id: number;
   position: number | null;
+  /** The boat's card photo (yacht.main_image_id). */
   mainImage: boolean;
   layout: boolean;
   hidden: boolean;
-  /** null: not known here. The public detail sends own photos as kind PARTNER; this session's uploads and an admin
-   * answer that carries `source` tell them apart. */
-  source: ImageSource | null;
+  source: ImageSource;
 }
 
-/** PATCH /admin/yacht-images/{id} answer (YachtImageAdminDto). */
+/** One image of YachtMediaDto.images, and the PATCH /admin/yacht-images/{id} answer (YachtImageAdminDto). */
 export interface AdminYachtImage {
   id: number;
   yachtId?: number;
@@ -59,21 +59,24 @@ export interface ImagePatch {
   hidden?: boolean;
 }
 
-export interface PublicYachtImage {
-  id: number | null;
-  position?: number | null;
-  mainImage?: boolean | null;
-  layout?: boolean;
-  kind?: string;
+/** GET /admin/yachts/{id}/media, and the answer of every media call (upload, order, delete, video, crew profile). */
+export interface YachtMediaDto {
+  yachtId: number;
+  /** yacht.main_image_id: the card photo. */
+  mainImageId: number | null;
+  /** yacht.video_url (a custom boat's own video is not in it: see PublicYachtDetail). */
+  videoUrl: string | null;
+  /** The public PDF link, null = none. */
+  crewProfileUrl: string | null;
+  /** Every image of the boat in position order, hidden ones included. */
+  images: AdminYachtImage[];
 }
 
-/** The part of GET /public/yachts/{slug} this page reads. */
+/** The part of GET /public/yachts/{slug} this page reads: which boat the sites serve (twin) and the video they show. */
 export interface PublicYachtDetail {
   id: number;
   slug: string;
-  yachtImages?: PublicYachtImage[] | null;
   videoUrl?: string | null;
-  crewProfileUrl?: string | null;
   customDetails?: { videoUrl?: string | null } | null;
 }
 
@@ -143,17 +146,14 @@ export interface LayoutScanParams {
 export const MAX_FILES_PER_REQUEST = 20;
 /** FileSystemService refuses a bigger file (application.upload.max-file-size-mb, 10 on prod). */
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-/** Keeps one multipart request well under any proxy body limit; a batch closes at 20 files or 40 MB. */
-export const MAX_BATCH_BYTES = 40 * 1024 * 1024;
+/** A batch closes at 20 files or 20 MB: the api.boat4you.com nginx refuses a body over 25 MB (client_max_body_size
+ * 25m, 413) and the multipart boundaries need some room. One file is at most 10 MB, so it always fits. */
+export const MAX_BATCH_BYTES = 20 * 1024 * 1024;
 /** Crew profile, contract: PDF only, at most 15 MB. */
 export const MAX_PDF_BYTES = 15 * 1024 * 1024;
 /** What FileSystemService.detectImageType accepts (magic bytes); HEIC is not among them. */
 export const IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 export const IMAGE_ACCEPT = 'image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp';
-
-/** Gallery kinds that are yacht_image rows of THIS boat. MODEL_SAMPLE ids belong to a donor boat, MARINA ids to a
- * location: never patched, ordered or deleted from here. No kind (GALLERY_EXTENDED off) = the boat's own rows. */
-const OWN_ROW_KINDS = ['PARTNER', 'LAYOUT'];
 
 const MB = 1024 * 1024;
 
@@ -277,104 +277,114 @@ export interface VideoLink {
   embedUrl: string;
 }
 
-const YOUTUBE_HOSTS = ['youtube.com', 'www.youtube.com', 'm.youtube.com'];
+/* The same rules as the backend's VideoUrlRules (PATCH /admin/yachts/{id}/media answers 400 otherwise), on the raw
+ * text like java.net.URI: http(s), host youtube.com / www.youtube.com / youtu.be / vimeo.com / www.vimeo.com /
+ * player.vimeo.com, no user info, no port, at most 512 characters, no whitespace. */
+const MAX_VIDEO_URL_LENGTH = 512;
+const URL_PARTS = /^([A-Za-z][A-Za-z0-9+.-]*):\/\/([^/?#]*)([^?#]*)(?:\?([^#]*))?(?:#[^#]*)?$/;
+/** Besides whitespace and control characters, what java.net.URI refuses: "<>\^`{|}[] and a % without two hex digits. */
+const NOT_A_URI = /["<>\\^`{|}[\]]|%(?![0-9A-Fa-f]{2})/;
+const HOST = /^[A-Za-z0-9.-]+$/;
+
 const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
-const VIMEO_ID = /^\d{1,12}$/;
+const YOUTUBE_EMBED_PATH = /^\/embed\/([A-Za-z0-9_-]{11})\/?$/;
+const YOUTU_BE_PATH = /^\/([A-Za-z0-9_-]{11})\/?$/;
+/** vimeo.com/<id>, an unlisted film vimeo.com/<id>/<hash> too. */
+const VIMEO_PATH = /^\/(\d+)(?:\/([0-9a-fA-F]+))?\/?$/;
+const VIMEO_PLAYER_PATH = /^\/video\/(\d+)\/?$/;
 
-/** The forms the backend accepts (PATCH /admin/yachts/{id}/media): youtube.com/watch?v=, youtu.be/<id>,
- * youtube.com/embed/<id>, vimeo.com/<id>, player.vimeo.com/video/<id>. Anything else: null. */
+const isControl = (c: string) => {
+  const code = c.charCodeAt(0);
+
+  return code < 0x20 || (code >= 0x7f && code <= 0x9f);
+};
+
+const isUriText = (text: string) =>
+  text.length <= MAX_VIDEO_URL_LENGTH && !/\s/.test(text) && !Array.from(text).some(isControl) && !NOT_A_URI.test(text);
+
+/** The first `name=value` of a raw query string, not decoded (as the backend reads it). */
+const rawQueryParam = (query: string | undefined, name: string): string | null => {
+  const pair = (query ?? '').split('&').find(p => p.includes('=') && p.slice(0, p.indexOf('=')) === name);
+
+  return pair === undefined ? null : pair.slice(pair.indexOf('=') + 1);
+};
+
+const youtubeLink = (id: string): VideoLink => ({
+  provider: 'youtube',
+  id,
+  embedUrl: `https://www.youtube-nocookie.com/embed/${id}`,
+});
+
+const vimeoLink = (id: string, hash?: string): VideoLink => ({
+  provider: 'vimeo',
+  id,
+  embedUrl: `https://player.vimeo.com/video/${id}${hash ? `?h=${hash}` : ''}`,
+});
+
+/** The forms the backend accepts: youtube.com/watch?v=, youtu.be/<id>, youtube.com/embed/<id>, vimeo.com/<id>
+ * (unlisted: vimeo.com/<id>/<hash>), player.vimeo.com/video/<id>. Anything else: null. */
 export const parseVideoUrl = (raw: string): VideoLink | null => {
-  let url: URL;
+  // the backend trims the value before checking it
+  const text = raw.trim();
+  const parts = isUriText(text) ? URL_PARTS.exec(text) : null;
 
-  try {
-    url = new URL(raw.trim());
-  } catch {
+  if (!parts) {
     return null;
   }
 
-  if (url.protocol !== 'https:' && url.protocol !== 'http:') {
+  const [, scheme, authority, path, query] = parts;
+
+  if (!['http', 'https'].includes(scheme.toLowerCase()) || !HOST.test(authority)) {
     return null;
   }
 
-  const host = url.hostname.toLowerCase();
-  const segments = url.pathname.split('/').filter(Boolean);
-  const youtube = (id: string | null | undefined): VideoLink | null =>
-    id && YOUTUBE_ID.test(id)
-      ? { provider: 'youtube', id, embedUrl: `https://www.youtube-nocookie.com/embed/${id}` }
-      : null;
-  const vimeo = (id: string | undefined): VideoLink | null =>
-    id && VIMEO_ID.test(id) ? { provider: 'vimeo', id, embedUrl: `https://player.vimeo.com/video/${id}` } : null;
+  const host = authority.toLowerCase();
 
-  if (YOUTUBE_HOSTS.includes(host)) {
-    if (segments.length === 1 && segments[0] === 'watch') {
-      return youtube(url.searchParams.get('v'));
+  if (host === 'youtube.com' || host === 'www.youtube.com') {
+    const v = path === '/watch' ? rawQueryParam(query, 'v') : null;
+    const embed = YOUTUBE_EMBED_PATH.exec(path);
+
+    if (v !== null) {
+      return YOUTUBE_ID.test(v) ? youtubeLink(v) : null;
     }
 
-    if (segments.length === 2 && segments[0] === 'embed') {
-      return youtube(segments[1]);
-    }
-
-    return null;
+    return embed ? youtubeLink(embed[1]) : null;
   }
 
   if (host === 'youtu.be') {
-    return segments.length === 1 ? youtube(segments[0]) : null;
+    const match = YOUTU_BE_PATH.exec(path);
+
+    return match ? youtubeLink(match[1]) : null;
   }
 
   if (host === 'vimeo.com' || host === 'www.vimeo.com') {
-    return segments.length === 1 ? vimeo(segments[0]) : null;
+    const match = VIMEO_PATH.exec(path);
+
+    return match ? vimeoLink(match[1], match[2]) : null;
   }
 
   if (host === 'player.vimeo.com') {
-    return segments.length === 2 && segments[0] === 'video' ? vimeo(segments[1]) : null;
+    const match = VIMEO_PLAYER_PATH.exec(path);
+
+    return match ? vimeoLink(match[1]) : null;
   }
 
   return null;
 };
 
-/** The boat's own yacht_image rows from the public detail (visible ones only: hidden images are never public). */
-export const publicImagesOf = (detail: PublicYachtDetail): MediaImage[] =>
-  (detail.yachtImages ?? [])
-    .filter(img => img.id != null && (!img.kind || OWN_ROW_KINDS.includes(img.kind)))
-    .map(img => ({
-      id: img.id as number,
-      position: img.position ?? null,
-      mainImage: img.mainImage === true,
-      layout: img.layout === true || img.kind === 'LAYOUT',
-      hidden: false,
-      source: null,
-    }));
-
-const byPosition = (a: MediaImage, b: MediaImage) =>
-  (a.position ?? Number.MAX_SAFE_INTEGER) - (b.position ?? Number.MAX_SAFE_INTEGER) || a.id - b.id;
-
-/**
- * The grid: the public rows in position order, each with the origin known from this session (`known`: uploads and
- * PATCH answers), plus the images hidden in this session (no longer public) so they can be shown again.
- */
-export const mergeMedia = (publicImages: MediaImage[], known: Map<number, Partial<MediaImage>>): MediaImage[] => {
-  const ids = new Set(publicImages.map(img => img.id));
-  const visible = publicImages.map(img => ({ ...img, source: known.get(img.id)?.source ?? img.source }));
-  const hiddenHere: MediaImage[] = [];
-
-  known.forEach((state, id) => {
-    if (!ids.has(id) && state.hidden === true) {
-      hiddenHere.push({
-        id,
-        position: state.position ?? null,
-        mainImage: false,
-        layout: state.layout === true,
-        hidden: true,
-        source: state.source ?? null,
-      });
-    }
-  });
-
-  return [...visible, ...hiddenHere].sort(byPosition);
-};
+/** The grid from the admin media answer: every image of the boat in position order, MAIN = yacht.main_image_id. */
+export const mediaImagesOf = (media: YachtMediaDto): MediaImage[] =>
+  (media.images ?? []).map(img => ({
+    id: img.id,
+    position: img.position ?? null,
+    mainImage: media.mainImageId != null ? img.id === media.mainImageId : img.mainImage === true,
+    layout: img.layout === true,
+    hidden: img.hidden === true,
+    source: img.source === 'OWN' ? 'OWN' : 'PARTNER',
+  }));
 
 /** What a PATCH answer says about the image (only the fields it carries). */
-export const knownFromAdmin = (dto: AdminYachtImage): Partial<MediaImage> => {
+const knownFromAdmin = (dto: AdminYachtImage): Partial<MediaImage> => {
   const state: Partial<MediaImage> = {};
 
   if (dto.position !== undefined) state.position = dto.position;
@@ -417,27 +427,31 @@ export const moveItem = <T>(items: T[], from: number, to: number): T[] => {
 export const canBeMain = (img: MediaImage) => !img.hidden && !img.layout;
 
 /** Own photos can be deleted; partner rows come back with the next sync (the backend answers 409) - hide them instead. */
-export const canDelete = (img: MediaImage) => img.source !== 'PARTNER';
+export const canDelete = (img: MediaImage) => img.source === 'OWN';
 
+export const PROXY_TOO_LARGE = 'Request too large (proxy limit)';
+
+/** The backend body's message, else the fallback. A string body is a proxy page, not the API: nginx answers a body
+ * over its client_max_body_size with an HTML 413 page. */
 export const errorMessage = (error: unknown, fallback: string): string => {
+  if (typeof error === 'string') {
+    return /\b413\b|too large/i.test(error) ? PROXY_TOO_LARGE : fallback;
+  }
+
   const message = (error as { message?: unknown } | null | undefined)?.message;
 
   return typeof message === 'string' && message.trim() ? message : fallback;
 };
 
-const idsOf = (data: unknown): number[] => {
-  const list = Array.isArray(data) ? data : (data as { images?: unknown[] } | null)?.images;
-
-  if (!Array.isArray(list)) return [];
-
-  return list
-    .map(item => (typeof item === 'number' ? item : (item as { id?: unknown } | null)?.id))
-    .filter((id): id is number => typeof id === 'number' && Number.isFinite(id));
-};
+const isMediaDto = (data: unknown): data is YachtMediaDto =>
+  typeof data === 'object' &&
+  data !== null &&
+  typeof (data as YachtMediaDto).yachtId === 'number' &&
+  Array.isArray((data as YachtMediaDto).images);
 
 export interface UploadOutcome {
-  /** Ids of the stored own photos (when the backend answers with them). */
-  ids: number[];
+  /** The boat's media after the last stored batch (the backend answers YachtMediaDto); none when nothing was stored. */
+  media?: YachtMediaDto;
   /** Files stored, in order. */
   uploaded: number;
   /** The first batch that failed and the files it and the later batches carried (not stored). */
@@ -456,6 +470,13 @@ export const createYachtMediaApi = (http: Http) => ({
     return Array.isArray(data) ? data : [];
   },
 
+  async getMedia(yachtId: number): Promise<YachtMediaDto> {
+    const { data } = await http.get<YachtMediaDto>(`/admin/yachts/${yachtId}/media`);
+
+    return data;
+  },
+
+  /** Only for the twin check and a custom boat's video: the grid comes from getMedia. */
   async getPublicDetail(slug: string): Promise<PublicYachtDetail> {
     const { data } = await http.get<PublicYachtDetail>(`/public/yachts/${encodeURIComponent(slug)}`);
 
@@ -472,7 +493,7 @@ export const createYachtMediaApi = (http: Http) => ({
     onProgress?: (perFile: number[], stored: number) => void
   ): Promise<UploadOutcome> {
     const progress = files.map(() => 0);
-    const outcome: UploadOutcome = { ids: [], uploaded: 0, failedFiles: 0 };
+    const outcome: UploadOutcome = { uploaded: 0, failedFiles: 0 };
     const report = () => onProgress?.(progress.slice(), outcome.uploaded);
     let offset = 0;
 
@@ -499,7 +520,11 @@ export const createYachtMediaApi = (http: Http) => ({
         sizes.forEach((_, i) => {
           progress[start + i] = 1;
         });
-        outcome.ids.push(...idsOf(data));
+
+        if (isMediaDto(data)) {
+          outcome.media = data;
+        }
+
         outcome.uploaded += batch.length;
         report();
       } catch (error) {
@@ -521,27 +546,40 @@ export const createYachtMediaApi = (http: Http) => ({
     return data;
   },
 
-  async reorderImages(yachtId: number, imageIds: number[]): Promise<void> {
-    await http.put(`/admin/yachts/${yachtId}/images/order`, { imageIds });
+  async reorderImages(yachtId: number, imageIds: number[]): Promise<YachtMediaDto> {
+    const { data } = await http.put<YachtMediaDto>(`/admin/yachts/${yachtId}/images/order`, { imageIds });
+
+    return data;
   },
 
-  async deleteImage(yachtId: number, imageId: number): Promise<void> {
-    await http.delete(`/admin/yachts/${yachtId}/images/${imageId}`);
+  async deleteImage(yachtId: number, imageId: number): Promise<YachtMediaDto> {
+    const { data } = await http.delete<YachtMediaDto>(`/admin/yachts/${yachtId}/images/${imageId}`);
+
+    return data;
   },
 
-  async setVideo(yachtId: number, videoUrl: string | null): Promise<void> {
-    await http.patch(`/admin/yachts/${yachtId}/media`, { videoUrl });
+  async setVideo(yachtId: number, videoUrl: string | null): Promise<YachtMediaDto> {
+    const { data } = await http.patch<YachtMediaDto>(`/admin/yachts/${yachtId}/media`, { videoUrl });
+
+    return data;
   },
 
-  async uploadCrewProfile(yachtId: number, file: File): Promise<void> {
+  async uploadCrewProfile(yachtId: number, file: File): Promise<YachtMediaDto> {
     const form = new FormData();
 
     form.append('file', file, file.name);
-    await http.post(`/admin/yachts/${yachtId}/crew-profile`, form, { headers: MULTIPART });
+
+    const { data } = await http.post<YachtMediaDto>(`/admin/yachts/${yachtId}/crew-profile`, form, {
+      headers: MULTIPART,
+    });
+
+    return data;
   },
 
-  async deleteCrewProfile(yachtId: number): Promise<void> {
-    await http.delete(`/admin/yachts/${yachtId}/crew-profile`);
+  async deleteCrewProfile(yachtId: number): Promise<YachtMediaDto> {
+    const { data } = await http.delete<YachtMediaDto>(`/admin/yachts/${yachtId}/crew-profile`);
+
+    return data;
   },
 
   async detectBlocked(dryRun: boolean): Promise<BlockedImageScan> {

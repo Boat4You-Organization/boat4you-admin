@@ -4,8 +4,10 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
 import {
+  MAX_BATCH_BYTES,
   MAX_IMAGE_BYTES,
   MAX_PDF_BYTES,
+  PROXY_TOO_LARGE,
   applyAdminImage,
   batchFileProgress,
   canBeMain,
@@ -14,15 +16,14 @@ import {
   errorMessage,
   imageFileProblem,
   isPdfMagic,
-  mergeMedia,
+  mediaImagesOf,
   moveItem,
   parseVideoUrl,
   pdfFileProblem,
   planBatches,
-  publicImagesOf,
   yachtLabel,
 } from '../src/services/yacht-media.api.ts';
-import type { MediaImage } from '../src/services/yacht-media.api.ts';
+import type { AdminYachtImage, MediaImage, YachtMediaDto } from '../src/services/yacht-media.api.ts';
 
 type Call = { method: string; url: string; data?: unknown; config?: Record<string, any> };
 
@@ -57,7 +58,31 @@ const img = (id: number, position: number | null, extra: Partial<MediaImage> = {
   mainImage: false,
   layout: false,
   hidden: false,
-  source: null,
+  source: 'PARTNER',
+  ...extra,
+});
+
+/** One row of YachtMediaDto.images as the backend sends it (YachtImageAdminDto). */
+const row = (id: number, position: number, extra: Partial<AdminYachtImage> = {}): AdminYachtImage => ({
+  id,
+  yachtId: 11769,
+  position,
+  mainImage: false,
+  layout: false,
+  layoutOverride: null,
+  hidden: false,
+  hiddenReason: null,
+  yachtMainImageId: null,
+  source: 'PARTNER',
+  ...extra,
+});
+
+const mediaDto = (images: AdminYachtImage[], extra: Partial<YachtMediaDto> = {}): YachtMediaDto => ({
+  yachtId: 11769,
+  mainImageId: null,
+  videoUrl: null,
+  crewProfileUrl: null,
+  images,
   ...extra,
 });
 
@@ -110,6 +135,25 @@ describe('planBatches', () => {
     );
   });
 
+  test('20 MB per request: under the 25 MB nginx body limit of api.boat4you.com with room for the boundaries', () => {
+    assert.equal(MAX_BATCH_BYTES, 20 * 1024 * 1024);
+
+    // the Allure set: 54 photos, 69.2 MB (largest 2.9 MB) - 3 batches of 20 / 20 / 14 used to reach 28.5 MB
+    const sizes = Array.from({ length: 54 }, (_, i) => Math.round((0.6 + (i % 10) * 0.25) * 1024 * 1024));
+    const batches = planBatches(sizes.map(size => ({ size })));
+
+    batches.forEach(batch => {
+      assert.ok(batch.length <= 20);
+      assert.ok(batch.reduce((sum, f) => sum + f.size, 0) <= MAX_BATCH_BYTES);
+    });
+    assert.equal(
+      batches.reduce((n, b) => n + b.length, 0),
+      54
+    );
+    // a single file at the 10 MB cap always fits a request
+    assert.ok(MAX_IMAGE_BYTES <= MAX_BATCH_BYTES);
+  });
+
   test('a batch closes before passing the byte cap; an oversize file goes alone', () => {
     const batches = planBatches([{ size: 30 }, { size: 20 }, { size: 5 }, { size: 100 }, { size: 1 }], 20, 40);
 
@@ -151,61 +195,76 @@ describe('parseVideoUrl', () => {
     assert.equal(parseVideoUrl(' https://youtube.com/embed/dQw4w9WgXcQ ')?.embedUrl, embed);
   });
 
-  test('anything else is refused', () => {
+  test('an unlisted Vimeo film vimeo.com/<id>/<hash> (the backend accepts it) embeds with its hash', () => {
+    assert.deepEqual(parseVideoUrl('https://vimeo.com/982130882/0a1b2c3d4e'), {
+      provider: 'vimeo',
+      id: '982130882',
+      embedUrl: 'https://player.vimeo.com/video/982130882?h=0a1b2c3d4e',
+    });
+  });
+
+  test('the backend forms with a trailing slash, an upper-case scheme or host, http', () => {
+    assert.equal(parseVideoUrl('https://youtu.be/dQw4w9WgXcQ/')?.id, 'dQw4w9WgXcQ');
+    assert.equal(parseVideoUrl('https://www.youtube.com/embed/dQw4w9WgXcQ/')?.id, 'dQw4w9WgXcQ');
+    assert.equal(parseVideoUrl('HTTPS://Vimeo.com/982130882/')?.id, '982130882');
+    assert.equal(parseVideoUrl('http://player.vimeo.com/video/982130882/')?.id, '982130882');
+    assert.equal(parseVideoUrl('https://youtube.com/watch?t=10&v=dQw4w9WgXcQ#top')?.id, 'dQw4w9WgXcQ');
+  });
+
+  test('anything else is refused (what the backend VideoUrlRules answers with 400)', () => {
     [
       '',
       'vimeo.com/982130882',
       'javascript:alert(1)',
       'https://vimeo.com/channels/staffpicks/982130882',
       'https://vimeo.com/abc',
+      'https://vimeo.com/982130882/not-a-hash',
       'https://www.youtube.com/watch?v=short',
+      'https://www.youtube.com/watch/?v=dQw4w9WgXcQ',
+      'https://www.youtube.com/watch?v=dQw4w9WgXc%51',
       'https://www.youtube.com/shorts/dQw4w9WgXcQ',
+      'https://m.youtube.com/watch?v=dQw4w9WgXcQ',
+      'https://user@vimeo.com/982130882',
+      'https://user:pw@www.youtube.com/watch?v=dQw4w9WgXcQ',
+      'https://vimeo.com:443/982130882',
+      'https://youtu.be:8443/dQw4w9WgXcQ',
+      'https://vimeo.com/982130882 x',
+      'https://vimeo.com/982130882#a#b',
+      'https://youtube.com/watch?v=dQw4w9WgXcQ&x=|',
       'https://youtube.com.evil.tld/watch?v=dQw4w9WgXcQ',
       'https://evil.tld/https://vimeo.com/982130882',
       'ftp://vimeo.com/982130882',
+      `https://vimeo.com/${'1'.repeat(520)}`,
     ].forEach(url => assert.equal(parseVideoUrl(url), null, url));
   });
 });
 
 describe('grid state', () => {
-  test('public rows: the boat own kinds only (no donor MODEL_SAMPLE, no MARINA, no id-less row)', () => {
-    const images = publicImagesOf({
-      id: 11769,
-      slug: 'gulet-allure-11769',
-      yachtImages: [
-        { id: 3, position: 2, mainImage: false, kind: 'LAYOUT', layout: true },
-        { id: 1, position: 0, mainImage: true, kind: 'PARTNER' },
-        { id: 900, position: 1000, kind: 'MODEL_SAMPLE' },
-        { id: 77, position: 2000, kind: 'MARINA' },
-        { id: null, position: 5 },
-        { id: 2, position: 1 },
-      ],
-    });
+  test('the grid from the admin media: every row in order, hidden ones too, source as the backend says, MAIN = yacht.main_image_id', () => {
+    const images = mediaImagesOf(
+      mediaDto(
+        [
+          row(11, 0, { source: 'OWN' }),
+          row(12, 1, { source: 'OWN', hidden: true, hiddenReason: 'ADMIN' }),
+          row(3, 2, { mainImage: true }),
+          row(4, 3, { layout: true }),
+        ],
+        { mainImageId: 11 }
+      )
+    );
 
     assert.deepEqual(
-      images.map(i => [i.id, i.mainImage, i.layout]),
+      images.map(i => [i.id, i.source, i.mainImage, i.hidden, i.layout]),
       [
-        [3, false, true],
-        [1, true, false],
-        [2, false, false],
+        [11, 'OWN', true, false, false],
+        [12, 'OWN', false, true, false],
+        [3, 'PARTNER', false, false, false],
+        [4, 'PARTNER', false, false, true],
       ]
     );
-  });
-
-  test('merge: origin from this session, session-hidden images kept, position order', () => {
-    const known = new Map<number, Partial<MediaImage>>([
-      [10, { source: 'OWN' }],
-      [5, { hidden: true, position: 1, source: 'PARTNER' }],
-    ]);
-    const merged = mergeMedia([img(20, 2), img(10, 0)], known);
-
     assert.deepEqual(
-      merged.map(i => [i.id, i.source, i.hidden]),
-      [
-        [10, 'OWN', false],
-        [5, 'PARTNER', true],
-        [20, null, false],
-      ]
+      images.filter(canDelete).map(i => i.id),
+      [11, 12]
     );
   });
 
@@ -249,10 +308,15 @@ describe('grid state', () => {
     assert.equal(canDelete(img(1, 0, { source: 'OWN' })), true);
   });
 
-  test('errorMessage: backend body message, else the fallback', () => {
+  test('errorMessage: backend body message, a proxy 413 page, else the fallback', () => {
     assert.equal(errorMessage({ code: 1102, message: 'Invalid video URL' }, 'x'), 'Invalid video URL');
     assert.equal(errorMessage(undefined, 'Network error'), 'Network error');
     assert.equal(errorMessage({ message: '  ' }, 'fallback'), 'fallback');
+    assert.equal(
+      errorMessage('<html><head><title>413 Request Entity Too Large</title></head></html>', 'x'),
+      PROXY_TOO_LARGE
+    );
+    assert.equal(errorMessage('<html><title>502 Bad Gateway</title></html>', 'fallback'), 'fallback');
   });
 });
 
@@ -269,20 +333,28 @@ describe('createYachtMediaApi', () => {
     });
   });
 
-  test('public detail by slug', async () => {
-    const { http, calls } = fakeHttp([{ id: 11769, slug: 'gulet-allure-11769' }]);
+  test('admin media by id; public detail by slug (twin check only)', async () => {
+    const { http, calls } = fakeHttp([mediaDto([]), { id: 11769, slug: 'gulet-allure-11769' }]);
+    const media = createYachtMediaApi(http);
 
-    await createYachtMediaApi(http).getPublicDetail('gulet-allure-11769');
-    assert.equal(calls[0].url, '/public/yachts/gulet-allure-11769');
+    assert.equal((await media.getMedia(11769)).yachtId, 11769);
+    await media.getPublicDetail('gulet-allure-11769');
+    assert.deepEqual(
+      calls.map(c => [c.method, c.url]),
+      [
+        ['get', '/admin/yachts/11769/media'],
+        ['get', '/public/yachts/gulet-allure-11769'],
+      ]
+    );
   });
 
-  test('54 photos: 3 sequential requests of 20 / 20 / 14 under "files", progress per file, ids collected', async () => {
-    const answers = [
-      Array.from({ length: 20 }, (_, i) => ({ id: 100 + i })),
-      Array.from({ length: 20 }, (_, i) => ({ id: 200 + i })),
-      Array.from({ length: 14 }, (_, i) => ({ id: 300 + i })),
-    ];
-    const { http, calls } = fakeHttp(answers);
+  test('54 photos: 3 sequential requests of 20 / 20 / 14 under "files", progress per file, the last media answer kept', async () => {
+    // each batch answers the boat's whole media (YachtMediaDto): the partner rows stay PARTNER, only uploads are OWN
+    const partner = [row(1, 0, { mainImage: true }), row(2, 1, { layout: true }), row(3, 2)];
+    const own = (n: number) => Array.from({ length: n }, (_, i) => row(100 + i, i, { source: 'OWN' }));
+    const after = (n: number) =>
+      mediaDto([...own(n), ...partner.map((r, i) => ({ ...r, position: n + i }))], { mainImageId: 1 });
+    const { http, calls } = fakeHttp([after(20), after(40), after(54)]);
     const files = Array.from({ length: 54 }, (_, i) => file(`allure-${i}.jpg`, 1000));
     const reports: number[][] = [];
     const stored: number[] = [];
@@ -304,7 +376,23 @@ describe('createYachtMediaApi', () => {
     assert.equal(((calls[2].data as FormData).getAll('files')[0] as File).name, 'allure-40.jpg');
     assert.equal(outcome.uploaded, 54);
     assert.equal(outcome.failedFiles, 0);
-    assert.equal(outcome.ids.length, 54);
+    assert.equal(outcome.media?.images.length, 57);
+
+    const grid = mediaImagesOf(outcome.media as YachtMediaDto);
+
+    assert.equal(grid.filter(i => i.source === 'OWN').length, 54);
+    assert.deepEqual(
+      grid.filter(i => i.source === 'PARTNER').map(i => [i.id, i.mainImage, i.layout]),
+      [
+        [1, true, false],
+        [2, false, true],
+        [3, false, false],
+      ]
+    );
+    assert.deepEqual(
+      grid.slice(0, 2).map(i => i.id),
+      [100, 101]
+    );
     assert.ok(reports.at(-1)?.every(p => p === 1));
     assert.deepEqual(stored, [20, 40, 54]);
 
@@ -313,8 +401,9 @@ describe('createYachtMediaApi', () => {
     assert.equal(reports.at(-1)?.[10], 0);
   });
 
-  test('a failed batch stops the upload and counts the files not stored', async () => {
-    const { http, calls } = fakeHttp([[{ id: 1 }], new Error('boom')]);
+  test('a failed batch stops the upload, counts the files not stored and keeps the media of the stored batch', async () => {
+    const stored = mediaDto([row(1, 0, { source: 'OWN' })]);
+    const { http, calls } = fakeHttp([stored, new Error('boom')]);
     const files = Array.from({ length: 25 }, (_, i) => file(`p${i}.jpg`, 10));
     const outcome = await createYachtMediaApi(http).uploadImages(5, files);
 
@@ -322,19 +411,31 @@ describe('createYachtMediaApi', () => {
     assert.equal(outcome.uploaded, 20);
     assert.equal(outcome.failedFiles, 5);
     assert.ok(outcome.error instanceof Error);
+    assert.equal(outcome.media, stored);
   });
 
-  test('image PATCH, order, delete, video, crew profile', async () => {
-    const { http, calls } = fakeHttp([{ id: 7, yachtMainImageId: 7 }]);
+  test('nothing stored: no media; an answer that is not YachtMediaDto is not taken for one', async () => {
+    const failed = await createYachtMediaApi(fakeHttp([new Error('413')]).http).uploadImages(5, [file('a.jpg', 10)]);
+    const odd = await createYachtMediaApi(fakeHttp([[{ id: 1 }]]).http).uploadImages(5, [file('a.jpg', 10)]);
+
+    assert.equal(failed.media, undefined);
+    assert.equal(failed.uploaded, 0);
+    assert.equal(odd.media, undefined);
+    assert.equal(odd.uploaded, 1);
+  });
+
+  test('image PATCH, order, delete, video, crew profile: each media call answers the boat media', async () => {
+    const answer = mediaDto([row(7, 0, { source: 'OWN' })], { mainImageId: 7, videoUrl: 'https://vimeo.com/982130882' });
+    const { http, calls } = fakeHttp([{ id: 7, yachtMainImageId: 7 }, answer, answer, answer, answer, answer, answer]);
     const media = createYachtMediaApi(http);
 
     assert.equal((await media.patchImage(7, { main: true })).yachtMainImageId, 7);
-    await media.reorderImages(11769, [7, 3, 1]);
-    await media.deleteImage(11769, 7);
-    await media.setVideo(11769, 'https://vimeo.com/982130882');
-    await media.setVideo(11769, null);
-    await media.uploadCrewProfile(11769, file('crew.pdf', 10, 'application/pdf'));
-    await media.deleteCrewProfile(11769);
+    assert.equal(await media.reorderImages(11769, [7, 3, 1]), answer);
+    assert.equal(await media.deleteImage(11769, 7), answer);
+    assert.equal((await media.setVideo(11769, 'https://vimeo.com/982130882')).videoUrl, 'https://vimeo.com/982130882');
+    assert.equal(await media.setVideo(11769, null), answer);
+    assert.equal(await media.uploadCrewProfile(11769, file('crew.pdf', 10, 'application/pdf')), answer);
+    assert.equal(await media.deleteCrewProfile(11769), answer);
 
     assert.deepEqual(
       calls.map(c => [c.method, c.url]),

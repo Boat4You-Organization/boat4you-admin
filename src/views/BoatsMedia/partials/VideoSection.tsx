@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import OndemandVideoOutlinedIcon from '@mui/icons-material/OndemandVideoOutlined';
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 
-import { YachtLookupItem, errorMessage, parseVideoUrl } from '@/services/yacht-media.api';
+import { YachtLookupItem, YachtMediaDto, errorMessage, parseVideoUrl } from '@/services/yacht-media.api';
 import YachtMediaService from '@/services/yacht-media.service';
 import { bbColors } from '@/styles/bb';
 import { showToast } from '@/valtio/global/global.actions';
@@ -13,15 +13,17 @@ import { SectionCard, dangerButtonSx, primaryButtonSx, useConfirm } from './ui';
 interface VideoSectionProps {
   yacht: YachtLookupItem;
   label: string;
-  /** The boat's current video (public detail videoUrl). */
+  /** The boat's video (yacht.video_url). */
   videoUrl: string | null;
-  onSaved: (videoUrl: string | null) => void;
+  /** A custom boat's own video: the sites show it while videoUrl is empty. */
+  customVideoUrl: string | null;
+  onMedia: (media: YachtMediaDto) => void;
 }
 
 const HINT =
   'YouTube (youtube.com/watch?v=…, youtu.be/…, youtube.com/embed/…) or Vimeo (vimeo.com/…, player.vimeo.com/video/…)';
 
-const VideoSection = ({ yacht, label, videoUrl, onSaved }: VideoSectionProps) => {
+const VideoSection = ({ yacht, label, videoUrl, customVideoUrl, onMedia }: VideoSectionProps) => {
   const [value, setValue] = useState(videoUrl ?? '');
   const [saving, setSaving] = useState(false);
   const { ask, dialog } = useConfirm();
@@ -37,8 +39,7 @@ const VideoSection = ({ yacht, label, videoUrl, onSaved }: VideoSectionProps) =>
   const save = async (next: string | null) => {
     setSaving(true);
     try {
-      await YachtMediaService.setVideo(yacht.id, next);
-      onSaved(next);
+      onMedia(await YachtMediaService.setVideo(yacht.id, next));
       showToast({ status: 'success', text: next ? 'Video saved.' : 'Video removed.' });
     } catch (error) {
       showToast({ status: 'error', text: errorMessage(error, 'The video could not be saved.') });
@@ -89,6 +90,12 @@ const VideoSection = ({ yacht, label, videoUrl, onSaved }: VideoSectionProps) =>
           )}
         </Stack>
       </Stack>
+      {!videoUrl && customVideoUrl && (
+        <Typography sx={{ fontSize: 11.5, color: bbColors.gray500, mt: 1, overflowWrap: 'anywhere' }}>
+          The sites show this custom boat&apos;s own video ({customVideoUrl}, set on Custom boats); a video saved here
+          takes its place.
+        </Typography>
+      )}
       {preview && (
         <Box sx={{ mt: 1.5, maxWidth: 560 }}>
           <Typography sx={{ fontSize: 11, color: bbColors.gray500, mb: 0.5 }}>

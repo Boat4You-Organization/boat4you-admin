@@ -21,12 +21,12 @@ import {
   MAX_FILES_PER_REQUEST,
   MediaImage,
   YachtLookupItem,
+  YachtMediaDto,
   applyAdminImage,
   canBeMain,
   canDelete,
   errorMessage,
   imageFileProblem,
-  knownFromAdmin,
   moveItem,
 } from '@/services/yacht-media.api';
 import YachtMediaService, { imageUrl } from '@/services/yacht-media.service';
@@ -51,12 +51,12 @@ interface OwnPhotosProps {
   yacht: YachtLookupItem;
   label: string;
   images: MediaImage[];
+  /** Grid changes of this boat (dropped once another boat is selected). */
   setImages: Dispatch<SetStateAction<MediaImage[]>>;
-  /** Re-reads the public detail (after an upload, a delete or an order change). */
-  reload: () => Promise<void>;
-  /** Keeps what this session learned about an image (origin, hidden) across reloads. */
-  remember: (id: number, state: Partial<MediaImage>) => void;
-  forget: (id: number) => void;
+  /** The boat's media as an upload, order change or delete answers it. */
+  onMedia: (media: YachtMediaDto) => void;
+  /** Re-reads the boat's media (GET /admin/yachts/{id}/media). */
+  reload: () => void;
   loading: boolean;
 }
 
@@ -89,7 +89,10 @@ const statusLabel: Record<UploadStatus, string> = {
 
 const isFileDrag = (e: DragEvent) => Array.from(e.dataTransfer.types).includes('Files');
 
-const OwnPhotos = ({ yacht, label, images, setImages, reload, remember, forget, loading }: OwnPhotosProps) => {
+// No readable answer: the network, or nginx refusing a body over its limit (its 413 page carries no CORS header).
+const UPLOAD_NO_ANSWER = 'No answer from the API: a network error, or a request larger than the proxy allows.';
+
+const OwnPhotos = ({ yacht, label, images, setImages, onMedia, reload, loading }: OwnPhotosProps) => {
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [uploading, setUploading] = useState(false);
   const [fileDragOver, setFileDragOver] = useState(false);
@@ -158,13 +161,15 @@ const OwnPhotos = ({ yacht, label, images, setImages, reload, remember, forget, 
         return { ...item, status: 'error', note: errorMessage(outcome.error, 'Upload failed') };
       })
     );
-    outcome.ids.forEach(id => remember(id, { source: 'OWN' }));
     setUploading(false);
+
+    if (outcome.media) onMedia(outcome.media);
+    else if (outcome.uploaded > 0) reload();
 
     if (outcome.error) {
       showToast({
         status: 'error',
-        text: `${outcome.uploaded} of ${accepted.length} photos stored. ${errorMessage(outcome.error, 'The upload failed.')}`,
+        text: `${outcome.uploaded} of ${accepted.length} photos stored. ${errorMessage(outcome.error, UPLOAD_NO_ANSWER)}`,
       });
     } else {
       const refused = files.length - accepted.length;
@@ -174,8 +179,6 @@ const OwnPhotos = ({ yacht, label, images, setImages, reload, remember, forget, 
         text: `${outcome.uploaded} photo${outcome.uploaded === 1 ? '' : 's'} stored${refused > 0 ? `, ${refused} refused` : ''}.`,
       });
     }
-
-    await reload();
   };
 
   const onFilesPicked = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -198,7 +201,6 @@ const OwnPhotos = ({ yacht, label, images, setImages, reload, remember, forget, 
     try {
       const dto: AdminYachtImage = await YachtMediaService.patchImage(img.id, body);
 
-      remember(img.id, knownFromAdmin(dto));
       setImages(prev => applyAdminImage(prev, dto));
       showToast({ status: 'success', text: done });
     } catch (error) {
@@ -213,9 +215,11 @@ const OwnPhotos = ({ yacht, label, images, setImages, reload, remember, forget, 
 
     setImages(next.map((img, i) => ({ ...img, position: i })));
     try {
-      await YachtMediaService.reorderImages(
-        yacht.id,
-        next.map(img => img.id)
+      onMedia(
+        await YachtMediaService.reorderImages(
+          yacht.id,
+          next.map(img => img.id)
+        )
       );
       showToast({ status: 'success', text: 'Order saved.' });
     } catch (error) {
@@ -238,10 +242,8 @@ const OwnPhotos = ({ yacht, label, images, setImages, reload, remember, forget, 
       onConfirm: async () => {
         setBusyId(img.id);
         try {
-          await YachtMediaService.deleteImage(yacht.id, img.id);
-          forget(img.id);
+          onMedia(await YachtMediaService.deleteImage(yacht.id, img.id));
           showToast({ status: 'success', text: 'Photo deleted.' });
-          await reload();
         } catch (error) {
           // 409 = a partner photo: the next sync would bring it back.
           showToast({
@@ -261,7 +263,7 @@ const OwnPhotos = ({ yacht, label, images, setImages, reload, remember, forget, 
       subtitle={
         <>
           {images.length} image{images.length === 1 ? '' : 's'}
-          {ownCount > 0 && ` · ${ownCount} own uploaded here`}
+          {ownCount > 0 && ` · ${ownCount} own`}
           {hiddenCount > 0 && ` · ${hiddenCount} hidden`} · own photos come first, the partner syncs never touch them
         </>
       }
@@ -366,7 +368,7 @@ const OwnPhotos = ({ yacht, label, images, setImages, reload, remember, forget, 
 
       {images.length === 0 && !loading && (
         <Typography sx={{ fontSize: 12.5, color: bbColors.gray500, mt: 2 }}>
-          No image on the public page yet.
+          No image yet.
         </Typography>
       )}
 
@@ -597,9 +599,8 @@ const OwnPhotos = ({ yacht, label, images, setImages, reload, remember, forget, 
         </Box>
       )}
       <Typography sx={{ fontSize: 11, color: bbColors.gray500, mt: 1.25 }}>
-        Drag a card (or use the arrows) to change the order; it is saved at once. The grid shows what the public boat
-        page shows: hidden images are not public, so after a reload only the ones hidden in this session stay listed
-        here, and OWN / PARTNER is known only for photos uploaded or changed in this session.
+        Drag a card (or use the arrows) to change the order; it is saved at once. Hidden images stay listed here (grey)
+        so they can be shown again; the sites never show them.
       </Typography>
     </SectionCard>
   );

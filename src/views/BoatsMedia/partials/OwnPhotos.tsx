@@ -367,9 +367,7 @@ const OwnPhotos = ({ yacht, label, images, setImages, onMedia, reload, loading }
       )}
 
       {images.length === 0 && !loading && (
-        <Typography sx={{ fontSize: 12.5, color: bbColors.gray500, mt: 2 }}>
-          No image yet.
-        </Typography>
+        <Typography sx={{ fontSize: 12.5, color: bbColors.gray500, mt: 2 }}>No image yet.</Typography>
       )}
 
       {images.length > 0 && (

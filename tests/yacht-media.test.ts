@@ -425,7 +425,10 @@ describe('createYachtMediaApi', () => {
   });
 
   test('image PATCH, order, delete, video, crew profile: each media call answers the boat media', async () => {
-    const answer = mediaDto([row(7, 0, { source: 'OWN' })], { mainImageId: 7, videoUrl: 'https://vimeo.com/982130882' });
+    const answer = mediaDto([row(7, 0, { source: 'OWN' })], {
+      mainImageId: 7,
+      videoUrl: 'https://vimeo.com/982130882',
+    });
     const { http, calls } = fakeHttp([{ id: 7, yachtMainImageId: 7 }, answer, answer, answer, answer, answer, answer]);
     const media = createYachtMediaApi(http);
 

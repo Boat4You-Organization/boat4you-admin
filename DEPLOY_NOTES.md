@@ -1,6 +1,6 @@
 # boat4you-admin — deploy notes
 
-## 2026-10-17 — Boats · Media: vlastite fotke, video i crew profile za BILO KOJI brod + image hygiene alati — ⏳ NIJE DEPLOYANO (grana `feat/yacht-media`)
+## 2026-10-17 — Boats · Media: vlastite fotke, video i crew profile za BILO KOJI brod + image hygiene alati — ✅ DEPLOYANO 20.10.2026 13:08 UTC (cusma1, `bb80aef`, entry `assets/index-CwtynOMl.js`, root/deep/asset 200; backend V9_92 na oba čvora 13:06 UTC), tag `live/2026-10-20` (grana `feat/yacht-media`)
 
 Mario 17.10. (gulet Allure 11769, `gulet-allure-11769`): naše 54 fotke, Vimeo https://vimeo.com/982130882 i crew-profile PDF na svih 7 sajtova. Nova stranica **Boats · Media** (`/boats/media`, izbornik odmah iza „Custom boats“, samo SYSTEM_ADMIN kao backend):
 

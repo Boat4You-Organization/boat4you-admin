@@ -36,6 +36,8 @@ export interface MediaImage {
   mainImage: boolean;
   layout: boolean;
   hidden: boolean;
+  /** Why it is hidden (yacht_image.hidden_reason): ADMIN, PARTNER_BLOCKED_PHOTO, DEAD_PARTNER_URL; null when shown. */
+  hiddenReason: string | null;
   source: ImageSource;
 }
 
@@ -380,6 +382,7 @@ export const mediaImagesOf = (media: YachtMediaDto): MediaImage[] =>
     mainImage: media.mainImageId != null ? img.id === media.mainImageId : img.mainImage === true,
     layout: img.layout === true,
     hidden: img.hidden === true,
+    hiddenReason: img.hiddenReason ?? null,
     source: img.source === 'OWN' ? 'OWN' : 'PARTNER',
   }));
 
@@ -392,6 +395,8 @@ const knownFromAdmin = (dto: AdminYachtImage): Partial<MediaImage> => {
   if (dto.layout !== undefined) state.layout = dto.layout;
 
   if (dto.hidden !== undefined) state.hidden = dto.hidden;
+
+  if (dto.hiddenReason !== undefined) state.hiddenReason = dto.hiddenReason;
 
   if (dto.source !== undefined) state.source = dto.source;
 

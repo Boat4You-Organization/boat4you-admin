@@ -92,6 +92,20 @@ const isFileDrag = (e: DragEvent) => Array.from(e.dataTransfer.types).includes('
 // No readable answer: the network, or nginx refusing a body over its limit (its 413 page carries no CORS header).
 const UPLOAD_NO_ANSWER = 'No answer from the API: a network error, or a request larger than the proxy allows.';
 
+/** Why a picture is hidden, for the chip's tooltip (yacht_image.hidden_reason). */
+function hiddenReasonText(reason?: string | null): string {
+  switch (reason) {
+    case 'DEAD_PARTNER_URL':
+      return "The partner's link delivers no picture - never downloaded, never shown on the site; it heals itself if the link comes back";
+    case 'PARTNER_BLOCKED_PHOTO':
+      return 'The partner withholds this photo (its placeholder image) - never shown on the site';
+    case 'ADMIN':
+      return 'Hidden by an admin - never shown on the site';
+    default:
+      return 'Hidden - never shown on the site';
+  }
+}
+
 const OwnPhotos = ({ yacht, label, images, setImages, onMedia, reload, loading }: OwnPhotosProps) => {
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -471,7 +485,8 @@ const OwnPhotos = ({ yacht, label, images, setImages, onMedia, reload, loading }
                   )}
                   {img.hidden && (
                     <Chip
-                      label="HIDDEN"
+                      label={img.hiddenReason === 'DEAD_PARTNER_URL' ? 'DEAD LINK' : 'HIDDEN'}
+                      title={hiddenReasonText(img.hiddenReason)}
                       size="small"
                       sx={{ ...chipSx, backgroundColor: bbColors.red100, color: bbColors.red600 }}
                     />

@@ -2440,7 +2440,7 @@ const Offers = () => {
               variant="contained"
               startIcon={<ContentCopyIcon />}
               onClick={handleCopyRichText}
-              sx={{ backgroundColor: bbColors.navy900, '&:hover': { backgroundColor: '#1b2d44' } }}
+              sx={{ backgroundColor: bbColors.navy900, color: '#ffffff', '&:hover': { backgroundColor: '#1b2d44' } }}
             >
               Copy as rich text
             </Button>

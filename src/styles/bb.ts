@@ -118,7 +118,7 @@ export const bbCardSx = {
 /** Auth page H1 — replaces the old Raleway-italic blue hero. */
 export const bbAuthTitleSx = {
   fontFamily: bbFont.stack,
-  fontSize: { xs: 32, md: 40 },
+  fontSize: { xs: 28, md: 32 },
   fontWeight: 800,
   letterSpacing: '-0.02em',
   lineHeight: 1.15,

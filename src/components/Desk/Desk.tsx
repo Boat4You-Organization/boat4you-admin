@@ -11,10 +11,12 @@ import {
   bbPageSubtitleSx,
   bbPageSx,
   bbPageTitleSx,
+  bbPillStyle,
   bbTabCountSx,
   bbTabSx,
   bbTabsTrackSx,
   bbTdSx,
+  bbTexture,
   bbThSx,
 } from '@/styles/bb';
 
@@ -451,4 +453,49 @@ export const CardHead = ({
     {hint && <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>{hint}</Typography>}
     {action && <Box sx={{ ml: 'auto' }}>{action}</Box>}
   </Stack>
+);
+
+/** 403 / 404 card: textured strip, illustration, code pill, title and description. */
+export const ErrorCard = ({
+  code,
+  tone,
+  illustration,
+  title,
+  children,
+}: {
+  code: string;
+  tone: 'danger' | 'info';
+  illustration: keyof typeof bbIllustrations;
+  title: React.ReactNode;
+  children?: React.ReactNode;
+}) => (
+  <Box sx={{ ...bbPageSx, display: 'flex', alignItems: 'flex-start', justifyContent: 'center' }}>
+    <Box
+      component="section"
+      sx={{
+        ...bbCardSx,
+        overflow: 'hidden',
+        width: '100%',
+        maxWidth: 640,
+        mt: { xs: 2, md: 6 },
+        background: `linear-gradient(180deg, ${bbColors.white} 0%, ${bbColors.gray50} 100%)`,
+      }}
+    >
+      <Box aria-hidden sx={{ height: 44, background: bbTexture.chart }} />
+      <Stack
+        alignItems="center"
+        gap={1.5}
+        sx={{ p: { xs: '28px 20px 32px', sm: '36px 40px 44px' }, textAlign: 'center' }}
+      >
+        <Box component="img" src={bbIllustrations[illustration]} alt="" sx={{ height: 140, width: 'auto' }} />
+        <Box component="span" sx={bbPillStyle(tone)}>
+          {code}
+        </Box>
+        <Typography component="h1" sx={{ ...bbPageTitleSx, fontSize: { xs: 22, sm: 26 } }}>
+          {title}
+        </Typography>
+        {children}
+      </Stack>
+    </Box>
+  </Box>
 );

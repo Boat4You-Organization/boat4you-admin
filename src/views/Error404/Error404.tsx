@@ -1,33 +1,25 @@
 import { useTranslation } from 'react-i18next';
 
-import { Container, Paper, Stack } from '@mui/material';
-import Typography from '@mui/material/Typography';
+import { Typography } from '@mui/material';
 
+import { ErrorCard } from '@/components/Desk';
 import Layout from '@/components/Layout';
-import colors from '@/styles/themes/colors';
+import { bbColors } from '@/styles/bb';
 
 const Error404 = () => {
   const { t } = useTranslation();
 
   return (
     <Layout>
-      <Container component="section" disableGutters sx={{ height: '100%', paddingBottom: 3 }}>
-        <Paper elevation={0} sx={{ height: '100%' }}>
-          <Stack alignItems="center" justifyContent="center" height="100%" gap={3}>
-            <Typography variant="hero" fontWeight={800} fontStyle="italic" color={colors.blue500}>
-              {t('common.not-found')}
-            </Typography>
-            <Typography
-              variant="body1"
-              align="center"
-              color={colors.black500}
-              dangerouslySetInnerHTML={{
-                __html: t('common.not-found-description'),
-              }}
-            />
-          </Stack>
-        </Paper>
-      </Container>
+      <ErrorCard code="404" tone="info" illustration="sailboat" title={t('common.not-found')}>
+        <Typography
+          align="center"
+          sx={{ fontSize: 13.5, color: bbColors.gray600, maxWidth: 440, lineHeight: 1.55 }}
+          dangerouslySetInnerHTML={{
+            __html: t('common.not-found-description'),
+          }}
+        />
+      </ErrorCard>
     </Layout>
   );
 };

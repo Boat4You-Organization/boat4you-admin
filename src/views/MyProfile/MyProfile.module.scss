@@ -1,5 +1,9 @@
 @use '@/styles/utils/rem-calc' as *;
 
+// The settings card overlaps the textured banner (v2.2 profile layout).
 .container {
-  margin-top: rem-calc(120);
+  max-width: rem-calc(640);
+  margin: rem-calc(-48) auto rem-calc(32);
+  padding-inline: rem-calc(12);
+  position: relative;
 }

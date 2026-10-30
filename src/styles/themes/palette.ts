@@ -1,27 +1,44 @@
 import { ThemeOptions } from '@mui/material';
 
-import colors from './colors';
+import { bbColors } from '@/styles/bb';
 
+// `primary` is navy: it drives checkboxes, switches, focus and text/outlined buttons. The yellow
+// call-to-action is the contained primary button, styled in components.ts.
 const palette: ThemeOptions['palette'] = {
   primary: {
-    main: colors.blue500,
-    contrastText: colors.white,
+    main: bbColors.navy900,
+    contrastText: bbColors.white,
   },
   secondary: {
-    main: colors.black,
-    contrastText: colors.white,
+    main: bbColors.navy900,
+    contrastText: bbColors.white,
   },
   error: {
-    main: colors.red500,
+    main: bbColors.red600,
+    dark: bbColors.red700,
+    contrastText: bbColors.white,
   },
   warning: {
-    main: colors.yellow500,
+    main: bbColors.amber700,
+    contrastText: bbColors.white,
   },
   success: {
-    main: colors.green500,
+    main: bbColors.green600,
+    contrastText: bbColors.white,
   },
   info: {
-    main: colors.blue500,
+    main: bbColors.navy700,
+    contrastText: bbColors.white,
+  },
+  text: {
+    primary: bbColors.navy900,
+    secondary: bbColors.gray500,
+    disabled: bbColors.gray450,
+  },
+  divider: bbColors.gray200,
+  background: {
+    default: bbColors.gray50,
+    paper: bbColors.white,
   },
 };
 

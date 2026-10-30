@@ -1,10 +1,22 @@
-import { Chip, ChipProps } from '@mui/material';
-import cx from 'clsx';
+import { Box, ChipProps } from '@mui/material';
 
-import styles from './StatusChip.module.scss';
+import { StatusTone, bbPillStyle } from '@/styles/bb';
 
-const StatusChip = ({ color, label }: ChipProps) => (
-  <Chip color={color} label={label} classes={{ root: styles.root }} className={cx(color && styles[color])} />
+// The one status pill (tinted background, dot, label). MUI colour names map onto the v2.2 tones.
+const TONE: Record<string, StatusTone> = {
+  success: 'success',
+  error: 'danger',
+  warning: 'warning',
+  info: 'info',
+  primary: 'progress',
+  secondary: 'neutral',
+  default: 'neutral',
+};
+
+const StatusChip = ({ color, label, sx }: ChipProps) => (
+  <Box component="span" sx={[bbPillStyle(TONE[color ?? 'default'] ?? 'neutral'), ...(Array.isArray(sx) ? sx : [sx])]}>
+    {label}
+  </Box>
 );
 
 export default StatusChip;

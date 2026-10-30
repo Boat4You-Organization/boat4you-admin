@@ -4,13 +4,13 @@
 
 .puller {
   position: absolute;
-  top: rem-calc(5);
+  top: rem-calc(8);
   left: 50%;
   transform: translateX(-50%);
   width: rem-calc(36);
   height: rem-calc(5);
   background-color: $black-200;
-  border-radius: rem-calc(2);
+  border-radius: rem-calc(3);
 }
 
 .swipeableContainer {

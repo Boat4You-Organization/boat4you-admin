@@ -50,15 +50,15 @@ const LanguagePicker = () => {
         onClick={toggleIsOpen}
         size="small"
         sx={{
-          // Match the Settings/profile icon button stack in Header.tsx so the
-          // top-right cluster reads as one cohesive group of dark glass pills.
-          width: 30,
-          height: 30,
-          borderRadius: '6px',
+          // Same dark glass button as the profile button in Header.tsx.
+          width: 32,
+          height: 32,
+          p: 0,
+          borderRadius: '9px',
           backgroundColor: 'rgba(255,255,255,0.06)',
-          border: '1px solid rgba(255,255,255,0.12)',
+          border: '1px solid rgba(255,255,255,0.14)',
           color: '#fff',
-          '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)' },
+          '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)', color: '#fff' },
         }}
       >
         <LanguageIcon size={16} fill={colors.white} />

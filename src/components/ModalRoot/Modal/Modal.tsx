@@ -21,13 +21,10 @@ import { bbColors, bbFont } from '@/styles/bb';
 /**
  * Shared admin modal shell — used by every modal in the Broker Desk
  * (CreateReservation, Cancel/Confirm/Sync booking, Edit notes, User
- * update, Inquiry status, Invoice preview, Agency update, …). Styling
- * aligns with the rest of the redesign:
+ * update, Inquiry status, Invoice preview, Agency update, …). v2.2:
  *
- *   - Title: navy 18px/800 (no italic)
- *   - Description: gray500
- *   - Confirm (primary action): yellow button
- *   - Cancel: outlined, navy text
+ *   - Radius 16, title bar 18/800 with an optional 12.5 description
+ *   - Footer on gray.75: cancel (outlined) then confirm (yellow), right-aligned
  *
  * When a modal passes `customButton`, the default action row is
  * suppressed and the caller provides its own footer.
@@ -54,39 +51,14 @@ interface ModalProps extends DialogProps {
   onBack?: () => void;
 }
 
+// Footer buttons follow the theme (yellow contained primary, outlined tertiary); only the
+// footer-specific sizing lives here.
 const confirmBtnSx = {
-  backgroundColor: bbColors.yellow500,
-  color: bbColors.yellowText,
-  fontFamily: bbFont.stack,
-  fontSize: 13,
-  fontWeight: 800,
-  letterSpacing: '0.02em',
-  textTransform: 'none' as const,
-  borderRadius: '6px',
-  boxShadow: '0 4px 10px -4px rgba(255,210,74,0.5)',
-  '&:hover': { backgroundColor: '#ffca2e', boxShadow: '0 4px 10px -4px rgba(255,210,74,0.5)' },
-  '&.Mui-disabled': {
-    backgroundColor: '#fce8a3',
-    color: bbColors.yellowText,
-    boxShadow: 'none',
-  },
+  minWidth: 96,
 };
 
 const cancelBtnSx = {
-  backgroundColor: bbColors.white,
-  color: bbColors.navy900,
-  border: `1px solid ${bbColors.gray300}`,
-  fontFamily: bbFont.stack,
-  fontSize: 13,
-  fontWeight: 700,
-  textTransform: 'none' as const,
-  borderRadius: '6px',
-  boxShadow: 'none',
-  '&:hover': {
-    backgroundColor: bbColors.gray75,
-    border: `1px solid ${bbColors.gray300}`,
-    boxShadow: 'none',
-  },
+  minWidth: 96,
 };
 
 const Modal = ({
@@ -119,7 +91,7 @@ const Modal = ({
     sx={{
       '& .MuiDialog-paper': {
         overflow: customButton ? 'visible' : 'hidden',
-        borderRadius: '12px',
+        borderRadius: '16px',
         fontFamily: bbFont.stack,
       },
     }}
@@ -131,8 +103,9 @@ const Modal = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          gap: 1.25,
           padding: '16px 20px',
-          borderBottom: `1px solid ${bbColors.gray200}`,
+          borderBottom: `1px solid ${bbColors.gray100}`,
         }}
       >
         {arrowBack && (
@@ -140,7 +113,7 @@ const Modal = ({
             <KeyboardBackspaceIcon fontSize="small" />
           </IconButton>
         )}
-        <Stack>
+        <Stack sx={{ flex: 1, minWidth: 0 }}>
           <Typography
             sx={{
               fontFamily: bbFont.stack,
@@ -153,16 +126,18 @@ const Modal = ({
             {title}
           </Typography>
           {description && (
-            <Typography
-              sx={{ fontFamily: bbFont.stack, fontSize: 12.5, color: bbColors.gray500, mt: 0.25 }}
-            >
+            <Typography sx={{ fontFamily: bbFont.stack, fontSize: 12.5, color: bbColors.gray500, mt: 0.25 }}>
               {description}
             </Typography>
           )}
         </Stack>
-        <Stack direction="row" alignItems="center" spacing={2}>
+        <Stack direction="row" alignItems="center" spacing={1.5}>
           {titleActions && <Box flex="none">{titleActions}</Box>}
-          <IconButton size="small" onClick={onClose} sx={{ color: bbColors.gray500 }}>
+          <IconButton
+            onClick={onClose}
+            aria-label={cancelBtnText}
+            sx={{ width: 32, height: 32, color: bbColors.gray500 }}
+          >
             <CloseRounded fontSize="small" />
           </IconButton>
         </Stack>
@@ -172,11 +147,9 @@ const Modal = ({
       <DialogContent
         ref={scrollRef}
         sx={{
-          pb: 3,
-          pt: 2.5,
+          '&&': { pt: '18px', pb: '20px', px: '20px' },
           fontFamily: bbFont.stack,
           color: bbColors.navy900,
-          borderBottom: `1px solid ${bbColors.gray200}`,
         }}
       >
         {children}
@@ -185,19 +158,21 @@ const Modal = ({
     {(!hideCancelButton || !hideConfirmButton) && (
       <DialogActions
         disableSpacing
-        sx={{ gap: 1, padding: '14px 20px', backgroundColor: bbColors.white }}
+        sx={{
+          gap: 1,
+          padding: '14px 20px',
+          // Primary action last, on the right; the cancel button sits before it
+          // (row-reverse, so flex-start is the right edge).
+          flexDirection: 'row-reverse',
+          justifyContent: 'flex-start',
+          '& > .MuiButton-root': { flex: '0 1 auto' },
+        }}
       >
         {customButton ? (
           <Box sx={{ width: '100%' }}>{customButton}</Box>
         ) : (
           !hideConfirmButton && (
-            <Button
-              onClick={onConfirm}
-              fullWidth
-              size="large"
-              {...ConfirmBtnProps}
-              sx={{ ...confirmBtnSx, ...(ConfirmBtnProps?.sx || {}) }}
-            >
+            <Button onClick={onConfirm} {...ConfirmBtnProps} sx={{ ...confirmBtnSx, ...(ConfirmBtnProps?.sx || {}) }}>
               {confirmBtnText}
             </Button>
           )
@@ -205,8 +180,7 @@ const Modal = ({
         {!hideCancelButton && (
           <Button
             onClick={onCancel}
-            size="large"
-            fullWidth
+            variant="outlined"
             {...CancelBtnProps}
             sx={{ ...cancelBtnSx, ...(CancelBtnProps?.sx || {}) }}
           >

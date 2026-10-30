@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, NavLink } from 'react-router-dom';
 
+import CloseIcon from '@mui/icons-material/CloseRounded';
 import LogoutIcon from '@mui/icons-material/LogoutOutlined';
 import MenuIcon from '@mui/icons-material/MenuRounded';
 import SettingsIcon from '@mui/icons-material/SettingsOutlined';
@@ -9,7 +10,7 @@ import { AppBar, Box, Button, Divider, Drawer, IconButton, Menu, MenuItem, Stack
 
 import navigation from '@/config/navigation.config';
 import { UserRoleName } from '@/models/user.model';
-import { bbColors, bbFont } from '@/styles/bb';
+import { bbColors, bbFont, bbTexture } from '@/styles/bb';
 import { createPoller } from '@/utils/contactCenter/poller';
 import useLogout from '@/utils/hooks/useLogout';
 import { useAuthStore } from '@/valtio/auth/auth.store';
@@ -21,35 +22,51 @@ import { useContactCenterStore } from '@/valtio/contactCenter/contactCenter.stor
 import LanguagePicker from './LanguagePicker';
 
 /**
- * Boat4You Broker Desk top navigation — navy bar, yellow B4 logomark,
- * CENTERED inline nav items (yellow pill = active), settings gear,
- * user pill. Mobile collapses nav + right cluster into a hamburger
- * drawer that slides in from the right.
+ * Boat4You Broker Desk top navigation (v2.2): navy bar on the nautical-chart
+ * texture, yellow B4 tile, centred nav (yellow pill = active), language and
+ * profile glass buttons, user pill. Below md the nav and the right cluster
+ * collapse into a 44px menu button that opens a textured drawer from the right.
  *
- *   height 54px, bg #0b1a2b, horizontal padding 20px
- *   no global search, no bell (intentionally removed per handoff)
- *   md breakpoint (900px) = desktop ↔ mobile switch
+ *   height 54px, horizontal padding 20px
+ *   below 1200px "· Broker Desk" and the user's name are hidden
  */
 
-const NAV_BG = bbColors.navy900;
-const NAV_ITEM_INACTIVE = bbColors.navyDim; // #a8bccf
-const NAV_ITEM_ACTIVE_BG = bbColors.yellow500;
-const NAV_ITEM_ACTIVE_FG = bbColors.navy900;
+const glassSx = {
+  width: 32,
+  height: 32,
+  p: 0,
+  borderRadius: '9px',
+  backgroundColor: 'rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.14)',
+  color: '#fff',
+  '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)', color: '#fff' },
+} as const;
 
-const navLinkStyle = ({ isActive }: { isActive: boolean }) => ({
-  color: isActive ? NAV_ITEM_ACTIVE_FG : NAV_ITEM_INACTIVE,
-  backgroundColor: isActive ? NAV_ITEM_ACTIVE_BG : 'transparent',
-  fontSize: 12.5,
-  fontWeight: isActive ? 800 : 600,
-  padding: '8px 14px',
-  borderRadius: 6,
-  textDecoration: 'none',
-  display: 'flex',
-  alignItems: 'center',
-  gap: 6,
-  fontFamily: bbFont.stack,
-  whiteSpace: 'nowrap' as const,
-});
+// NavLink marks the current route with the `active` class.
+const navLinksSx = {
+  '& a': {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '6px',
+    height: 32,
+    padding: '0 10px',
+    borderRadius: '8px',
+    fontFamily: bbFont.stack,
+    fontSize: 12.5,
+    fontWeight: 600,
+    color: bbColors.navyMist,
+    textDecoration: 'none',
+    whiteSpace: 'nowrap',
+    transition: 'background-color .15s, color .15s',
+  },
+  '& a:hover': { color: '#fff', backgroundColor: 'rgba(255,255,255,0.07)' },
+  '& a.active': {
+    backgroundColor: bbColors.yellow500,
+    color: bbColors.navy900,
+    fontWeight: 800,
+    boxShadow: '0 6px 14px -8px rgba(255,210,74,.95)',
+  },
+} as const;
 
 const Header = () => {
   const { user } = useAuthStore();
@@ -102,54 +119,49 @@ const Header = () => {
   const initials = `${user.name?.[0] ?? ''}${user.surname?.[0] ?? ''}`.toUpperCase() || 'B4';
 
   const Brand = (
-    <Link to="/bookings" style={{ textDecoration: 'none' }}>
-      <Stack direction="row" alignItems="center" gap={1.25}>
+    <Link to="/bookings" style={{ textDecoration: 'none' }} aria-label="boat4you — Bookings">
+      <Stack direction="row" alignItems="center" gap={1}>
         <Box
           sx={{
             width: 30,
             height: 30,
-            borderRadius: '7px',
+            borderRadius: '8px',
             backgroundColor: bbColors.yellow500,
             color: bbColors.yellowText,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontWeight: 800,
-            fontSize: 13,
-            letterSpacing: '-0.02em',
+            fontSize: 12,
+            boxShadow: 'inset 0 -2px 0 rgba(59,41,0,.16)',
           }}
         >
           B4
         </Box>
-        <Stack direction="row" alignItems="baseline" gap={0.75}>
-          <Typography
+        <Typography
+          component="span"
+          sx={{
+            fontWeight: 800,
+            fontSize: 14,
+            color: '#fff',
+            fontFamily: bbFont.stack,
+            whiteSpace: 'nowrap',
+          }}
+        >
+          boat4you{' '}
+          <Box
+            component="span"
             sx={{
-              fontWeight: 800,
-              fontSize: 14,
-              letterSpacing: '-0.01em',
-              color: '#fff',
-              fontFamily: bbFont.stack,
-            }}
-          >
-            boat4you
-          </Typography>
-          {/* "· Broker Desk" hidden below sm to keep the brand block compact on
-              tight mobile widths; logomark + wordmark alone still read clean. */}
-          <Box component="span" sx={{ color: bbColors.yellow500, display: { xs: 'none', sm: 'inline' } }}>
-            ·
-          </Box>
-          <Typography
-            sx={{
+              color: bbColors.navyDim,
               fontSize: 11,
-              color: NAV_ITEM_INACTIVE,
-              fontWeight: 500,
-              fontFamily: bbFont.stack,
-              display: { xs: 'none', sm: 'inline' },
+              fontWeight: 600,
+              display: 'none',
+              '@media (min-width: 1200px)': { display: 'inline' },
             }}
           >
-            Broker Desk
-          </Typography>
-        </Stack>
+            · Broker Desk
+          </Box>
+        </Typography>
       </Stack>
     </Link>
   );
@@ -157,19 +169,29 @@ const Header = () => {
   // eslint-disable-next-line react/no-unstable-nested-components
   const NavBadge = ({ count }: { count: number }) => (
     <Box
+      component="span"
       sx={{
-        fontSize: 9.5,
-        fontWeight: 800,
-        padding: '1px 6px',
+        minWidth: 17,
+        height: 17,
+        px: '5px',
         borderRadius: 999,
         backgroundColor: bbColors.red600,
         color: '#fff',
-        letterSpacing: '0.04em',
+        fontSize: 10,
+        fontWeight: 700,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0 0 0 2px rgba(11,26,43,.35)',
       }}
     >
       {count}
     </Box>
   );
+
+  const totalUnread = visibleNavigation.reduce((sum, item) => sum + badgeFor(item.id, item.news), 0);
+
+  const roleLabel = user.roles?.[0]?.roleName;
 
   return (
     <>
@@ -177,23 +199,23 @@ const Header = () => {
         elevation={0}
         position="fixed"
         sx={{
-          backgroundColor: NAV_BG,
+          background: bbTexture.chart,
           color: '#fff',
           height: 54,
           justifyContent: 'center',
           borderBottom: 'none',
+          boxShadow: 'inset 0 -1px 0 rgba(255,255,255,.07)',
           fontFamily: bbFont.stack,
         }}
       >
-        {/* CSS grid = 3 equal columns; Brand left, nav centered, right
-            cluster right. On md-down, grid collapses to [brand | hamburger]
-            so the bar stays tight on tablet / phone widths. */}
+        {/* Brand left, nav centred, tools right. Below md: [brand | menu button]. */}
         <Box
           sx={{
-            px: { xs: 1.5, sm: 2.5 },
+            pl: { xs: 1.5, md: 2.5 },
+            pr: { xs: 1, md: 2.5 },
             height: 54,
             display: 'grid',
-            gridTemplateColumns: { xs: '1fr auto', md: '1fr auto 1fr' },
+            gridTemplateColumns: { xs: '1fr auto', md: 'auto minmax(0, 1fr) auto' },
             alignItems: 'center',
             gap: 2,
           }}
@@ -203,10 +225,20 @@ const Header = () => {
 
           {/* --- Nav (centered) --- Desktop only. */}
           <Stack
+            component="nav"
+            aria-label="Main navigation"
             direction="row"
             alignItems="center"
-            gap={0.25}
-            sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}
+            gap="2px"
+            sx={{
+              display: { xs: 'none', md: 'flex' },
+              justifyContent: 'center',
+              minWidth: 0,
+              overflowX: 'auto',
+              scrollbarWidth: 'none',
+              '&::-webkit-scrollbar': { display: 'none' },
+              ...navLinksSx,
+            }}
           >
             {visibleNavigation.map(item => {
               // Bookings and the Contact Center get live counts from their stores (polled); other
@@ -214,7 +246,7 @@ const Header = () => {
               const count = badgeFor(item.id, item.news);
 
               return (
-                <NavLink key={item.id} to={item.path || '/'} style={navLinkStyle}>
+                <NavLink key={item.id} to={item.path || '/'}>
                   {t(item.id, item.id)}
                   {count > 0 ? <NavBadge count={count} /> : null}
                 </NavLink>
@@ -226,92 +258,94 @@ const Header = () => {
           <Stack
             direction="row"
             alignItems="center"
-            gap={1.25}
+            gap={1}
             sx={{
               display: { xs: 'none', md: 'flex' },
               justifyContent: 'flex-end',
             }}
           >
             <LanguagePicker />
-            <IconButton
-              component={Link}
-              to="/my-profile"
-              size="small"
-              sx={{
-                width: 30,
-                height: 30,
-                borderRadius: '6px',
-                backgroundColor: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                color: '#fff',
-                '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)' },
-              }}
-            >
-              <SettingsIcon sx={{ fontSize: 16 }} />
+            <IconButton component={Link} to="/my-profile" aria-label={t('profileSettings')} sx={glassSx}>
+              <SettingsIcon sx={{ fontSize: 17 }} />
             </IconButton>
             <Button
               onClick={e => setUserMenu(e.currentTarget)}
+              aria-haspopup="menu"
+              aria-expanded={Boolean(userMenu)}
               sx={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: 1,
+                height: 34,
+                minHeight: 34,
                 backgroundColor: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                padding: '3px 12px 3px 3px',
+                border: '1px solid rgba(255,255,255,0.14)',
+                padding: '0 4px',
                 borderRadius: '999px',
+                boxShadow: 'none',
                 textTransform: 'none',
                 color: '#fff',
                 minWidth: 0,
-                '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)' },
+                '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)', boxShadow: 'none' },
+                '@media (min-width: 1200px)': { padding: '0 12px 0 4px' },
               }}
             >
               <Box
+                component="span"
                 sx={{
-                  width: 24,
-                  height: 24,
+                  width: 26,
+                  height: 26,
                   borderRadius: '50%',
-                  background: `linear-gradient(135deg, ${bbColors.navy700}, ${bbColors.navy900})`,
-                  color: '#fff',
+                  backgroundColor: bbColors.yellow500,
+                  color: bbColors.yellowText,
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 10,
+                  fontSize: 10.5,
                   fontWeight: 800,
                 }}
               >
                 {initials}
               </Box>
               <Typography
+                component="span"
                 sx={{
-                  fontSize: 11.5,
+                  fontSize: 13,
                   fontWeight: 700,
                   color: '#fff',
                   fontFamily: bbFont.stack,
-                  display: { xs: 'none', lg: 'inline' },
+                  whiteSpace: 'nowrap',
+                  display: 'none',
+                  '@media (min-width: 1200px)': { display: 'inline' },
                 }}
               >
-                {user.name} {user.surname}
+                {user.name} {user.surname} ▾
               </Typography>
             </Button>
           </Stack>
 
-          {/* --- Hamburger (mobile) --- */}
+          {/* --- Menu button (mobile) --- */}
           <IconButton
             onClick={() => setDrawerOpen(true)}
             aria-label="Open navigation"
             sx={{
               display: { xs: 'inline-flex', md: 'none' },
-              width: 34,
-              height: 34,
-              borderRadius: '6px',
+              position: 'relative',
+              width: 44,
+              height: 44,
+              borderRadius: '10px',
               backgroundColor: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.12)',
               color: '#fff',
               justifySelf: 'end',
-              '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)' },
+              '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)', color: '#fff' },
             }}
           >
-            <MenuIcon sx={{ fontSize: 20 }} />
+            <MenuIcon sx={{ fontSize: 22 }} />
+            {totalUnread > 0 && (
+              <Box sx={{ position: 'absolute', top: 4, right: 2, display: 'flex' }}>
+                <NavBadge count={totalUnread} />
+              </Box>
+            )}
           </IconButton>
         </Box>
       </AppBar>
@@ -323,34 +357,25 @@ const Header = () => {
         onClose={() => setUserMenu(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        slotProps={{
-          paper: {
-            sx: {
-              mt: 1,
-              minWidth: 200,
-              border: `1px solid ${bbColors.gray200}`,
-              borderRadius: '8px',
-              boxShadow: '0 8px 24px -8px rgba(11,26,43,0.18)',
-            },
-          },
-        }}
+        slotProps={{ paper: { sx: { mt: 1, width: 240 } } }}
       >
-        <MenuItem
-          component={Link}
-          to="/my-profile"
-          onClick={() => setUserMenu(null)}
-          sx={{ gap: 1, fontSize: 13, color: bbColors.navy900 }}
-        >
-          <SettingsIcon sx={{ fontSize: 16 }} />
+        <Box sx={{ p: '10px 10px 8px', mb: '4px', borderBottom: `1px solid ${bbColors.gray100}` }}>
+          <Typography sx={{ fontSize: 13, fontWeight: 700, color: bbColors.navy900 }}>
+            {user.name} {user.surname}
+          </Typography>
+          {roleLabel && <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>{roleLabel}</Typography>}
+        </Box>
+        <MenuItem component={Link} to="/my-profile" onClick={() => setUserMenu(null)}>
+          <SettingsIcon sx={{ fontSize: 16, color: bbColors.gray500 }} />
           {t('profileSettings')}
         </MenuItem>
-        <Divider />
+        <Divider sx={{ '&.MuiDivider-root': { my: '4px' } }} />
         <MenuItem
           onClick={() => {
             setUserMenu(null);
             handleLogout();
           }}
-          sx={{ gap: 1, fontSize: 13, color: bbColors.red600 }}
+          sx={{ color: bbColors.red700 }}
         >
           <LogoutIcon sx={{ fontSize: 16 }} />
           {t('logout')}
@@ -362,96 +387,116 @@ const Header = () => {
         anchor="right"
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        PaperProps={{ sx: { width: 280, backgroundColor: NAV_BG, color: '#fff' } }}
+        PaperProps={{
+          sx: {
+            width: 300,
+            maxWidth: '86vw',
+            background: bbTexture.chart,
+            color: '#fff',
+            boxShadow: '-8px 0 24px rgba(0,0,0,.3)',
+          },
+        }}
       >
-        <Stack sx={{ p: 2, gap: 1 }}>
-          {/* User strip — mirrors the desktop pill but expanded so the
-              broker sees their identity at the top of the drawer and can
-              reach Profile / Logout without a nested menu. */}
+        <Stack component="nav" aria-label="Main navigation" sx={{ p: '10px 10px 16px', minHeight: '100%' }}>
+          {/* User strip: identity at the top, Profile / Logout at the bottom of the drawer. */}
           <Stack
             direction="row"
             alignItems="center"
             gap={1.25}
-            sx={{
-              backgroundColor: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              borderRadius: '10px',
-              p: 1.25,
-            }}
+            sx={{ p: '6px 4px 14px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}
           >
             <Box
               sx={{
-                width: 36,
-                height: 36,
+                flex: 'none',
+                width: 38,
+                height: 38,
                 borderRadius: '50%',
                 background: `linear-gradient(135deg, ${bbColors.navy700}, ${bbColors.navy900})`,
+                border: '1px solid rgba(255,255,255,.25)',
                 color: '#fff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: 13,
-                fontWeight: 800,
+                fontWeight: 700,
               }}
             >
               {initials}
             </Box>
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Typography sx={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>
+              <Typography sx={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>
                 {user.name} {user.surname}
               </Typography>
-              <Typography sx={{ fontSize: 11, color: NAV_ITEM_INACTIVE }}>Broker Desk</Typography>
+              <Typography sx={{ fontSize: 12, color: bbColors.navyDim }}>
+                Broker Desk{roleLabel ? ` · ${roleLabel}` : ''}
+              </Typography>
             </Box>
+            <IconButton
+              onClick={() => setDrawerOpen(false)}
+              aria-label="Close navigation"
+              sx={{
+                width: 44,
+                height: 44,
+                color: '#fff',
+                '&:hover': { color: '#fff', backgroundColor: 'rgba(255,255,255,.07)' },
+              }}
+            >
+              <CloseIcon />
+            </IconButton>
           </Stack>
 
-          <Stack sx={{ mt: 1, gap: 0.25 }}>
+          <Stack
+            sx={{
+              py: '10px',
+              gap: '2px',
+              flex: 1,
+              ...navLinksSx,
+              '& a': { ...navLinksSx['& a'], height: 44, px: '12px', fontSize: 14, justifyContent: 'space-between' },
+            }}
+          >
             {visibleNavigation.map(item => (
-              <NavLink
-                key={item.id}
-                to={item.path || '/'}
-                onClick={() => setDrawerOpen(false)}
-                style={({ isActive }) => ({
-                  ...navLinkStyle({ isActive }),
-                  padding: '10px 14px',
-                  fontSize: 13,
-                  justifyContent: 'space-between',
-                })}
-              >
+              <NavLink key={item.id} to={item.path || '/'} onClick={() => setDrawerOpen(false)}>
                 <span>{t(item.id, item.id)}</span>
                 {badgeFor(item.id, item.news) > 0 ? <NavBadge count={badgeFor(item.id, item.news)} /> : null}
               </NavLink>
             ))}
           </Stack>
 
-          <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)', my: 1 }} />
-
-          <MenuItem
-            component={Link}
-            to="/my-profile"
-            onClick={() => setDrawerOpen(false)}
-            sx={{ gap: 1, fontSize: 13, color: '#fff', borderRadius: '6px' }}
-          >
-            <SettingsIcon sx={{ fontSize: 18 }} />
-            {t('profileSettings')}
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              setDrawerOpen(false);
-              handleLogout();
+          <Stack
+            sx={{
+              borderTop: '1px solid rgba(255,255,255,0.1)',
+              pt: 1,
+              gap: '2px',
+              '& .MuiMenuItem-root': {
+                minHeight: 44,
+                gap: 1,
+                fontSize: 14,
+                fontWeight: 600,
+                color: bbColors.navyMist,
+                borderRadius: '8px',
+                '&:hover': { backgroundColor: 'rgba(255,255,255,0.07)', color: '#fff' },
+              },
             }}
-            sx={{ gap: 1, fontSize: 13, color: '#ff9e8d', borderRadius: '6px' }}
           >
-            <LogoutIcon sx={{ fontSize: 18 }} />
-            {t('logout')}
-          </MenuItem>
-
-          <Divider sx={{ borderColor: 'rgba(255,255,255,0.12)', my: 1 }} />
-
-          {/* Language switcher in the mobile drawer — same component as desktop
-              right cluster but rendered inline so the broker can switch HR/EN
-              without opening another drawer. */}
-          <Box sx={{ px: 1, py: 0.5 }}>
-            <LanguagePicker />
-          </Box>
+            <MenuItem component={Link} to="/my-profile" onClick={() => setDrawerOpen(false)}>
+              <SettingsIcon sx={{ fontSize: 18 }} />
+              {t('profileSettings')}
+            </MenuItem>
+            {/* Language switcher: same component as the desktop cluster, inline in the drawer. */}
+            <Box sx={{ px: '12px', py: 0.5 }}>
+              <LanguagePicker />
+            </Box>
+            <MenuItem
+              onClick={() => {
+                setDrawerOpen(false);
+                handleLogout();
+              }}
+              sx={{ '&&': { color: '#ff9e8d' } }}
+            >
+              <LogoutIcon sx={{ fontSize: 18 }} />
+              {t('logout')}
+            </MenuItem>
+          </Stack>
         </Stack>
       </Drawer>
     </>

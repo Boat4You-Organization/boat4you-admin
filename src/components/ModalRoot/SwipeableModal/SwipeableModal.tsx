@@ -4,7 +4,7 @@ import CloseRounded from '@mui/icons-material/CloseRounded';
 import KeyboardBackspaceIcon from '@mui/icons-material/KeyboardBackspace';
 import { Box, Button, ButtonProps, DialogProps, IconButton, Stack, SwipeableDrawer, Typography } from '@mui/material';
 
-import colors from '@/styles/themes/colors';
+import { bbColors, bbFont, bbShadow } from '@/styles/bb';
 
 import styles from './SwipeableModal.module.scss';
 
@@ -66,8 +66,13 @@ const SwipeableModal = ({
         zIndex,
       },
       '.MuiDrawer-paper ': {
-        borderTopLeftRadius: '12px',
-        borderTopRightRadius: '12px',
+        borderTopLeftRadius: '16px',
+        borderTopRightRadius: '16px',
+        border: `1px solid ${bbColors.gray200}`,
+        borderBottom: 0,
+        boxShadow: bbShadow.sheet,
+        fontFamily: bbFont.stack,
+        color: bbColors.navy900,
         maxHeight: '80dvh',
         overflowY: 'hidden',
         position: 'fixed',
@@ -87,26 +92,24 @@ const SwipeableModal = ({
           direction="row"
           justifyContent="space-between"
           alignItems={description ? 'flex-start' : 'center'}
-          borderBottom={`1px solid ${colors.black200}`}
+          borderBottom={`1px solid ${bbColors.gray100}`}
           className={styles.swipeableContainer}
-          sx={{ flexShrink: 0 }}
+          sx={{ flexShrink: 0, '&&': { borderTop: 0, padding: '18px 8px 12px 16px' } }}
         >
           {arrowBack && (
-            <IconButton size="large" onClick={onBack} sx={{ color: colors.black400 }}>
+            <IconButton size="large" onClick={onBack} sx={{ color: bbColors.gray500 }}>
               <KeyboardBackspaceIcon />
             </IconButton>
           )}
-          <Stack>
-            <Typography variant="h2">{title}</Typography>
-            {description && (
-              <Typography variant="body1" color={colors.blue500}>
-                {description}
-              </Typography>
-            )}
+          <Stack sx={{ flex: 1, minWidth: 0 }}>
+            <Typography sx={{ fontSize: 17, fontWeight: 800, letterSpacing: '-0.01em', color: bbColors.navy900 }}>
+              {title}
+            </Typography>
+            {description && <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>{description}</Typography>}
           </Stack>
-          <Stack direction="row" alignItems="center" spacing={3}>
+          <Stack direction="row" alignItems="center" spacing={1}>
             {titleActions && <Box flex="none">{titleActions}</Box>}
-            <IconButton size="large" onClick={onClose} sx={{ color: colors.black400 }}>
+            <IconButton size="large" onClick={onClose} aria-label={cancelBtnText} sx={{ color: bbColors.gray500 }}>
               <CloseRounded />
             </IconButton>
           </Stack>
@@ -129,7 +132,12 @@ const SwipeableModal = ({
       {children}
     </Box>
     {(!hideCancelButton || !hideConfirmButton) && (
-      <Stack direction="column" spacing={2} className={styles.swipeableContainer} sx={{ flexShrink: 0 }}>
+      <Stack
+        direction="column"
+        spacing={1}
+        className={styles.swipeableContainer}
+        sx={{ flexShrink: 0, '&&': { padding: '12px 16px 16px', borderTopColor: bbColors.gray100 } }}
+      >
         {customButton ? (
           <Box sx={{ width: '100%' }}>{customButton}</Box>
         ) : (
@@ -140,7 +148,7 @@ const SwipeableModal = ({
           )
         )}
         {!hideCancelButton && (
-          <Button onClick={onCancel} size="large" color="secondary" fullWidth {...CancelBtnProps}>
+          <Button onClick={onCancel} size="large" variant="outlined" fullWidth {...CancelBtnProps}>
             {cancelBtnText}
           </Button>
         )}

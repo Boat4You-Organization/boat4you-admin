@@ -1,30 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NavLink, Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 
 import LogoutIcon from '@mui/icons-material/LogoutOutlined';
 import MenuIcon from '@mui/icons-material/MenuRounded';
 import SettingsIcon from '@mui/icons-material/SettingsOutlined';
-import {
-  AppBar,
-  Box,
-  Button,
-  Divider,
-  Drawer,
-  IconButton,
-  Menu,
-  MenuItem,
-  Stack,
-  Typography,
-} from '@mui/material';
+import { AppBar, Box, Button, Divider, Drawer, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material';
 
 import navigation from '@/config/navigation.config';
 import { UserRoleName } from '@/models/user.model';
 import { bbColors, bbFont } from '@/styles/bb';
+import { createPoller } from '@/utils/contactCenter/poller';
 import useLogout from '@/utils/hooks/useLogout';
 import { useAuthStore } from '@/valtio/auth/auth.store';
 import { refreshUnviewedBookingsCount } from '@/valtio/bookings/bookings.actions';
 import { useBookingsStore } from '@/valtio/bookings/bookings.store';
+import { refreshContactCenterUnread } from '@/valtio/contactCenter/contactCenter.actions';
+import { useContactCenterStore } from '@/valtio/contactCenter/contactCenter.store';
+
 import LanguagePicker from './LanguagePicker';
 
 /**
@@ -66,6 +59,19 @@ const Header = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const { unviewedCount: unviewedBookings } = useBookingsStore();
   const isUserRole = user?.roles?.some(role => role.roleName === UserRoleName.USER);
+  const isSystemAdmin = !!user?.roles?.some(role => role.roleName === UserRoleName.SYSTEM_ADMIN);
+  const { unreadCount: contactCenterUnread } = useContactCenterStore();
+  // Only the items this user's roles may open (a MANAGER does not see SYSTEM_ADMIN-only items).
+  const visibleNavigation = navigation.filter(
+    item => !item.accessLevel || !!user?.roles?.some(role => item.accessLevel?.includes(role.roleName))
+  );
+  const badgeFor = (id: string, news?: number) => {
+    if (id === 'bookings') return unviewedBookings;
+
+    if (id === 'contactCenter') return contactCenterUnread;
+
+    return news ?? 0;
+  };
 
   // Poll the unviewed-bookings count whenever the admin shell is mounted.
   // First fetch on mount, then every 60s so a parked tab still surfaces
@@ -77,9 +83,19 @@ const Header = () => {
 
     const id = window.setInterval(refreshUnviewedBookingsCount, 60_000);
 
-    
-return () => window.clearInterval(id);
+    return () => window.clearInterval(id);
   }, [user, isUserRole]);
+
+  // Contact Center unread conversations, every 30 s while the tab is visible (SYSTEM_ADMIN only, like the API).
+  useEffect(() => {
+    if (!isSystemAdmin) return undefined;
+
+    const poller = createPoller(refreshContactCenterUnread, 30_000);
+
+    poller.start();
+
+    return () => poller.stop();
+  }, [isSystemAdmin]);
 
   if (!user || isUserRole) return null;
 
@@ -119,10 +135,7 @@ return () => window.clearInterval(id);
           </Typography>
           {/* "· Broker Desk" hidden below sm to keep the brand block compact on
               tight mobile widths; logomark + wordmark alone still read clean. */}
-          <Box
-            component="span"
-            sx={{ color: bbColors.yellow500, display: { xs: 'none', sm: 'inline' } }}
-          >
+          <Box component="span" sx={{ color: bbColors.yellow500, display: { xs: 'none', sm: 'inline' } }}>
             ·
           </Box>
           <Typography
@@ -195,14 +208,12 @@ return () => window.clearInterval(id);
             gap={0.25}
             sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}
           >
-            {navigation.map(item => {
-              // Bookings gets a live count pulled from bookingsStore (polled
-              // every 60s). Other nav items fall back to the static `news`
-              // prop (currently unused but kept for future module alerts).
-              const count = item.id === 'bookings' ? unviewedBookings : item.news ?? 0;
+            {visibleNavigation.map(item => {
+              // Bookings and the Contact Center get live counts from their stores (polled); other
+              // nav items fall back to the static `news` prop (kept for future module alerts).
+              const count = badgeFor(item.id, item.news);
 
-              
-return (
+              return (
                 <NavLink key={item.id} to={item.path || '/'} style={navLinkStyle}>
                   {t(item.id, item.id)}
                   {count > 0 ? <NavBadge count={count} /> : null}
@@ -393,7 +404,7 @@ return (
           </Stack>
 
           <Stack sx={{ mt: 1, gap: 0.25 }}>
-            {navigation.map(item => (
+            {visibleNavigation.map(item => (
               <NavLink
                 key={item.id}
                 to={item.path || '/'}
@@ -406,7 +417,7 @@ return (
                 })}
               >
                 <span>{t(item.id, item.id)}</span>
-                {item.news ? <NavBadge count={item.news} /> : null}
+                {badgeFor(item.id, item.news) > 0 ? <NavBadge count={badgeFor(item.id, item.news)} /> : null}
               </NavLink>
             ))}
           </Stack>

@@ -68,10 +68,10 @@ const navigation: NavigationLink[] = [
     accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
   },
   {
-    id: 'chat',
+    // Contact Center (P2, replaces /chat): backend /admin/cc/** and /admin/chat/** are SYSTEM_ADMIN only.
+    id: 'contactCenter',
     icon: Contact,
-    path: '/chat',
-    // Backend /admin/chat/** is SYSTEM_ADMIN only; a MANAGER would see an empty inbox.
+    path: '/contact-center',
     accessLevel: [UserRoleName.SYSTEM_ADMIN],
   },
   {

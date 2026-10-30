@@ -46,7 +46,7 @@ const YachtCards = ({ payload, siteId }: { payload: string | null; siteId: strin
         gridTemplateColumns: { xs: '1fr', sm: 'repeat(auto-fill, minmax(180px, 1fr))' },
         gap: 1,
         width: '100%',
-        minWidth: { md: 380 },
+        minWidth: { md: 'min(380px, 100%)' },
       }}
     >
       {cards.map((c, i) => {

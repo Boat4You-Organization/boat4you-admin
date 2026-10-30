@@ -181,7 +181,7 @@ export const fieldSx = {
   border: `1px solid ${cc.field}`,
   borderRadius: '8px',
   bgcolor: '#FFFFFF',
-  fontSize: 13.5,
+  fontSize: { xs: 16, md: 13.5 }, // under 16 px iOS Safari zooms the page on focus
   color: cc.ink,
   fontFamily: 'inherit',
   outline: 'none',
@@ -192,7 +192,7 @@ export const textareaSx = {
   ...fieldSx,
   height: 'auto',
   py: '8px',
-  fontSize: 13,
+  fontSize: { xs: 16, md: 13 },
   lineHeight: 1.5,
   resize: 'vertical',
 } as const;
@@ -450,7 +450,7 @@ export const SearchField = ({
         minWidth: 0,
         border: 0,
         outline: 'none',
-        fontSize: 13.5,
+        fontSize: { xs: 16, md: 13.5 },
         color: cc.ink,
         bgcolor: 'transparent',
         fontFamily: 'inherit',

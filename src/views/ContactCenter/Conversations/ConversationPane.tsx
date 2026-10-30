@@ -302,7 +302,7 @@ const ConversationPane = ({ detail, onChanged, onDeleted, onBack, onOpenCard }: 
               onKeyDown={onKey}
               placeholder={t('replyPlaceholder')}
               inputProps={{ maxLength: MAX_REPLY, 'aria-label': t('replyLabel') }}
-              sx={{ p: '10px 12px 2px', fontSize: { xs: 15, md: 14 }, lineHeight: 1.5, color: cc.ink }}
+              sx={{ p: '10px 12px 2px', fontSize: { xs: 16, md: 14 }, lineHeight: 1.5, color: cc.ink }}
             />
             <Box component="span" sx={{ alignSelf: 'flex-end', p: '0 10px 6px', fontSize: 11, color: cc.muted }}>
               {draft.length} / {MAX_REPLY}

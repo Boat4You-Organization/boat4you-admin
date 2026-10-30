@@ -12,7 +12,7 @@ import ContactCenterService from '@/services/contactCenter.service';
 import { ConversationDetail, ConversationFilter, ConversationRow, LiveRow } from '@/types/contactCenter.type';
 import { Poller, createPoller } from '@/utils/contactCenter/poller';
 import { linkSx } from '@/views/ContactCenter/common';
-import { ChatIcon, Empty, GoneIcon, Sk, cc, panelSx, scrollSx } from '@/views/ContactCenter/ui';
+import { CcButton, ChatIcon, Empty, GoneIcon, Sk, cc, panelSx, scrollSx } from '@/views/ContactCenter/ui';
 
 import ClientCard from './ClientCard';
 import ConversationList, { ListMode } from './ConversationList';
@@ -152,6 +152,7 @@ const Conversations = () => {
   useEffect(() => {
     setDetail(null);
     setMissing(false);
+    setCardOpen(false); // a conversation opened from the card shows that conversation, not a blank drawer
 
     if (selectedId == null) return undefined;
 
@@ -241,6 +242,13 @@ const Conversations = () => {
         )}
         {selectedId != null && !detail && !missing && (
           <Box sx={{ p: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <CcButton
+              kind="txt"
+              onClick={backToList}
+              sx={{ display: { xs: 'inline-flex', md: 'none' }, alignSelf: 'flex-start', minHeight: 44, px: 1 }}
+            >
+              ← {t('backToList')}
+            </CcButton>
             <Sk h={18} w="40%" />
             <Sk h={12} w="70%" />
             <Sk h={120} w="100%" r={10} />
@@ -270,7 +278,13 @@ const Conversations = () => {
         {detail ? card('column') : null}
       </Box>
 
-      <Drawer anchor="right" open={cardOpen} onClose={() => setCardOpen(false)}>
+      <Drawer
+        anchor="right"
+        open={cardOpen}
+        onClose={() => setCardOpen(false)}
+        // a conversation link in the card (even the open one) shows the conversation instead of the drawer
+        onClick={e => (e.target as HTMLElement).closest('a[href^="/contact-center/c/"]') && setCardOpen(false)}
+      >
         <Box sx={{ width: { xs: '100vw', sm: 400 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
           {detail && card('drawer')}
         </Box>

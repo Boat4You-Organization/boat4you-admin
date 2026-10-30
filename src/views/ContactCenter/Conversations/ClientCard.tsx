@@ -40,7 +40,7 @@ const Source = ({ kind, s }: { kind: string; s: SourceView | null }) => {
 
   const campaign = [s.utmSource, s.utmMedium, s.utmCampaign].filter(Boolean).join(' / ');
   const detail = [
-    formatAt(s.at, 'DD.MM.YYYY'),
+    formatAt(s.at, 'DD.MM.YYYY HH:mm'),
     s.fromSiteId && `${t('fromSite')} ${siteLabel(s.fromSiteId)}`,
     campaign,
     s.referrer && `${t('referrer')} ${s.referrer}`,
@@ -77,11 +77,23 @@ const Source = ({ kind, s }: { kind: string; s: SourceView | null }) => {
   );
 };
 
-const TagEditor = ({ tags, onChange, wide }: { tags: string[]; onChange(tags: string[]): void; wide: boolean }) => {
+const TagEditor = ({
+  tags,
+  onChange,
+  wide,
+  busy,
+}: {
+  tags: string[];
+  onChange(tags: string[]): void;
+  wide: boolean;
+  busy: boolean;
+}) => {
   const { t } = useTranslation('contactCenter');
   const [input, setInput] = useState('');
 
   const add = (raw: string) => {
+    if (busy) return; // the next change waits for the saved list (two quick taps would drop a tag)
+
     const tag = raw.trim().toLowerCase();
 
     setInput('');
@@ -120,6 +132,7 @@ const TagEditor = ({ tags, onChange, wide }: { tags: string[]; onChange(tags: st
               component="button"
               type="button"
               aria-label={t('removeTag', { tag })}
+              disabled={busy}
               onClick={() => onChange(tags.filter(x => x !== tag))}
               sx={{
                 border: 0,
@@ -149,7 +162,7 @@ const TagEditor = ({ tags, onChange, wide }: { tags: string[]; onChange(tags: st
             minWidth: 80,
             border: 0,
             outline: 'none',
-            fontSize: 13,
+            fontSize: { xs: 16, md: 13 },
             fontFamily: 'inherit',
             color: cc.ink,
             bgcolor: 'transparent',
@@ -213,29 +226,37 @@ const ClientCard = ({
   const [card, setCard] = useState<ContactCard | null>(null);
   const [form, setForm] = useState({ name: '', email: '', phone: '', note: '' });
   const [saving, setSaving] = useState(false);
+  const [tagsSaving, setTagsSaving] = useState(false);
   const page = layout === 'page';
 
-  const load = useCallback(async () => {
-    if (contactId == null) {
-      setCard(null);
+  /** keepForm: after a status or tag save, unsaved edits of name, e-mail, phone and note stay in the fields. */
+  const load = useCallback(
+    async (keepForm = false) => {
+      if (contactId == null) {
+        setCard(null);
 
-      return;
-    }
+        return;
+      }
 
-    try {
-      const { data } = await ContactCenterService.contact(contactId);
+      try {
+        const { data } = await ContactCenterService.contact(contactId);
 
-      setCard(data);
-      setForm({
-        name: data.contact.name ?? '',
-        email: data.contact.email ?? '',
-        phone: data.contact.phone ?? '',
-        note: data.note ?? '',
-      });
-    } catch {
-      setCard(null);
-    }
-  }, [contactId]);
+        setCard(data);
+
+        if (keepForm) return;
+
+        setForm({
+          name: data.contact.name ?? '',
+          email: data.contact.email ?? '',
+          phone: data.contact.phone ?? '',
+          note: data.note ?? '',
+        });
+      } catch {
+        setCard(null);
+      }
+    },
+    [contactId]
+  );
 
   useEffect(() => {
     load().catch(() => undefined);
@@ -253,13 +274,13 @@ const ClientCard = ({
   const errorText = (e: unknown) =>
     isAxiosError(e) && e.response?.data?.error ? String(e.response.data.error) : t('saveFailed');
 
-  const save = async (patch: ContactPatch) => {
+  const save = async (patch: ContactPatch, keepForm = false) => {
     if (!c) return;
 
     setSaving(true);
     try {
       await ContactCenterService.updateContact(c.id, patch);
-      await load();
+      await load(keepForm);
     } catch (e) {
       showToast({ status: 'error', text: errorText(e) });
     } finally {
@@ -270,13 +291,16 @@ const ClientCard = ({
   const saveForm = () => save({ name: form.name, email: form.email, phone: form.phone, note: form.note });
 
   const saveTags = async (tags: string[]) => {
-    if (!c) return;
+    if (!c || tagsSaving) return;
 
+    setTagsSaving(true);
     try {
       await ContactCenterService.setTags(c.id, tags);
-      await load();
+      await load(true);
     } catch (e) {
       showToast({ status: 'error', text: errorText(e) });
+    } finally {
+      setTagsSaving(false);
     }
   };
 
@@ -376,7 +400,9 @@ const ClientCard = ({
           component="select"
           value={c.status}
           disabled={saving}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => save({ status: e.target.value as ContactStatus })}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+            save({ status: e.target.value as ContactStatus }, true)
+          }
           sx={fieldSx}
         >
           {CONTACT_STATUSES.map(s => (
@@ -386,7 +412,7 @@ const ClientCard = ({
           ))}
         </Box>
       </Labeled>
-      <TagEditor tags={c.tags} onChange={tags => saveTags(tags)} wide={page} />
+      <TagEditor tags={c.tags} onChange={tags => saveTags(tags)} wide={page} busy={tagsSaving} />
       <Labeled label={t('contact.note')}>
         <Box
           component="textarea"

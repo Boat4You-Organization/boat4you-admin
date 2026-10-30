@@ -3,7 +3,7 @@
  * through safeHref, on the conversation's own site (ADMIN-11). */
 import { useTranslation } from 'react-i18next';
 
-import { Box, Link, Tooltip } from '@mui/material';
+import { Box, Link } from '@mui/material';
 import dayjs from 'dayjs';
 
 import { safeHref, siteLabel } from '@/utils/contactCenter/safeLink';
@@ -76,12 +76,11 @@ export const PageLink = ({
 
   return (
     <Box component="span" sx={{ wordBreak: 'break-all', color: cc.text2 }}>
-      {path}{' '}
-      <Tooltip title={t('suspiciousLinkHint')}>
-        <Pill colors={[cc.redBg, cc.red]} sx={{ height: 18, fontSize: 10.5 }}>
-          {t('suspiciousLink')}
-        </Pill>
-      </Tooltip>
+      {/* The tag comes first so a one-line ellipsis never cuts it off. */}
+      <Pill title={t('suspiciousLinkHint')} colors={[cc.redBg, cc.red]} sx={{ height: 18, fontSize: 10.5 }}>
+        {t('suspiciousLink')}
+      </Pill>{' '}
+      {path}
     </Box>
   );
 };

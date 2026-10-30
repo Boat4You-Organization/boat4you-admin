@@ -74,7 +74,7 @@ const ProactiveDialog = ({ row, onClose }: { row: LiveRow | null; onClose(): voi
           value={text}
           placeholder={t('proactive.placeholder')}
           onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value)}
-          sx={{ ...textareaSx, p: '10px 12px', borderRadius: '10px', fontSize: 14 }}
+          sx={{ ...textareaSx, p: '10px 12px', borderRadius: '10px', fontSize: { xs: 16, md: 14 } }}
         />
         <Box sx={{ textAlign: 'right', fontSize: 12, color: cc.muted, mt: '4px' }}>
           {text.length} / {MAX}

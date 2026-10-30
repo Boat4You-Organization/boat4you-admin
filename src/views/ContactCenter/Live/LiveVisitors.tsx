@@ -55,7 +55,7 @@ const LiveVisitors = () => {
       >
         <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1, fontSize: 15, fontWeight: 700 }}>
           <Dot color={cc.green} size={9} />
-          {t('liveHeader', { count: list.length })}
+          {rows ? t('liveHeader', { count: rows.length }) : t('tab.live')}
         </Box>
         <Box component="span" sx={{ fontSize: 12.5, color: cc.muted }}>
           {t('liveSub')}

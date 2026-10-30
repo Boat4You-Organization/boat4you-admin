@@ -1,6 +1,6 @@
 # boat4you-admin — deploy notes
 
-## 2026-10-30 — 🗂️ Kontakt centar (P2) umjesto `/chat` — ⏳ NIJE DEPLOYANO
+## 2026-10-30 — 🗂️ Kontakt centar (P2) umjesto `/chat` — ✅ DEPLOYANO 30.10.2026 11:36 UTC (cusma1, main `1fd8e13`, entry `assets/index-DvDzqq_G.js`; backend P2 na cusma2 od 11:07 UTC)
 
 Plan `infra/docs/superpowers/plans/2026-10-30-p2-contact-center-admin.md`, zadaci 9–15. Grana `feat/contact-center-p2` iz `main` `0a35a6a`.
 

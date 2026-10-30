@@ -353,6 +353,7 @@ interface Resources {
     actionFailed: 'The action failed.';
     anonymousVisitor: 'Visitor';
     backToList: 'List';
+    backToListLong: 'Back to the list';
     cameFrom: 'Came from';
     cancel: 'Cancel';
     channel: {
@@ -366,9 +367,11 @@ interface Resources {
       SOCIAL: 'Social';
     };
     chatNotOpened: 'Chat not opened';
+    clearFilters: 'Clear filters';
     clientCard: 'Client card';
     close: 'Close conversation';
     closePanel: 'Close';
+    composerHint: 'Replying takes the conversation over — the AI is switched off for it.';
     confirmDelete: 'Delete this conversation?';
     confirmDeleteMany: 'Delete the selected conversations ({{count}})?';
     confirmMerge: 'Merge this contact into the current one? Conversations, visits and tags move to the current contact and the merged one is deleted.';
@@ -398,12 +401,17 @@ interface Resources {
       SPAM: 'Spam';
       WON: 'Won';
     };
+    contactStatusAll: 'Contact status: all';
     contactsEmpty: 'No contacts for these filters.';
     contactsSearch: 'Search name, e-mail or phone';
+    contactsSearchLabel: 'Search contacts';
     contactsTable: {
       conversations: 'Conversations';
       lastActivity: 'Last activity';
     };
+    conversationCount_one: '{{count}} conversation';
+    conversationCount_other: '{{count}} conversations';
+    conversationLabel: 'Conversation';
     delete: 'Delete';
     deleteFailed: 'The conversation could not be deleted.';
     deleteSelected: 'Delete selected ({{count}})';
@@ -422,11 +430,17 @@ interface Resources {
       tag: 'Tag';
       to: 'To';
     };
+    filters: 'Filters · {{count}}';
     fromSite: 'from';
     lastSeen: 'Last seen';
+    listLabel: 'Conversation list';
     live: 'On the site now';
-    liveEmpty: 'No consenting visitors on the sites. Tracking starts when the shared widget (P3) is on the sites.';
+    liveEmpty: 'No visitors with consent on the sites.';
+    liveHeader_one: '{{count}} visitor on the sites now';
+    liveHeader_other: '{{count}} visitors on the sites now';
+    liveSub: 'Refreshes every 15 s · only visitors who consented';
     liveTable: {
+      action: 'Action';
       chat: 'Chat';
       country: 'Country';
       device: 'Device';
@@ -446,12 +460,16 @@ interface Resources {
       all: 'All';
       live: 'Live now';
     };
+    moreActions: 'More actions';
     new: 'new';
     next: 'Next';
     noContact: 'This conversation has no contact yet (no name, e-mail or phone).';
     noHistory: 'No navigation recorded on the sites.';
     notFound: 'The conversation does not exist or was deleted.';
+    openBoatPage: 'Open the boat page';
+    pageOf: 'Page {{page}} · {{size}} per page';
     pages: 'pages: {{count}}';
+    pagesShort: '{{count}} pages';
     persons: 'people: {{count}}';
     pickSession: 'Pick a conversation from the list.';
     prev: 'Previous';
@@ -462,6 +480,8 @@ interface Resources {
       QUEUED: "The message arrives with the widget's next heartbeat.";
       QUEUE_FULL: 'Too many messages waiting, try again shortly.';
       button: 'Send message';
+      label: 'Message';
+      placeholder: "E.g. Hello! If you need help with a boat, I'm here.";
       title: 'Message to the visitor';
     };
     range: {
@@ -470,7 +490,10 @@ interface Resources {
       custom: 'From–to';
       today: 'Today';
     };
-    replyFailed: 'The reply was not sent.';
+    rangeLabel: 'Period';
+    referrer: 'referrer';
+    removeTag: 'Remove tag {{tag}}';
+    replyLabel: 'Reply';
     replyPlaceholder: 'Reply to the client… (Enter sends, Shift+Enter new line)';
     results: 'results: {{count}}';
     returnToAi: 'Back to AI';
@@ -482,10 +505,17 @@ interface Resources {
       USER: 'Client';
     };
     save: 'Save';
+    saveChanges: 'Save changes';
     saveFailed: 'Saving failed.';
+    savesNow: 'saves at once';
+    search: 'Search';
     searchPlaceholder: 'Search name, e-mail or message text';
     selectAll: 'Select all';
+    selectConversation: 'Select conversation';
     send: 'Send';
+    sendFailed: 'Sending failed. The text is still in the field.';
+    siteAll: 'Site: all';
+    spamTagHint: '(marks the contact as spam)';
     stats: {
       aiOnly: 'AI only';
       byChannel: 'By source';
@@ -520,7 +550,8 @@ interface Resources {
     };
     statusLabel: 'Status';
     suspicious: 'Suspicious';
-    suspiciousBanner: 'Suspicious conversation: the AI is off and stays off. It is kept as evidence and cannot be deleted.';
+    suspiciousBannerText: 'The AI is off and stays off. It is kept as evidence and cannot be deleted.';
+    suspiciousBannerTitle: 'Suspicious conversation:';
     suspiciousLink: 'suspicious, do not open';
     suspiciousLinkHint: "Not a path on this conversation's site, so it is not shown as a link. Do not open it.";
     tab: {
@@ -529,10 +560,15 @@ interface Resources {
       live: 'Live visitors';
       stats: 'Statistics';
     };
+    tagPlaceholder: 'e.g. vip';
+    tagSuggestions: 'Suggestions';
     takeOver: 'Take over';
+    takeOverHint: 'The AI stops replying; the visitor sees no message';
     title: 'Contact Center';
     trail: 'Last pages';
+    trailTitle: 'Journey';
     unread: 'Unread';
+    viewLabel: 'View';
     viewing: 'Viewing';
   };
   extras: {

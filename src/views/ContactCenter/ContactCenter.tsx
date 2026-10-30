@@ -1,28 +1,27 @@
-/* Contact Center (P2, design 2.3): the admin's home for conversations, live visitors, contacts and statistics. It
- * replaces the /chat inbox (which now redirects here). SYSTEM_ADMIN only, like the /admin/cc API. */
+/* Contact Center (P2, design 2.3; redesign 30.10.2026): the admin's home for conversations, live visitors, contacts and
+ * statistics. It replaces the /chat inbox (which now redirects here). SYSTEM_ADMIN only, like the /admin/cc API. */
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link as RouterLink, useLocation } from 'react-router-dom';
 
-import { Box, Tabs, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 
 import Layout from '@/components/Layout';
-import PillTab from '@/components/PillTab';
-import { bbColors } from '@/styles/bb';
 
 import ContactDetail from './Contacts/ContactDetail';
 import Contacts from './Contacts/Contacts';
 import Conversations from './Conversations/Conversations';
 import LiveVisitors from './Live/LiveVisitors';
 import Stats from './Stats/Stats';
+import { cc } from './ui';
 
 type TabKey = 'conversations' | 'live' | 'contacts' | 'stats';
 
-const TAB_PATH: Record<TabKey, string> = {
-  conversations: '/contact-center',
-  live: '/contact-center/live',
-  contacts: '/contact-center/contacts',
-  stats: '/contact-center/stats',
-};
+const TABS: { key: TabKey; path: string }[] = [
+  { key: 'conversations', path: '/contact-center' },
+  { key: 'live', path: '/contact-center/live' },
+  { key: 'contacts', path: '/contact-center/contacts' },
+  { key: 'stats', path: '/contact-center/stats' },
+];
 
 const tabOf = (path: string): TabKey => {
   if (path.startsWith('/contact-center/live')) return 'live';
@@ -37,27 +36,66 @@ const tabOf = (path: string): TabKey => {
 const ContactCenter = () => {
   const { t } = useTranslation('contactCenter');
   const { pathname } = useLocation();
-  const navigate = useNavigate();
   const tab = tabOf(pathname);
   const contactId = /^\/contact-center\/contacts\/(\d+)/.exec(pathname)?.[1];
 
   return (
     <Layout>
       {/* The header is fixed (54 px): the page starts below it, as in Boats · Media. */}
-      <Box sx={{ px: { xs: 1.5, md: 3 }, pt: '74px', pb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', mb: 2 }}>
-          <Typography sx={{ fontSize: 24, fontWeight: 800, color: bbColors.navy900 }}>{t('title')}</Typography>
-          <Tabs
-            value={tab}
-            onChange={(_, v: TabKey) => navigate(TAB_PATH[v])}
-            variant="scrollable"
-            allowScrollButtonsMobile
+      <Box
+        sx={{
+          px: { xs: 1.5, md: 3 },
+          pt: { xs: '66px', md: '74px' },
+          pb: 3,
+          bgcolor: cc.page,
+          minHeight: '100vh',
+          color: cc.ink,
+          fontSize: 14,
+        }}
+      >
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px 28px', mb: 2 }}>
+          <Box component="h1" sx={{ m: 0, fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', color: cc.ink }}>
+            {t('title')}
+          </Box>
+          <Box
+            component="nav"
+            aria-label={t('title')}
+            sx={{
+              display: 'flex',
+              gap: '4px',
+              p: '4px',
+              bgcolor: cc.seg,
+              borderRadius: '999px',
+              overflowX: 'auto',
+              maxWidth: '100%',
+            }}
           >
-            <PillTab value="conversations" label={t('tab.conversations')} />
-            <PillTab value="live" label={t('tab.live')} />
-            <PillTab value="contacts" label={t('tab.contacts')} />
-            <PillTab value="stats" label={t('tab.stats')} />
-          </Tabs>
+            {TABS.map(({ key, path }) => {
+              const on = key === tab;
+
+              return (
+                <Box
+                  key={key}
+                  component={RouterLink}
+                  to={path}
+                  aria-current={on ? 'page' : undefined}
+                  sx={{
+                    p: '7px 16px',
+                    borderRadius: '999px',
+                    bgcolor: on ? cc.ink : 'transparent',
+                    color: on ? '#FFFFFF' : cc.text,
+                    textDecoration: 'none',
+                    fontSize: 13,
+                    fontWeight: on ? 600 : 500,
+                    whiteSpace: 'nowrap',
+                    '&:hover': on ? undefined : { bgcolor: 'rgba(11,29,58,.06)' },
+                  }}
+                >
+                  {t(`tab.${key}`)}
+                </Box>
+              );
+            })}
+          </Box>
         </Box>
         {tab === 'conversations' && <Conversations />}
         {tab === 'live' && <LiveVisitors />}

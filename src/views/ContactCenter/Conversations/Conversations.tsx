@@ -1,17 +1,18 @@
 /* Conversations in three columns (design 2.3): list, open conversation, client card. Short polling (plan P2): the
  * list's first page every 5 s, the open conversation every 4 s, live visitors every 15 s, only while the tab is visible
  * and never two of the same request in flight (createPoller). Deep link: /contact-center/c/:id. */
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link as RouterLink, useNavigate, useParams } from 'react-router-dom';
 
-import { Box, Button, Drawer, Typography } from '@mui/material';
+import { Box, Drawer } from '@mui/material';
 import { isAxiosError } from 'axios';
 
 import ContactCenterService from '@/services/contactCenter.service';
-import { bbColors } from '@/styles/bb';
 import { ConversationDetail, ConversationFilter, ConversationRow, LiveRow } from '@/types/contactCenter.type';
 import { Poller, createPoller } from '@/utils/contactCenter/poller';
+import { linkSx } from '@/views/ContactCenter/common';
+import { ChatIcon, Empty, GoneIcon, Sk, cc, panelSx, scrollSx } from '@/views/ContactCenter/ui';
 
 import ClientCard from './ClientCard';
 import ConversationList, { ListMode } from './ConversationList';
@@ -26,7 +27,7 @@ const olderThan = (r: ConversationRow, last: ConversationRow) => {
   return a < b || (a === b && r.id < last.id);
 };
 
-const columnSx = { bgcolor: '#fff', border: `1px solid ${bbColors.gray100}`, borderRadius: 2, p: 1.5, minHeight: 0 };
+const columnSx = { ...panelSx, minHeight: 0, height: '100%', display: 'flex', flexDirection: 'column' } as const;
 
 const Conversations = () => {
   const { t } = useTranslation('contactCenter');
@@ -40,6 +41,7 @@ const Conversations = () => {
   const [live, setLive] = useState<LiveRow[]>([]);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [listFailed, setListFailed] = useState(false);
   const [detail, setDetail] = useState<ConversationDetail | null>(null);
   const [missing, setMissing] = useState(false);
   const [cardOpen, setCardOpen] = useState(false);
@@ -54,9 +56,19 @@ const Conversations = () => {
 
   const loadFirst = useCallback(async () => {
     const asked = filterRef.current;
-    const { data } = await ContactCenterService.conversations({ ...asked, size: PAGE });
+    let data: ConversationRow[];
+
+    try {
+      data = (await ContactCenterService.conversations({ ...asked, size: PAGE })).data;
+    } catch {
+      if (asked === filterRef.current) setListFailed(true); // the last good rows stay visible under the notice
+
+      return;
+    }
 
     if (asked !== filterRef.current) return; // the filter changed while this page was on its way
+
+    setListFailed(false);
 
     const last = data[data.length - 1];
     const tail = last ? rowsRef.current.filter(r => !data.some(d => d.id === r.id) && olderThan(r, last)) : [];
@@ -156,35 +168,45 @@ const Conversations = () => {
     listPoller.current?.poke();
   };
 
-  const card = useMemo(
-    () => (
+  const contactId = detail?.row.contactId ?? null;
+  const card = useCallback(
+    (layout: 'column' | 'drawer') => (
       <ClientCard
-        key={detail?.row.contactId ?? 'none'}
-        contactId={detail?.row.contactId ?? null}
+        key={contactId ?? 'none'}
+        contactId={contactId}
+        layout={layout}
         onMerged={refreshBoth}
+        onClose={layout === 'drawer' ? () => setCardOpen(false) : undefined}
       />
     ),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [detail?.row.contactId]
+    [contactId]
   );
+
+  const backToList = () => navigate('/contact-center');
 
   return (
     <Box
       sx={{
         display: 'grid',
-        gap: 1.5,
-        gridTemplateColumns: { xs: '1fr', md: '340px 1fr', lg: '340px 1fr 320px' },
-        height: { md: 'calc(100vh - 200px)' },
-        minHeight: 480,
+        gap: 2,
+        gridTemplateColumns: { xs: '1fr', md: '340px minmax(0, 1fr)', lg: '340px minmax(0, 1fr) 320px' },
+        height: { xs: 'calc(100dvh - 150px)', md: 'calc(100vh - 150px)' },
+        minHeight: 560,
       }}
     >
-      <Box sx={{ ...columnSx, display: { xs: selectedId ? 'none' : 'block', md: 'block' } }}>
+      <Box
+        component="section"
+        aria-label={t('listLabel')}
+        sx={{ ...columnSx, display: { xs: selectedId ? 'none' : 'flex', md: 'flex' } }}
+      >
         <ConversationList
           mode={mode}
           onMode={setMode}
           rows={rows}
           live={live}
           loading={loading}
+          failed={listFailed}
           hasMore={hasMore}
           onLoadMore={() => loadMore().catch(() => undefined)}
           selectedId={selectedId}
@@ -195,47 +217,62 @@ const Conversations = () => {
         />
       </Box>
 
-      <Box sx={{ ...columnSx, display: { xs: selectedId ? 'flex' : 'none', md: 'flex' }, flexDirection: 'column' }}>
-        {selectedId != null && (
-          <Box sx={{ display: { xs: 'flex', lg: 'none' }, gap: 1, mb: 1 }}>
-            <Button size="small" sx={{ display: { md: 'none' } }} onClick={() => navigate('/contact-center')}>
-              ← {t('backToList')}
-            </Button>
-            <Button size="small" onClick={() => setCardOpen(true)} disabled={!detail}>
-              {t('clientCard')}
-            </Button>
+      <Box
+        component="section"
+        aria-label={t('conversationLabel')}
+        sx={{ ...columnSx, position: 'relative', display: { xs: selectedId ? 'flex' : 'none', md: 'flex' } }}
+      >
+        {selectedId == null && (
+          <Empty>
+            <ChatIcon />
+            {t('pickSession')}
+          </Empty>
+        )}
+        {missing && (
+          <Empty>
+            <GoneIcon />
+            <Box component="span" sx={{ color: cc.ink, fontWeight: 600 }}>
+              {t('notFound')}
+            </Box>
+            <Box component={RouterLink} to="/contact-center" sx={{ ...linkSx, fontSize: 13.5 }}>
+              ← {t('backToListLong')}
+            </Box>
+          </Empty>
+        )}
+        {selectedId != null && !detail && !missing && (
+          <Box sx={{ p: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <Sk h={18} w="40%" />
+            <Sk h={12} w="70%" />
+            <Sk h={120} w="100%" r={10} />
+            <Sk h={54} w="55%" r={12} />
+            <Sk h={54} w="60%" r={12} sx={{ alignSelf: 'flex-end' }} />
           </Box>
         )}
-        {selectedId == null && (
-          <Typography sx={{ m: 'auto', fontSize: 14, color: bbColors.gray500 }}>{t('pickSession')}</Typography>
-        )}
-        {missing && <Typography sx={{ m: 'auto', fontSize: 14, color: bbColors.gray500 }}>{t('notFound')}</Typography>}
         {detail && (
           <ConversationPane
             detail={detail}
             onChanged={refreshBoth}
+            onBack={backToList}
+            onOpenCard={() => setCardOpen(true)}
             onDeleted={() => {
-              navigate('/contact-center');
+              backToList();
               listPoller.current?.poke();
             }}
           />
         )}
       </Box>
 
-      <Box sx={{ ...columnSx, display: { xs: 'none', lg: 'block' }, overflowY: 'auto' }}>
-        <Typography sx={{ fontSize: 14, fontWeight: 800, mb: 1 }}>{t('clientCard')}</Typography>
-        {detail ? card : <Typography sx={{ fontSize: 13, color: bbColors.gray500 }}>—</Typography>}
+      <Box
+        component="aside"
+        aria-label={t('clientCard')}
+        sx={{ ...columnSx, ...scrollSx, display: { xs: 'none', lg: 'block' } }}
+      >
+        {detail ? card('column') : null}
       </Box>
 
       <Drawer anchor="right" open={cardOpen} onClose={() => setCardOpen(false)}>
-        <Box sx={{ width: { xs: '100vw', sm: 380 }, p: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <Typography sx={{ fontSize: 16, fontWeight: 800 }}>{t('clientCard')}</Typography>
-            <Button size="small" sx={{ ml: 'auto' }} onClick={() => setCardOpen(false)}>
-              {t('closePanel')}
-            </Button>
-          </Box>
-          {detail && card}
+        <Box sx={{ width: { xs: '100vw', sm: 400 }, height: '100%', display: 'flex', flexDirection: 'column' }}>
+          {detail && card('drawer')}
         </Box>
       </Drawer>
     </Box>

@@ -5,72 +5,80 @@ import { ReactNode } from 'react';
 
 import { Box, Button, ButtonProps, SxProps, Theme } from '@mui/material';
 
+import { bbColors, bbIllustrations, bbShadow, bbTones } from '@/styles/bb';
+
+// Broker Desk v2.2: the Contact Center keeps its own names but takes its values from the one admin token set.
 export const cc = {
-  ink: '#0B1D3A',
-  text: '#374151',
-  text2: '#4B5563',
-  muted: '#5F6B7A',
-  faint: '#9AA4B2',
-  page: '#F5F6F8',
-  border: '#E2E6EB',
-  hair: '#EEF0F3',
-  field: '#CBD2DB',
-  hover: '#EFF1F4',
-  seg: '#E9ECF0',
-  soft: '#F7F8FA',
-  softer: '#FBFBFC',
-  skeleton: '#EAEDF1',
-  rowHover: '#F9FAFB',
-  link: '#1D4ED8',
-  linkHover: '#1E3A8A',
-  red: '#B91C1C',
-  redBg: '#FEE2E2',
-  redDot: '#DC2626',
-  redInk: '#7F1D1D',
-  redLine: '#FCA5A5',
-  alertInk: '#991B1B',
-  green: '#16A34A',
-  greenBg: '#DCFCE7',
-  greenInk: '#166534',
-  greenKpi: '#15803D',
-  unreadBg: '#FFFBEB',
-  tagBg: '#EEF2FF',
-  tagFg: '#3730A3',
-  note: '#EEF2F7',
-  searchBar: '#3B6FD8',
-  shadow: '0 6px 20px rgba(11,29,58,.25)',
+  ink: bbColors.navy900,
+  text: bbColors.gray600,
+  text2: bbColors.gray600,
+  muted: bbColors.gray500,
+  faint: bbColors.gray450,
+  page: bbColors.gray50,
+  border: bbColors.cardBorder,
+  hair: bbColors.gray100,
+  field: bbColors.fieldBorder,
+  hover: bbColors.foam50,
+  seg: bbColors.gray150,
+  soft: bbColors.tableHead,
+  softer: bbColors.gray75,
+  skeleton: bbColors.gray100,
+  rowHover: bbColors.gray75,
+  link: bbColors.navy700,
+  linkHover: '#123f8a',
+  red: bbColors.red700,
+  redBg: bbColors.red100,
+  redDot: bbColors.red600,
+  redInk: '#7a1f12',
+  redLine: bbColors.red200,
+  alertInk: bbColors.red700,
+  green: bbColors.green600,
+  greenBg: bbColors.green100,
+  greenInk: bbColors.green700,
+  greenKpi: bbColors.green700,
+  unreadBg: bbColors.unreadRow,
+  tagBg: bbColors.progress100,
+  tagFg: bbColors.progress700,
+  note: bbColors.gray100,
+  searchBar: bbColors.navy700,
+  shadow: bbShadow.raised,
 } as const;
 
 /** [background, text] of a conversation status chip; an unknown status is grey. */
+const tone = (t: keyof typeof bbTones): [string, string] => [bbTones[t].bg, bbTones[t].fg];
+
+// Status tones from the v2.2 table: chat closed = neutral, AI = info, wants a human = attention,
+// with the team = success, locked = danger.
 export const CHAT_STATUS_COLORS: Record<string, [string, string]> = {
-  AI: ['#DBEAFE', '#1E40AF'],
-  HUMAN_REQUESTED: ['#FFEDD5', '#9A3412'],
-  HUMAN: [cc.greenBg, cc.greenInk],
-  CLOSED: [cc.hover, cc.text2],
-  LOCKED: [cc.redBg, cc.red],
+  AI: tone('info'),
+  HUMAN_REQUESTED: tone('attention'),
+  HUMAN: tone('success'),
+  CLOSED: tone('neutral'),
+  LOCKED: tone('danger'),
 };
 
 export const CONTACT_STATUS_COLORS: Record<string, [string, string]> = {
-  NEW: [cc.hover, cc.text],
-  REPLIED: ['#DBEAFE', '#1E40AF'],
-  OFFER_SENT: ['#E0E7FF', cc.tagFg],
-  NEGOTIATING: ['#FFEDD5', '#9A3412'],
-  WON: [cc.greenBg, cc.greenInk],
-  LOST: ['#F3F4F6', cc.text2],
-  SPAM: [cc.redBg, cc.red],
+  NEW: tone('neutral'),
+  REPLIED: tone('info'),
+  OFFER_SENT: tone('progress'),
+  NEGOTIATING: tone('attention'),
+  WON: tone('success'),
+  LOST: tone('neutral'),
+  SPAM: tone('danger'),
 };
 
-const GREY: [string, string] = [cc.hover, cc.text2];
+const GREY: [string, string] = tone('neutral');
 
 export const chipSx = {
   display: 'inline-flex',
   alignItems: 'center',
-  gap: '4px',
+  gap: '5px',
   height: 22,
-  px: '8px',
+  px: '9px',
   borderRadius: '999px',
   fontSize: 11.5,
-  fontWeight: 600,
+  fontWeight: 700,
+  boxShadow: 'inset 0 0 0 1px rgba(11,26,43,.06)',
   whiteSpace: 'nowrap',
   maxWidth: '100%',
   overflow: 'hidden',
@@ -81,11 +89,14 @@ export const Pill = ({
   colors,
   sx,
   title,
+  dot,
   children,
 }: {
   colors?: [string, string];
   sx?: SxProps<Theme>;
   title?: string;
+  /** Status pills lead with a dot in the text colour (colour is never the only signal). */
+  dot?: boolean;
   children: ReactNode;
 }) => {
   const [bg, fg] = colors ?? GREY;
@@ -94,7 +105,24 @@ export const Pill = ({
     <Box
       component="span"
       title={title}
-      sx={[{ ...chipSx, bgcolor: bg, color: fg }, ...(Array.isArray(sx) ? sx : [sx])]}
+      sx={[
+        {
+          ...chipSx,
+          bgcolor: bg,
+          color: fg,
+          ...(dot && {
+            '&::before': {
+              content: '""',
+              flex: 'none',
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              bgcolor: 'currentColor',
+            },
+          }),
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
     >
       {children}
     </Box>
@@ -114,7 +142,7 @@ export const OutlinePill = ({ children, sx }: { children: ReactNode; sx?: SxProp
 );
 
 export const TagPill = ({ children }: { children: ReactNode }) => (
-  <Pill colors={[cc.tagBg, cc.tagFg]} sx={{ fontWeight: 500 }}>
+  <Pill colors={[cc.tagBg, cc.tagFg]} sx={{ fontWeight: 600 }}>
     {children}
   </Pill>
 );
@@ -129,10 +157,17 @@ export const Dot = ({ color, label, size = 8 }: { color: string; label?: string;
   />
 );
 
-type Kind = 'fill' | 'out' | 'txt' | 'red' | 'danger';
+type Kind = 'primary' | 'fill' | 'out' | 'txt' | 'red' | 'danger';
 
 const KIND_SX: Record<Kind, object> = {
-  fill: { bgcolor: cc.ink, color: '#FFFFFF', '&:hover': { bgcolor: '#14294d' } },
+  primary: {
+    bgcolor: bbColors.yellow500,
+    color: bbColors.yellowText,
+    fontWeight: 800,
+    boxShadow: bbShadow.yellowCta,
+    '&:hover': { bgcolor: bbColors.yellowHover, boxShadow: bbShadow.yellowCta },
+  },
+  fill: { bgcolor: cc.ink, color: '#FFFFFF', '&:hover': { bgcolor: bbColors.navy800 } },
   out: { bgcolor: '#FFFFFF', color: cc.ink, borderColor: cc.field, '&:hover': { bgcolor: cc.hover } },
   txt: { bgcolor: 'transparent', color: cc.ink, '&:hover': { bgcolor: cc.hover } },
   red: { bgcolor: 'transparent', color: cc.red, '&:hover': { bgcolor: cc.redBg } },
@@ -141,6 +176,7 @@ const KIND_SX: Record<Kind, object> = {
 
 // The theme's own disabled look (light blue) is not the board's: a disabled button keeps its colours, only fainter.
 const DISABLED_SX: Record<Kind, object> = {
+  primary: { bgcolor: bbColors.yellow500, color: bbColors.yellowText, boxShadow: 'none' },
   fill: { bgcolor: cc.ink, color: '#FFFFFF' },
   out: { bgcolor: '#FFFFFF', color: cc.ink, borderColor: cc.field },
   txt: { bgcolor: 'transparent', color: cc.ink },
@@ -148,7 +184,7 @@ const DISABLED_SX: Record<Kind, object> = {
   danger: { bgcolor: cc.redDot, color: '#FFFFFF' },
 };
 
-/** A board button: navy fill, outline, text, red text or red fill. */
+/** A board button: yellow primary (send / save), navy fill, outline, text, red text or red fill. */
 export const CcButton = ({ kind = 'out', sx, ...props }: Omit<ButtonProps, 'variant' | 'color'> & { kind?: Kind }) => (
   <Button
     disableElevation
@@ -158,9 +194,11 @@ export const CcButton = ({ kind = 'out', sx, ...props }: Omit<ButtonProps, 'vari
       {
         minHeight: 36,
         px: '14px',
-        borderRadius: '8px',
+        borderRadius: '10px',
         fontSize: 13,
-        fontWeight: 600,
+        fontWeight: 700,
+        boxShadow: 'none',
+        transition: 'background-color .15s, border-color .15s',
         textTransform: 'none',
         whiteSpace: 'nowrap',
         border: '1px solid transparent',
@@ -176,16 +214,16 @@ export const CcButton = ({ kind = 'out', sx, ...props }: Omit<ButtonProps, 'vari
 /** Native input, select and textarea in the board style (class `fld`). */
 export const fieldSx = {
   width: '100%',
-  height: 38,
+  height: 36,
   px: '10px',
   border: `1px solid ${cc.field}`,
-  borderRadius: '8px',
+  borderRadius: '10px',
   bgcolor: '#FFFFFF',
-  fontSize: { xs: 16, md: 13.5 }, // under 16 px iOS Safari zooms the page on focus
+  fontSize: { xs: 16, md: 13 }, // under 16 px iOS Safari zooms the page on focus
   color: cc.ink,
   fontFamily: 'inherit',
   outline: 'none',
-  '&:focus-visible': { borderColor: cc.ink, boxShadow: `0 0 0 1px ${cc.ink}` },
+  '&:focus': { borderColor: bbColors.navy700, boxShadow: bbShadow.focusRing },
 } as const;
 
 export const textareaSx = {
@@ -199,7 +237,7 @@ export const textareaSx = {
 
 export const Labeled = ({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) => (
   <Box component="label" sx={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-    <Box component="span" sx={{ fontSize: 12, fontWeight: 500, color: cc.text2 }}>
+    <Box component="span" sx={{ fontSize: 12, fontWeight: 600, color: cc.text2 }}>
       {label}
       {hint && (
         <Box component="span" sx={{ fontWeight: 400, color: cc.muted }}>
@@ -215,10 +253,7 @@ export const Labeled = ({ label, hint, children }: { label: string; hint?: strin
 export const SectionLabel = ({ children, sx }: { children: ReactNode; sx?: SxProps<Theme> }) => (
   <Box
     component="h3"
-    sx={[
-      { m: 0, fontSize: 11, fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: cc.muted },
-      ...(Array.isArray(sx) ? sx : [sx]),
-    ]}
+    sx={[{ m: 0, fontSize: 12.5, fontWeight: 600, color: bbColors.gray600 }, ...(Array.isArray(sx) ? sx : [sx])]}
   >
     {children}
   </Box>
@@ -227,7 +262,8 @@ export const SectionLabel = ({ children, sx }: { children: ReactNode; sx?: SxPro
 export const panelSx = {
   bgcolor: '#FFFFFF',
   border: `1px solid ${cc.border}`,
-  borderRadius: '12px',
+  borderRadius: '14px',
+  boxShadow: bbShadow.card,
   overflow: 'hidden',
 } as const;
 
@@ -246,16 +282,14 @@ export const tableSx = {
     top: 0,
     bgcolor: cc.soft,
     textAlign: 'left',
-    fontSize: 11,
+    fontSize: 11.5,
     fontWeight: 700,
-    letterSpacing: '.06em',
-    textTransform: 'uppercase',
-    color: cc.muted,
-    p: '10px 14px',
+    color: bbColors.tableHeadText,
+    p: '9px 12px',
     borderBottom: `1px solid ${cc.border}`,
     whiteSpace: 'nowrap',
   },
-  '& td': { p: '12px 14px', borderBottom: `1px solid ${cc.hair}`, fontSize: 13, verticalAlign: 'top' },
+  '& td': { p: '9px 12px', borderBottom: `1px solid ${cc.hair}`, fontSize: 13, verticalAlign: 'top' },
   '& tbody tr.click:hover td': { bgcolor: cc.rowHover, cursor: 'pointer' },
   '& .num': { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
   '& .tnum': { fontVariantNumeric: 'tabular-nums' },
@@ -282,7 +316,7 @@ export const Segmented = <T extends string>({
     role="group"
     aria-label={label}
     sx={[
-      { display: 'flex', gap: '2px', p: '3px', bgcolor: cc.hover, borderRadius: '9px' },
+      { display: 'flex', gap: '2px', p: '3px', bgcolor: cc.seg, borderRadius: '10px' },
       ...(Array.isArray(sx) ? sx : [sx]),
     ]}
   >
@@ -298,11 +332,11 @@ export const Segmented = <T extends string>({
           onClick={() => onChange(o.value)}
           sx={{
             flex: 1,
-            minHeight: 34,
-            px: '14px',
+            minHeight: 30,
+            px: '12px',
             border: 0,
             borderRadius: '7px',
-            fontSize: 13,
+            fontSize: 12.5,
             fontWeight: 600,
             fontFamily: 'inherit',
             cursor: 'pointer',
@@ -313,7 +347,7 @@ export const Segmented = <T extends string>({
             whiteSpace: 'nowrap',
             bgcolor: on ? '#FFFFFF' : 'transparent',
             color: on ? cc.ink : cc.text2,
-            boxShadow: on ? '0 1px 2px rgba(11,29,58,.15)' : 'none',
+            boxShadow: on ? '0 1px 2px rgba(11,26,43,.15)' : 'none',
           }}
         >
           {o.label}
@@ -363,18 +397,16 @@ export const FilterIcon = () => (
   </Svg>
 );
 
-export const ChatIcon = () => (
-  <Svg size={36} stroke={cc.faint} width={1.6}>
-    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-  </Svg>
+// Empty-state illustrations (v2.2): nothing picked = binoculars, gone = sailboat, empty list = chart and dividers.
+const Illustration = ({ src, height }: { src: string; height: number }) => (
+  <Box component="img" src={src} alt="" loading="lazy" sx={{ height, width: 'auto', userSelect: 'none' }} />
 );
 
-export const GoneIcon = () => (
-  <Svg size={36} stroke={cc.faint} width={1.6}>
-    <circle cx="12" cy="12" r="9" />
-    <path d="M9 9l6 6M15 9l-6 6" />
-  </Svg>
-);
+export const ChatIcon = () => <Illustration src={bbIllustrations.binoculars} height={112} />;
+
+export const GoneIcon = () => <Illustration src={bbIllustrations.sailboat} height={104} />;
+
+export const EmptyListIcon = () => <Illustration src={bbIllustrations.chartDividers} height={92} />;
 
 export const CloseIcon = () => (
   <Svg size={20}>
@@ -427,11 +459,12 @@ export const SearchField = ({
         display: 'flex',
         alignItems: 'center',
         gap: '8px',
-        height: 38,
+        height: 36,
         px: '10px',
         border: `1px solid ${cc.field}`,
-        borderRadius: '8px',
+        borderRadius: '10px',
         bgcolor: '#FFFFFF',
+        '&:focus-within': { borderColor: bbColors.navy700, boxShadow: bbShadow.focusRing },
       },
       ...(Array.isArray(sx) ? sx : [sx]),
     ]}
@@ -450,7 +483,7 @@ export const SearchField = ({
         minWidth: 0,
         border: 0,
         outline: 'none',
-        fontSize: { xs: 16, md: 13.5 },
+        fontSize: { xs: 16, md: 13 },
         color: cc.ink,
         bgcolor: 'transparent',
         fontFamily: 'inherit',
@@ -468,7 +501,8 @@ export const LoadAlert = ({ text }: { text: string }) => (
       alignItems: 'center',
       gap: '10px',
       p: '10px 14px',
-      borderRadius: '8px',
+      borderRadius: '10px',
+      border: `1px solid ${bbColors.red200}`,
       bgcolor: cc.redBg,
       color: cc.alertInk,
       fontSize: 13,
@@ -495,11 +529,12 @@ export const Empty = ({ children }: { children: ReactNode }) => (
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      gap: 1,
-      p: '40px 16px',
+      gap: '10px',
+      p: '24px 16px',
       textAlign: 'center',
       color: cc.muted,
-      fontSize: 13.5,
+      fontSize: 14,
+      lineHeight: 1.5,
     }}
   >
     {children}

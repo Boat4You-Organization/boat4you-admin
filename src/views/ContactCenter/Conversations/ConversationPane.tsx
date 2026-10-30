@@ -309,7 +309,7 @@ const ConversationPane = ({ detail, onChanged, onDeleted, onBack, onOpenCard }: 
             </Box>
           </Box>
           <CcButton
-            kind="fill"
+            kind="primary"
             disabled={busy || !draft.trim()}
             onClick={() => send().catch(() => undefined)}
             sx={{ minHeight: 44, px: '18px' }}

@@ -10,7 +10,18 @@ import { ConversationFilter, ConversationRow, LiveRow } from '@/types/contactCen
 import { displayName, isLiveNow } from '@/utils/contactCenter/display';
 import { showToast } from '@/valtio/global/global.actions';
 import { ChatStatusChip, SiteChip, countryText, formatAt, isSuspicious } from '@/views/ContactCenter/common';
-import { CcButton, Dot, LoadAlert, Pill, Segmented, Sk, TagPill, cc, scrollSx } from '@/views/ContactCenter/ui';
+import {
+  CcButton,
+  Dot,
+  EmptyListIcon,
+  LoadAlert,
+  Pill,
+  Segmented,
+  Sk,
+  TagPill,
+  cc,
+  scrollSx,
+} from '@/views/ContactCenter/ui';
 
 import ConversationFilters from './ConversationFilters';
 
@@ -180,6 +191,7 @@ const ConversationList = ({
               gap: 1.5,
             }}
           >
+            <EmptyListIcon />
             {filter.flaggedOnly ? t('emptyFlagged') : t('empty')}
             {filtered && <CcButton onClick={clearFilters}>{t('clearFilters')}</CcButton>}
           </Box>

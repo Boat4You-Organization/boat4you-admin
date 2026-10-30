@@ -54,7 +54,7 @@ const ContactCenter = () => {
         }}
       >
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px 28px', mb: 2 }}>
-          <Box component="h1" sx={{ m: 0, fontSize: 24, fontWeight: 700, letterSpacing: '-0.02em', color: cc.ink }}>
+          <Box component="h1" sx={{ m: 0, fontSize: 22, fontWeight: 800, letterSpacing: '-0.015em', color: cc.ink }}>
             {t('title')}
           </Box>
           <Box
@@ -62,10 +62,10 @@ const ContactCenter = () => {
             aria-label={t('title')}
             sx={{
               display: 'flex',
-              gap: '4px',
-              p: '4px',
+              gap: '2px',
+              p: '3px',
               bgcolor: cc.seg,
-              borderRadius: '999px',
+              borderRadius: '10px',
               overflowX: 'auto',
               maxWidth: '100%',
             }}
@@ -80,15 +80,18 @@ const ContactCenter = () => {
                   to={path}
                   aria-current={on ? 'page' : undefined}
                   sx={{
-                    p: '7px 16px',
-                    borderRadius: '999px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    height: 30,
+                    px: '12px',
+                    borderRadius: '7px',
                     bgcolor: on ? cc.ink : 'transparent',
                     color: on ? '#FFFFFF' : cc.text,
                     textDecoration: 'none',
-                    fontSize: 13,
-                    fontWeight: on ? 600 : 500,
+                    fontSize: 12.5,
+                    fontWeight: 600,
                     whiteSpace: 'nowrap',
-                    '&:hover': on ? undefined : { bgcolor: 'rgba(11,29,58,.06)' },
+                    '&:hover': on ? undefined : { color: cc.ink, bgcolor: 'rgba(255,255,255,.6)' },
                   }}
                 >
                   {t(`tab.${key}`)}

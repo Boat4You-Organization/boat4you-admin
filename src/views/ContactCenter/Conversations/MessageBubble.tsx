@@ -11,10 +11,10 @@ import { cc } from '@/views/ContactCenter/ui';
 import YachtCards from './YachtCards';
 
 const LOOK: Record<string, { bg: string; border: string; align: 'flex-start' | 'flex-end' }> = {
-  USER: { bg: '#F1F3F5', border: '#E7EAEE', align: 'flex-start' },
-  ASSISTANT: { bg: '#E8F0FE', border: '#D3E1FC', align: 'flex-end' },
-  ADMIN: { bg: '#E7F6EC', border: '#C9EBD4', align: 'flex-end' },
-  SYSTEM: { bg: '#FEF3C7', border: '#FDE68A', align: 'flex-end' },
+  USER: { bg: '#F1F4F7', border: '#E5EAF0', align: 'flex-start' },
+  ASSISTANT: { bg: '#E8F0FB', border: '#CFDDF4', align: 'flex-end' },
+  ADMIN: { bg: '#E3F6EC', border: '#BFE8D2', align: 'flex-end' },
+  SYSTEM: { bg: '#FEF3C7', border: '#F4E1A0', align: 'flex-end' },
 };
 
 const MessageBubble = ({ message, siteId, visitor }: { message: MessageView; siteId: string; visitor: string }) => {

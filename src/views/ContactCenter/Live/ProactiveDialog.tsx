@@ -84,7 +84,7 @@ const ProactiveDialog = ({ row, onClose }: { row: LiveRow | null; onClose(): voi
         <CcButton kind="txt" onClick={onClose}>
           {t('cancel')}
         </CcButton>
-        <CcButton kind="fill" disabled={busy || !text.trim()} onClick={send}>
+        <CcButton kind="primary" disabled={busy || !text.trim()} onClick={send}>
           {t('send')}
         </CcButton>
       </Box>

@@ -19,13 +19,21 @@ export const formatAt = (at: string | null | undefined, pattern = 'DD.MM. HH:mm'
 export const ChatStatusChip = ({ status }: { status: string }) => {
   const { t } = useTranslation('contactCenter');
 
-  return <Pill colors={CHAT_STATUS_COLORS[status]}>{t(`status.${status}`, { defaultValue: status })}</Pill>;
+  return (
+    <Pill dot colors={CHAT_STATUS_COLORS[status]}>
+      {t(`status.${status}`, { defaultValue: status })}
+    </Pill>
+  );
 };
 
 export const ContactStatusChip = ({ status }: { status: string }) => {
   const { t } = useTranslation('contactCenter');
 
-  return <Pill colors={CONTACT_STATUS_COLORS[status]}>{t(`contactStatus.${status}`, { defaultValue: status })}</Pill>;
+  return (
+    <Pill dot colors={CONTACT_STATUS_COLORS[status]}>
+      {t(`contactStatus.${status}`, { defaultValue: status })}
+    </Pill>
+  );
 };
 
 export const SiteChip = ({ siteId, small }: { siteId: string; small?: boolean }) => (

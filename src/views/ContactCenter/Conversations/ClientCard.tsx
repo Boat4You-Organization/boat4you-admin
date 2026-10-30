@@ -337,7 +337,7 @@ const ClientCard = ({
           {t('clientCard')}
         </Box>
         {layout === 'column' && dirty && (
-          <CcButton kind="fill" disabled={saving} onClick={saveForm} sx={{ ml: 'auto', minHeight: 32, px: '12px' }}>
+          <CcButton kind="primary" disabled={saving} onClick={saveForm} sx={{ ml: 'auto', minHeight: 32, px: '12px' }}>
             {t('save')}
           </CcButton>
         )}
@@ -568,7 +568,7 @@ const ClientCard = ({
               {t('clientCard')} · <ContactStatusChip status={c.status} />
             </Box>
           </Box>
-          <CcButton kind="fill" disabled={saving || !dirty} onClick={saveForm}>
+          <CcButton kind="primary" disabled={saving || !dirty} onClick={saveForm}>
             {t('save')}
           </CcButton>
         </Box>
@@ -648,7 +648,7 @@ const ClientCard = ({
           }}
         >
           <CcButton
-            kind="fill"
+            kind="primary"
             disabled={saving}
             onClick={saveForm}
             sx={{ width: '100%', minHeight: 48, fontSize: 15, borderRadius: '10px' }}

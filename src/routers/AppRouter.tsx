@@ -18,10 +18,19 @@ const Extras = lazy(() => import('@/views/Extras'));
 const Invoices = lazy(() => import('@/views/Invoices'));
 const Offers = lazy(() => import('@/views/Offers'));
 const Users = lazy(() => import('@/views/Users'));
-const Chat = lazy(() => import('@/views/Chat'));
+const ContactCenter = lazy(() => import('@/views/ContactCenter'));
 const Login = lazy(() => import('@/views/Login'));
 const MyProfile = lazy(() => import('@/views/MyProfile'));
 const SignUp = lazy(() => import('@/views/SignUp'));
+
+const CONTACT_CENTER_PATHS = [
+  '/contact-center',
+  '/contact-center/c/:id',
+  '/contact-center/live',
+  '/contact-center/contacts',
+  '/contact-center/contacts/:id',
+  '/contact-center/stats',
+];
 
 const AppRouter: React.FC = () => (
   <BrowserRouter>
@@ -48,12 +57,18 @@ const AppRouter: React.FC = () => (
             />
           }
         />
-        {/* SYSTEM_ADMIN only, same as the backend (AdminAiChatController @PreAuthorize):
-            transcripts carry visitor IPs, e-mails and security evidence. */}
-        <Route
-          path="/chat"
-          element={<AppRoute variant="protected" accessLevel={[UserRoleName.SYSTEM_ADMIN]} component={<Chat />} />}
-        />
+        {/* Contact Center (P2) replaces the /chat inbox. SYSTEM_ADMIN only, same as the backend (/admin/cc and
+            /admin/chat @PreAuthorize): transcripts carry visitor IPs, e-mails and security evidence. */}
+        <Route path="/chat" element={<Navigate to="/contact-center" replace />} />
+        {CONTACT_CENTER_PATHS.map(path => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <AppRoute variant="protected" accessLevel={[UserRoleName.SYSTEM_ADMIN]} component={<ContactCenter />} />
+            }
+          />
+        ))}
         <Route path="/login" element={<AppRoute variant="anonymous" component={<Login />} />} />
         <Route path="/signup" element={<AppRoute variant="anonymous" component={<SignUp />} />} />
         <Route path="/reset-password" element={<AppRoute variant="anonymous" component={<ResetPassword />} />} />

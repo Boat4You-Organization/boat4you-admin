@@ -8,6 +8,7 @@ import amenitiesEn from '@/locales/en/amenities.json';
 import bookingEn from '@/locales/en/booking.json';
 import chatEn from '@/locales/en/chat.json';
 import commonEn from '@/locales/en/common.json';
+import contactCenterEn from '@/locales/en/contactCenter.json';
 import extrasEn from '@/locales/en/extras.json';
 import formEn from '@/locales/en/form.json';
 import inquiriesEn from '@/locales/en/inquiries.json';
@@ -23,6 +24,7 @@ import amenitiesHr from '@/locales/hr/amenities.json';
 import bookingHr from '@/locales/hr/booking.json';
 import chatHr from '@/locales/hr/chat.json';
 import commonHr from '@/locales/hr/common.json';
+import contactCenterHr from '@/locales/hr/contactCenter.json';
 import extrasHr from '@/locales/hr/extras.json';
 import formHr from '@/locales/hr/form.json';
 import inquiriesHr from '@/locales/hr/inquiries.json';
@@ -53,6 +55,7 @@ i18n.use(initReactI18next).init({
       inquiries: inquiriesEn,
       invoices: invoicesEn,
       chat: chatEn,
+      contactCenter: contactCenterEn,
     },
     hr: {
       common: commonHr,
@@ -70,6 +73,7 @@ i18n.use(initReactI18next).init({
       inquiries: inquiriesHr,
       invoices: invoicesHr,
       chat: chatHr,
+      contactCenter: contactCenterHr,
     },
   },
 
@@ -91,6 +95,7 @@ i18n.use(initReactI18next).init({
     'inquiries',
     'invoices',
     'chat',
+    'contactCenter',
   ],
   defaultNS: 'common',
   nsSeparator: '.',

@@ -2,6 +2,7 @@
  * /admin/chat through chat.service.ts. JWT and refresh go through the shared axios instance (ADMIN-15, ADMIN-16). */
 import { api } from '@/config/axios.config';
 import {
+  CcFunnel,
   CcStats,
   ContactCard,
   ContactPatch,
@@ -48,7 +49,10 @@ const ContactCenterService = {
 
   merge: (id: number, sourceId: number) => api.post<ContactCard>(`/admin/cc/contacts/${id}/merge`, { sourceId }),
 
-  stats: (query: { from?: string; to?: string; siteId?: string }) => api.get<CcStats>('/admin/cc/stats', { params: params(query) }),
+  stats: (query: { from?: string; to?: string; siteId?: string }) =>
+    api.get<CcStats>('/admin/cc/stats', { params: params(query) }),
+  funnel: (query: { from?: string; to?: string; siteId?: string; device?: string; channel?: string }) =>
+    api.get<CcFunnel>('/admin/cc/funnel', { params: params(query) }),
 };
 
 export default ContactCenterService;

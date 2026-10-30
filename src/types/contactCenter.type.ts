@@ -223,3 +223,17 @@ export interface CcStats {
     personsBuckets: Count[];
   };
 }
+
+/** GET /admin/cc/funnel (P6 R0): steps VISIT, BOAT, FORM, INQUIRY; exits are last pages of visits without an inquiry. */
+export interface CcFunnel {
+  from: string;
+  to: string;
+  siteId: string | null;
+  device: string | null;
+  channel: string | null;
+  steps: Count[];
+  chatOpened: number;
+  exitsByType: Count[];
+  exits: Array<{ path: string; pageType: string; views: number; exits: number }>;
+  clicks: Array<{ pageType: string; label: string; clicks: number }>;
+}

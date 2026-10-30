@@ -220,5 +220,44 @@
   "liveHeader_other": "{{count}} posjetitelja sada na sajtovima",
   "liveSub": "Osvježava se svakih 15 s · samo posjetitelji s pristankom",
   "siteAll": "Sajt: svi",
-  "rangeLabel": "Razdoblje"
+  "rangeLabel": "Razdoblje",
+  "funnel": {
+    "title": "Lijevak upita",
+    "deviceAll": "Uređaj: svi",
+    "channelAll": "Izvor: svi",
+    "devices": {
+      "DESKTOP": "Računalo",
+      "TABLET": "Tablet",
+      "MOBILE": "Mobitel"
+    },
+    "steps": {
+      "VISIT": "Posjet",
+      "BOAT": "Stranica broda",
+      "FORM": "Obrazac upita ili rezervacije",
+      "INQUIRY": "Poslan upit"
+    },
+    "ofVisits": "{{n}} % posjeta",
+    "chatOpened": "Posjeti s otvorenim chatom: {{count}}",
+    "note": "Posjet se broji na najdubljem koraku i na svim koracima prije njega, pa se upit poslan iz prozora na sestrinskom sajtu broji i kao obrazac. Poslani upiti broje se od uvođenja ovog mjerenja.",
+    "exitsByType": "Gdje odlaze bez upita",
+    "exitPages": "Izlazne stranice",
+    "path": "Stranica",
+    "type": "Vrsta",
+    "views": "Posjeta",
+    "exits": "Izlazi",
+    "exitRate": "Stopa izlaza",
+    "clicks": "Najčešći klikovi",
+    "element": "Element",
+    "clickCount": "Klikovi",
+    "pageType": {
+      "HOME": "Naslovnica",
+      "BOAT": "Brod",
+      "SEARCH": "Pretraga",
+      "DESTINATION": "Destinacija",
+      "BLOG": "Blog",
+      "ITINERARY": "Itinerar",
+      "BOOKING": "Obrazac / rezervacija",
+      "OTHER": "Ostalo"
+    }
+  }
 }

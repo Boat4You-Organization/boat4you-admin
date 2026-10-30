@@ -219,5 +219,44 @@
   "liveHeader_other": "{{count}} visitors on the sites now",
   "liveSub": "Refreshes every 15 s · only visitors who consented",
   "siteAll": "Site: all",
-  "rangeLabel": "Period"
+  "rangeLabel": "Period",
+  "funnel": {
+    "title": "Inquiry funnel",
+    "deviceAll": "Device: all",
+    "channelAll": "Source: all",
+    "devices": {
+      "DESKTOP": "Desktop",
+      "TABLET": "Tablet",
+      "MOBILE": "Mobile"
+    },
+    "steps": {
+      "VISIT": "Visit",
+      "BOAT": "Boat page",
+      "FORM": "Inquiry or booking form",
+      "INQUIRY": "Inquiry sent"
+    },
+    "ofVisits": "{{n}} % of visits",
+    "chatOpened": "Visits that opened the chat: {{count}}",
+    "note": "A visit counts at its deepest step and at every step before it, so an inquiry sent from a pop-up on a sister site also counts as a form. Sent inquiries are counted from the start of this measurement.",
+    "exitsByType": "Where they leave without an inquiry",
+    "exitPages": "Exit pages",
+    "path": "Page",
+    "type": "Type",
+    "views": "Visits",
+    "exits": "Exits",
+    "exitRate": "Exit rate",
+    "clicks": "Top clicks",
+    "element": "Element",
+    "clickCount": "Clicks",
+    "pageType": {
+      "HOME": "Home",
+      "BOAT": "Boat",
+      "SEARCH": "Search",
+      "DESTINATION": "Destination",
+      "BLOG": "Blog",
+      "ITINERARY": "Itinerary",
+      "BOOKING": "Form / booking",
+      "OTHER": "Other"
+    }
+  }
 }

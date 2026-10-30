@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
 import { displayName, formatDuration } from '../src/utils/contactCenter/display.ts';
+import { exitRate, funnelRows } from '../src/utils/contactCenter/funnel.ts';
 import { createPoller } from '../src/utils/contactCenter/poller.ts';
 import { safeHref } from '../src/utils/contactCenter/safeLink.ts';
 
@@ -167,5 +168,35 @@ describe('createPoller', () => {
     await flush();
     assert.equal(calls, 2);
     poller.stop();
+  });
+});
+
+describe('funnel (P6 R0)', () => {
+  test('each step as a share of visits and as the drop from the step before, in whole percents', () => {
+    const steps = [
+      { key: 'VISIT', value: 200 },
+      { key: 'BOAT', value: 80 },
+      { key: 'FORM', value: 10 },
+      { key: 'INQUIRY', value: 3 },
+    ];
+
+    assert.deepEqual(funnelRows(steps), [
+      { key: 'VISIT', value: 200, ofVisits: 100, drop: null },
+      { key: 'BOAT', value: 80, ofVisits: 40, drop: 60 },
+      { key: 'FORM', value: 10, ofVisits: 5, drop: 88 },
+      { key: 'INQUIRY', value: 3, ofVisits: 2, drop: 70 },
+    ]);
+  });
+
+  test('no visits gives no percentages, never NaN', () => {
+    assert.deepEqual(funnelRows([{ key: 'VISIT', value: 0 }, { key: 'BOAT', value: 0 }]), [
+      { key: 'VISIT', value: 0, ofVisits: null, drop: null },
+      { key: 'BOAT', value: 0, ofVisits: null, drop: null },
+    ]);
+  });
+
+  test('exit rate is exits of views, in whole percents', () => {
+    assert.equal(exitRate(2, 3), 67);
+    assert.equal(exitRate(0, 0), null);
   });
 });

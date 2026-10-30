@@ -432,6 +432,45 @@ interface Resources {
     };
     filters: 'Filters · {{count}}';
     fromSite: 'from';
+    funnel: {
+      channelAll: 'Source: all';
+      chatOpened: 'Visits that opened the chat: {{count}}';
+      clickCount: 'Clicks';
+      clicks: 'Top clicks';
+      deviceAll: 'Device: all';
+      devices: {
+        DESKTOP: 'Desktop';
+        MOBILE: 'Mobile';
+        TABLET: 'Tablet';
+      };
+      element: 'Element';
+      exitPages: 'Exit pages';
+      exitRate: 'Exit rate';
+      exits: 'Exits';
+      exitsByType: 'Where they leave without an inquiry';
+      note: 'A visit counts at its deepest step and at every step before it, so an inquiry sent from a pop-up on a sister site also counts as a form. Sent inquiries are counted from the start of this measurement.';
+      ofVisits: '{{n}} % of visits';
+      pageType: {
+        BLOG: 'Blog';
+        BOAT: 'Boat';
+        BOOKING: 'Form / booking';
+        DESTINATION: 'Destination';
+        HOME: 'Home';
+        ITINERARY: 'Itinerary';
+        OTHER: 'Other';
+        SEARCH: 'Search';
+      };
+      path: 'Page';
+      steps: {
+        BOAT: 'Boat page';
+        FORM: 'Inquiry or booking form';
+        INQUIRY: 'Inquiry sent';
+        VISIT: 'Visit';
+      };
+      title: 'Inquiry funnel';
+      type: 'Type';
+      views: 'Visits';
+    };
     lastSeen: 'Last seen';
     listLabel: 'Conversation list';
     live: 'On the site now';

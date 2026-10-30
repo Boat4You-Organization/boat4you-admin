@@ -1,6 +1,6 @@
 # boat4you-admin — deploy notes
 
-## 2026-10-30 — 🎨 Broker Desk redizajn v2.2 na cijelom adminu (samo vizualni sloj) — ⏳ ČEKA spajanje u `main` i Mariov „da“ za deploy
+## 2026-10-30 — 🎨 Broker Desk redizajn v2.2 na cijelom adminu (samo vizualni sloj) — ✅ LIVE 30.10.2026 (cusma1, main `7bf1bf1`, entry `assets/index-BsjmJMkY.js`), tag `live/2026-10-30-redesign-v22`
 
 Mario 30.10.2026: „sredi samo dizajn, funkcije se ne smiju dirat, sve mora biti pod istim funkcijama“. Dizajn: `_design/redesign-v2.2/index.html` (Claude Design, 31 ploča). Grana `feat/redesign-v2.2` (iz `main` `e157889`), commiti `e5a8a5f` … `502d807`, po fazama:
 
@@ -17,11 +17,9 @@ Nije napravljeno (namjerno, mijenja ponašanje): zamjena `window.confirm` (brisa
 
 Provjere: `tsc` 0, `yarn lint` 0 grešaka (pre-commit hook), `yarn test` 37/37, `yarn build` OK; lokalni pregled (Vite + lažni API iz scratchpada) na 1440 i 375 px za sve ekrane, usporedba s pločama dizajna.
 
-Deploy:
+Pregled prije deploya (jedan agent, Opus): „safe to deploy: yes“, 0 blokera; popravljeno u `7bf1bf1`: redoslijed tabova u podnožju modala (Odustani pa potvrda u DOM-u), mali Switch, okvir fokusa na modalima/izbornicima, žuti bljesak korisničkog gumba. Ostalo iz pregleda svjesno ostavljeno: oznake bez CSS verzala sada pišu kako su u kodu (npr. „Under option“), potvrde brisanja/otkazivanja su crvene (destruktivni gumb), čipovi fiksne visine 22 px.
 
-- [ ] Mario: „da“ za spajanje `feat/redesign-v2.2` u `main` i deploy
-- [ ] `git fetch`, graditi točno `origin/main` (druge sesije deployaju admin), `.env.production.local` s `api.boat4you.com`, bundle bez `localhost:8443`
-- [ ] `infra/deploy-scripts/admin_deploy.sh` (cusma1), provjera root/deep/asset 200 i entry
+Deploy: Mario „da“ (30.10.), fast-forward u `main`, build iz čistog worktreeja na `origin/main` `7bf1bf1` (`ADMIN_REPO=…/wt-deploy-v22`), `localhost:8443` 0 / `api.boat4you.com` 19, swap preko staging dira; live entry == novi, root/deep/asset 200; Inter woff2 i slike (tekstura, otoci, ilustracije) 200 s ispravnim content-typeom. Prethodni live: `index-j1FPEKNm.js` (backup na cusma1 `admin-dist.bak-<ts>.tar.gz`, `html.prev`).
 
 ## 2026-10-30 — 🎨 Kontakt centar: redizajn po „Contact Center redizajn.html“ (funkcije iste) — ✅ LIVE 30.10.2026 (merge `59b015c`; live kroz deploy `72fb63a`/`4ed4ea8`, entry `assets/index-j1FPEKNm.js`), tag `live/2026-10-30-cc-redesign`
 

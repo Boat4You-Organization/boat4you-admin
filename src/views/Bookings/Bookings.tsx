@@ -33,6 +33,7 @@ import {
 } from '@/valtio/bookings/bookings.actions';
 import { useBookingsStore } from '@/valtio/bookings/bookings.store';
 
+import BookingsOverview from './partials/BookingsOverview';
 import CancelBookingModal from './partials/CancelBookingModal';
 import ConfirmBookingModal from './partials/ConfirmBookingModal';
 import CreateReservationModal from './partials/CreateReservationModal';
@@ -77,7 +78,6 @@ const statusToPillVariant = (s: ReservationSysStatus | VirtualReservationStatus)
   }
 };
 
-
 const formatCheckIn = (from?: string): string => {
   if (!from) return '—';
 
@@ -95,8 +95,7 @@ const formatCheckIn = (from?: string): string => {
 
   if (diff < 0 && diff > -60) return `${Math.abs(diff)}d ago`;
 
-  
-return f.format('DD MMM YYYY');
+  return f.format('DD MMM YYYY');
 };
 
 const formatNights = (from?: string, to?: string): number => {
@@ -107,15 +106,13 @@ const formatNights = (from?: string, to?: string): number => {
 
   if (!f.isValid() || !t.isValid()) return 0;
 
-  
-return Math.max(0, t.startOf('day').diff(f.startOf('day'), 'day'));
+  return Math.max(0, t.startOf('day').diff(f.startOf('day'), 'day'));
 };
 
 const initialsOf = (s: string): string => {
   const parts = s.split(' ').filter(Boolean);
 
-  
-return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase() || '?';
+  return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase() || '?';
 };
 
 type TabValue = (typeof RESERVATION_SYS_TAB_VALUES)[number];
@@ -156,8 +153,7 @@ const Bookings = () => {
   useEffect(() => {
     const id = window.setTimeout(() => setDebouncedSearch(searchInput.trim()), 350);
 
-    
-return () => window.clearTimeout(id);
+    return () => window.clearTimeout(id);
   }, [searchInput]);
 
   const {
@@ -210,11 +206,21 @@ return () => window.clearTimeout(id);
         undefined,
         search
       );
-      
-return;
+
+      return;
     }
 
-    getBookings(pageNumber, sortBy, sortDirection, effectiveBackendStatus, undefined, undefined, undefined, undefined, search);
+    getBookings(
+      pageNumber,
+      sortBy,
+      sortDirection,
+      effectiveBackendStatus,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      search
+    );
   }, [dateRange, page, sortBy, sortDirection, statusFilter, debouncedSearch, isVirtualTab]);
 
   // Client-side filter for virtual tabs. Backend paginates over every
@@ -229,8 +235,7 @@ return;
           b.reservationDateTo
         );
 
-        
-return eff === statusFilter;
+        return eff === statusFilter;
       })
     : bookings;
 
@@ -264,10 +269,7 @@ return eff === statusFilter;
       <ConfirmBookingModal isOpen={confirmBookingModalOpen} onClose={toggleConfirmBookingModal} />
       <MarkAsPaidBookingModal isOpen={markAsPaidBookingModalOpen} onClose={toggleMarkAsPaidBookingModal} />
       <EditNotesModal isOpen={editNotesModalOpen} onClose={toggleEditNotesModal} />
-      <CreateReservationModal
-        isOpen={createReservationModalOpen}
-        onClose={() => toggleCreateReservationModal(false)}
-      />
+      <CreateReservationModal isOpen={createReservationModalOpen} onClose={() => toggleCreateReservationModal(false)} />
       <Layout>
         <Box
           sx={{
@@ -289,7 +291,10 @@ return eff === statusFilter;
             sx={{ mb: 2 }}
           >
             <Box>
-              <Typography component="h1" sx={{ fontSize: { xs: 20, sm: 22 }, fontWeight: 800, letterSpacing: '-0.01em' }}>
+              <Typography
+                component="h1"
+                sx={{ fontSize: { xs: 20, sm: 22 }, fontWeight: 800, letterSpacing: '-0.01em' }}
+              >
                 {t('common.bookings')}
               </Typography>
               <Typography sx={{ fontSize: 12.5, color: bbColors.gray500, mt: 0.5 }}>
@@ -317,6 +322,8 @@ return eff === statusFilter;
             </Stack>
           </Stack>
 
+          <BookingsOverview />
+
           {/* Tabs — pill group */}
           <Box
             sx={{
@@ -335,8 +342,7 @@ return eff === statusFilter;
             {RESERVATION_SYS_TAB_VALUES.map(v => {
               const active = v === statusFilter;
 
-              
-return (
+              return (
                 <Box
                   key={v}
                   onClick={() => {
@@ -438,8 +444,7 @@ return (
                       const isActive = isSortable && sortBy === h.sortKey;
                       const arrow = isActive ? (sortDirection === 'asc' ? ' ↑' : ' ↓') : '';
 
-                      
-return (
+                      return (
                         <Box
                           component="th"
                           key={h.label || `col-${i}`}
@@ -470,14 +475,22 @@ return (
                 <Box component="tbody">
                   {isLoading && (
                     <Box component="tr">
-                      <Box component="td" colSpan={11} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                      <Box
+                        component="td"
+                        colSpan={11}
+                        sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}
+                      >
                         Loading…
                       </Box>
                     </Box>
                   )}
                   {!isLoading && visibleBookings.length === 0 && (
                     <Box component="tr">
-                      <Box component="td" colSpan={11} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                      <Box
+                        component="td"
+                        colSpan={11}
+                        sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}
+                      >
                         No bookings match the current filters.
                       </Box>
                     </Box>
@@ -494,8 +507,7 @@ return (
                       const cleanYacht = b.modelName?.replace(/\s*-\s*\d+\s*cab\.?$/i, '') ?? '—';
                       const isUnviewed = !viewedSet.has(b.reservationId);
 
-                      
-return (
+                      return (
                         <Box
                           component="tr"
                           key={`${b.reservationId}`}

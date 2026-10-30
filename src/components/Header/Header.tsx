@@ -102,7 +102,7 @@ const Header = () => {
   const initials = `${user.name?.[0] ?? ''}${user.surname?.[0] ?? ''}`.toUpperCase() || 'B4';
 
   const Brand = (
-    <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+    <Link to="/bookings" style={{ textDecoration: 'none' }}>
       <Stack direction="row" alignItems="center" gap={1.25}>
         <Box
           sx={{

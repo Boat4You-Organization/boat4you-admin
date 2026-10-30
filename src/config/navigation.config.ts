@@ -17,22 +17,16 @@ export interface NavigationLink {
 
 const navigation: NavigationLink[] = [
   {
-    // Broker Desk landing page — top of the nav, default redirect for
-    // SYSTEM_ADMIN / MANAGER after login (see role-default-routes.config).
-    id: 'dashboard',
-    path: '/dashboard',
+    // Landing page and first menu item since the Dashboard was folded into it (Mario 30.10.2026).
+    id: 'bookings',
+    icon: Bookings,
+    path: '/bookings',
     accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
   },
   {
     id: 'offers',
     icon: Boat,
     path: '/offers',
-    accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
-  },
-  {
-    id: 'bookings',
-    icon: Bookings,
-    path: '/bookings',
     accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
   },
   {

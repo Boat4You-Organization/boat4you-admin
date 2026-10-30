@@ -10,7 +10,6 @@ const ResetPassword = lazy(() => import('@/views/ResetPassword'));
 const ForgotPassword = lazy(() => import('@/views/ForgotPassword'));
 const Agencies = lazy(() => import('@/views/Agencies'));
 const Bookings = lazy(() => import('@/views/Bookings'));
-const Dashboard = lazy(() => import('@/views/Dashboard'));
 const SingleBooking = lazy(() => import('@/views/Bookings/SingleBooking'));
 const CustomBoats = lazy(() => import('@/views/CustomBoats'));
 const BoatsMedia = lazy(() => import('@/views/BoatsMedia'));
@@ -36,17 +35,9 @@ const AppRouter: React.FC = () => (
   <BrowserRouter>
     <Suspense fallback={<Loader />}>
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" />} />
-        <Route
-          path="/dashboard"
-          element={
-            <AppRoute
-              variant="protected"
-              accessLevel={[UserRoleName.MANAGER, UserRoleName.SYSTEM_ADMIN]}
-              component={<Dashboard />}
-            />
-          }
-        />
+        <Route path="/" element={<Navigate to="/bookings" />} />
+        {/* The Dashboard was folded into Bookings (Mario 30.10.2026); old bookmarks land there. */}
+        <Route path="/dashboard" element={<Navigate to="/bookings" replace />} />
         <Route
           path="/offers"
           element={

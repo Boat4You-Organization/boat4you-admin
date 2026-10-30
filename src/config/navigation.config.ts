@@ -4,7 +4,6 @@ import Boat from '@/components/SvgIcons/Boat';
 import { People } from '@/components/SvgIcons/BoatFeatures';
 import Bookings from '@/components/SvgIcons/Bookings';
 import Contact from '@/components/SvgIcons/Contact';
-import Extras from '@/components/SvgIcons/Extras';
 import Invoices from '@/components/SvgIcons/Invoices';
 import { UserRoleName } from '@/models/user.model';
 
@@ -60,12 +59,6 @@ const navigation: NavigationLink[] = [
     icon: Boat,
     path: '/boats/media',
     accessLevel: [UserRoleName.SYSTEM_ADMIN],
-  },
-  {
-    id: 'extras',
-    icon: Extras,
-    path: '/extras',
-    accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
   },
   {
     // Contact Center (P2, replaces /chat): backend /admin/cc/** and /admin/chat/** are SYSTEM_ADMIN only.

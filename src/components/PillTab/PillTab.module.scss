@@ -1,38 +1,38 @@
 @use '@/styles/settings/variables' as *;
 @use '@/styles/utils/rem-calc' as *;
-@use '@/styles/mixins/breakpoints' as *;
 
+// v2.2: the one tab style (navy fill on the grey Tabs track from the theme).
 .root {
   &.container {
-    min-height: auto;
+    min-height: rem-calc(30);
+    height: rem-calc(30);
     min-width: auto;
-    padding: rem-calc(12 16);
+    padding: rem-calc(0 12);
     background-color: transparent;
-    color: $black-600;
-    border-radius: rem-calc(100);
+    color: #46566a;
+    border-radius: rem-calc(7);
+    font-size: rem-calc(12.5);
+    font-weight: 600;
+    white-space: nowrap;
     transition:
-      background-color $animation-duration-normal ease-in-out,
-      color $animation-duration-normal ease-in-out;
+      background-color 0.15s ease,
+      color 0.15s ease;
 
     &:hover {
-      background-color: $black-100;
-      color: $black-950;
+      background-color: rgb(255 255 255 / 60%);
+      color: #0b1a2b;
     }
   }
 }
 
 .selected {
   &.container {
-    border-width: rem-calc(2);
-    background-color: $blue-50;
-    color: $blue-500;
-    transition:
-      background-color $animation-duration-normal ease-in-out,
-      color $animation-duration-normal ease-in-out;
+    background-color: #0b1a2b;
+    color: #fff;
 
     &:hover {
-      background-color: $blue-50;
-      color: $blue-500;
+      background-color: #0b1a2b;
+      color: #fff;
     }
   }
 }

@@ -8,12 +8,9 @@ import { Box, Button, IconButton, Stack, TextField, Typography } from '@mui/mate
 
 import Layout from '@/components/Layout';
 import { PAGE_NUMBER } from '@/config/constants.config';
-import {
-  AGENCY_PRIMARY_SOURCE_ARRAY,
-  AGENCY_PRIMARY_SOURCE_LABEL_MAP,
-} from '@/models/agencies.model';
+import { AGENCY_PRIMARY_SOURCE_ARRAY, AGENCY_PRIMARY_SOURCE_LABEL_MAP } from '@/models/agencies.model';
 import AgenciesService from '@/services/agencies.service';
-import { bbColors, bbFont, bbStatusPill } from '@/styles/bb';
+import { bbCardSx, bbColors, bbFont, bbStatusPill, bbTagStyles } from '@/styles/bb';
 import useQueryParams from '@/utils/hooks/useQueryParams';
 import { getAgencies, getSelectedAgency, toggleUpdateAgencyModal } from '@/valtio/agencies/agencies.actions';
 import { useAgenciesStore } from '@/valtio/agencies/agencies.store';
@@ -24,7 +21,7 @@ import useAgenciesView from './useAgenciesView';
 
 // Agencies list uses a bigger page than the standard admin PAGE_SIZE (20)
 // so the broker sees the whole partner fleet in just a couple of pages.
-const {AGENCIES_PAGE_SIZE} = AgenciesService;
+const { AGENCIES_PAGE_SIZE } = AgenciesService;
 
 /**
  * Agencies list — Broker Desk redesign.
@@ -39,8 +36,7 @@ const {AGENCIES_PAGE_SIZE} = AgenciesService;
 const initialsOf = (name: string): string => {
   const parts = name.trim().split(/\s+/).filter(Boolean);
 
-  
-return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase() || '?';
+  return `${parts[0]?.[0] ?? ''}${parts[1]?.[0] ?? ''}`.toUpperCase() || '?';
 };
 
 const Agencies = () => {
@@ -59,8 +55,7 @@ const Agencies = () => {
   useEffect(() => {
     const id = window.setTimeout(() => setDebouncedSearch(searchInput.trim()), 350);
 
-    
-return () => window.clearTimeout(id);
+    return () => window.clearTimeout(id);
   }, [searchInput]);
 
   const { isLoading, selectedAgency, agencies, totalCount, updateAgencyModalOpen } = useAgenciesStore();
@@ -130,7 +125,10 @@ return () => window.clearTimeout(id);
             sx={{ mb: 2 }}
           >
             <Box>
-              <Typography component="h1" sx={{ fontSize: { xs: 20, sm: 22 }, fontWeight: 800, letterSpacing: '-0.01em' }}>
+              <Typography
+                component="h1"
+                sx={{ fontSize: { xs: 20, sm: 22 }, fontWeight: 800, letterSpacing: '-0.01em' }}
+              >
                 {t('common.agencies', 'Agencies')}
               </Typography>
               <Typography sx={{ fontSize: 12.5, color: bbColors.gray500, mt: 0.5 }}>
@@ -143,12 +141,11 @@ return () => window.clearTimeout(id);
           <Box
             sx={{
               display: 'flex',
-              gap: 0.5,
-              mb: 1.75,
-              backgroundColor: bbColors.white,
-              border: `1px solid ${bbColors.gray200}`,
+              gap: '2px',
+              mb: 1.5,
+              backgroundColor: bbColors.gray150,
               borderRadius: '10px',
-              padding: '4px',
+              padding: '3px',
               width: 'fit-content',
               overflowX: 'auto',
               maxWidth: '100%',
@@ -159,14 +156,9 @@ return () => window.clearTimeout(id);
               const label =
                 v === 'all'
                   ? t('common.all')
-                  : t(
-                      AGENCY_PRIMARY_SOURCE_LABEL_MAP[
-                        v as keyof typeof AGENCY_PRIMARY_SOURCE_LABEL_MAP
-                      ]
-                    );
+                  : t(AGENCY_PRIMARY_SOURCE_LABEL_MAP[v as keyof typeof AGENCY_PRIMARY_SOURCE_LABEL_MAP]);
 
-              
-return (
+              return (
                 <Box
                   key={v}
                   onClick={() => {
@@ -174,12 +166,18 @@ return (
                     setParam({ source: v === 'all' ? '' : v, page: 1 });
                   }}
                   sx={{
-                    padding: '7px 14px',
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: active ? bbColors.white : bbColors.gray500,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    height: 30,
+                    padding: '0 12px',
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: active ? bbColors.white : bbColors.gray600,
                     backgroundColor: active ? bbColors.navy900 : 'transparent',
-                    borderRadius: '6px',
+                    borderRadius: '7px',
+                    '&:hover': active
+                      ? undefined
+                      : { color: bbColors.navy900, backgroundColor: 'rgba(255,255,255,.6)' },
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
                     userSelect: 'none',
@@ -195,11 +193,9 @@ return (
             direction="row"
             gap={1}
             sx={{
-              backgroundColor: bbColors.white,
-              border: `1px solid ${bbColors.gray200}`,
-              borderRadius: '10px',
-              padding: '10px 12px',
-              mb: 1.75,
+              ...bbCardSx,
+              padding: '10px',
+              mb: 1.5,
               flexWrap: 'wrap',
               alignItems: 'center',
             }}
@@ -212,11 +208,6 @@ return (
               sx={{
                 flex: 1,
                 minWidth: 240,
-                '& .MuiOutlinedInput-root': {
-                  fontSize: 12,
-                  borderRadius: '6px',
-                  '& fieldset': { borderColor: bbColors.gray300 },
-                },
               }}
               slotProps={{
                 input: {
@@ -237,18 +228,21 @@ return (
 
           {/* Card grid */}
           {isLoading && (
-            <Box sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>Loading…</Box>
+            <Box
+              sx={{ padding: '28px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 14, fontWeight: 600 }}
+            >
+              Loading…
+            </Box>
           )}
           {!isLoading && agencies.length === 0 && (
             <Box
               sx={{
-                backgroundColor: bbColors.white,
-                border: `1px solid ${bbColors.gray200}`,
-                borderRadius: '10px',
-                padding: '40px 20px',
+                ...bbCardSx,
+                padding: '28px 20px',
                 textAlign: 'center',
-                color: bbColors.gray500,
-                fontSize: 13,
+                color: bbColors.navy900,
+                fontSize: 14,
+                fontWeight: 700,
               }}
             >
               No agencies match the current filters.
@@ -258,7 +252,7 @@ return (
             <Box
               sx={{
                 display: 'grid',
-                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' },
                 gap: 1.5,
                 mb: 4,
               }}
@@ -266,34 +260,27 @@ return (
               {agencies.map(a => {
                 const statusPill = bbStatusPill(a.active ? 'active' : 'cancelled');
 
-                
-return (
+                return (
                   <Box
                     key={a.id}
                     data-id={a.id}
                     onClick={selectAgency}
                     sx={{
-                      backgroundColor: bbColors.white,
-                      border: `1px solid ${bbColors.gray200}`,
-                      borderRadius: '10px',
+                      ...bbCardSx,
                       overflow: 'hidden',
                       cursor: 'pointer',
-                      '&:hover': { borderColor: bbColors.navy700 },
+                      transition: 'border-color .15s',
+                      '&:hover': { borderColor: bbColors.gray450 },
                     }}
                   >
                     {/* Header — logo + name + status */}
-                    <Stack
-                      direction="row"
-                      alignItems="center"
-                      gap={1.25}
-                      sx={{ p: '12px 16px', borderBottom: `1px solid ${bbColors.gray100}` }}
-                    >
+                    <Stack direction="row" alignItems="center" gap={1.25} sx={{ p: '14px 16px 10px' }}>
                       <Box
                         sx={{
                           width: 40,
                           height: 40,
-                          borderRadius: '8px',
-                          background: `linear-gradient(135deg, ${bbColors.navy700}, ${bbColors.navy900})`,
+                          borderRadius: '10px',
+                          background: bbColors.navy900,
                           color: bbColors.yellow500,
                           display: 'flex',
                           alignItems: 'center',
@@ -307,10 +294,18 @@ return (
                         {initialsOf(a.name)}
                       </Box>
                       <Box sx={{ flex: 1, minWidth: 0 }}>
-                        <Typography sx={{ fontSize: 13.5, fontWeight: 800, color: bbColors.navy900, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <Typography
+                          sx={{
+                            fontSize: 14,
+                            fontWeight: 700,
+                            color: bbColors.navy900,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
                           {a.name}
                         </Typography>
-                        <Typography sx={{ fontSize: 11, color: bbColors.gray500 }}>
+                        <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>
                           {a.country || '—'} · #{a.id}
                         </Typography>
                       </Box>
@@ -323,10 +318,14 @@ return (
                     <Box
                       sx={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(2, 1fr)',
+                        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
                         gap: 0,
+                        mx: 2,
+                        border: `1px solid ${bbColors.gray100}`,
+                        borderRadius: '10px',
+                        backgroundColor: bbColors.gray75,
                         '& > div': {
-                          padding: '10px 16px',
+                          padding: '8px 12px',
                           borderRight: `1px solid ${bbColors.gray100}`,
                           borderBottom: `1px solid ${bbColors.gray100}`,
                         },
@@ -336,38 +335,42 @@ return (
                     >
                       <Box>
                         <Typography sx={statLabel}>Source</Typography>
-                        <Typography sx={statValue}>
+                        <Box
+                          component="span"
+                          sx={{
+                            ...bbTagStyles.base,
+                            ...(String(a.primarySource).toUpperCase().includes('MMK')
+                              ? bbTagStyles.mmk
+                              : bbTagStyles.nausys),
+                            mt: 0.5,
+                          }}
+                        >
                           {t(AGENCY_PRIMARY_SOURCE_LABEL_MAP[a.primarySource], a.primarySource)}
-                        </Typography>
+                        </Box>
                       </Box>
                       <Box>
                         <Typography sx={statLabel}>Discount</Typography>
-                        <Typography sx={statValue}>
-                          {a.discount != null ? `${a.discount}%` : '—'}
-                        </Typography>
+                        <Typography sx={statValue}>{a.discount != null ? `${a.discount}%` : '—'}</Typography>
                       </Box>
                       <Box>
                         <Typography sx={statLabel}>By-pass</Typography>
-                        <Typography sx={statValue}>{a.skipExternalSystem ? t('common.yes') : t('common.no')}</Typography>
+                        <Typography sx={statValue}>
+                          {a.skipExternalSystem ? t('common.yes') : t('common.no')}
+                        </Typography>
                       </Box>
                       <Box>
                         <Typography sx={statLabel}>Contact</Typography>
-                        <Typography sx={{ ...statValue, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <Typography
+                          sx={{ ...statValue, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}
+                        >
                           {a.email || a.phone || '—'}
                         </Typography>
                       </Box>
                     </Box>
 
                     {/* Footer link */}
-                    <Stack
-                      direction="row"
-                      justifyContent="flex-end"
-                      sx={{ p: '10px 16px', borderTop: `1px solid ${bbColors.gray100}` }}
-                    >
-                      <Typography
-                        component="span"
-                        sx={{ color: bbColors.navy700, fontWeight: 700, fontSize: 12 }}
-                      >
+                    <Stack direction="row" justifyContent="flex-start" sx={{ p: '10px 16px 12px' }}>
+                      <Typography component="span" sx={{ color: bbColors.navy700, fontWeight: 700, fontSize: 12 }}>
                         Open profile →
                       </Typography>
                     </Stack>
@@ -384,7 +387,6 @@ return (
                 size="small"
                 disabled={page <= PAGE_NUMBER}
                 onClick={() => handlePageChange(page - 1)}
-                sx={{ textTransform: 'none', fontSize: 12, borderColor: bbColors.gray300, color: bbColors.navy900 }}
               >
                 ← Prev
               </Button>
@@ -396,7 +398,6 @@ return (
                 size="small"
                 disabled={page >= totalPages}
                 onClick={() => handlePageChange(page + 1)}
-                sx={{ textTransform: 'none', fontSize: 12, borderColor: bbColors.gray300, color: bbColors.navy900 }}
               >
                 Next →
               </Button>
@@ -409,11 +410,9 @@ return (
 };
 
 const statLabel = {
-  fontSize: 10,
-  letterSpacing: '0.14em',
-  textTransform: 'uppercase' as const,
+  fontSize: 12,
   color: bbColors.gray500,
-  fontWeight: 700,
+  fontWeight: 400,
 };
 
 const statValue = {

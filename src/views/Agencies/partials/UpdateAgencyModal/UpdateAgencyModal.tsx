@@ -163,9 +163,7 @@ const UpdateAgencyModal = ({ isOpen, onClose }: UpdateAgencyModalProps) => {
 
     showToast({
       status: success ? 'success' : 'error',
-      text: success
-        ? `Recalculated prices: ${payload} offer(s) updated`
-        : message || 'Recalculation failed',
+      text: success ? `Recalculated prices: ${payload} offer(s) updated` : message || 'Recalculation failed',
     });
     setRecalculating(false);
   };
@@ -231,16 +229,10 @@ const UpdateAgencyModal = ({ isOpen, onClose }: UpdateAgencyModalProps) => {
         <Tabs
           value={tabValue}
           onChange={handleTabChange}
-          variant="fullWidth"
           scrollButtons={false}
           sx={{
             mb: 3,
-            '& .MuiTabs-flexContainer': {
-              border: `1px solid ${colors.black200}`,
-              borderRadius: '100px',
-              gap: '16px',
-              padding: '4px',
-            },
+            '& .MuiTabs-flexContainer': { gap: '2px' },
             '& .MuiTabs-indicator': {
               display: 'none',
             },

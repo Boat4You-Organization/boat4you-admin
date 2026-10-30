@@ -19,7 +19,7 @@ import {
   UserStatus,
 } from '@/models/user.model';
 import UsersService from '@/services/users.service';
-import { bbColors, bbFont, bbStatusPill } from '@/styles/bb';
+import { bbCardSx, bbColors, bbFont, bbSegmentSx, bbStatusPill } from '@/styles/bb';
 import useQueryParams from '@/utils/hooks/useQueryParams';
 import { showToast } from '@/valtio/global/global.actions';
 import {
@@ -184,23 +184,7 @@ const Users = () => {
               </Typography>
             </Box>
             <Stack direction="row" gap={1} sx={{ flexShrink: 0 }}>
-              <Button
-                onClick={() => toggleCreateUserModal(true)}
-                sx={{
-                  backgroundColor: bbColors.yellow500,
-                  color: bbColors.yellowText,
-                  padding: '8px 14px',
-                  borderRadius: '6px',
-                  fontSize: 12,
-                  fontWeight: 800,
-                  letterSpacing: '0.02em',
-                  textTransform: 'none',
-                  boxShadow: '0 4px 10px -4px rgba(255,210,74,0.5)',
-                  '&:hover': { backgroundColor: '#ffca2e', boxShadow: '0 4px 10px -4px rgba(255,210,74,0.5)' },
-                }}
-              >
-                + {t('common.addUser', 'Add user')}
-              </Button>
+              <Button onClick={() => toggleCreateUserModal(true)}>+ {t('common.addUser', 'Add user')}</Button>
             </Stack>
           </Stack>
 
@@ -208,12 +192,11 @@ const Users = () => {
           <Box
             sx={{
               display: 'flex',
-              gap: 0.5,
-              mb: 1.75,
-              backgroundColor: bbColors.white,
-              border: `1px solid ${bbColors.gray200}`,
+              gap: '2px',
+              mb: 1.5,
+              backgroundColor: bbColors.gray150,
               borderRadius: '10px',
-              padding: '4px',
+              padding: '3px',
               width: 'fit-content',
               overflowX: 'auto',
               maxWidth: '100%',
@@ -230,12 +213,18 @@ const Users = () => {
                     setParam({ userRole: v === USER_ROLE_NAME_TAB_VALUES[0] ? '' : v, page: 1 });
                   }}
                   sx={{
-                    padding: '7px 14px',
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: active ? bbColors.white : bbColors.gray500,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    height: 30,
+                    padding: '0 12px',
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: active ? bbColors.white : bbColors.gray600,
                     backgroundColor: active ? bbColors.navy900 : 'transparent',
-                    borderRadius: '6px',
+                    borderRadius: '7px',
+                    '&:hover': active
+                      ? undefined
+                      : { color: bbColors.navy900, backgroundColor: 'rgba(255,255,255,.6)' },
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
                     userSelect: 'none',
@@ -252,11 +241,9 @@ const Users = () => {
             direction="row"
             gap={1}
             sx={{
-              backgroundColor: bbColors.white,
-              border: `1px solid ${bbColors.gray200}`,
-              borderRadius: '10px',
-              padding: '10px 12px',
-              mb: 1.75,
+              ...bbCardSx,
+              padding: '10px',
+              mb: 1.5,
               flexWrap: 'wrap',
               alignItems: 'center',
             }}
@@ -270,39 +257,26 @@ const Users = () => {
               sx={{
                 flex: 1,
                 minWidth: 240,
-                '& .MuiOutlinedInput-root': {
-                  fontSize: 12,
-                  borderRadius: '6px',
-                  '& fieldset': { borderColor: bbColors.gray300 },
-                },
               }}
             />
             {/* User-status filter — kept as small segmented chips so the
                 broker can flip between Active / Inactive without opening
                 a select menu. "All" clears the filter. */}
-            <Stack direction="row" gap={0.5}>
+            <Stack direction="row" gap="2px" sx={{ p: '3px', backgroundColor: bbColors.gray150, borderRadius: '10px' }}>
               {USER_STATUS_VALUES.map(v => {
                 const active = v === userStatus;
 
                 return (
                   <Box
                     key={v}
+                    component="button"
+                    type="button"
+                    aria-pressed={active}
                     onClick={() => {
                       setUserStatus(v);
                       setParam({ userStatus: v === USER_STATUS_VALUES[0] ? '' : v, page: 1 });
                     }}
-                    sx={{
-                      padding: '6px 11px',
-                      fontSize: 11.5,
-                      fontWeight: 700,
-                      color: active ? bbColors.white : bbColors.gray500,
-                      backgroundColor: active ? bbColors.navy900 : bbColors.gray75,
-                      borderRadius: '6px',
-                      border: `1px solid ${bbColors.gray200}`,
-                      cursor: 'pointer',
-                      whiteSpace: 'nowrap',
-                      userSelect: 'none',
-                    }}
+                    sx={bbSegmentSx(active)}
                   >
                     {v === 'all' ? t('common.all') : t(USER_STATUS_LABEL_MAP[v])}
                   </Box>
@@ -314,9 +288,7 @@ const Users = () => {
           {/* Table card */}
           <Box
             sx={{
-              backgroundColor: bbColors.white,
-              border: `1px solid ${bbColors.gray200}`,
-              borderRadius: '10px',
+              ...bbCardSx,
               overflow: 'hidden',
             }}
           >
@@ -329,14 +301,12 @@ const Users = () => {
                         component="th"
                         key={h || `col-${i}`}
                         sx={{
-                          fontSize: 10,
-                          letterSpacing: '0.14em',
-                          textTransform: 'uppercase',
-                          color: bbColors.gray500,
+                          fontSize: 11.5,
+                          color: bbColors.tableHeadText,
                           fontWeight: 700,
-                          padding: '10px 14px',
+                          padding: '9px 12px',
                           textAlign: i === 4 ? 'right' : 'left',
-                          backgroundColor: bbColors.gray75,
+                          backgroundColor: bbColors.tableHead,
                           borderBottom: `1px solid ${bbColors.gray200}`,
                           whiteSpace: 'nowrap',
                         }}
@@ -352,7 +322,13 @@ const Users = () => {
                       <Box
                         component="td"
                         colSpan={5}
-                        sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}
+                        sx={{
+                          padding: '28px 20px',
+                          textAlign: 'center',
+                          color: bbColors.gray500,
+                          fontSize: 14,
+                          fontWeight: 600,
+                        }}
                       >
                         Loading…
                       </Box>
@@ -363,7 +339,13 @@ const Users = () => {
                       <Box
                         component="td"
                         colSpan={5}
-                        sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}
+                        sx={{
+                          padding: '28px 20px',
+                          textAlign: 'center',
+                          color: bbColors.gray500,
+                          fontSize: 14,
+                          fontWeight: 600,
+                        }}
                       >
                         No users match the current filters.
                       </Box>
@@ -504,7 +486,6 @@ const Users = () => {
                 size="small"
                 disabled={page <= PAGE_NUMBER}
                 onClick={() => handlePageChange(page - 1)}
-                sx={{ textTransform: 'none', fontSize: 12, borderColor: bbColors.gray300, color: bbColors.navy900 }}
               >
                 ← Prev
               </Button>
@@ -516,7 +497,6 @@ const Users = () => {
                 size="small"
                 disabled={page >= totalPages}
                 onClick={() => handlePageChange(page + 1)}
-                sx={{ textTransform: 'none', fontSize: 12, borderColor: bbColors.gray300, color: bbColors.navy900 }}
               >
                 Next →
               </Button>
@@ -529,10 +509,10 @@ const Users = () => {
 };
 
 const tdBase = {
-  padding: '12px 14px',
-  fontSize: 12.5,
+  padding: '9px 12px',
+  fontSize: 13,
   borderBottom: `1px solid ${bbColors.gray100}`,
-  color: '#2c3e56',
+  color: bbColors.navy900,
   whiteSpace: 'nowrap' as const,
 };
 

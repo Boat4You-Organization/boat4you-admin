@@ -3,7 +3,7 @@ import { ReactNode, useCallback, useState } from 'react';
 import { Box, Stack, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material';
 
 import ModalRoot from '@/components/ModalRoot';
-import { bbCardSx, bbColors } from '@/styles/bb';
+import { bbCardSx, bbColors, bbShadow } from '@/styles/bb';
 
 interface SectionCardProps {
   icon: ReactNode;
@@ -23,11 +23,25 @@ export const SectionCard = ({ icon, title, subtitle, actions, children }: Sectio
       sx={{ mb: 1.75 }}
     >
       <Stack direction="row" alignItems="center" gap={1} sx={{ minWidth: 0 }}>
-        <Box sx={{ color: bbColors.navy700, display: 'flex' }} aria-hidden>
+        <Box
+          sx={{
+            flex: 'none',
+            width: 32,
+            height: 32,
+            borderRadius: '10px',
+            backgroundColor: bbColors.info100,
+            color: bbColors.navy700,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            '& svg': { fontSize: 18 },
+          }}
+          aria-hidden
+        >
           {icon}
         </Box>
         <Box sx={{ minWidth: 0 }}>
-          <Typography component="h2" sx={{ fontSize: 15, fontWeight: 800, color: bbColors.navy900 }}>
+          <Typography component="h2" sx={{ fontSize: 15, fontWeight: 700, color: bbColors.navy900 }}>
             {title}
           </Typography>
           {subtitle && <Typography sx={{ fontSize: 12, color: bbColors.gray500, mt: 0.25 }}>{subtitle}</Typography>}
@@ -82,7 +96,7 @@ export const buttonSx = {
   textTransform: 'none',
   fontSize: 12.5,
   fontWeight: 700,
-  borderRadius: '6px',
+  borderRadius: '10px',
   boxShadow: 'none',
 } as const;
 
@@ -90,8 +104,10 @@ export const primaryButtonSx = {
   ...buttonSx,
   backgroundColor: bbColors.yellow500,
   color: bbColors.yellowText,
-  '&:hover': { backgroundColor: '#ffca2e', boxShadow: 'none' },
-  '&.Mui-disabled': { backgroundColor: '#fce8a3', color: bbColors.yellowText },
+  fontWeight: 800,
+  boxShadow: bbShadow.yellowCta,
+  '&:hover': { backgroundColor: bbColors.yellowHover, boxShadow: bbShadow.yellowCta },
+  '&.Mui-disabled': { backgroundColor: bbColors.yellowDisabled, color: '#8c7a4a', boxShadow: 'none' },
 } as const;
 
 export const secondaryButtonSx = {
@@ -121,12 +137,20 @@ export const ResultTable = <T,>({ columns, rows, empty }: { columns: Column<T>[]
   }
 
   return (
-    <Box sx={{ overflowX: 'auto', maxHeight: 360, border: `1px solid ${bbColors.gray200}`, borderRadius: '8px' }}>
+    <Box sx={{ overflowX: 'auto', maxHeight: 360, border: `1px solid ${bbColors.gray200}`, borderRadius: '10px' }}>
       <Table size="small" stickyHeader>
         <TableHead>
           <TableRow>
             {columns.map(c => (
-              <TableCell key={c.label} sx={{ fontSize: 11.5, fontWeight: 800, backgroundColor: bbColors.gray75 }}>
+              <TableCell
+                key={c.label}
+                sx={{
+                  fontSize: 11.5,
+                  fontWeight: 700,
+                  color: bbColors.tableHeadText,
+                  backgroundColor: bbColors.tableHead,
+                }}
+              >
                 {c.label}
               </TableCell>
             ))}
@@ -151,9 +175,7 @@ export const ResultTable = <T,>({ columns, rows, empty }: { columns: Column<T>[]
 
 export const Stat = ({ label, value }: { label: string; value: ReactNode }) => (
   <Box sx={{ px: 1.25, py: 0.75, borderRadius: '8px', backgroundColor: bbColors.gray100, minWidth: 92 }}>
-    <Typography sx={{ fontSize: 10.5, color: bbColors.gray500, fontWeight: 700, textTransform: 'uppercase' }}>
-      {label}
-    </Typography>
+    <Typography sx={{ fontSize: 12, color: bbColors.gray500, fontWeight: 600 }}>{label}</Typography>
     <Typography sx={{ fontSize: 15, fontWeight: 800, color: bbColors.navy900 }}>{value}</Typography>
   </Box>
 );

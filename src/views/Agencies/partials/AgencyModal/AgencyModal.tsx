@@ -57,16 +57,10 @@ const AgencyModal = ({ isOpen, onClose, onConfirm }: AgencyModalProps) => {
         <Tabs
           value={tabValue}
           onChange={handleTabChange}
-          variant="fullWidth"
           scrollButtons={false}
           sx={{
             mb: 3,
-            '& .MuiTabs-flexContainer': {
-              border: `1px solid ${colors.black200}`,
-              borderRadius: '100px',
-              gap: '16px',
-              padding: '4px',
-            },
+            '& .MuiTabs-flexContainer': { gap: '2px' },
             '& .MuiTabs-indicator': {
               display: 'none',
             },

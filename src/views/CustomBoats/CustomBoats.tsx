@@ -9,7 +9,7 @@ import Layout from '@/components/Layout';
 import EditIcon from '@/components/SvgIcons/Edit';
 import TrashIcon from '@/components/SvgIcons/Trash';
 import { PAGE_NUMBER, PAGE_SIZE } from '@/config/constants.config';
-import { bbColors, bbFont } from '@/styles/bb';
+import { bbCardSx, bbColors, bbFont, bbTagStyles } from '@/styles/bb';
 import useQueryParams from '@/utils/hooks/useQueryParams';
 import { formatPrice } from '@/utils/static/formatNumber';
 import {
@@ -104,7 +104,10 @@ const CustomBoats = () => {
             sx={{ mb: 2 }}
           >
             <Box>
-              <Typography component="h1" sx={{ fontSize: { xs: 20, sm: 22 }, fontWeight: 800, letterSpacing: '-0.01em' }}>
+              <Typography
+                component="h1"
+                sx={{ fontSize: { xs: 20, sm: 22 }, fontWeight: 800, letterSpacing: '-0.01em' }}
+              >
                 {t('common.customBoats', 'Custom boats')}
               </Typography>
               <Typography sx={{ fontSize: 12.5, color: bbColors.gray500, mt: 0.5 }}>
@@ -112,23 +115,7 @@ const CustomBoats = () => {
               </Typography>
             </Box>
             <Stack direction="row" gap={1} sx={{ flexShrink: 0 }}>
-              <Button
-                onClick={() => toggleCreateCustomYachtModal(true)}
-                sx={{
-                  backgroundColor: bbColors.yellow500,
-                  color: bbColors.yellowText,
-                  padding: '8px 14px',
-                  borderRadius: '6px',
-                  fontSize: 12,
-                  fontWeight: 800,
-                  letterSpacing: '0.02em',
-                  textTransform: 'none',
-                  boxShadow: '0 4px 10px -4px rgba(255,210,74,0.5)',
-                  '&:hover': { backgroundColor: '#ffca2e', boxShadow: '0 4px 10px -4px rgba(255,210,74,0.5)' },
-                }}
-              >
-                + New custom boat
-              </Button>
+              <Button onClick={() => toggleCreateCustomYachtModal(true)}>+ New custom boat</Button>
             </Stack>
           </Stack>
 
@@ -137,11 +124,9 @@ const CustomBoats = () => {
             direction="row"
             gap={1}
             sx={{
-              backgroundColor: bbColors.white,
-              border: `1px solid ${bbColors.gray200}`,
-              borderRadius: '10px',
-              padding: '10px 12px',
-              mb: 1.75,
+              ...bbCardSx,
+              padding: '10px',
+              mb: 1.5,
               flexWrap: 'wrap',
               alignItems: 'center',
             }}
@@ -152,32 +137,27 @@ const CustomBoats = () => {
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
               onKeyDown={onSearchKey}
-              sx={{
-                flex: 1,
-                minWidth: 240,
-                '& .MuiOutlinedInput-root': {
-                  fontSize: 12,
-                  borderRadius: '6px',
-                  '& fieldset': { borderColor: bbColors.gray300 },
-                },
-              }}
+              sx={{ flex: 1, minWidth: 240 }}
             />
           </Stack>
 
           {/* Card grid */}
           {isLoading && (
-            <Box sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>Loading…</Box>
+            <Box
+              sx={{ padding: '28px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 14, fontWeight: 600 }}
+            >
+              Loading…
+            </Box>
           )}
           {!isLoading && customYachts.length === 0 && (
             <Box
               sx={{
-                backgroundColor: bbColors.white,
-                border: `1px solid ${bbColors.gray200}`,
-                borderRadius: '10px',
-                padding: '40px 20px',
+                ...bbCardSx,
+                padding: '28px 20px',
                 textAlign: 'center',
-                color: bbColors.gray500,
-                fontSize: 13,
+                color: bbColors.navy900,
+                fontSize: 14,
+                fontWeight: 700,
               }}
             >
               No custom boats yet. Click "+ New custom boat" to add the first one.
@@ -187,99 +167,126 @@ const CustomBoats = () => {
             <Box
               sx={{
                 display: 'grid',
-                gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)' },
+                gridTemplateColumns: {
+                  xs: '1fr',
+                  sm: 'repeat(2, minmax(0, 1fr))',
+                  md: 'repeat(3, minmax(0, 1fr))',
+                  xl: 'repeat(4, minmax(0, 1fr))',
+                },
                 gap: 1.5,
               }}
             >
               {customYachts.map((cy, i) => (
                 <Stack
                   key={cy.id}
-                  direction="row"
                   data-id={cy.id}
                   onClick={selectCustomYacht}
                   sx={{
-                    backgroundColor: bbColors.white,
-                    border: `1px solid ${bbColors.gray200}`,
-                    borderRadius: '10px',
+                    ...bbCardSx,
                     overflow: 'hidden',
                     cursor: 'pointer',
-                    '&:hover': { borderColor: bbColors.navy700 },
+                    transition: 'border-color .15s',
+                    '&:hover': { borderColor: bbColors.gray450 },
                   }}
                 >
-                  {/* Navy gradient tile with yellow boat icon */}
+                  {/* 4:3 picture area: the list carries no photo, so the v2.2 "no photo" tile (navy gradient + icon). */}
                   <Box
                     sx={{
-                      width: 110,
-                      flexShrink: 0,
+                      position: 'relative',
+                      aspectRatio: '4 / 3',
                       background: `linear-gradient(135deg, ${bbColors.navy700}, ${bbColors.navy900})`,
-                      color: bbColors.yellow500,
+                      color: bbColors.white,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: 42,
                     }}
                   >
-                    ⛵
+                    <svg
+                      width="44"
+                      height="44"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.4"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden
+                    >
+                      <path d="M12 3v13M12 4l7 11h-7M12 7 6 15h6" />
+                      <path d="M3 18h18l-2 3H5z" />
+                    </svg>
+                    <Box
+                      component="span"
+                      sx={{ ...bbTagStyles.base, ...bbTagStyles.hot, position: 'absolute', top: 10, left: 10 }}
+                    >
+                      EXCLUSIVE
+                    </Box>
                   </Box>
-                  <Stack sx={{ flex: 1, p: '14px 16px', minWidth: 0 }} gap={0.75}>
-                    <Typography sx={{ fontSize: 13.5, fontWeight: 800, color: bbColors.navy900 }}>
-                      {cy.modelName} · {cy.name}
+                  <Stack sx={{ flex: 1, p: '12px 14px', minWidth: 0 }} gap={0.75}>
+                    <Typography sx={{ fontSize: 14, fontWeight: 700, color: bbColors.navy900 }}>
+                      {cy.modelName}
+                      <Box component="span" sx={{ color: bbColors.gray500, fontWeight: 500 }}>
+                        {' · '}
+                        {cy.name}
+                      </Box>
                     </Typography>
-                    <Stack direction="row" alignItems="center" gap={0.75} sx={{ color: bbColors.gray500, fontSize: 11 }}>
-                      <FlagIcon countryCode={cy.countryCode} />
-                      <Typography sx={{ fontSize: 11, color: bbColors.gray500 }}>
-                        {cy.countryName || '—'}
-                      </Typography>
-                    </Stack>
-                    <Stack direction="row" gap={0.5} flexWrap="wrap">
+                    <Stack direction="row" alignItems="center" justifyContent="space-between" gap={0.75}>
+                      <Stack direction="row" alignItems="center" gap={0.75} sx={{ minWidth: 0 }}>
+                        <FlagIcon countryCode={cy.countryCode} />
+                        <Typography sx={{ fontSize: 12, color: bbColors.gray500 }} noWrap>
+                          {cy.countryName || '—'}
+                        </Typography>
+                      </Stack>
                       <Box sx={pillStyle}>
-                        <Box component="span" sx={{ color: bbColors.gray500 }}>Low</Box>{' '}
-                        <Box component="span" sx={{ fontWeight: 800 }}>
+                        <Box component="span" sx={{ color: bbColors.gray500, fontWeight: 600 }}>
+                          Low
+                        </Box>{' '}
+                        <Box component="span" sx={{ fontWeight: 700 }}>
                           €{formatPrice(cy.lowPrice || 0)}
                         </Box>
-                      </Box>
-                      <Box sx={{ ...pillStyle, backgroundColor: bbColors.amber100, color: '#8a6d00' }}>
-                        EXCLUSIVE
                       </Box>
                     </Stack>
                     <Stack
                       direction="row"
                       justifyContent="space-between"
                       alignItems="center"
-                      sx={{ mt: 0.5, pt: 1, borderTop: `1px solid ${bbColors.gray100}` }}
+                      sx={{ mt: 'auto', pt: 1, borderTop: `1px solid ${bbColors.gray100}` }}
                     >
-                      <Typography sx={{ fontSize: 11, color: bbColors.gray500, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <Typography
+                        sx={{
+                          fontSize: 12,
+                          color: bbColors.gray500,
+                          minWidth: 0,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
                         Slug: {cy.slug}
                       </Typography>
                       <Stack direction="row" gap={0.5} sx={{ flexShrink: 0 }}>
                         <Tooltip title={t('actions.edit')} arrow>
                           <IconButton
                             size="small"
+                            aria-label={t('actions.edit')}
                             onClick={e => handleEditCard(e, i)}
-                            sx={{
-                              color: bbColors.navy700,
-                              backgroundColor: bbColors.gray100,
-                              padding: '6px',
-                              borderRadius: '6px',
-                              '&:hover': { backgroundColor: bbColors.gray200 },
-                            }}
+                            sx={{ border: `1px solid ${bbColors.fieldBorder}`, backgroundColor: bbColors.white }}
                           >
-                            <EditIcon size={14} fill={bbColors.navy700} />
+                            <EditIcon size={14} fill={bbColors.navy900} />
                           </IconButton>
                         </Tooltip>
                         <Tooltip title={t('actions.delete')} arrow>
                           <IconButton
                             size="small"
+                            aria-label={t('actions.delete')}
                             onClick={e => handleDeleteCard(e, i)}
                             sx={{
-                              color: bbColors.red600,
-                              backgroundColor: bbColors.red100,
-                              padding: '6px',
-                              borderRadius: '6px',
-                              '&:hover': { backgroundColor: '#fbd9d2' },
+                              border: `1px solid ${bbColors.red200}`,
+                              backgroundColor: bbColors.white,
+                              '&:hover': { backgroundColor: bbColors.red100 },
                             }}
                           >
-                            <TrashIcon size={14} fill={bbColors.red600} />
+                            <TrashIcon size={14} fill={bbColors.red700} />
                           </IconButton>
                         </Tooltip>
                       </Stack>
@@ -297,7 +304,6 @@ const CustomBoats = () => {
                 size="small"
                 disabled={page <= PAGE_NUMBER}
                 onClick={() => handlePageChange(page - 1)}
-                sx={{ textTransform: 'none', fontSize: 12, borderColor: bbColors.gray300, color: bbColors.navy900 }}
               >
                 ← Prev
               </Button>
@@ -309,7 +315,6 @@ const CustomBoats = () => {
                 size="small"
                 disabled={page >= totalPages}
                 onClick={() => handlePageChange(page + 1)}
-                sx={{ textTransform: 'none', fontSize: 12, borderColor: bbColors.gray300, color: bbColors.navy900 }}
               >
                 Next →
               </Button>
@@ -325,13 +330,14 @@ const pillStyle = {
   display: 'inline-flex',
   alignItems: 'center',
   gap: 0.5,
-  padding: '3px 8px',
+  padding: '0 8px',
+  height: 22,
   borderRadius: 999,
-  backgroundColor: bbColors.gray100,
-  fontSize: 10.5,
+  backgroundColor: bbColors.info100,
+  color: bbColors.navy700,
+  fontSize: 11.5,
   fontWeight: 700,
-  color: bbColors.navy900,
-  letterSpacing: '0.02em',
+  whiteSpace: 'nowrap' as const,
 };
 
 export default CustomBoats;

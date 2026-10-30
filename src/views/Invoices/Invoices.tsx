@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Route, Routes, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
-import { Box, Button, Checkbox as MuiCheckbox, MenuItem, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, MenuItem, Checkbox as MuiCheckbox, Stack, TextField, Typography } from '@mui/material';
 import { pdf } from '@react-pdf/renderer';
 import dayjs from 'dayjs';
 import { saveAs } from 'file-saver';
@@ -17,7 +17,7 @@ import {
   InvoiceStatus,
 } from '@/models/invoices.model';
 import InvoicesService from '@/services/invoices.service';
-import { bbColors, bbFont, bbStatusPill } from '@/styles/bb';
+import { bbCardSx, bbColors, bbFont, bbStatusPill } from '@/styles/bb';
 import useQueryParams from '@/utils/hooks/useQueryParams';
 import DateTime from '@/utils/static/DateTime';
 import { formatPrice } from '@/utils/static/formatNumber';
@@ -59,10 +59,11 @@ const statusToVariant = (s: InvoiceStatus): string => {
 
 // Subtle full-row tint so the list scans by state at a glance (Mario
 // 28.8.2026): Ready = warm amber, Sent = green, Draft = plain white.
-const statusRowTint = (s: InvoiceStatus): string | undefined => {
-  if (s === InvoiceStatus.SENT) return '#f2fbf6';
+// v2.2: rows stay white; the status shows as a 3px bar on the first cell (sent = green, ready = amber).
+const statusRowBar = (s: InvoiceStatus): string | undefined => {
+  if (s === InvoiceStatus.SENT) return bbColors.green600;
 
-  if (s === InvoiceStatus.READY) return '#fdf9ec';
+  if (s === InvoiceStatus.READY) return bbColors.yellow500;
 
   return undefined;
 };
@@ -113,8 +114,29 @@ const Invoices = () => {
 
     setSelectedIds([]);
     // Single page — the service requests the whole year at once (no paging).
-    getInvoices(0, sortBy, sortDirection, status, search, undefined, undefined, undefined, departureDate || undefined, undefined, yearFilter);
-  }, [sortBy, sortDirection, statusFilter, search, departureDate, yearFilter, createInvoiceModalOpen, updateInvoiceModalOpen]);
+    getInvoices(
+      0,
+      sortBy,
+      sortDirection,
+      status,
+      search,
+      undefined,
+      undefined,
+      undefined,
+      departureDate || undefined,
+      undefined,
+      yearFilter
+    );
+  }, [
+    sortBy,
+    sortDirection,
+    statusFilter,
+    search,
+    departureDate,
+    yearFilter,
+    createInvoiceModalOpen,
+    updateInvoiceModalOpen,
+  ]);
 
   const onSearchKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') setParam({ search: searchInput, page: 1 });
@@ -166,7 +188,6 @@ const Invoices = () => {
     }
   };
 
-
   return (
     <>
       {selectedInvoice && (
@@ -206,7 +227,10 @@ const Invoices = () => {
             sx={{ mb: 2 }}
           >
             <Box>
-              <Typography component="h1" sx={{ fontSize: { xs: 20, sm: 22 }, fontWeight: 800, letterSpacing: '-0.01em' }}>
+              <Typography
+                component="h1"
+                sx={{ fontSize: { xs: 20, sm: 22 }, fontWeight: 800, letterSpacing: '-0.01em' }}
+              >
                 {t('common.invoices')}
               </Typography>
               <Typography sx={{ fontSize: 12.5, color: bbColors.gray500, mt: 0.5 }}>
@@ -215,28 +239,11 @@ const Invoices = () => {
             </Box>
             <Stack direction="row" gap={1}>
               {selectedIds.length > 0 && (
-                <Button
-                  variant="outlined"
-                  size="small"
-                  disabled={zipping}
-                  onClick={handleDownloadSelected}
-                  sx={{ textTransform: 'none', fontSize: 12.5, fontWeight: 700, borderColor: bbColors.gray300, color: bbColors.navy900 }}
-                >
+                <Button variant="outlined" size="small" disabled={zipping} onClick={handleDownloadSelected}>
                   {zipping ? t('actions.preparing-zip') : `${t('actions.download-selected')} (${selectedIds.length})`}
                 </Button>
               )}
-              <Button
-                variant="contained"
-                size="small"
-                onClick={() => toggleCreateInvoiceModal(true)}
-                sx={{
-                  textTransform: 'none',
-                  fontSize: 12.5,
-                  fontWeight: 700,
-                  backgroundColor: bbColors.navy900,
-                  '&:hover': { backgroundColor: bbColors.navy700 },
-                }}
-              >
+              <Button variant="contained" size="small" onClick={() => toggleCreateInvoiceModal(true)}>
                 + {t('actions.newInvoice')}
               </Button>
             </Stack>
@@ -245,12 +252,11 @@ const Invoices = () => {
           <Box
             sx={{
               display: 'flex',
-              gap: 0.5,
-              mb: 1.75,
-              backgroundColor: bbColors.white,
-              border: `1px solid ${bbColors.gray200}`,
+              gap: '2px',
+              mb: 1.5,
+              backgroundColor: bbColors.gray150,
               borderRadius: '10px',
-              padding: '4px',
+              padding: '3px',
               width: 'fit-content',
               overflowX: 'auto',
               maxWidth: '100%',
@@ -263,8 +269,7 @@ const Invoices = () => {
             {availableYears.map(y => {
               const active = y === yearFilter;
 
-
-return (
+              return (
                 <Box
                   key={y}
                   onClick={() => {
@@ -272,12 +277,18 @@ return (
                     setParam({ year: y === CURRENT_YEAR ? '' : String(y), page: 1 });
                   }}
                   sx={{
-                    padding: '7px 14px',
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: active ? bbColors.white : bbColors.gray500,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    height: 30,
+                    padding: '0 12px',
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: active ? bbColors.white : bbColors.gray600,
                     backgroundColor: active ? bbColors.navy900 : 'transparent',
-                    borderRadius: '6px',
+                    borderRadius: '7px',
+                    '&:hover': active
+                      ? undefined
+                      : { color: bbColors.navy900, backgroundColor: 'rgba(255,255,255,.6)' },
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
                     userSelect: 'none',
@@ -294,11 +305,9 @@ return (
             direction="row"
             gap={1}
             sx={{
-              backgroundColor: bbColors.white,
-              border: `1px solid ${bbColors.gray200}`,
-              borderRadius: '10px',
-              padding: '10px 12px',
-              mb: 1.75,
+              ...bbCardSx,
+              padding: '10px',
+              mb: 1.5,
               flexWrap: 'wrap',
               alignItems: 'center',
             }}
@@ -312,11 +321,6 @@ return (
               sx={{
                 flex: 1,
                 minWidth: 240,
-                '& .MuiOutlinedInput-root': {
-                  fontSize: 12,
-                  borderRadius: '6px',
-                  '& fieldset': { borderColor: bbColors.gray300 },
-                },
               }}
             />
             <TextField
@@ -329,11 +333,6 @@ return (
               }}
               sx={{
                 minWidth: 130,
-                '& .MuiOutlinedInput-root': {
-                  fontSize: 12,
-                  borderRadius: '6px',
-                  '& fieldset': { borderColor: bbColors.gray300 },
-                },
               }}
             >
               {INVOICE_STATUS_TAB_VALUES.map(v => (
@@ -353,11 +352,6 @@ return (
               slotProps={{ inputLabel: { shrink: true } }}
               sx={{
                 minWidth: 150,
-                '& .MuiOutlinedInput-root': {
-                  fontSize: 12,
-                  borderRadius: '6px',
-                  '& fieldset': { borderColor: bbColors.gray300 },
-                },
               }}
             />
             {departureDate && (
@@ -373,9 +367,7 @@ return (
 
           <Box
             sx={{
-              backgroundColor: bbColors.white,
-              border: `1px solid ${bbColors.gray200}`,
-              borderRadius: '10px',
+              ...bbCardSx,
               overflow: 'hidden',
             }}
           >
@@ -388,7 +380,7 @@ return (
                       sx={{
                         width: 36,
                         padding: '6px 4px 6px 10px',
-                        backgroundColor: bbColors.gray75,
+                        backgroundColor: bbColors.tableHead,
                         borderBottom: `1px solid ${bbColors.gray200}`,
                       }}
                     >
@@ -414,8 +406,7 @@ return (
                     ].map((h: { label: string; align: string; sortKey?: string }, i) => {
                       const active = h.sortKey && sortBy === h.sortKey;
 
-                      
-return (
+                      return (
                         <Box
                           component="th"
                           key={h.label || `col-${i}`}
@@ -430,14 +421,12 @@ return (
                               : undefined
                           }
                           sx={{
-                            fontSize: 10,
-                            letterSpacing: '0.14em',
-                            textTransform: 'uppercase',
+                            fontSize: 11.5,
                             color: active ? bbColors.navy900 : bbColors.gray500,
                             fontWeight: 700,
-                            padding: '10px 14px',
+                            padding: '9px 12px',
                             textAlign: h.align as 'left' | 'right',
-                            backgroundColor: bbColors.gray75,
+                            backgroundColor: bbColors.tableHead,
                             borderBottom: `1px solid ${bbColors.gray200}`,
                             whiteSpace: 'nowrap',
                             cursor: h.sortKey ? 'pointer' : 'default',
@@ -454,14 +443,34 @@ return (
                 <Box component="tbody">
                   {isLoading && (
                     <Box component="tr">
-                      <Box component="td" colSpan={11} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                      <Box
+                        component="td"
+                        colSpan={11}
+                        sx={{
+                          padding: '28px 20px',
+                          textAlign: 'center',
+                          color: bbColors.gray500,
+                          fontSize: 14,
+                          fontWeight: 600,
+                        }}
+                      >
                         Loading…
                       </Box>
                     </Box>
                   )}
                   {!isLoading && invoices.length === 0 && (
                     <Box component="tr">
-                      <Box component="td" colSpan={11} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                      <Box
+                        component="td"
+                        colSpan={11}
+                        sx={{
+                          padding: '28px 20px',
+                          textAlign: 'center',
+                          color: bbColors.gray500,
+                          fontSize: 14,
+                          fontWeight: 600,
+                        }}
+                      >
                         No invoices match the current filters.
                       </Box>
                     </Box>
@@ -470,8 +479,7 @@ return (
                     invoices.map(inv => {
                       const pill = bbStatusPill(statusToVariant(inv.invoiceStatus));
 
-                      
-return (
+                      return (
                         <Box
                           component="tr"
                           key={inv.id}
@@ -487,8 +495,11 @@ return (
                           }}
                           sx={{
                             cursor: 'pointer',
-                            backgroundColor: statusRowTint(inv.invoiceStatus),
-                            '&:hover': { backgroundColor: bbColors.gray75 },
+                            backgroundColor: selectedIds.includes(inv.id) ? bbColors.selectedRow : bbColors.white,
+                            '& > td:first-of-type': statusRowBar(inv.invoiceStatus)
+                              ? { boxShadow: `inset 3px 0 0 ${statusRowBar(inv.invoiceStatus)}` }
+                              : undefined,
+                            '&:hover > td': { backgroundColor: bbColors.gray75 },
                           }}
                         >
                           <Box
@@ -517,12 +528,23 @@ return (
                                 reservation number in the same field. */}
                             {inv.contractNumber ?? inv.reservationNumber ?? '—'}
                           </Box>
-                          <Box component="td" sx={{ ...tdBase, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap', color: bbColors.gray500 }}>
+                          <Box
+                            component="td"
+                            sx={{
+                              ...tdBase,
+                              fontVariantNumeric: 'tabular-nums',
+                              whiteSpace: 'nowrap',
+                              color: bbColors.gray500,
+                            }}
+                          >
                             {/* Date the operator issued the booking confirmation
                                 — Mario's "when do reservations happen" axis. */}
                             {inv.bookingDate ? dayjs(inv.bookingDate).format('DD MMM YYYY') : '—'}
                           </Box>
-                          <Box component="td" sx={{ ...tdBase, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+                          <Box
+                            component="td"
+                            sx={{ ...tdBase, fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}
+                          >
                             {/* Charter period — departure → return. */}
                             {inv.charterDateFrom
                               ? `${dayjs(inv.charterDateFrom).format('DD MMM')} → ${
@@ -563,7 +585,10 @@ return (
                             </Box>
                           </Box>
                           <Box component="td" sx={{ ...tdBase, textAlign: 'right' }}>
-                            <Typography component="span" sx={{ color: bbColors.navy700, fontWeight: 700, fontSize: 12 }}>
+                            <Typography
+                              component="span"
+                              sx={{ color: bbColors.navy700, fontWeight: 700, fontSize: 12 }}
+                            >
                               Open →
                             </Typography>
                           </Box>
@@ -574,7 +599,6 @@ return (
               </Box>
             </Box>
           </Box>
-
         </Box>
       </Layout>
     </>
@@ -582,10 +606,10 @@ return (
 };
 
 const tdBase = {
-  padding: '12px 14px',
-  fontSize: 12.5,
+  padding: '9px 12px',
+  fontSize: 13,
   borderBottom: `1px solid ${bbColors.gray100}`,
-  color: '#2c3e56',
+  color: bbColors.navy900,
   whiteSpace: 'nowrap' as const,
 };
 

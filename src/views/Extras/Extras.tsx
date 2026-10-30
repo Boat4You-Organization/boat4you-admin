@@ -140,14 +140,22 @@ const Extras = () => {
               <Box component="tbody">
                 {isLoading && (
                   <Box component="tr">
-                    <Box component="td" colSpan={3} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                    <Box
+                      component="td"
+                      colSpan={3}
+                      sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}
+                    >
                       Loading…
                     </Box>
                   </Box>
                 )}
                 {!isLoading && extras.length === 0 && (
                   <Box component="tr">
-                    <Box component="td" colSpan={3} sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}>
+                    <Box
+                      component="td"
+                      colSpan={3}
+                      sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}
+                    >
                       No extras in the catalogue yet.
                     </Box>
                   </Box>
@@ -208,7 +216,7 @@ const tdBase = {
   padding: '12px 14px',
   fontSize: 12.5,
   borderBottom: `1px solid ${bbColors.gray100}`,
-  color: '#2c3e56',
+  color: '#46566a',
   whiteSpace: 'nowrap' as const,
 };
 

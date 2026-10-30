@@ -21,6 +21,7 @@ const ConversationFilters = ({
 }) => {
   const { t } = useTranslation('contactCenter');
   const [q, setQ] = useState(value.q ?? '');
+  const [tag, setTag] = useState(value.tag ?? '');
   const [fromDay, setFromDay] = useState('');
   const [toDay, setToDay] = useState('');
 
@@ -31,6 +32,16 @@ const ConversationFilters = ({
 
     return () => window.clearTimeout(id);
   }, [q, value, onChange]);
+
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      const clean = tag.trim().toLowerCase();
+
+      if ((value.tag ?? '') !== clean) onChange({ ...value, tag: clean || undefined });
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => window.clearTimeout(id);
+  }, [tag, value, onChange]);
 
   const set = (patch: Partial<ConversationFilter>) => onChange({ ...value, ...patch });
 
@@ -88,8 +99,8 @@ const ConversationFilters = ({
       </TextField>
       <TextField
         label={t('filter.tag')}
-        value={value.tag ?? ''}
-        onChange={e => set({ tag: e.target.value.trim().toLowerCase() || undefined })}
+        value={tag}
+        onChange={e => setTag(e.target.value)}
         inputProps={{ maxLength: 40 }}
         {...small}
       />

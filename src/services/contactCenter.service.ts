@@ -33,8 +33,9 @@ const ContactCenterService = {
 
   live: () => api.get<LiveRow[]>('/admin/cc/live'),
 
+  // The visitor's tracker key goes in the body, never in the URL (access logs).
   sendProactive: (visitorKey: string, text: string) =>
-    api.post<{ result: ProactiveResult }>(`/admin/cc/live/${encodeURIComponent(visitorKey)}/message`, { text }),
+    api.post<{ result: ProactiveResult }>('/admin/cc/live/message', { visitorKey, text }),
 
   contacts: (query: { q?: string; status?: string; tag?: string; page?: number; size?: number }) =>
     api.get<ContactRow[]>('/admin/cc/contacts', { params: params(query) }),

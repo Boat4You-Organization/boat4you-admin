@@ -12,7 +12,6 @@ import ContactCenterService from '@/services/contactCenter.service';
 import { bbColors } from '@/styles/bb';
 import { ConversationDetail, ConversationFilter, ConversationRow, LiveRow } from '@/types/contactCenter.type';
 import { Poller, createPoller } from '@/utils/contactCenter/poller';
-import { refreshContactCenterUnread } from '@/valtio/contactCenter/contactCenter.actions';
 
 import ClientCard from './ClientCard';
 import ConversationList, { ListMode } from './ConversationList';
@@ -113,24 +112,27 @@ const Conversations = () => {
     listPoller.current?.poke();
   }, []);
 
+  const selectedRef = useRef(selectedId);
+
+  selectedRef.current = selectedId;
+
+  // Opening a conversation does not clear its unread dot: the broker e-mail is sent once per burst while the flag is
+  // set, and only a reply or a close clears it (ADMIN-10, as on the old /chat).
   const loadDetail = useCallback(async () => {
     if (selectedId == null) return;
 
     try {
       const { data } = await ContactCenterService.conversation(selectedId);
 
+      if (selectedRef.current !== selectedId) return; // another conversation was opened while this one was loading
+
       setDetail(data);
       setMissing(false);
-
-      if (data.row.adminUnread) {
-        await ContactCenterService.markRead(selectedId);
-        setRows(prev => prev.map(r => (r.id === selectedId ? { ...r, adminUnread: false } : r)));
-        refreshContactCenterUnread().catch(() => undefined);
-      }
     } catch (e) {
-      if (isAxiosError(e) && e.response?.status === 404) {
+      if (selectedRef.current === selectedId && isAxiosError(e) && e.response?.status === 404) {
         setDetail(null);
         setMissing(true);
+        detailPoller.current?.stop();
       }
     }
   }, [selectedId]);

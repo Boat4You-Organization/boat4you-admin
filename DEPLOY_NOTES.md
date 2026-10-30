@@ -8,6 +8,7 @@ Plan `infra/docs/superpowers/plans/2026-10-30-p2-contact-center-admin.md`, zadac
 - Kartice: **Razgovori** (tri stupca: popis Svi / Live sada s filterima i pretragom, otvoreni razgovor s kretanjem po sajtovima, karticama brodova i gumbima Preuzmi / Vrati AI-ju / Zatvori / Obriši, kartica klijenta), **Live posjetitelji** (proaktivna poruka), **Kontakti** (popis + stranica kontakta), **Statistika**.
 - Odgovor, zatvaranje i brisanje i dalje idu kroz `/admin/chat/**`; sumnjivi razgovor nema Obriši ni checkbox i nema Vrati AI-ju (ADMIN-5, ADMIN-9). Sve od posjetitelja, AI-ja i trackera je čisti tekst; link samo na putanju sajta tog razgovora (ADMIN-11, ADMIN-12).
 - Kratki poll: prva stranica popisa 5 s, otvoreni razgovor 4 s, live 15 s; samo dok je tab vidljiv, nikad dva ista zahtjeva u letu.
+- Oznaka nepročitano kao na starom `/chat` (ADMIN-10): samo otvaranje razgovora je NE briše, brišu je odgovor ili zatvaranje. Inače bi svaka poruka posjetitelja dok je razgovor otvoren slala novi mail brokeru (završni pregled P2, I-1).
 - Header sada prikazuje samo stavke koje uloga korisnika smije otvoriti (MANAGER više ne vidi SYSTEM_ADMIN stavke).
 
 Provjere: `tsc` 0, `yarn lint:base` 0 grešaka, `yarn build` OK, `yarn test` 37/37 (novo `tests/contact-center.test.ts`). **Ručna provjera prema starom `/chat` (ADMIN-1…14) NIJE napravljena lokalno** (backend P2 API nije na produkciji, a lokalni backend s podacima nije podignut): radi se odmah nakon deploya, samo čitanjem.

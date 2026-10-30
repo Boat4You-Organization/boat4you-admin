@@ -67,6 +67,10 @@ const Stats = () => {
   useEffect(() => {
     const end = range === 'custom' ? dayjs(toDay).add(1, 'day').startOf('day') : dayjs();
     const start = startOf(range, fromDay);
+
+    // A cleared date input is no date: no request (an invalid date would throw in toISOString).
+    if (!start.isValid() || !end.isValid() || !start.isBefore(end)) return undefined;
+
     let current = true;
 
     ContactCenterService.stats({ from: start.toISOString(), to: end.toISOString(), siteId: siteId || undefined })

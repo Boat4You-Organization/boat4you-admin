@@ -19,6 +19,8 @@ describe('safeHref', () => {
     assert.equal(safeHref('boat4you', null), null);
     assert.equal(safeHref('boat4you', 'https://user:pw@www.boat4you.com/x'), null);
     assert.equal(safeHref('boat4you', 'https://www.boat4you.com.evil.tld/x'), null);
+    assert.equal(safeHref('boat4you', '/..//evil.tld'), null);
+    assert.equal(safeHref('boat4you', 'https://www.boat4you.com//evil.tld'), null);
   });
 
   test('a full URL of the same host stays, another site of ours is no link here', () => {

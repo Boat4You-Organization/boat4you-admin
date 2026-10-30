@@ -44,14 +44,15 @@ export function safeHref(siteId: string, pathOrUrl: string | null | undefined): 
 
       const url = new URL(pathOrUrl, base);
 
-      return url.origin === base ? url.href : null;
+      // `/..//evil.tld` resolves to `//evil.tld` on our host: no link, a site that normalises it could redirect away.
+      return url.origin === base && !url.pathname.startsWith('//') ? url.href : null;
     }
 
     if (!pathOrUrl.startsWith('https://') || /[\s\\]/.test(pathOrUrl)) return null;
 
     const url = new URL(pathOrUrl);
 
-    return url.origin === base && !url.username && !url.password ? url.href : null;
+    return url.origin === base && !url.username && !url.password && !url.pathname.startsWith('//') ? url.href : null;
   } catch {
     return null;
   }

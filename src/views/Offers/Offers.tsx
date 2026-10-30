@@ -31,7 +31,7 @@ import ModalRoot from '@/components/ModalRoot';
 import { api } from '@/config/axios.config';
 import CatalogueService from '@/services/catalogue.service';
 import ReservationsService from '@/services/reservations.service';
-import { bbColors, bbFont, bbShadow } from '@/styles/bb';
+import { bbColors, bbFont, bbShadow, bbTagStyles } from '@/styles/bb';
 import colors from '@/styles/themes/colors';
 import { CapacityDto, RigDto } from '@/utils/yachtCapacity';
 import { BrokerNotes, brokerNoteLines, capacityChipsEn } from '@/utils/yachtCapacityEn';
@@ -186,7 +186,7 @@ const BoatThumb = memo(({ url, label }: { url: string | null; label: string }) =
         setAttempt(attempt + 1);
         setPendingRetry(false);
       },
-      delay * (0.75 + Math.random() * 0.5),
+      delay * (0.75 + Math.random() * 0.5)
     );
   };
 
@@ -207,7 +207,7 @@ const BoatThumb = memo(({ url, label }: { url: string | null; label: string }) =
         width: 96,
         height: 96,
         flexShrink: 0,
-        borderRadius: '8px',
+        borderRadius: '10px',
         overflow: 'hidden',
         backgroundColor: bbColors.gray100,
         display: 'flex',
@@ -234,7 +234,14 @@ const BoatThumb = memo(({ url, label }: { url: string | null; label: string }) =
           src={url}
           alt=""
           onError={handleError}
-          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+          }}
         />
       )}
     </Box>
@@ -504,9 +511,10 @@ const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOp
   return (
     <Box
       sx={{
-        border: `1px solid ${inCart ? '#a8e7c4' : row.isOption ? '#f4e7a8' : bbColors.cardBorder}`,
+        border: `1px solid ${inCart ? bbColors.green200 : row.isOption ? bbColors.amber200 : bbColors.cardBorder}`,
         backgroundColor: inCart ? '#f6fdf9' : row.isOption ? '#fffdf2' : colors.white,
-        borderRadius: '12px',
+        borderRadius: '14px',
+        boxShadow: bbShadow.card,
         p: 1.5,
         // Thousands of cards on one list: let Chrome skip layout and paint
         // for the ones off-screen (find-in-page still searches them).
@@ -514,7 +522,7 @@ const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOp
         containIntrinsicSize: 'auto 128px',
       }}
     >
-      <Stack direction="row" alignItems="stretch" gap={1.5}>
+      <Stack direction="row" alignItems="stretch" gap={1.5} sx={{ flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
         {/* Thumbnail — square-ish tile so a row of cards reads
             like a consistent grid. Falls back to a grey tile
             with model name when the yacht has no synced image
@@ -522,17 +530,14 @@ const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOp
         <BoatThumb url={thumbUrl} label={row.modelName} />
 
         {/* Middle: identity + location + agency + specs pills */}
-        <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Box sx={{ flex: 1, minWidth: { xs: 180, sm: 0 } }}>
           <Stack direction="row" alignItems="center" gap={1} sx={{ flexWrap: 'wrap' }}>
             <Typography sx={{ fontSize: 15, fontWeight: 700, color: bbColors.navy900 }}>
               {row.modelName}
               <Box component="span" sx={{ color: bbColors.gray500, fontWeight: 600, mx: 0.75 }}>
                 /
               </Box>
-              <Box
-                component="span"
-                sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.3 }}
-              >
+              <Box component="span" sx={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.3 }}>
                 {row.name}
               </Box>
             </Typography>
@@ -552,12 +557,10 @@ const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOp
                   sx={{
                     display: 'inline-block',
                     ...OFFER_CHARTER_COLORS[row.offerCharter.kind],
-                    fontSize: 10,
+                    fontSize: 11.5,
                     fontWeight: 700,
-                    letterSpacing: 0.5,
-                    textTransform: 'uppercase',
-                    px: 0.75,
-                    py: 0.25,
+                    lineHeight: '20px',
+                    px: '9px',
                     borderRadius: '999px',
                     cursor: 'help',
                     opacity: charterStale ? 0.4 : 1,
@@ -573,15 +576,13 @@ const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOp
                 component="span"
                 sx={{
                   display: 'inline-block',
-                  backgroundColor: '#fef7e0',
-                  color: '#8a6d00',
-                  border: '1px solid #f4e7a8',
-                  fontSize: 10,
+                  backgroundColor: '#fef3c7',
+                  color: '#8a5a00',
+                  border: '1px solid #f4e1a0',
+                  fontSize: 11.5,
                   fontWeight: 700,
-                  letterSpacing: 0.5,
-                  textTransform: 'uppercase',
-                  px: 0.75,
-                  py: 0.25,
+                  lineHeight: '20px',
+                  px: '9px',
                   borderRadius: '999px',
                 }}
               >
@@ -594,15 +595,13 @@ const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOp
                 title="The searched dates are not offered for this yacht — the price shown is for the closest free period. Adjust the offer dates to this window."
                 sx={{
                   display: 'inline-block',
-                  backgroundColor: '#fdecec',
-                  color: '#a83232',
-                  border: '1px solid #f5c2c2',
-                  fontSize: 10,
+                  backgroundColor: '#fde8e4',
+                  color: '#b03221',
+                  border: '1px solid #f5c3bb',
+                  fontSize: 11.5,
                   fontWeight: 700,
-                  letterSpacing: 0.5,
-                  textTransform: 'uppercase',
-                  px: 0.75,
-                  py: 0.25,
+                  lineHeight: '20px',
+                  px: '9px',
                   borderRadius: '999px',
                 }}
               >
@@ -621,26 +620,18 @@ const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOp
                 display: 'inline-block',
               }}
             />
-            <Typography sx={{ fontSize: 13, color: '#2c3e56', fontWeight: 500 }}>
+            <Typography sx={{ fontSize: 13, color: '#46566a', fontWeight: 500 }}>
               {row.locationName}
               {row.locationCountryCode ? ` · ${row.locationCountryCode}` : ''}
             </Typography>
             <BusinessOutlinedIcon aria-hidden sx={{ fontSize: 13, color: bbColors.gray500, mx: 0.25 }} />
-            <Typography sx={{ fontSize: 13, color: bbColors.navy700, fontWeight: 600 }}>
-              {row.agencyName}
-            </Typography>
+            <Typography sx={{ fontSize: 13, color: bbColors.navy700, fontWeight: 600 }}>{row.agencyName}</Typography>
             {row.sourceSystem && (
               <Box
                 component="span"
                 sx={{
-                  fontSize: 10,
-                  fontWeight: 700,
-                  letterSpacing: 0.3,
-                  px: 0.6,
-                  py: 0.1,
-                  borderRadius: 0.75,
-                  color: row.sourceSystem === 'MMK' ? '#7c3aed' : '#0369a1',
-                  backgroundColor: row.sourceSystem === 'MMK' ? '#ede9fe' : '#e0f2fe',
+                  ...bbTagStyles.base,
+                  ...(row.sourceSystem === 'MMK' ? bbTagStyles.mmk : bbTagStyles.nausys),
                 }}
               >
                 {row.sourceSystem}
@@ -663,7 +654,7 @@ const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOp
                   borderRadius: 4,
                   backgroundColor: bbColors.gray100,
                   fontSize: 11,
-                  color: '#2c3e56',
+                  color: '#46566a',
                   fontWeight: 500,
                 }}
               >
@@ -706,14 +697,22 @@ const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOp
             size="small"
             variant="text"
             onClick={() => onOpen(row)}
-            sx={{ p: 0, minWidth: 0, fontSize: 11, textTransform: 'none', mt: 0.75, color: bbColors.navy700, fontWeight: 700 }}
+            sx={{
+              p: 0,
+              minWidth: 0,
+              fontSize: 11,
+              textTransform: 'none',
+              mt: 0.75,
+              color: bbColors.navy700,
+              fontWeight: 700,
+            }}
           >
             View on customer site ↗
           </Button>
         </Box>
 
         {/* Right: pricing + action */}
-        <Stack alignItems="flex-end" spacing={0.5} sx={{ minWidth: 180 }}>
+        <Stack alignItems="flex-end" spacing={0.5} sx={{ minWidth: { xs: '100%', sm: 180 } }}>
           {hasDiscount && (
             <Typography sx={{ fontSize: 12, color: bbColors.gray500, textDecoration: 'line-through' }}>
               List:{' '}
@@ -726,15 +725,14 @@ const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOp
           )}
           <Typography
             sx={{
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: 800,
-              color: bbColors.green600,
+              color: bbColors.navy900,
               lineHeight: 1.15,
               fontVariantNumeric: 'tabular-nums',
             }}
           >
-            {periodTotal.toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{' '}
-            {rowSymbol}
+            {periodTotal.toLocaleString('hr-HR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {rowSymbol}
           </Typography>
           {(() => {
             if (row.agencyCommissionEur == null || row.clientPriceEur <= 0) return null;
@@ -747,9 +745,9 @@ const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOp
             return (
               <Box
                 sx={{
-                  backgroundColor: isZero ? bbColors.gray100 : '#fef7e0',
-                  color: isZero ? bbColors.gray500 : '#8a6d00',
-                  border: `1px solid ${isZero ? bbColors.gray200 : '#f4e7a8'}`,
+                  backgroundColor: isZero ? bbColors.gray100 : '#fef3c7',
+                  color: isZero ? bbColors.gray500 : '#8a5a00',
+                  border: `1px solid ${isZero ? bbColors.gray200 : '#f4e1a0'}`,
                   fontSize: 11,
                   fontWeight: 700,
                   px: 0.9,
@@ -770,7 +768,7 @@ const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOp
             <Typography
               sx={{
                 fontSize: 11,
-                color: '#8a6d00',
+                color: '#8a5a00',
                 fontWeight: 600,
                 mt: 0.25,
                 textAlign: 'right',
@@ -784,17 +782,12 @@ const ResultRow = memo(({ row, nights, charterStale, inCart, adding, onAdd, onOp
             size="small"
             disabled={adding || inCart}
             onClick={() => onAdd(row)}
+            color="secondary"
             sx={{
               mt: 0.5,
-              textTransform: 'none',
-              backgroundColor: inCart ? bbColors.green600 : bbColors.navy900,
-              boxShadow: 'none',
-              fontWeight: 700,
-              borderRadius: '8px',
-              '&:hover': {
-                backgroundColor: inCart ? bbColors.green600 : '#13283d',
-                boxShadow: 'none',
-              },
+              ...(inCart && {
+                '&.Mui-disabled': { backgroundColor: bbColors.green100, color: bbColors.green700 },
+              }),
             }}
           >
             {inCart ? '✓ In offer' : adding ? 'Adding…' : '+ Add to offer'}
@@ -960,7 +953,7 @@ const Offers = () => {
     // carries BOTH provider ids, so one pick searches both yacht pools.
     const did: string[] = regions.length > 0 ? regions.flatMap(r => r.ids) : country ? [country.id] : [];
 
-  const params = {
+    const params = {
       did,
       startDate: startDate.format('YYYY-MM-DD'),
       endDate: endDate.format('YYYY-MM-DD'),
@@ -976,7 +969,7 @@ const Offers = () => {
       minCabins: Number(minCabins) || undefined,
       minPersons: Number(minPersons) || undefined,
       currency,
-  };
+    };
 
     setSearchedPeriod(`${params.startDate}|${params.endDate}`);
 
@@ -1003,43 +996,43 @@ const Offers = () => {
     // The search endpoint returns a wider row than the admin-reservation
     // flow needs; pick out just what the offer card actually shows.
     const mapRows = (content: SearchPage['content']): SearchRow[] =>
-  (content || []).map(y => ({
-    yachtId: y.id ?? y.yachtId ?? 0,
-    slug: y.slug || '',
-    name: y.name,
-    modelName: y.modelName,
-    // Display in the active currency: read the converted amount from
-    // clientPriceInfo/listPriceInfo (backend leaves *Eur in EUR). Commission
-    // has no converted field, so scale it by the same EUR→currency rate so
-    // the commission % (commission/price) and its displayed amount stay
-    // correct. EUR → rate 1 / info.amount == *Eur, so no change.
-    clientPriceEur: y.clientPriceInfo?.amount ?? (Number(y.clientPriceEur) || 0),
-    listPriceEur: y.listPriceInfo?.amount ?? (y.listPriceEur != null ? Number(y.listPriceEur) : null),
-    agencyCommissionEur:
-      y.agencyCommissionEur != null ? Number(y.agencyCommissionEur) * (y.clientPriceInfo?.rate ?? 1) : null,
-    currency,
-    agencyName: y.agencyName,
-    sourceSystem: y.sourceSystem ?? null,
-    locationName: y.location?.name || '',
-    locationCountryCode: y.location?.countryCode ?? null,
-    cabins: y.cabins ?? null,
-    berths: y.berths ?? null,
-    wc: y.wc ?? null,
-    maxPersons: y.maxPersons ?? null,
-    charterType: y.charterType ?? null,
-    capacity: y.capacity ?? null,
-    brokerNotes: y.brokerNotes ?? null,
-    offerCharter: toOfferCharter(y.offerCharter),
-    buildYear: y.buildYear ?? null,
-    lengthMeters: y.length != null ? Number(y.length) : null,
-    vesselType: y.vesselType ?? null,
-    mainImageId: y.mainImageId ?? null,
-    isOption: y.isOption === true,
-    optionExpiresAt: y.optionExpiresAt ?? null,
-    offerDateFrom: y.offerDateFrom ?? null,
-    offerDateTo: y.offerDateTo ?? null,
-    matchKind: y.matchKind ?? null,
-  }));
+      (content || []).map(y => ({
+        yachtId: y.id ?? y.yachtId ?? 0,
+        slug: y.slug || '',
+        name: y.name,
+        modelName: y.modelName,
+        // Display in the active currency: read the converted amount from
+        // clientPriceInfo/listPriceInfo (backend leaves *Eur in EUR). Commission
+        // has no converted field, so scale it by the same EUR→currency rate so
+        // the commission % (commission/price) and its displayed amount stay
+        // correct. EUR → rate 1 / info.amount == *Eur, so no change.
+        clientPriceEur: y.clientPriceInfo?.amount ?? (Number(y.clientPriceEur) || 0),
+        listPriceEur: y.listPriceInfo?.amount ?? (y.listPriceEur != null ? Number(y.listPriceEur) : null),
+        agencyCommissionEur:
+          y.agencyCommissionEur != null ? Number(y.agencyCommissionEur) * (y.clientPriceInfo?.rate ?? 1) : null,
+        currency,
+        agencyName: y.agencyName,
+        sourceSystem: y.sourceSystem ?? null,
+        locationName: y.location?.name || '',
+        locationCountryCode: y.location?.countryCode ?? null,
+        cabins: y.cabins ?? null,
+        berths: y.berths ?? null,
+        wc: y.wc ?? null,
+        maxPersons: y.maxPersons ?? null,
+        charterType: y.charterType ?? null,
+        capacity: y.capacity ?? null,
+        brokerNotes: y.brokerNotes ?? null,
+        offerCharter: toOfferCharter(y.offerCharter),
+        buildYear: y.buildYear ?? null,
+        lengthMeters: y.length != null ? Number(y.length) : null,
+        vesselType: y.vesselType ?? null,
+        mainImageId: y.mainImageId ?? null,
+        isOption: y.isOption === true,
+        optionExpiresAt: y.optionExpiresAt ?? null,
+        offerDateFrom: y.offerDateFrom ?? null,
+        offerDateTo: y.offerDateTo ?? null,
+        matchKind: y.matchKind ?? null,
+      }));
 
     // The backend orders by price with no tiebreak, so at equal prices the
     // same row can come back on two neighbouring pages while another row is
@@ -1494,7 +1487,8 @@ const Offers = () => {
         // Converted to the active currency (matchedOffer.*Info.amount); *Eur stays
         // EUR. row.clientPriceEur is already converted by the search map, so the
         // fallbacks are consistent.
-        clientPriceEur: matchedOffer.clientPriceInfo?.amount ?? (Number(matchedOffer.clientPriceEur) || row.clientPriceEur),
+        clientPriceEur:
+          matchedOffer.clientPriceInfo?.amount ?? (Number(matchedOffer.clientPriceEur) || row.clientPriceEur),
         listPriceEur:
           matchedOffer.listPriceInfo?.amount ??
           (matchedOffer.listPriceEur != null ? Number(matchedOffer.listPriceEur) : row.listPriceEur),
@@ -1571,8 +1565,7 @@ const Offers = () => {
     // prices / extras stay snapshotted at add-time.
     // paymentType (26.9.2026): carts saved before it existed would put every
     // obligatory service under "payable separately" in the client e-mail.
-    const lacksPaymentType = (c: CartYacht): boolean =>
-      c.extras.some(x => x.obligatory && x.paymentType === undefined);
+    const lacksPaymentType = (c: CartYacht): boolean => c.extras.some(x => x.obligatory && x.paymentType === undefined);
     // capacity (6.10.2026): carts saved before it existed lack max. people,
     // crew, the partner notes and the sail / engine lines. null too: an entry
     // added while the backend did not send the block yet is topped up once it
@@ -1846,22 +1839,28 @@ const Offers = () => {
     totalCount === 0 && results.length === 0
       ? null
       : searching && results.length > 0
-      ? `Loading ${loadedText} of ${Math.min(totalCount, MAX_SEARCH_PAGES * 100).toLocaleString('en')}…`
-      : walkEnd === 'truncated'
-        ? `Showing the ${loadedText} cheapest of ${totalText} — narrow the filters (dates, region, type) to reach the pricier boats.`
-        : walkEnd === 'stopped'
-          ? `Stopped at ${loadedText} of ${totalText} — click Search to load everything.`
-          : walkEnd === 'failed'
-            ? `Stopped at ${loadedText} of ${totalText} — some pages failed, click Search to retry.`
-            : walkEnd === 'complete' && results.length < totalCount
-              ? `${loadedText} of ${totalText} loaded — ${(totalCount - results.length).toLocaleString('en')} could not be fetched (the API's paging can return some rows twice and skip others).`
-              : null;
+        ? `Loading ${loadedText} of ${Math.min(totalCount, MAX_SEARCH_PAGES * 100).toLocaleString('en')}…`
+        : walkEnd === 'truncated'
+          ? `Showing the ${loadedText} cheapest of ${totalText} — narrow the filters (dates, region, type) to reach the pricier boats.`
+          : walkEnd === 'stopped'
+            ? `Stopped at ${loadedText} of ${totalText} — click Search to load everything.`
+            : walkEnd === 'failed'
+              ? `Stopped at ${loadedText} of ${totalText} — some pages failed, click Search to retry.`
+              : walkEnd === 'complete' && results.length < totalCount
+                ? `${loadedText} of ${totalText} loaded — ${(totalCount - results.length).toLocaleString('en')} could not be fetched (the API's paging can return some rows twice and skip others).`
+                : null;
 
   return (
     <Layout>
       <Stack
-        direction="row"
-        sx={{ backgroundColor: bbColors.gray50, minHeight: 600, alignItems: 'flex-start', pt: '54px', fontFamily: bbFont.stack }}
+        direction={{ xs: 'column', md: 'row' }}
+        sx={{
+          backgroundColor: bbColors.gray50,
+          minHeight: 600,
+          alignItems: { xs: 'stretch', md: 'flex-start' },
+          pt: '54px',
+          fontFamily: bbFont.stack,
+        }}
       >
         {/* === LEFT PANEL: filters ============================================ */}
         {/* Filters are grouped into labelled SECTIONs (uppercase small caps) so
@@ -1870,20 +1869,22 @@ const Offers = () => {
             below the main component) that stacks the label + control(s). */}
         <Box
           sx={{
-            width: 320,
+            width: { xs: '100%', md: 320 },
             flexShrink: 0,
             backgroundColor: colors.white,
-            borderRight: `1px solid ${bbColors.gray200}`,
+            borderRight: { md: `1px solid ${bbColors.gray200}` },
+            borderBottom: { xs: `1px solid ${bbColors.gray200}`, md: 0 },
             p: 2,
             // The list is one page of up to 5,000 rows inside the single
             // <main> scroller; the panels stay put so Search, the filters
-            // and the cart are reachable from any depth.
-            position: 'sticky',
-            top: '54px',
-            alignSelf: 'flex-start',
-            minHeight: 'calc(100vh - 54px)',
-            maxHeight: 'calc(100vh - 54px)',
-            overflowY: 'auto',
+            // and the cart are reachable from any depth. On a phone the
+            // panels stack: filters, results, then the offer.
+            position: { md: 'sticky' },
+            top: { md: '54px' },
+            alignSelf: { md: 'flex-start' },
+            minHeight: { md: 'calc(100vh - 54px)' },
+            maxHeight: { md: 'calc(100vh - 54px)' },
+            overflowY: { md: 'auto' },
             // Uniform control typography across the whole filter panel: MUI
             // inputs (Select/Autocomplete/TextField) default to 16px while
             // chips render 13px, so Destination read bigger than the region
@@ -1936,6 +1937,7 @@ const Offers = () => {
                 <Stack direction="row" spacing={0.5}>
                   <Button
                     size="small"
+                    variant="outlined"
                     disabled={startDate.subtract(7, 'day').isBefore(dayjs(), 'day')}
                     onClick={() => {
                       setStartDate(startDate.subtract(7, 'day'));
@@ -1947,6 +1949,7 @@ const Offers = () => {
                   </Button>
                   <Button
                     size="small"
+                    variant="outlined"
                     onClick={() => {
                       setStartDate(startDate.add(7, 'day'));
                       setEndDate(endDate.add(7, 'day'));
@@ -2060,23 +2063,10 @@ const Offers = () => {
                 // too long to lock the broker out of the button.
                 onClick={() => (searching ? stopSearch() : handleSearch())}
                 fullWidth
-                sx={{
-                  backgroundColor: bbColors.yellow500,
-                  color: bbColors.yellowText,
-                  boxShadow: bbShadow.yellowCta,
-                  '&:hover': { backgroundColor: '#f7c83d', boxShadow: bbShadow.yellowCta },
-                  '&:disabled': { backgroundColor: '#f6e8bd', color: '#a08a45', boxShadow: 'none' },
-                  textTransform: 'none',
-                  fontWeight: 800,
-                }}
               >
                 {searching ? 'Stop' : 'Search'}
               </Button>
-              <Button
-                variant="outlined"
-                onClick={handleResetFilters}
-                sx={{ textTransform: 'none', color: bbColors.gray500, borderColor: bbColors.gray300 }}
-              >
+              <Button variant="outlined" onClick={handleResetFilters}>
                 Reset
               </Button>
             </Stack>
@@ -2123,7 +2113,7 @@ const Offers = () => {
                   gap: 0.75,
                   px: 1.25,
                   py: 0.5,
-                  borderRadius: '8px',
+                  borderRadius: '10px',
                   border: `1px solid ${bbColors.gray200}`,
                   backgroundColor: colors.white,
                   fontSize: 12,
@@ -2138,7 +2128,7 @@ const Offers = () => {
                 sx={{
                   px: 1.25,
                   py: 0.5,
-                  borderRadius: '8px',
+                  borderRadius: '10px',
                   border: `1px solid ${bbColors.gray200}`,
                   backgroundColor: colors.white,
                   fontSize: 12,
@@ -2152,7 +2142,7 @@ const Offers = () => {
                 sx={{
                   px: 1.25,
                   py: 0.5,
-                  borderRadius: '8px',
+                  borderRadius: '10px',
                   border: `1px solid ${bbColors.gray200}`,
                   backgroundColor: colors.white,
                   fontSize: 12,
@@ -2248,7 +2238,7 @@ const Offers = () => {
                 textAlign: 'center',
                 fontSize: 13,
                 fontWeight: 600,
-                color: walkEnd === 'failed' ? '#b42318' : bbColors.gray500,
+                color: walkEnd === 'failed' ? '#b03221' : bbColors.gray500,
               }}
             >
               {walkNote}
@@ -2259,18 +2249,22 @@ const Offers = () => {
         {/* === RIGHT PANEL: cart ============================================== */}
         <Box
           sx={{
-            width: 320,
+            width: { xs: '100%', md: 320 },
             flexShrink: 0,
             backgroundColor: colors.white,
-            borderLeft: `1px solid ${bbColors.gray200}`,
+            borderLeft: { md: `1px solid ${bbColors.gray200}` },
+            borderTop: { xs: `1px solid ${bbColors.gray200}`, md: 0 },
             p: 2,
             display: 'flex',
             flexDirection: 'column',
             position: 'sticky',
-            top: '54px',
-            alignSelf: 'flex-start',
-            minHeight: 'calc(100vh - 54px)',
-            maxHeight: 'calc(100vh - 54px)',
+            top: { md: '54px' },
+            bottom: { xs: 0, md: 'auto' },
+            zIndex: { xs: 2, md: 'auto' },
+            boxShadow: { xs: '0 -8px 24px rgba(11,26,43,.12)', md: 'none' },
+            alignSelf: { md: 'flex-start' },
+            minHeight: { md: 'calc(100vh - 54px)' },
+            maxHeight: { xs: '34vh', md: 'calc(100vh - 54px)' },
             overflowY: 'auto',
           }}
         >
@@ -2315,14 +2309,20 @@ const Offers = () => {
             </Typography>
           )}
 
-          <Stack spacing={0.75}>
+          <Stack spacing={1}>
             {cart.map(y => (
               <Stack
                 key={`${y.yachtId}-${y.dateFrom}`}
                 direction="row"
                 alignItems="flex-start"
                 gap={1}
-                sx={{ py: 0.75, borderBottom: `1px solid ${bbColors.gray100}` }}
+                sx={{
+                  p: '10px 12px',
+                  border: `1px solid ${bbColors.cardBorder}`,
+                  borderRadius: '12px',
+                  backgroundColor: bbColors.white,
+                  boxShadow: '0 1px 2px rgba(11,26,43,.04)',
+                }}
               >
                 <Box sx={{ minWidth: 0, flex: 1 }}>
                   <Typography sx={{ fontSize: 13, fontWeight: 700, color: bbColors.navy900 }} noWrap>
@@ -2343,8 +2343,8 @@ const Offers = () => {
                           px: 0.5,
                           py: 0.1,
                           borderRadius: 0.75,
-                          color: y.sourceSystem === 'MMK' ? '#7c3aed' : '#0369a1',
-                          backgroundColor: y.sourceSystem === 'MMK' ? '#ede9fe' : '#e0f2fe',
+                          color: y.sourceSystem === 'MMK' ? '#6b21a8' : '#075985',
+                          backgroundColor: y.sourceSystem === 'MMK' ? '#f3e8ff' : '#e0f2fe',
                         }}
                       >
                         {y.sourceSystem}
@@ -2407,10 +2407,10 @@ const Offers = () => {
               backgroundColor: bbColors.yellow500,
               color: bbColors.yellowText,
               fontWeight: 800,
-              borderRadius: '8px',
+              borderRadius: '10px',
               boxShadow: bbShadow.yellowCta,
-              '&:hover': { backgroundColor: '#f7c83d', boxShadow: bbShadow.yellowCta },
-              '&:disabled': { backgroundColor: '#f6e8bd', color: '#a08a45', boxShadow: 'none' },
+              '&:hover': { backgroundColor: '#ffc928', boxShadow: bbShadow.yellowCta },
+              '&:disabled': { backgroundColor: '#f6e8bd', color: '#8c7a4a', boxShadow: 'none' },
             }}
           >
             {openingModal ? 'Loading details…' : 'Preview email'}
@@ -2440,7 +2440,7 @@ const Offers = () => {
               variant="contained"
               startIcon={<ContentCopyIcon />}
               onClick={handleCopyRichText}
-              sx={{ backgroundColor: bbColors.navy900, '&:hover': { backgroundColor: '#13283d' } }}
+              sx={{ backgroundColor: bbColors.navy900, '&:hover': { backgroundColor: '#1b2d44' } }}
             >
               Copy as rich text
             </Button>
@@ -2527,8 +2527,8 @@ const EmptyState = ({ icon, title, sub }: { icon: ReactNode; title: string; sub:
         width: 44,
         height: 44,
         borderRadius: '12px',
-        backgroundColor: '#fef7e0',
-        color: '#8a6d00',
+        backgroundColor: '#fef3c7',
+        color: '#8a5a00',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -2543,7 +2543,7 @@ const EmptyState = ({ icon, title, sub }: { icon: ReactNode; title: string; sub:
 );
 
 /**
- * Left-panel filter section wrapper — uppercase small-caps label stacked
+ * Left-panel filter section wrapper — sentence-case label (v2.2) stacked
  * on top of its control(s). Matches the mockup's filter groupings where a
  * section can hold one picker (e.g. "Currency") or multiple related ones
  * (e.g. "Destination" → Country + Region, "Build year" → From + To).
@@ -2553,11 +2553,9 @@ const Section = ({ label, children }: { label: string; children: ReactNode }) =>
     <Typography
       component="div"
       sx={{
-        fontSize: 10.5,
-        fontWeight: 700,
-        letterSpacing: '0.14em',
-        textTransform: 'uppercase',
-        color: bbColors.gray500,
+        fontSize: 12.5,
+        fontWeight: 600,
+        color: bbColors.gray600,
         mb: 0.5,
       }}
     >
@@ -2601,7 +2599,7 @@ const CollapsibleSection = ({
         p: 0,
         cursor: 'pointer',
         font: 'inherit',
-        color: '#2c3e56',
+        color: '#46566a',
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'baseline', gap: 1, minWidth: 0 }}>
@@ -2611,7 +2609,13 @@ const CollapsibleSection = ({
         {hint && (
           <Typography
             component="span"
-            sx={{ fontSize: 11, color: bbColors.gray600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+            sx={{
+              fontSize: 11,
+              color: bbColors.gray600,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
           >
             {hint}
           </Typography>

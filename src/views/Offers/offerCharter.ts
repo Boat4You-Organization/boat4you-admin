@@ -34,10 +34,10 @@ export const OFFER_CHARTER_COLORS: Record<
   OfferCharterKind,
   { color: string; backgroundColor: string; border: string }
 > = {
-  BAREBOAT: { color: '#1d4ed8', backgroundColor: '#eff6ff', border: '1px solid #bfdbfe' },
+  BAREBOAT: { color: '#1a4fa8', backgroundColor: '#e8f0fb', border: '1px solid #cfddf4' },
   // Orange: apart from Crewed's green at a glance, and from the yellow "option" pill next to it.
-  SKIPPERED: { color: '#c2410c', backgroundColor: '#fff7ed', border: '1px solid #fdba74' },
-  CREWED: { color: '#15803d', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0' },
+  SKIPPERED: { color: '#9a3412', backgroundColor: '#ffedd5', border: '1px solid #ffd3a8' },
+  CREWED: { color: '#047857', backgroundColor: '#d1fae5', border: '1px solid #a8e7c4' },
 };
 
 const CHARGE_MAX = 120;

@@ -43,11 +43,11 @@ export const ToggleChipGroup = ({
             borderRadius: 999,
             border: `1px solid ${on ? bbColors.navy900 : bbColors.gray300}`,
             backgroundColor: on ? bbColors.navy900 : colors.white,
-            color: on ? colors.white : '#2c3e56',
+            color: on ? colors.white : '#46566a',
             transition: 'all .12s ease',
             '&:hover': {
               borderColor: on ? bbColors.navy900 : bbColors.gray500,
-              backgroundColor: on ? '#13283d' : bbColors.gray100,
+              backgroundColor: on ? '#1b2d44' : bbColors.gray100,
             },
           }}
         >
@@ -199,8 +199,8 @@ export const RegionMultiSelect = ({
   useEffect(() => {
     if (!countryCode) {
       setRegions([]);
-      
-return;
+
+      return;
     }
 
     api
@@ -236,15 +236,12 @@ return;
             size="small"
             {...getTagProps({ index })}
             key={option.id}
-            sx={{ backgroundColor: '#eef3f9', color: bbColors.navy700, fontWeight: 600 }}
+            sx={{ backgroundColor: '#e8f0fb', color: bbColors.navy700, fontWeight: 600 }}
           />
         ))
       }
       renderInput={params => (
-        <TextField
-          {...params}
-          placeholder={countryCode ? 'Any region' : 'Pick a country first'}
-        />
+        <TextField {...params} placeholder={countryCode ? 'Any region' : 'Pick a country first'} />
       )}
     />
   );
@@ -273,13 +270,7 @@ const amenityLabel = (a: AmenityOption) =>
  * / Generator etc. stay data-driven; priority three render first. Selection is
  * the same `number[]` of equipment ids the search already consumes.
  */
-export const OffersAmenityChips = ({
-  value,
-  onChange,
-}: {
-  value: number[];
-  onChange: (next: number[]) => void;
-}) => {
+export const OffersAmenityChips = ({ value, onChange }: { value: number[]; onChange: (next: number[]) => void }) => {
   const [options, setOptions] = useState<AmenityOption[]>([]);
 
   useEffect(() => {
@@ -306,9 +297,7 @@ export const OffersAmenityChips = ({
   };
 
   if (options.length === 0) {
-    return (
-      <Box sx={{ fontSize: 12, color: bbColors.gray600 }}>Loading amenities…</Box>
-    );
+    return <Box sx={{ fontSize: 12, color: bbColors.gray600 }}>Loading amenities…</Box>;
   }
 
   return (
@@ -334,19 +323,12 @@ export const VESSEL_TYPES_OFFERS: { id: string; label: string }[] = [
   { id: 'MOTORSAILER', label: 'Motorsailer' },
 ];
 
-export const VesselTypeDropdown = ({
-  value,
-  onChange,
-}: {
-  value: string[];
-  onChange: (next: string[]) => void;
-}) => {
+export const VesselTypeDropdown = ({ value, onChange }: { value: string[]; onChange: (next: string[]) => void }) => {
   // Toggle CHIPS instead of a multi-Select dropdown: a click applies
   // instantly and there's no menu that "stays open hanging" after a pick
   // (Mario's UX gripe). State shape (string[] of vessel ids) is unchanged,
   // so the search query keeps working exactly as before.
-  const toggle = (id: string) =>
-    onChange(value.includes(id) ? value.filter(v => v !== id) : [...value, id]);
+  const toggle = (id: string) => onChange(value.includes(id) ? value.filter(v => v !== id) : [...value, id]);
 
   return <ToggleChipGroup options={VESSEL_TYPES_OFFERS} selected={value} onToggle={toggle} />;
 };
@@ -409,8 +391,8 @@ const useDebouncedSearch = <T,>(fetcher: (q: string) => Promise<T[]>, delay = 25
         if (id === reqIdRef.current) setLoading(false);
       }
     }, delay);
-    
-return () => {
+
+    return () => {
       if (ref.current) window.clearTimeout(ref.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -449,8 +431,8 @@ const dedupManufacturers = (raw: { id: number; name: string }[]): Manufacturer[]
     .sort((a, b) => a.canonical.localeCompare(b.canonical));
 
   singletons.sort((a, b) => a.canonical.localeCompare(b.canonical));
-  
-return [...grouped, ...singletons];
+
+  return [...grouped, ...singletons];
 };
 
 export const ManufacturerPicker = ({
@@ -477,8 +459,7 @@ export const ManufacturerPicker = ({
     const { data } = await api.get(`/public/catalogue/manufacturers?${qs.toString()}`);
     const raw = (data?.content || []).map((m: any) => ({ id: m.id, name: (m.name || '').trim() }));
 
-    
-return dedupManufacturers(raw);
+    return dedupManufacturers(raw);
   });
 
   const merged = [...value, ...options.filter(o => !value.find(v => v.canonical === o.canonical))];
@@ -507,16 +488,11 @@ return dedupManufacturers(raw);
             size="small"
             {...getTagProps({ index })}
             key={option.canonical}
-            sx={{ backgroundColor: '#eef3f9', color: bbColors.navy700, fontWeight: 600 }}
+            sx={{ backgroundColor: '#e8f0fb', color: bbColors.navy700, fontWeight: 600 }}
           />
         ))
       }
-      renderInput={params => (
-        <TextField
-          {...params}
-          placeholder={value.length === 0 ? 'Builder' : ''}
-        />
-      )}
+      renderInput={params => <TextField {...params} placeholder={value.length === 0 ? 'Builder' : ''} />}
     />
   );
 };
@@ -555,8 +531,7 @@ export const ModelPicker = ({
 
     const { data } = await api.get(`/public/catalogue/models?${qs.toString()}`);
 
-    
-return (data?.content || []).map((m: any) => ({
+    return (data?.content || []).map((m: any) => ({
       id: m.id,
       name: m.name,
       manufacturerId: m.manufacturerId,
@@ -596,15 +571,12 @@ return (data?.content || []).map((m: any) => ({
             size="small"
             {...getTagProps({ index })}
             key={option.id}
-            sx={{ backgroundColor: '#eef3f9', color: bbColors.navy700, fontWeight: 600 }}
+            sx={{ backgroundColor: '#e8f0fb', color: bbColors.navy700, fontWeight: 600 }}
           />
         ))
       }
       renderInput={params => (
-        <TextField
-          {...params}
-          placeholder={manufacturerIds.length === 0 ? 'Pick a builder first' : 'Model'}
-        />
+        <TextField {...params} placeholder={manufacturerIds.length === 0 ? 'Pick a builder first' : 'Model'} />
       )}
     />
   );

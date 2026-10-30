@@ -31,7 +31,8 @@ body {
 
 input:focus-visible,
 textarea:focus-visible,
-select:focus-visible {
+select:focus-visible,
+[tabindex='-1']:focus-visible {
   outline: none;
 }
 

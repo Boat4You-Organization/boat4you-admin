@@ -666,6 +666,17 @@ const overrides: ThemeOptions['components'] = {
         backgroundColor: bbColors.gray300,
         opacity: 1,
       },
+      // size="small": 28×16 track, 12px thumb, centred like the default size.
+      sizeSmall: {
+        width: 44,
+        height: 32,
+        padding: '8px',
+        '& .MuiSwitch-switchBase': {
+          padding: 10,
+          '&.Mui-checked': { transform: 'translateX(12px)' },
+        },
+        '& .MuiSwitch-thumb': { width: 12, height: 12 },
+      },
     },
   },
   MuiAutocomplete: {

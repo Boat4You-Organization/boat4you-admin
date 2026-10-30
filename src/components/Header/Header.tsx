@@ -286,7 +286,7 @@ const Header = () => {
                 textTransform: 'none',
                 color: '#fff',
                 minWidth: 0,
-                '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)', boxShadow: 'none' },
+                '&:hover, &:active': { backgroundColor: 'rgba(255,255,255,0.12)', boxShadow: 'none' },
                 '@media (min-width: 1200px)': { padding: '0 12px 0 4px' },
               }}
             >

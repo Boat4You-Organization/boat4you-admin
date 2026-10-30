@@ -161,22 +161,11 @@ const Modal = ({
         sx={{
           gap: 1,
           padding: '14px 20px',
-          // Primary action last, on the right; the cancel button sits before it
-          // (row-reverse, so flex-start is the right edge).
-          flexDirection: 'row-reverse',
-          justifyContent: 'flex-start',
+          // Cancel, then the primary action last on the right (DOM order = tab order).
+          justifyContent: 'flex-end',
           '& > .MuiButton-root': { flex: '0 1 auto' },
         }}
       >
-        {customButton ? (
-          <Box sx={{ width: '100%' }}>{customButton}</Box>
-        ) : (
-          !hideConfirmButton && (
-            <Button onClick={onConfirm} {...ConfirmBtnProps} sx={{ ...confirmBtnSx, ...(ConfirmBtnProps?.sx || {}) }}>
-              {confirmBtnText}
-            </Button>
-          )
-        )}
         {!hideCancelButton && (
           <Button
             onClick={onCancel}
@@ -186,6 +175,15 @@ const Modal = ({
           >
             {cancelBtnText}
           </Button>
+        )}
+        {customButton ? (
+          <Box sx={{ width: '100%' }}>{customButton}</Box>
+        ) : (
+          !hideConfirmButton && (
+            <Button onClick={onConfirm} {...ConfirmBtnProps} sx={{ ...confirmBtnSx, ...(ConfirmBtnProps?.sx || {}) }}>
+              {confirmBtnText}
+            </Button>
+          )
         )}
       </DialogActions>
     )}

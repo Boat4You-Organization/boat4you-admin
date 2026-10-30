@@ -2,11 +2,15 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import { Box, Dialog } from '@mui/material';
 
 import ContactCenterService from '@/services/contactCenter.service';
 import { LiveRow } from '@/types/contactCenter.type';
+import { siteLabel } from '@/utils/contactCenter/safeLink';
 import { showToast } from '@/valtio/global/global.actions';
+import { CcButton, cc, textareaSx } from '@/views/ContactCenter/ui';
+
+const MAX = 1000;
 
 const ProactiveDialog = ({ row, onClose }: { row: LiveRow | null; onClose(): void }) => {
   const { t } = useTranslation('contactCenter');
@@ -33,28 +37,57 @@ const ProactiveDialog = ({ row, onClose }: { row: LiveRow | null; onClose(): voi
     }
   };
 
+  const about = row
+    ? [
+        row.contactName ?? t('anonymousVisitor'),
+        siteLabel(row.visitor.siteId),
+        row.visitor.currentTitle ?? row.visitor.currentPath,
+      ]
+        .filter(Boolean)
+        .join(' · ')
+    : '';
+
   return (
-    <Dialog open={!!row} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>{t('proactive.title')}</DialogTitle>
-      <DialogContent>
-        <TextField
+    <Dialog
+      open={!!row}
+      onClose={onClose}
+      fullWidth
+      maxWidth={false}
+      aria-labelledby="cc-proactive-title"
+      PaperProps={{ sx: { maxWidth: 520, borderRadius: '14px', boxShadow: '0 20px 50px rgba(11,29,58,0.3)', m: 2 } }}
+    >
+      <Box sx={{ p: '18px 20px 6px' }}>
+        <Box component="h2" id="cc-proactive-title" sx={{ m: 0, fontSize: 17, fontWeight: 700, color: cc.ink }}>
+          {t('proactive.title')}
+        </Box>
+        <Box component="p" sx={{ m: '6px 0 0', fontSize: 13, color: cc.muted }}>
+          {about}
+        </Box>
+      </Box>
+      <Box sx={{ p: '12px 20px' }}>
+        <Box
+          component="textarea"
           autoFocus
-          fullWidth
-          multiline
-          minRows={3}
+          aria-label={t('proactive.label')}
+          rows={5}
+          maxLength={MAX}
           value={text}
-          onChange={e => setText(e.target.value)}
-          inputProps={{ maxLength: 1000 }}
-          helperText={`${text.length} / 1000`}
-          sx={{ mt: 1 }}
+          placeholder={t('proactive.placeholder')}
+          onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setText(e.target.value)}
+          sx={{ ...textareaSx, p: '10px 12px', borderRadius: '10px', fontSize: { xs: 16, md: 14 } }}
         />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>{t('cancel')}</Button>
-        <Button variant="contained" disabled={busy || !text.trim()} onClick={send}>
+        <Box sx={{ textAlign: 'right', fontSize: 12, color: cc.muted, mt: '4px' }}>
+          {text.length} / {MAX}
+        </Box>
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, p: '12px 20px 18px' }}>
+        <CcButton kind="txt" onClick={onClose}>
+          {t('cancel')}
+        </CcButton>
+        <CcButton kind="fill" disabled={busy || !text.trim()} onClick={send}>
           {t('send')}
-        </Button>
-      </DialogActions>
+        </CcButton>
+      </Box>
     </Dialog>
   );
 };

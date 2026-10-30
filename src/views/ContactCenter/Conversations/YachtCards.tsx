@@ -1,9 +1,11 @@
 /* Boat cards the AI showed in a reply (`payload.yachts`); text only, the link only through safeHref (ADMIN-11, ADMIN-12). */
+import { useTranslation } from 'react-i18next';
+
 import { Box } from '@mui/material';
 import dayjs from 'dayjs';
 
-import { bbColors } from '@/styles/bb';
 import { PageLink } from '@/views/ContactCenter/common';
+import { cc } from '@/views/ContactCenter/ui';
 
 interface Card {
   name?: unknown;
@@ -32,12 +34,21 @@ export const cardsOf = (payload: string | null): Card[] => {
 };
 
 const YachtCards = ({ payload, siteId }: { payload: string | null; siteId: string }) => {
+  const { t } = useTranslation('contactCenter');
   const cards = cardsOf(payload);
 
   if (!cards.length) return null;
 
   return (
-    <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 1, mt: 1 }}>
+    <Box
+      sx={{
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', sm: 'repeat(auto-fill, minmax(180px, 1fr))' },
+        gap: 1,
+        width: '100%',
+        minWidth: { md: 'min(380px, 100%)' },
+      }}
+    >
       {cards.map((c, i) => {
         const slug = text(c.slug);
         const start = text(c.startDate);
@@ -45,20 +56,49 @@ const YachtCards = ({ payload, siteId }: { payload: string | null; siteId: strin
         const path =
           text(c.url) ||
           (slug ? `/boat/${encodeURIComponent(slug)}?startDate=${start}&endDate=${end}&currency=EUR` : '');
+        const where = [
+          text(c.location),
+          start && `${dayjs(start).format('DD.MM.')}–${end ? dayjs(end).format('DD.MM.') : ''}`,
+        ].filter(Boolean);
 
         return (
           <Box
             // eslint-disable-next-line react/no-array-index-key
             key={`${slug}-${i}`}
-            sx={{ border: `1px solid ${bbColors.gray200}`, borderRadius: 1.5, p: 1, bgcolor: '#fff', fontSize: 12 }}
+            sx={{
+              p: '10px 12px',
+              border: `1px solid ${cc.border}`,
+              borderRadius: '10px',
+              bgcolor: '#FFFFFF',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '3px',
+            }}
           >
-            <Box sx={{ fontWeight: 700, color: bbColors.navy900 }}>{text(c.name) || slug || '—'}</Box>
-            <Box sx={{ color: bbColors.gray600 }}>
-              {text(c.location)}
-              {start && ` · ${dayjs(start).format('DD.MM.')}–${end ? dayjs(end).format('DD.MM.YYYY') : ''}`}
+            <Box
+              component="span"
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                gap: '6px',
+                fontWeight: 600,
+                fontSize: 13.5,
+                color: cc.ink,
+              }}
+            >
+              {text(c.name) || slug || '—'}
+              {path && <PageLink siteId={siteId} path={path} label="↗" ariaLabel={t('openBoatPage')} />}
             </Box>
-            {text(c.totalPriceEur) && <Box sx={{ fontWeight: 700 }}>{`€ ${text(c.totalPriceEur)}`}</Box>}
-            {path && <PageLink siteId={siteId} path={path} label="↗" />}
+            {where.length > 0 && (
+              <Box component="span" sx={{ fontSize: 12, color: cc.muted }}>
+                {where.join(' · ')}
+              </Box>
+            )}
+            {text(c.totalPriceEur) && (
+              <Box component="span" sx={{ fontSize: 13, fontWeight: 600, color: cc.ink }}>
+                {`€ ${text(c.totalPriceEur)}`}
+              </Box>
+            )}
           </Box>
         );
       })}

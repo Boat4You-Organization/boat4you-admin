@@ -14,7 +14,7 @@ const ContactDetail = ({ id }: { id: number }) => {
   return (
     <Box>
       <Button size="small" onClick={() => navigate('/contact-center/contacts')} sx={{ mb: 1 }}>
-        ← {t('tabs.contacts')}
+        ← {t('tab.contacts')}
       </Button>
       <Box sx={{ bgcolor: '#fff', border: `1px solid ${bbColors.gray100}`, borderRadius: 2, p: 2, maxWidth: 900 }}>
         <ClientCard key={id} contactId={id} />

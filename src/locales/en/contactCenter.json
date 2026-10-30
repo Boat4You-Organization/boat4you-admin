@@ -1,6 +1,6 @@
 {
   "title": "Contact Center",
-  "tabs": {
+  "tab": {
     "conversations": "Conversations",
     "live": "Live visitors",
     "contacts": "Contacts",

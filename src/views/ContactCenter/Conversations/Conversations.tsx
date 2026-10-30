@@ -174,7 +174,7 @@ const Conversations = () => {
         display: 'grid',
         gap: 1.5,
         gridTemplateColumns: { xs: '1fr', md: '340px 1fr', lg: '340px 1fr 320px' },
-        height: { md: 'calc(100vh - 170px)' },
+        height: { md: 'calc(100vh - 200px)' },
         minHeight: 480,
       }}
     >

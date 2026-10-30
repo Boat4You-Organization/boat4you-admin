@@ -43,7 +43,8 @@ const ContactCenter = () => {
 
   return (
     <Layout>
-      <Box sx={{ px: { xs: 1.5, md: 3 }, py: 2 }}>
+      {/* The header is fixed (54 px): the page starts below it, as in Boats · Media. */}
+      <Box sx={{ px: { xs: 1.5, md: 3 }, pt: '74px', pb: 2 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap', mb: 2 }}>
           <Typography sx={{ fontSize: 24, fontWeight: 800, color: bbColors.navy900 }}>{t('title')}</Typography>
           <Tabs
@@ -52,10 +53,10 @@ const ContactCenter = () => {
             variant="scrollable"
             allowScrollButtonsMobile
           >
-            <PillTab value="conversations" label={t('tabs.conversations')} />
-            <PillTab value="live" label={t('tabs.live')} />
-            <PillTab value="contacts" label={t('tabs.contacts')} />
-            <PillTab value="stats" label={t('tabs.stats')} />
+            <PillTab value="conversations" label={t('tab.conversations')} />
+            <PillTab value="live" label={t('tab.live')} />
+            <PillTab value="contacts" label={t('tab.contacts')} />
+            <PillTab value="stats" label={t('tab.stats')} />
           </Tabs>
         </Box>
         {tab === 'conversations' && <Conversations />}

@@ -523,7 +523,7 @@ interface Resources {
     suspiciousBanner: 'Suspicious conversation: the AI is off and stays off. It is kept as evidence and cannot be deleted.';
     suspiciousLink: 'suspicious, do not open';
     suspiciousLinkHint: "Not a path on this conversation's site, so it is not shown as a link. Do not open it.";
-    tabs: {
+    tab: {
       contacts: 'Contacts';
       conversations: 'Conversations';
       live: 'Live visitors';

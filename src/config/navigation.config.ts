@@ -30,6 +30,13 @@ const navigation: NavigationLink[] = [
     accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
   },
   {
+    // Contact Center (P2, replaces /chat): backend /admin/cc/** and /admin/chat/** are SYSTEM_ADMIN only.
+    id: 'contactCenter',
+    icon: Contact,
+    path: '/contact-center',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
     id: 'users',
     icon: People,
     path: '/users',
@@ -52,13 +59,6 @@ const navigation: NavigationLink[] = [
     id: 'boatsMedia',
     icon: Boat,
     path: '/boats/media',
-    accessLevel: [UserRoleName.SYSTEM_ADMIN],
-  },
-  {
-    // Contact Center (P2, replaces /chat): backend /admin/cc/** and /admin/chat/** are SYSTEM_ADMIN only.
-    id: 'contactCenter',
-    icon: Contact,
-    path: '/contact-center',
     accessLevel: [UserRoleName.SYSTEM_ADMIN],
   },
   {

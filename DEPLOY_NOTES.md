@@ -1,5 +1,9 @@
 # boat4you-admin — deploy notes
 
+## 2026-10-30 — 🧭 Kontakt centar odmah iza Offers u izborniku — ✅ DEPLOYANO 30.10.2026 (cusma1, main `72fb63a`, entry `assets/index-j1FPEKNm.js`)
+
+Mario 30.10.2026. Redoslijed: Bookings, Offers, Contact Center, Users, Invoices, Custom boats, Boats · Media, Agencies.
+
 ## 2026-10-30 — 📊 Dashboard spojen u Bookings — ✅ DEPLOYANO 30.10.2026 (cusma1, main `4d13399`, entry `assets/index-BIJTy3lu.js`)
 
 Mario 30.10.2026: „dashboard prikazuje isto što i bookings, samo uz statistiku“. KPI kartice (ovaj tjedan, ovaj mjesec, potvrđene, prihod YTD) i graf tjedna premješteni na vrh Bookings (`partials/BookingsOverview.tsx`, isti endpoint `/admin/reservations/dashboard-metrics`); Dashboard view obrisan; Bookings je prvi u izborniku i default ruta nakon prijave; `/` i `/dashboard` → `/bookings`; logo u headeru vodi na Bookings. Verifikacija: root/deep/asset 200, live == new.

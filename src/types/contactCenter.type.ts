@@ -234,6 +234,6 @@ export interface CcFunnel {
   steps: Count[];
   chatOpened: number;
   exitsByType: Count[];
-  exits: Array<{ path: string; pageType: string; views: number; exits: number }>;
+  exits: Array<{ siteId: string; path: string; pageType: string; views: number; exits: number }>;
   clicks: Array<{ pageType: string; label: string; clicks: number }>;
 }

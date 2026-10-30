@@ -8,6 +8,7 @@ import { Box } from '@mui/material';
 import ContactCenterService from '@/services/contactCenter.service';
 import { CcFunnel } from '@/types/contactCenter.type';
 import { exitRate, funnelRows } from '@/utils/contactCenter/funnel';
+import { siteLabel } from '@/utils/contactCenter/safeLink';
 import { Bars, barGrid, cardSx } from '@/views/ContactCenter/Stats/parts';
 import { LoadAlert, SectionLabel, cc, fieldSx, tableSx } from '@/views/ContactCenter/ui';
 
@@ -126,6 +127,7 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
             <Box component="table" sx={tableSx}>
               <thead>
                 <tr>
+                  {!siteId && <th>{t('filter.site')}</th>}
                   <th>{t('funnel.path')}</th>
                   <th>{t('funnel.type')}</th>
                   <th className="num">{t('funnel.views')}</th>
@@ -135,7 +137,8 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
               </thead>
               <tbody>
                 {data.exits.map(e => (
-                  <tr key={e.path}>
+                  <tr key={`${e.siteId}|${e.path}`}>
+                    {!siteId && <td className="soft nowrap">{siteLabel(e.siteId)}</td>}
                     <Box component="td" sx={ellipsisSx} title={e.path}>
                       {e.path}
                     </Box>

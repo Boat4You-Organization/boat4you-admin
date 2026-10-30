@@ -1,5 +1,23 @@
 # boat4you-admin — deploy notes
 
+## 2026-10-30 — 🗂️ Kontakt centar (P2) umjesto `/chat` — ⏳ NIJE DEPLOYANO
+
+Plan `infra/docs/superpowers/plans/2026-10-30-p2-contact-center-admin.md`, zadaci 9–15. Grana `feat/contact-center-p2` iz `main` `0a35a6a`.
+
+- Nova stavka izbornika **Kontakt centar** (samo SYSTEM_ADMIN) s brojem nepročitanih razgovora (`GET /admin/cc/conversations/unread-count`, svakih 30 s dok je tab vidljiv). `/chat` sada vodi na `/contact-center`.
+- Kartice: **Razgovori** (tri stupca: popis Svi / Live sada s filterima i pretragom, otvoreni razgovor s kretanjem po sajtovima, karticama brodova i gumbima Preuzmi / Vrati AI-ju / Zatvori / Obriši, kartica klijenta), **Live posjetitelji** (proaktivna poruka), **Kontakti** (popis + stranica kontakta), **Statistika**.
+- Odgovor, zatvaranje i brisanje i dalje idu kroz `/admin/chat/**`; sumnjivi razgovor nema Obriši ni checkbox i nema Vrati AI-ju (ADMIN-5, ADMIN-9). Sve od posjetitelja, AI-ja i trackera je čisti tekst; link samo na putanju sajta tog razgovora (ADMIN-11, ADMIN-12).
+- Kratki poll: prva stranica popisa 5 s, otvoreni razgovor 4 s, live 15 s; samo dok je tab vidljiv, nikad dva ista zahtjeva u letu.
+- Header sada prikazuje samo stavke koje uloga korisnika smije otvoriti (MANAGER više ne vidi SYSTEM_ADMIN stavke).
+
+Provjere: `tsc` 0, `yarn lint:base` 0 grešaka, `yarn build` OK, `yarn test` 37/37 (novo `tests/contact-center.test.ts`). **Ručna provjera prema starom `/chat` (ADMIN-1…14) NIJE napravljena lokalno** (backend P2 API nije na produkciji, a lokalni backend s podacima nije podignut): radi se odmah nakon deploya, samo čitanjem.
+
+Deploy:
+
+- [ ] TEK NAKON backend jara s P2 (`/admin/cc/**`); sa starim backendom Kontakt centar javlja grešku, a `/chat` više ne postoji.
+- [ ] Uobičajeni admin ručni deploy (test prije swapa).
+- [ ] Provjera kao SYSTEM_ADMIN: popis (zadano Svi), Treba čovjeka uključuje Zaključan, Samo sumnjivi s praznim stanjem, točka nepročitano, otvoren razgovor (povijest, poruke, kartica klijenta), Kontakti, Statistika (posjetitelji 0 do P3), HR/EN.
+
 ## 2026-10-17 — Boats · Media: vlastite fotke, video i crew profile za BILO KOJI brod + image hygiene alati — ✅ DEPLOYANO 20.10.2026 13:08 UTC (cusma1, `bb80aef`, entry `assets/index-CwtynOMl.js`, root/deep/asset 200; backend V9_92 na oba čvora 13:06 UTC), tag `live/2026-10-20` (grana `feat/yacht-media`)
 
 Mario 17.10. (gulet Allure 11769, `gulet-allure-11769`): naše 54 fotke, Vimeo https://vimeo.com/982130882 i crew-profile PDF na svih 7 sajtova. Nova stranica **Boats · Media** (`/boats/media`, izbornik odmah iza „Custom boats“, samo SYSTEM_ADMIN kao backend):

@@ -23,11 +23,12 @@ const SUGGESTED_TAGS = ['vip', 'spam'];
 const initials = (name: string | null, email: string | null) => {
   const words = (name ?? '').trim().split(/\s+/).filter(Boolean);
 
-  if (words.length)
-    {return words
+  if (words.length) {
+    return words
       .slice(0, 2)
       .map(w => w[0].toUpperCase())
-      .join('');}
+      .join('');
+  }
 
   return email?.trim()[0]?.toUpperCase() ?? '#';
 };

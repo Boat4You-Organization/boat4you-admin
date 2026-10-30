@@ -33,10 +33,11 @@ const ToggleChip = ({
     color: cc.text,
   };
 
-  if (on)
-    {colors = danger
+  if (on) {
+    colors = danger
       ? { borderColor: cc.red, bgcolor: cc.redBg, color: cc.red }
-      : { borderColor: cc.ink, bgcolor: cc.ink, color: '#FFFFFF' };}
+      : { borderColor: cc.ink, bgcolor: cc.ink, color: '#FFFFFF' };
+  }
 
   return (
     <Box

@@ -160,7 +160,12 @@
   },
   "overrides": [
     {
-      "files": ["src/views/Chat/**", "src/services/chat.service.ts"],
+      "files": [
+        "src/views/Chat/**",
+        "src/services/chat.service.ts",
+        "src/views/ContactCenter/**",
+        "src/services/contactCenter.service.ts"
+      ],
       "rules": {
         "react/no-danger": "error"
       }

@@ -1,5 +1,28 @@
 # boat4you-admin — deploy notes
 
+## 2026-10-30 — 🎨 Broker Desk redizajn v2.2 na cijelom adminu (samo vizualni sloj) — ⏳ ČEKA spajanje u `main` i Mariov „da“ za deploy
+
+Mario 30.10.2026: „sredi samo dizajn, funkcije se ne smiju dirat, sve mora biti pod istim funkcijama“. Dizajn: `_design/redesign-v2.2/index.html` (Claude Design, 31 ploča). Grana `feat/redesign-v2.2` (iz `main` `e157889`), commiti `e5a8a5f` … `502d807`, po fazama:
+
+1. **Sustav** (`e5a8a5f`): jedan set tokena u `src/styles/bb.ts` (boje v2.2, semantički tonovi, radijusi 14/10/16, meka sjena kartice, tekstura nautičke karte, ilustracije); stari SCSS/TS nazivi boja (`_variables.scss`, `themes/colors.ts`) preusmjereni na te vrijednosti. **Inter je sada stvarno učitan** (`public/fonts/Inter/*.var.woff2`, latin + latin-ext). MUI theme: žuti contained primary, navy secondary, outlined tertiary, destruktivni, polja 36 px s fokus aurom, navy kartice na sivoj traci, izbornici, dijalozi, tooltipi. Header na teksturi + mobilna ladica; modal (podnožje desno, Odustani pa Potvrdi), bottom sheet iste obitelji, tamni toast s ikonom i X. Zajedničke komponente `src/components/Desk` (PageHead, DeskTabs, FilterBar, TableCard, Th, Pager, skeleton/prazna stanja, kartice, ErrorCard).
+2. **Rezervacije** (`948fcd6`): početna (KPI + graf tjedna jedan do drugog, tablica u kartici, neviđeni redovi jantar + žuta traka + NEW, kartice umjesto tablice na mobitelu), detalj (kartice: brod/podaci, faze plaćanja, cijena, bilješke, novosti za klijenta; bočno radnje / putna aplikacija / dokumenti / interni dokumenti), čarobnjak s indikatorom koraka.
+3. **Kontakt centar** (`1d61da0`): `cc` tokeni uzimaju vrijednosti iz `bb.ts`; statusi po v2.2 tablici s točkom; Pošalji/Spremi žuti, Preuzmi navy; ilustracije praznih stanja. Raspored i ponašanje isti.
+4. **Ponude** (`c0924f5`): sekcije filtera, kartice rezultata, pillovi Bareboat/Skipper/Crewed u v2.2 tonovima, MMK/NauSys tagovi, košarica kao kartice, mobitel: paneli jedan ispod drugog, ponuda u ljepljivom donjem panelu. **E-mail HTML za klijenta (`offerHtml.ts`) nije diran.**
+5. **Ostale stranice** (`b802ce5`): Korisnici, Računi (statusna traka umjesto obojenih redova), Agencije (3 stupca kartica), Vlastiti brodovi (okomite kartice 4:3), Brodovi · Mediji, modali (GridDisplay, PillTab).
+6. **Račun i pristup** (`502d807`): Moj profil (teksturirani pojas, kartica s redovima), prijava (fotografija otoka, mobitel s teksturom), 403/404 (ErrorCard s ilustracijom).
+
+Funkcije: diff `origin/main..feat/redesign-v2.2` ne dira `src/services`, `src/valtio`, `src/routers`, `src/models`, `src/config`, `src/utils`, `src/locales`, `offerHtml.ts` ni PDF računa; svi handleri/API pozivi isti (provjereno skriptom koja uspoređuje `onX=`, `*Service.*`, `navigate(`, `toggle*`, `set*` po datoteci). Novo je samo: X na toastu i u mobilnoj ladici (zatvaranje), broj nepročitanih na mobilnom gumbu izbornika, ime i uloga u korisničkom izborniku, kartice rezervacija na mobitelu (isti klik).
+
+Nije napravljeno (namjerno, mijenja ponašanje): zamjena `window.confirm` (brisanje rezervacije „spam“) dijalogom iz dizajna; dodatne radnje s ploča kojih u adminu nema (npr. „Izvoz CSV“, „Na rezervacije“ na 403/404, broj po kartici statusa).
+
+Provjere: `tsc` 0, `yarn lint` 0 grešaka (pre-commit hook), `yarn test` 37/37, `yarn build` OK; lokalni pregled (Vite + lažni API iz scratchpada) na 1440 i 375 px za sve ekrane, usporedba s pločama dizajna.
+
+Deploy:
+
+- [ ] Mario: „da“ za spajanje `feat/redesign-v2.2` u `main` i deploy
+- [ ] `git fetch`, graditi točno `origin/main` (druge sesije deployaju admin), `.env.production.local` s `api.boat4you.com`, bundle bez `localhost:8443`
+- [ ] `infra/deploy-scripts/admin_deploy.sh` (cusma1), provjera root/deep/asset 200 i entry
+
 ## 2026-10-30 — 🎨 Kontakt centar: redizajn po „Contact Center redizajn.html“ (funkcije iste) — ✅ LIVE 30.10.2026 (merge `59b015c`; live kroz deploy `72fb63a`/`4ed4ea8`, entry `assets/index-j1FPEKNm.js`), tag `live/2026-10-30-cc-redesign`
 
 Mario 30.10.2026: „Mijenjamo dizajn malo admin contact centra, funkcije moraju ostat, samo dizajn napravi po ovome“.

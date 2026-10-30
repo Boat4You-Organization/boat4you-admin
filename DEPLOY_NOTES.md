@@ -1,5 +1,15 @@
 # boat4you-admin — deploy notes
 
+## 2026-10-30 — 🎨 Kontakt centar: redizajn po „Contact Center redizajn.html“ (funkcije iste) — ✅ LIVE 30.10.2026 (merge `59b015c`; live kroz deploy `72fb63a`/`4ed4ea8`, entry `assets/index-j1FPEKNm.js`), tag `live/2026-10-30-cc-redesign`
+
+Mario 30.10.2026: „Mijenjamo dizajn malo admin contact centra, funkcije moraju ostat, samo dizajn napravi po ovome“.
+
+- `src/views/ContactCenter/ui.tsx`: boje i elementi s ploča (gumbi, čipovi, polja, segmentirani prekidač, tablice, kosturi, obavijest o grešci); svi ekrani Kontakt centra prestilizirani.
+- Raspored: tri stupca od 1280 px; ispod toga popis + razgovor, a kartica klijenta u ladici; mobitel s „← Popis“, „Kartica klijenta“ i „Više radnji“. Polja na mobitelu 16 px (iOS ne zumira).
+- Novo u izgledu: sklopivo „Kretanje“, brojač znakova, greška slanja ostaje u polju (crveni rub + obavijest), čipovi „Treba čovjeka“ / „Samo sumnjivi“ i sklopivi filteri, „Očisti filtere“, kartica kontakta s inicijalima, KPI kartice i trake u statistici. Status ili tag više ne brišu nespremljeno ime i bilješku.
+- Provjere: `tsc` 0, lint 0 grešaka, `yarn test` 37/37, build; lokalni pregled s lažnim API-jem na 1440/1024/390 px; jedan završni pregled (Opus): 0 kritičnih, 2 važna, 7 manjih, svi popravljeni u `c25c36b`.
+- ⚠️ 30.10. 14:39–14:40 UTC: build iz `59b015c` (bez `4d13399` i `72fb63a` druge sesije) bio je ~90 s live; vraćeno deployem iz `4ed4ea8` (isti entry kao `72fb63a`). Pouka: admin deploy uvijek iz trenutnog `origin/main`.
+
 ## 2026-10-30 — 🧭 Kontakt centar odmah iza Offers u izborniku — ✅ DEPLOYANO 30.10.2026 (cusma1, main `72fb63a`, entry `assets/index-j1FPEKNm.js`)
 
 Mario 30.10.2026. Redoslijed: Bookings, Offers, Contact Center, Users, Invoices, Custom boats, Boats · Media, Agencies.

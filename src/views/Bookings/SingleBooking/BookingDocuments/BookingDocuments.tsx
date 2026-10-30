@@ -2,11 +2,11 @@
 import { ChangeEvent, DragEvent, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box, Chip, IconButton, MenuItem, Select, Stack, Tooltip, Typography } from '@mui/material';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import DownloadIcon from '@mui/icons-material/Download';
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
+import { Box, Chip, IconButton, MenuItem, Select, Stack, Tooltip, Typography } from '@mui/material';
 
 import ReservationsService, { ReservationDocumentDto, ReservationDocumentType } from '@/services/reservations.service';
 import { bbColors } from '@/styles/bb';
@@ -28,15 +28,15 @@ interface BookingDocumentsProps {
  * Files are PDF, DOC, or DOCX, ≤20MB. Storage is DB BYTEA on the backend
  * with cascade delete tied to the reservation.
  */
-const ACCEPT = '.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+const ACCEPT =
+  '.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
 const formatSize = (bytes: number): string => {
   if (bytes < 1024) return `${bytes} B`;
 
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
 
-  
-return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 };
 
 /** Customer-facing identity of an upload. OTHER renders without a chip so the
@@ -55,8 +55,7 @@ const formatDate = (iso: string): string => {
 
     if (isNaN(d.getTime())) return '';
 
-    
-return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
+    return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' });
   } catch {
     return '';
   }
@@ -109,7 +108,12 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
     let anyOk = false;
 
     for (const file of list) {
-      const created = await ReservationsService.uploadReservationDocument(reservationId, file, internal, internal ? 'OTHER' : docType);
+      const created = await ReservationsService.uploadReservationDocument(
+        reservationId,
+        file,
+        internal,
+        internal ? 'OTHER' : docType
+      );
 
       if (created) anyOk = true;
     }
@@ -122,7 +126,7 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
   };
 
   const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const {files} = e.target;
+    const { files } = e.target;
 
     // Reset the input so the SAME file can be re-uploaded later (otherwise
     // `change` doesn't fire on identical filenames).
@@ -177,7 +181,7 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
 
     if (uploading) return;
 
-    const {files} = e.dataTransfer;
+    const { files } = e.dataTransfer;
 
     if (!files || files.length === 0) return;
 
@@ -190,7 +194,7 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
 
   const handleDelete = async (doc: ReservationDocumentDto) => {
     const ok = window.confirm(
-      t('booking.documents.confirm-delete', `Delete "${doc.filename}"? This cannot be undone.`) as string,
+      t('booking.documents.confirm-delete', `Delete "${doc.filename}"? This cannot be undone.`) as string
     );
 
     if (!ok) return;
@@ -203,41 +207,39 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
   };
 
   return (
-    <Box sx={{ mt: 2 }}>
+    <Box>
       {/* Section header — internal docs use red label so Mario can never
           confuse the two drawers and accidentally upload a private note to
           the customer-visible one. */}
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
         <Typography
           sx={{
-            fontSize: 11,
-            fontWeight: 800,
-            letterSpacing: 0.6,
-            color: internal ? '#c62828' : bbColors.gray600,
-            textTransform: 'uppercase',
+            fontSize: 12.5,
+            fontWeight: 600,
+            color: internal ? bbColors.red700 : bbColors.gray600,
           }}
         >
           {internal
             ? t('booking.documents.internal-title', 'Internal documentation')
             : t('booking.documents.title', 'Documents')}
         </Typography>
-        <Typography sx={{ fontSize: 11, color: internal ? '#c62828' : bbColors.gray500 }}>
+        <Typography sx={{ fontSize: 12, color: internal ? bbColors.red700 : bbColors.gray500 }}>
           {documents.length > 0 ? `${documents.length}` : ''}
         </Typography>
       </Stack>
 
       {/* List */}
       {loading ? (
-        <Typography sx={{ fontSize: 12, color: bbColors.gray500, fontStyle: 'italic' }}>
+        <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>
           {t('booking.documents.loading', 'Loading…')}
         </Typography>
       ) : documents.length === 0 ? (
-        <Typography sx={{ fontSize: 12, color: bbColors.gray500, fontStyle: 'italic' }}>
+        <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>
           {t('booking.documents.empty', 'No documents attached yet.')}
         </Typography>
       ) : (
         <Stack spacing={0.75} sx={{ mb: 1.5 }}>
-          {documents.map((doc) => (
+          {documents.map(doc => (
             <Box
               key={doc.id}
               sx={{
@@ -246,9 +248,9 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
                 gap: 1,
                 px: 1,
                 py: 0.75,
-                borderRadius: '6px',
-                backgroundColor: bbColors.gray100,
-                border: `1px solid ${bbColors.gray200}`,
+                borderRadius: '8px',
+                backgroundColor: bbColors.gray75,
+                border: `1px solid ${bbColors.gray100}`,
               }}
             >
               <InsertDriveFileOutlinedIcon sx={{ fontSize: 18, color: bbColors.gray600, flexShrink: 0 }} />
@@ -285,7 +287,7 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
                     />
                   )}
                 </Stack>
-                <Typography sx={{ fontSize: 10, color: bbColors.gray500 }}>
+                <Typography sx={{ fontSize: 11, color: bbColors.gray500 }}>
                   {formatSize(doc.sizeBytes)}
                   {doc.uploadedAt ? ` · ${formatDate(doc.uploadedAt)}` : ''}
                 </Typography>
@@ -315,17 +317,27 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
           </Typography>
           <Select
             value={docType}
-            onChange={(e) => setDocType(e.target.value as ReservationDocumentType)}
+            onChange={e => setDocType(e.target.value as ReservationDocumentType)}
             size="small"
             fullWidth
             disabled={uploading}
             sx={{ fontSize: 12, '& .MuiSelect-select': { py: 0.5 } }}
           >
-            <MenuItem value="BOARDING_PASS" sx={{ fontSize: 12 }}>{TYPE_LABELS.BOARDING_PASS}</MenuItem>
-            <MenuItem value="CREW_LIST" sx={{ fontSize: 12 }}>{TYPE_LABELS.CREW_LIST}</MenuItem>
-            <MenuItem value="PREFERENCE_LIST" sx={{ fontSize: 12 }}>{TYPE_LABELS.PREFERENCE_LIST}</MenuItem>
-            <MenuItem value="CONTRACT" sx={{ fontSize: 12 }}>{TYPE_LABELS.CONTRACT}</MenuItem>
-            <MenuItem value="OTHER" sx={{ fontSize: 12 }}>{TYPE_LABELS.OTHER}</MenuItem>
+            <MenuItem value="BOARDING_PASS" sx={{ fontSize: 12 }}>
+              {TYPE_LABELS.BOARDING_PASS}
+            </MenuItem>
+            <MenuItem value="CREW_LIST" sx={{ fontSize: 12 }}>
+              {TYPE_LABELS.CREW_LIST}
+            </MenuItem>
+            <MenuItem value="PREFERENCE_LIST" sx={{ fontSize: 12 }}>
+              {TYPE_LABELS.PREFERENCE_LIST}
+            </MenuItem>
+            <MenuItem value="CONTRACT" sx={{ fontSize: 12 }}>
+              {TYPE_LABELS.CONTRACT}
+            </MenuItem>
+            <MenuItem value="OTHER" sx={{ fontSize: 12 }}>
+              {TYPE_LABELS.OTHER}
+            </MenuItem>
           </Select>
         </Stack>
       )}
@@ -350,16 +362,14 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
           justifyContent: 'center',
           gap: 0.5,
           padding: '14px 12px',
-          borderRadius: '6px',
-          border: `1.5px dashed ${isDragging ? bbColors.navy700 : bbColors.gray300}`,
+          borderRadius: '10px',
+          border: `1.5px dashed ${isDragging ? bbColors.navy700 : '#c9d1dc'}`,
           background: isDragging ? bbColors.gray100 : 'transparent',
           color: isDragging ? bbColors.navy700 : bbColors.gray600,
           cursor: uploading ? 'progress' : 'pointer',
           textAlign: 'center',
           transition: 'background-color 120ms, border-color 120ms, color 120ms',
-          '&:hover': uploading
-            ? undefined
-            : { backgroundColor: bbColors.gray100, borderColor: bbColors.gray500 },
+          '&:hover': uploading ? undefined : { backgroundColor: bbColors.gray100, borderColor: bbColors.gray500 },
           opacity: uploading ? 0.6 : 1,
         }}
       >
@@ -372,20 +382,14 @@ const BookingDocuments = ({ reservationId, internal = false }: BookingDocumentsP
               : t('booking.documents.drop-or-click', 'Drop files here or click to upload')}
         </Typography>
         {!uploading && !isDragging && (
-          <Typography sx={{ fontSize: 10, color: bbColors.gray500, fontWeight: 500 }}>
+          <Typography sx={{ fontSize: 11, color: bbColors.gray500, fontWeight: 500 }}>
             {t('booking.documents.types-hint', 'PDF, DOC, DOCX up to 20 MB')}
           </Typography>
         )}
       </Box>
 
       {/* Hidden native input — clicking the button above proxies into here */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept={ACCEPT}
-        onChange={handleFileChange}
-        style={{ display: 'none' }}
-      />
+      <input ref={fileInputRef} type="file" accept={ACCEPT} onChange={handleFileChange} style={{ display: 'none' }} />
     </Box>
   );
 };

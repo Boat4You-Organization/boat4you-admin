@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, Button, Stack, TextField, Typography } from '@mui/material';
 
 import ReservationsService from '@/services/reservations.service';
-import { bbColors } from '@/styles/bb';
+import { bbColors, bbOverlineSx } from '@/styles/bb';
 
 interface BookingCrewListUrlProps {
   reservationId: number;
@@ -50,27 +50,14 @@ const BookingCrewListUrl = ({ reservationId, initialUrl, onSaved }: BookingCrewL
   };
 
   return (
-    <Stack spacing={1} sx={{ pt: 2.5 }}>
-      <Typography
-        variant="body2"
-        fontWeight={700}
-        color={bbColors.gray500}
-        sx={{ textTransform: 'uppercase', letterSpacing: 0.6, fontSize: 11 }}
-      >
-        {t('booking.crew-list-url', 'Crew list URL')}
-      </Typography>
+    <Stack spacing={1} sx={{ pt: 1.5 }}>
+      <Typography sx={bbOverlineSx}>{t('booking.crew-list-url', 'Crew list URL')}</Typography>
       <TextField
         size="small"
         fullWidth
         value={value}
         onChange={e => setValue(e.target.value)}
         placeholder={t('booking.crew-list-url-placeholder', 'https://...')}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            fontSize: 13,
-            backgroundColor: '#fff',
-          },
-        }}
       />
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
         {/* Quick sanity check — open the partner crew editor in a new tab
@@ -81,25 +68,10 @@ const BookingCrewListUrl = ({ reservationId, initialUrl, onSaved }: BookingCrewL
           disabled={!/^https?:\/\//i.test(trimmed)}
           variant="outlined"
           size="small"
-          sx={{
-            textTransform: 'none',
-            fontSize: 13,
-            borderRadius: '6px',
-          }}
         >
           {t('booking.crew-list-open', 'Open ↗')}
         </Button>
-        <Button
-          onClick={handleSave}
-          disabled={!dirty || saving}
-          variant="contained"
-          size="small"
-          sx={{
-            textTransform: 'none',
-            fontSize: 13,
-            borderRadius: '6px',
-          }}
-        >
+        <Button onClick={handleSave} disabled={!dirty || saving} variant="outlined" size="small">
           {saving ? t('booking.saving', 'Saving...') : t('booking.save', 'Save')}
         </Button>
       </Box>

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box, Button, Stack, TextField, Typography } from '@mui/material';
+import { Box, Button, Stack, TextField } from '@mui/material';
 
+import { CardHead, DeskCard } from '@/components/Desk';
 import ReservationsService from '@/services/reservations.service';
 import { bbColors } from '@/styles/bb';
 
@@ -50,30 +51,13 @@ const BookingCharterUpdate = ({ reservationId, initialCharterUpdate, onSaved }: 
   };
 
   return (
-    <Box
-      sx={{
-        backgroundColor: bbColors.amber100,
-        border: `1px solid ${bbColors.amber700}`,
-        borderRadius: '10px',
-        overflow: 'hidden',
-      }}
-    >
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        sx={{ p: '12px 16px', borderBottom: `1px solid ${bbColors.amber700}` }}
-      >
-        <Box>
-          <Typography sx={{ fontSize: 13.5, fontWeight: 800, color: bbColors.amber700 }}>
-            {t('booking.charter-update', 'Charter update')}
-          </Typography>
-          <Typography sx={{ fontSize: 11, color: bbColors.amber700 }}>
-            {t('booking.charter-update-hint', 'Shown to the customer in My bookings')}
-          </Typography>
-        </Box>
-      </Stack>
-      <Stack spacing={1} sx={{ p: '14px 16px' }}>
+    <DeskCard sx={{ borderColor: bbColors.amber200 }}>
+      <CardHead
+        title={t('booking.charter-update', 'Charter update')}
+        hint={t('booking.charter-update-hint', 'Shown to the customer in My bookings')}
+        sx={{ backgroundColor: bbColors.unreadRow }}
+      />
+      <Stack spacing={1} sx={{ p: '12px 16px' }}>
         <TextField
           multiline
           minRows={3}
@@ -81,30 +65,14 @@ const BookingCharterUpdate = ({ reservationId, initialCharterUpdate, onSaved }: 
           value={value}
           onChange={e => setValue(e.target.value)}
           placeholder={t('booking.charter-update-placeholder', 'e.g. Skipper: 1470 €\nStand Up Paddle: 200 €')}
-          sx={{
-            '& .MuiOutlinedInput-root': {
-              fontSize: 13,
-              backgroundColor: '#fff',
-            },
-          }}
         />
         <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Button
-            onClick={handleSave}
-            disabled={!dirty || saving}
-            variant="contained"
-            size="small"
-            sx={{
-              textTransform: 'none',
-              fontSize: 13,
-              borderRadius: '6px',
-            }}
-          >
+          <Button onClick={handleSave} disabled={!dirty || saving} variant="outlined">
             {saving ? t('booking.saving', 'Saving...') : t('booking.save', 'Save')}
           </Button>
         </Box>
       </Stack>
-    </Box>
+    </DeskCard>
   );
 };
 

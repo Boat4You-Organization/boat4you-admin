@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Box, Button, Stack, Typography } from '@mui/material';
 
 import TripService, { TripAlbumSummary } from '@/services/trip.service';
-import { bbColors } from '@/styles/bb';
+import { bbColors, bbOverlineSx } from '@/styles/bb';
 
 interface BookingTripAlbumProps {
   reservationId: number;
@@ -33,17 +33,10 @@ const BookingTripAlbum = ({ reservationId }: BookingTripAlbumProps) => {
   };
 
   return (
-    <Stack spacing={1} sx={{ pt: 2.5 }}>
-      <Typography
-        variant="body2"
-        fontWeight={700}
-        color={bbColors.gray500}
-        sx={{ textTransform: 'uppercase', letterSpacing: 0.6, fontSize: 11 }}
-      >
-        Trip album
-      </Typography>
+    <Stack spacing={1} sx={{ pt: 1.5 }}>
+      <Typography sx={bbOverlineSx}>Trip album</Typography>
 
-      <Box sx={{ border: `1px solid ${bbColors.gray200}`, borderRadius: '8px', background: '#fff', p: 1.5 }}>
+      <Box sx={{ border: `1px solid ${bbColors.gray200}`, borderRadius: '10px', background: '#fff', p: 1.5 }}>
         <Typography sx={{ fontSize: 13, fontWeight: 700 }}>
           {summary.total} photo(s) · {summary.marketingConsented} with marketing consent
         </Typography>
@@ -53,25 +46,16 @@ const BookingTripAlbum = ({ reservationId }: BookingTripAlbumProps) => {
         </Typography>
 
         <Stack direction="row" spacing={1} sx={{ mt: 1.25 }}>
-          <Button
-            size="small"
-            variant="outlined"
-            disabled={downloading !== null}
-            onClick={() => download(false)}
-            sx={{ textTransform: 'none', fontSize: 12, borderRadius: '6px' }}
-          >
+          <Button size="small" variant="outlined" disabled={downloading !== null} onClick={() => download(false)}>
             {downloading === 'all' ? 'Preparing…' : 'Download all (ZIP)'}
           </Button>
           <Button
             size="small"
-            variant="contained"
+            variant="outlined"
             disabled={downloading !== null || summary.marketingConsented === 0}
             onClick={() => download(true)}
-            sx={{ textTransform: 'none', fontSize: 12, borderRadius: '6px' }}
           >
-            {downloading === 'marketing'
-              ? 'Preparing…'
-              : `Marketing photos (${summary.marketingConsented})`}
+            {downloading === 'marketing' ? 'Preparing…' : `Marketing photos (${summary.marketingConsented})`}
           </Button>
         </Stack>
       </Box>

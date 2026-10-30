@@ -4,9 +4,27 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import { Box, Button, IconButton, Stack, TextField, Typography } from '@mui/material';
+import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
+import { Box, Button, IconButton, InputAdornment, Stack, TextField } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 
+import {
+  DeskPage,
+  DeskTabs,
+  EmptyState,
+  FilterBar,
+  InitialsAvatar,
+  NewTag,
+  PageHead,
+  Pager,
+  SkeletonRows,
+  TableCard,
+  TableMessageRow,
+  Th,
+  cellSubSx,
+  rowSx,
+  tdSx,
+} from '@/components/Desk';
 import Layout from '@/components/Layout';
 import { PAGE_NUMBER, PAGE_SIZE } from '@/config/constants.config';
 import {
@@ -17,7 +35,7 @@ import {
   VirtualReservationStatus,
   getEffectiveReservationSysStatus,
 } from '@/models/booking.model';
-import { bbColors, bbFont, bbStatusPill } from '@/styles/bb';
+import { bbCardSx, bbColors, bbStatusPill } from '@/styles/bb';
 import useQueryParams from '@/utils/hooks/useQueryParams';
 import DateTime from '@/utils/static/DateTime';
 import { formatPrice } from '@/utils/static/formatNumber';
@@ -271,437 +289,256 @@ const Bookings = () => {
       <EditNotesModal isOpen={editNotesModalOpen} onClose={toggleEditNotesModal} />
       <CreateReservationModal isOpen={createReservationModalOpen} onClose={() => toggleCreateReservationModal(false)} />
       <Layout>
-        <Box
-          sx={{
-            backgroundColor: bbColors.gray50,
-            minHeight: '100vh',
-            fontFamily: bbFont.stack,
-            color: bbColors.navy900,
-            pt: '74px',
-            pb: 4,
-            px: { xs: 2, sm: 3 },
-          }}
-        >
-          {/* Page head */}
-          <Stack
-            direction={{ xs: 'column', md: 'row' }}
-            alignItems={{ xs: 'flex-start', md: 'flex-end' }}
-            justifyContent="space-between"
-            gap={2}
-            sx={{ mb: 2 }}
-          >
-            <Box>
-              <Typography
-                component="h1"
-                sx={{ fontSize: { xs: 20, sm: 22 }, fontWeight: 800, letterSpacing: '-0.01em' }}
-              >
-                {t('common.bookings')}
-              </Typography>
-              <Typography sx={{ fontSize: 12.5, color: bbColors.gray500, mt: 0.5 }}>
-                Confirmed charters, deposits & options
-              </Typography>
-            </Box>
-            <Stack direction="row" gap={1} sx={{ flexShrink: 0 }}>
-              <Button
-                onClick={() => toggleCreateReservationModal(true)}
-                sx={{
-                  backgroundColor: bbColors.yellow500,
-                  color: bbColors.yellowText,
-                  padding: '8px 14px',
-                  borderRadius: '6px',
-                  fontSize: 12,
-                  fontWeight: 800,
-                  letterSpacing: '0.02em',
-                  textTransform: 'none',
-                  boxShadow: '0 4px 10px -4px rgba(255,210,74,0.5)',
-                  '&:hover': { backgroundColor: '#ffca2e', boxShadow: '0 4px 10px -4px rgba(255,210,74,0.5)' },
-                }}
-              >
-                + Create reservation
-              </Button>
-            </Stack>
-          </Stack>
+        <DeskPage>
+          <PageHead
+            title={t('common.bookings')}
+            subtitle="Confirmed charters, deposits & options"
+            actions={<Button onClick={() => toggleCreateReservationModal(true)}>+ Create reservation</Button>}
+          />
 
           <BookingsOverview />
 
-          {/* Tabs — pill group */}
-          <Box
-            sx={{
-              display: 'flex',
-              gap: 0.5,
-              mb: 1.75,
-              backgroundColor: bbColors.white,
-              border: `1px solid ${bbColors.gray200}`,
-              borderRadius: '10px',
-              padding: '4px',
-              width: 'fit-content',
-              overflowX: 'auto',
-              maxWidth: '100%',
+          <DeskTabs
+            ariaLabel="Status"
+            items={RESERVATION_SYS_TAB_VALUES.map(v => ({ value: v, label: TAB_LABELS[v as TabValue] }))}
+            value={statusFilter}
+            onChange={v => {
+              setStatusFilter(v);
+              setParam({ bookingStatus: v === 'all' ? '' : v, page: 1 });
             }}
-          >
-            {RESERVATION_SYS_TAB_VALUES.map(v => {
-              const active = v === statusFilter;
+          />
 
-              return (
-                <Box
-                  key={v}
-                  onClick={() => {
-                    setStatusFilter(v);
-                    setParam({ bookingStatus: v === 'all' ? '' : v, page: 1 });
-                  }}
-                  sx={{
-                    padding: '7px 14px',
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: active ? bbColors.white : bbColors.gray500,
-                    backgroundColor: active ? bbColors.navy900 : 'transparent',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    userSelect: 'none',
-                  }}
-                >
-                  {TAB_LABELS[v as TabValue]}
-                </Box>
-              );
-            })}
-          </Box>
-
-          {/* Filter bar */}
-          <Stack
-            direction="row"
-            gap={1}
-            sx={{
-              backgroundColor: bbColors.white,
-              border: `1px solid ${bbColors.gray200}`,
-              borderRadius: '10px',
-              padding: '10px 12px',
-              mb: 1.75,
-              flexWrap: 'wrap',
-              alignItems: 'center',
-            }}
-          >
+          <FilterBar>
             <TextField
               placeholder="Search booking number, client name, email…"
               size="small"
               value={searchInput}
               onChange={e => setSearchInput(e.target.value)}
-              sx={{
-                flex: 1,
-                minWidth: 240,
-                '& .MuiOutlinedInput-root': {
-                  fontSize: 12,
-                  borderRadius: '6px',
-                  '& fieldset': { borderColor: bbColors.gray300 },
-                },
-              }}
+              sx={{ flex: '1 1 360px', minWidth: 240 }}
               slotProps={{
                 input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchRoundedIcon sx={{ fontSize: 18 }} />
+                    </InputAdornment>
+                  ),
                   endAdornment: searchInput ? (
                     <IconButton
                       size="small"
                       onClick={clearSearch}
                       aria-label="Clear search"
-                      sx={{ color: bbColors.gray500, p: 0.25 }}
+                      sx={{ width: 22, height: 22, borderRadius: '50%', backgroundColor: bbColors.gray100 }}
                     >
-                      <CloseRoundedIcon sx={{ fontSize: 16 }} />
+                      <CloseRoundedIcon sx={{ fontSize: 13 }} />
                     </IconButton>
                   ) : null,
                 },
               }}
             />
+          </FilterBar>
+
+          {/* Phone: the table becomes a list of cards (same rows, same click target). */}
+          <Stack gap={1} sx={{ display: { xs: 'flex', sm: 'none' } }}>
+            {isLoading && <EmptyState title="Loading…" />}
+            {!isLoading && visibleBookings.length === 0 && (
+              <EmptyState title="No bookings match the current filters." illustration="binoculars" />
+            )}
+            {!isLoading &&
+              visibleBookings.map(b => {
+                const effStatus = getEffectiveReservationSysStatus(
+                  b.reservationSysStatus,
+                  b.reservationDateFrom,
+                  b.reservationDateTo
+                );
+                const pill = bbStatusPill(statusToPillVariant(effStatus));
+                const nights = formatNights(b.reservationDateFrom, b.reservationDateTo);
+                const cleanYacht = b.modelName?.replace(/\s*-\s*\d+\s*cab\.?$/i, '') ?? '—';
+                const isUnviewed = !viewedSet.has(b.reservationId);
+
+                return (
+                  <Box
+                    key={`m-${b.reservationId}`}
+                    role="link"
+                    tabIndex={0}
+                    onClick={() => openBooking(b)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') openBooking(b);
+                    }}
+                    sx={{
+                      ...bbCardSx,
+                      p: '12px 14px',
+                      cursor: 'pointer',
+                      backgroundColor: isUnviewed ? bbColors.unreadRow : bbColors.white,
+                      boxShadow: isUnviewed
+                        ? `inset 3px 0 0 ${bbColors.yellow500}, ${bbCardSx.boxShadow}`
+                        : bbCardSx.boxShadow,
+                    }}
+                  >
+                    <Stack direction="row" alignItems="center" gap={1}>
+                      <Box component="strong" sx={{ fontSize: 14, fontVariantNumeric: 'tabular-nums' }}>
+                        {b.reservationNumber ?? `#${b.reservationId}`}
+                      </Box>
+                      {isUnviewed && <NewTag>New</NewTag>}
+                      <Box component="span" sx={{ ...pill.style, ml: 'auto' }}>
+                        {pill.label}
+                      </Box>
+                    </Stack>
+                    <Box sx={{ mt: 0.75, fontSize: 13.5, fontWeight: 600 }}>{b.endUser || '—'}</Box>
+                    <Box sx={{ fontSize: 13, color: bbColors.gray600 }}>
+                      {cleanYacht}
+                      {b.yachtName ? ` · ${b.yachtName}` : ''}
+                      {b.locationFromName ? ` · ${b.locationFromName}` : ''}
+                    </Box>
+                    <Stack direction="row" justifyContent="space-between" sx={{ mt: 1, fontSize: 12.5 }}>
+                      <Box component="span" sx={{ color: bbColors.gray500 }}>
+                        {DateTime.formatShortWithoutDay(dayjs(b.reservationDateFrom))} →{' '}
+                        {DateTime.formatShortWithoutDay(dayjs(b.reservationDateTo))} · {nights} night
+                        {nights === 1 ? '' : 's'}
+                      </Box>
+                      <Box component="strong" sx={{ color: bbColors.green700 }}>
+                        €{formatPrice(b.reservationTotalPrice)}
+                      </Box>
+                    </Stack>
+                  </Box>
+                );
+              })}
+            {totalCount > PAGE_SIZE && (
+              <Pager
+                page={page}
+                totalPages={totalPages}
+                onChange={handlePageChange}
+                sx={{ ...bbCardSx, borderTop: 0, justifyContent: 'center' }}
+              />
+            )}
           </Stack>
 
-          {/* Table card */}
-          <Box
-            sx={{
-              backgroundColor: bbColors.white,
-              border: `1px solid ${bbColors.gray200}`,
-              borderRadius: '10px',
-              overflow: 'hidden',
-            }}
+          <TableCard
+            sx={{ display: { xs: 'none', sm: 'block' } }}
+            minWidth={1180}
+            footer={
+              totalCount > PAGE_SIZE ? (
+                <Pager
+                  page={page}
+                  totalPages={totalPages}
+                  onChange={handlePageChange}
+                  range={`${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, totalCount)} of ${totalCount}`}
+                />
+              ) : null
+            }
           >
-            <Box sx={{ overflowX: 'auto' }}>
-              <Box component="table" sx={{ width: '100%', minWidth: 1080, borderCollapse: 'collapse' }}>
-                <Box component="thead">
-                  <Box component="tr">
-                    {(
-                      [
-                        { label: 'Booking', align: 'left', sortKey: 'reservationNumber' },
-                        { label: 'Client ID', align: 'left' },
-                        { label: 'Client', align: 'left' },
-                        { label: 'Yacht / Base', align: 'left' },
-                        { label: 'Agency', align: 'left' },
-                        { label: 'Dates', align: 'left' },
-                        { label: 'Client price', align: 'right' },
-                        { label: 'Agency price', align: 'right' },
-                        { label: 'Commission', align: 'right' },
-                        { label: 'Status', align: 'left' },
-                        { label: 'Check-in', align: 'left', sortKey: 'reservationDateFrom' },
-                      ] as Array<{ label: string; align: 'left' | 'right'; sortKey?: string }>
-                    ).map((h, i) => {
-                      const isSortable = !!h.sortKey;
-                      const isActive = isSortable && sortBy === h.sortKey;
-                      const arrow = isActive ? (sortDirection === 'asc' ? ' ↑' : ' ↓') : '';
-
-                      return (
-                        <Box
-                          component="th"
-                          key={h.label || `col-${i}`}
-                          onClick={isSortable ? () => handleSortClick(h.sortKey!) : undefined}
-                          sx={{
-                            fontSize: 10,
-                            letterSpacing: '0.14em',
-                            textTransform: 'uppercase',
-                            color: isActive ? bbColors.navy900 : bbColors.gray500,
-                            fontWeight: 700,
-                            padding: '10px 14px',
-                            textAlign: h.align,
-                            backgroundColor: bbColors.gray75,
-                            borderBottom: `1px solid ${bbColors.gray200}`,
-                            whiteSpace: 'nowrap',
-                            cursor: isSortable ? 'pointer' : 'default',
-                            userSelect: 'none',
-                            '&:hover': isSortable ? { color: bbColors.navy900 } : undefined,
-                          }}
-                        >
-                          {h.label}
-                          {arrow}
-                        </Box>
-                      );
-                    })}
-                  </Box>
-                </Box>
-                <Box component="tbody">
-                  {isLoading && (
-                    <Box component="tr">
-                      <Box
-                        component="td"
-                        colSpan={11}
-                        sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}
-                      >
-                        Loading…
-                      </Box>
-                    </Box>
-                  )}
-                  {!isLoading && visibleBookings.length === 0 && (
-                    <Box component="tr">
-                      <Box
-                        component="td"
-                        colSpan={11}
-                        sx={{ padding: '40px 20px', textAlign: 'center', color: bbColors.gray500, fontSize: 13 }}
-                      >
-                        No bookings match the current filters.
-                      </Box>
-                    </Box>
-                  )}
-                  {!isLoading &&
-                    visibleBookings.map(b => {
-                      const effStatus = getEffectiveReservationSysStatus(
-                        b.reservationSysStatus,
-                        b.reservationDateFrom,
-                        b.reservationDateTo
-                      );
-                      const pill = bbStatusPill(statusToPillVariant(effStatus));
-                      const nights = formatNights(b.reservationDateFrom, b.reservationDateTo);
-                      const cleanYacht = b.modelName?.replace(/\s*-\s*\d+\s*cab\.?$/i, '') ?? '—';
-                      const isUnviewed = !viewedSet.has(b.reservationId);
-
-                      return (
-                        <Box
-                          component="tr"
-                          key={`${b.reservationId}`}
-                          onClick={() => openBooking(b)}
-                          sx={{
-                            cursor: 'pointer',
-                            backgroundColor: isUnviewed ? bbColors.amber100 : undefined,
-                            '&:hover': {
-                              backgroundColor: isUnviewed ? '#fceec5' : bbColors.gray75,
-                            },
-                          }}
-                        >
-                          <Box
-                            component="td"
-                            sx={{
-                              ...tdBase,
-                              fontWeight: 700,
-                              fontVariantNumeric: 'tabular-nums',
-                              borderLeft: isUnviewed ? `3px solid ${bbColors.yellow500}` : undefined,
-                            }}
-                          >
-                            <Stack direction="row" alignItems="center" gap={0.75}>
-                              {isUnviewed && (
-                                <Box
-                                  component="span"
-                                  sx={{
-                                    fontSize: 9,
-                                    fontWeight: 800,
-                                    letterSpacing: '0.08em',
-                                    backgroundColor: bbColors.yellow500,
-                                    color: bbColors.yellowText,
-                                    padding: '2px 6px',
-                                    borderRadius: '4px',
-                                    textTransform: 'uppercase',
-                                  }}
-                                >
-                                  New
-                                </Box>
-                              )}
-                              <Box component="span">{b.reservationNumber ?? `#${b.reservationId}`}</Box>
-                            </Stack>
-                          </Box>
-                          <Box
-                            component="td"
-                            sx={{
-                              ...tdBase,
-                              color: bbColors.gray500,
-                              fontWeight: 600,
-                              fontVariantNumeric: 'tabular-nums',
-                            }}
-                          >
-                            {b.reservationUserId != null ? `#${b.reservationUserId}` : '—'}
-                          </Box>
-                          <Box component="td" sx={tdBase}>
-                            <Stack direction="row" alignItems="center" gap={1.25}>
-                              <Box
-                                sx={{
-                                  width: 28,
-                                  height: 28,
-                                  borderRadius: '50%',
-                                  background: `linear-gradient(135deg, ${bbColors.navy700}, ${bbColors.navy900})`,
-                                  color: '#fff',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  fontSize: 10,
-                                  fontWeight: 800,
-                                  flexShrink: 0,
-                                }}
-                              >
-                                {initialsOf(b.endUser || '?')}
-                              </Box>
-                              <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: bbColors.navy900 }}>
-                                {b.endUser || '—'}
-                              </Typography>
-                            </Stack>
-                          </Box>
-                          <Box component="td" sx={tdBase}>
-                            <Typography sx={{ fontSize: 12.5, fontWeight: 600 }}>
-                              {cleanYacht}
-                              {b.yachtName ? (
-                                <Box component="span" sx={{ color: bbColors.gray500, fontWeight: 500 }}>
-                                  {' · '}
-                                  {b.yachtName}
-                                </Box>
-                              ) : null}
-                            </Typography>
-                            <Typography sx={{ fontSize: 11, color: bbColors.gray500 }}>
-                              {b.locationFromName ?? '—'}
-                            </Typography>
-                          </Box>
-                          <Box component="td" sx={{ ...tdBase, color: bbColors.navy700, fontWeight: 600 }}>
-                            {b.agencyName ?? '—'}
-                          </Box>
-                          <Box component="td" sx={{ ...tdBase, fontVariantNumeric: 'tabular-nums' }}>
-                            <Typography sx={{ fontSize: 12.5 }}>
-                              {DateTime.formatShortWithoutDay(dayjs(b.reservationDateFrom))} →{' '}
-                              {DateTime.formatShortWithoutDay(dayjs(b.reservationDateTo))}
-                            </Typography>
-                            <Typography sx={{ fontSize: 11, color: bbColors.gray500 }}>
-                              {nights} night{nights === 1 ? '' : 's'}
-                            </Typography>
-                          </Box>
-                          <Box
-                            component="td"
-                            sx={{
-                              ...tdBase,
-                              textAlign: 'right',
-                              color: bbColors.green600,
-                              fontWeight: 800,
-                              fontVariantNumeric: 'tabular-nums',
-                            }}
-                          >
-                            €{formatPrice(b.reservationTotalPrice)}
-                          </Box>
-                          <Box
-                            component="td"
-                            sx={{
-                              ...tdBase,
-                              textAlign: 'right',
-                              fontWeight: 700,
-                              fontVariantNumeric: 'tabular-nums',
-                              color: bbColors.navy900,
-                            }}
-                          >
-                            {b.reservationAgencyPrice != null ? `€${formatPrice(b.reservationAgencyPrice)}` : '—'}
-                          </Box>
-                          <Box
-                            component="td"
-                            sx={{
-                              ...tdBase,
-                              textAlign: 'right',
-                              color: bbColors.amber700,
-                              fontWeight: 700,
-                              fontVariantNumeric: 'tabular-nums',
-                              fontSize: 11.5,
-                            }}
-                          >
-                            {b.reservationCommission != null ? `€${formatPrice(b.reservationCommission)}` : '—'}
-                          </Box>
-                          <Box component="td" sx={tdBase}>
-                            <Box component="span" sx={pill.style}>
-                              {pill.label}
-                            </Box>
-                          </Box>
-                          <Box component="td" sx={{ ...tdBase, color: bbColors.gray500 }}>
-                            {formatCheckIn(b.reservationDateFrom)}
-                          </Box>
-                        </Box>
-                      );
-                    })}
-                </Box>
+            <Box component="thead">
+              <Box component="tr">
+                {(
+                  [
+                    { label: 'Booking', align: 'left', sortKey: 'reservationNumber' },
+                    { label: 'Client ID', align: 'left' },
+                    { label: 'Client', align: 'left' },
+                    { label: 'Yacht / Base', align: 'left' },
+                    { label: 'Agency', align: 'left' },
+                    { label: 'Dates', align: 'left' },
+                    { label: 'Client price', align: 'right' },
+                    { label: 'Agency price', align: 'right' },
+                    { label: 'Commission', align: 'right' },
+                    { label: 'Status', align: 'left' },
+                    { label: 'Check-in', align: 'left', sortKey: 'reservationDateFrom' },
+                  ] as Array<{ label: string; align: 'left' | 'right'; sortKey?: string }>
+                ).map((h, i) => (
+                  <Th
+                    key={h.label || `col-${i}`}
+                    align={h.align}
+                    active={!!h.sortKey && sortBy === h.sortKey}
+                    direction={sortDirection === 'asc' ? 'asc' : 'desc'}
+                    onSort={h.sortKey ? () => handleSortClick(h.sortKey!) : undefined}
+                  >
+                    {h.label}
+                  </Th>
+                ))}
               </Box>
             </Box>
-          </Box>
+            <Box component="tbody">
+              {isLoading && <SkeletonRows cols={11} />}
+              {!isLoading && visibleBookings.length === 0 && (
+                <TableMessageRow cols={11} title="No bookings match the current filters." illustration="binoculars" />
+              )}
+              {!isLoading &&
+                visibleBookings.map(b => {
+                  const effStatus = getEffectiveReservationSysStatus(
+                    b.reservationSysStatus,
+                    b.reservationDateFrom,
+                    b.reservationDateTo
+                  );
+                  const pill = bbStatusPill(statusToPillVariant(effStatus));
+                  const nights = formatNights(b.reservationDateFrom, b.reservationDateTo);
+                  const cleanYacht = b.modelName?.replace(/\s*-\s*\d+\s*cab\.?$/i, '') ?? '—';
+                  const isUnviewed = !viewedSet.has(b.reservationId);
 
-          {/* Pagination */}
-          {totalCount > PAGE_SIZE && (
-            <Stack direction="row" alignItems="center" justifyContent="center" gap={2} sx={{ mt: 2 }}>
-              <Button
-                variant="outlined"
-                size="small"
-                disabled={page <= PAGE_NUMBER}
-                onClick={() => handlePageChange(page - 1)}
-                sx={{ textTransform: 'none', fontSize: 12, borderColor: bbColors.gray300, color: bbColors.navy900 }}
-              >
-                ← Prev
-              </Button>
-              <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>
-                Page <strong>{page}</strong> of <strong>{totalPages}</strong>
-              </Typography>
-              <Button
-                variant="outlined"
-                size="small"
-                disabled={page >= totalPages}
-                onClick={() => handlePageChange(page + 1)}
-                sx={{ textTransform: 'none', fontSize: 12, borderColor: bbColors.gray300, color: bbColors.navy900 }}
-              >
-                Next →
-              </Button>
-            </Stack>
-          )}
-        </Box>
+                  return (
+                    <Box
+                      component="tr"
+                      key={`${b.reservationId}`}
+                      onClick={() => openBooking(b)}
+                      sx={rowSx({ unread: isUnviewed })}
+                    >
+                      <Box component="td" sx={{ ...tdSx, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+                        <Stack direction="row" alignItems="center" gap={0.75}>
+                          <Box component="span">{b.reservationNumber ?? `#${b.reservationId}`}</Box>
+                          {isUnviewed && <NewTag>New</NewTag>}
+                        </Stack>
+                      </Box>
+                      <Box component="td" sx={{ ...tdSx, color: bbColors.gray500, fontVariantNumeric: 'tabular-nums' }}>
+                        {b.reservationUserId != null ? `#${b.reservationUserId}` : '—'}
+                      </Box>
+                      <Box component="td" sx={tdSx}>
+                        <Stack direction="row" alignItems="center" gap={1}>
+                          <InitialsAvatar text={initialsOf(b.endUser || '?')} />
+                          <Box component="span">{b.endUser || '—'}</Box>
+                        </Stack>
+                      </Box>
+                      <Box component="td" sx={tdSx}>
+                        {cleanYacht}
+                        {b.yachtName ? ` · ${b.yachtName}` : null}
+                        <Box component="span" sx={cellSubSx}>
+                          {b.locationFromName ?? '—'}
+                        </Box>
+                      </Box>
+                      <Box component="td" sx={{ ...tdSx, color: bbColors.navy700 }}>
+                        {b.agencyName ?? '—'}
+                      </Box>
+                      <Box component="td" sx={{ ...tdSx, fontVariantNumeric: 'tabular-nums' }}>
+                        {DateTime.formatShortWithoutDay(dayjs(b.reservationDateFrom))} →{' '}
+                        {DateTime.formatShortWithoutDay(dayjs(b.reservationDateTo))}
+                        <Box component="span" sx={cellSubSx}>
+                          {nights} night{nights === 1 ? '' : 's'}
+                        </Box>
+                      </Box>
+                      <Box component="td" sx={{ ...tdSx, ...numSx, color: bbColors.green700, fontWeight: 700 }}>
+                        €{formatPrice(b.reservationTotalPrice)}
+                      </Box>
+                      <Box component="td" sx={{ ...tdSx, ...numSx }}>
+                        {b.reservationAgencyPrice != null ? `€${formatPrice(b.reservationAgencyPrice)}` : '—'}
+                      </Box>
+                      <Box component="td" sx={{ ...tdSx, ...numSx, color: bbColors.amber800, fontWeight: 600 }}>
+                        {b.reservationCommission != null ? `€${formatPrice(b.reservationCommission)}` : '—'}
+                      </Box>
+                      <Box component="td" sx={tdSx}>
+                        <Box component="span" sx={pill.style}>
+                          {pill.label}
+                        </Box>
+                      </Box>
+                      <Box component="td" sx={{ ...tdSx, color: bbColors.gray600 }}>
+                        {formatCheckIn(b.reservationDateFrom)}
+                      </Box>
+                    </Box>
+                  );
+                })}
+            </Box>
+          </TableCard>
+        </DeskPage>
       </Layout>
     </>
   );
 };
 
-const tdBase = {
-  padding: '12px 14px',
-  fontSize: 12.5,
-  borderBottom: `1px solid ${bbColors.gray100}`,
-  color: '#2c3e56',
-  whiteSpace: 'nowrap' as const,
-};
+const numSx = { textAlign: 'right' as const, fontVariantNumeric: 'tabular-nums' };
 
 export default Bookings;

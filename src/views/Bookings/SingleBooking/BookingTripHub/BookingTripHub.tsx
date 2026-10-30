@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Box, Button, Stack, Typography } from '@mui/material';
 import QRCode from 'qrcode';
 
-import { bbColors } from '@/styles/bb';
+import { bbColors, bbOverlineSx } from '@/styles/bb';
 
 interface BookingTripHubProps {
   tripToken: string | null | undefined;
@@ -47,20 +47,13 @@ const BookingTripHub = ({ tripToken }: BookingTripHubProps) => {
   };
 
   return (
-    <Stack spacing={1} sx={{ pt: 2.5 }}>
-      <Typography
-        variant="body2"
-        fontWeight={700}
-        color={bbColors.gray500}
-        sx={{ textTransform: 'uppercase', letterSpacing: 0.6, fontSize: 11 }}
-      >
-        {t('booking.trip-hub', 'Trip app (PWA)')}
-      </Typography>
+    <Stack spacing={1}>
+      <Typography sx={bbOverlineSx}>{t('booking.trip-hub', 'Trip app (PWA)')}</Typography>
 
       <Box
         sx={{
           border: `1px solid ${bbColors.gray200}`,
-          borderRadius: '8px',
+          borderRadius: '10px',
           background: '#fff',
           p: 1.5,
           display: 'flex',
@@ -69,25 +62,14 @@ const BookingTripHub = ({ tripToken }: BookingTripHubProps) => {
         }}
       >
         {qrDataUrl && (
-          <img
-            src={qrDataUrl}
-            alt="Trip hub QR"
-            width={96}
-            height={96}
-            style={{ borderRadius: 6, flexShrink: 0 }}
-          />
+          <img src={qrDataUrl} alt="Trip hub QR" width={96} height={96} style={{ borderRadius: 6, flexShrink: 0 }} />
         )}
         <Stack spacing={0.75} sx={{ minWidth: 0, flex: 1 }}>
           <Typography sx={{ fontSize: 11, color: bbColors.gray500, wordBreak: 'break-all', lineHeight: 1.4 }}>
             {tripUrl}
           </Typography>
           <Stack direction="row" spacing={1}>
-            <Button
-              size="small"
-              variant="contained"
-              onClick={handleCopy}
-              sx={{ textTransform: 'none', fontSize: 12, borderRadius: '6px' }}
-            >
+            <Button size="small" variant="outlined" onClick={handleCopy}>
               {copied ? t('booking.copied', 'Copied ✓') : t('booking.copy-link', 'Copy link')}
             </Button>
             <Button
@@ -97,7 +79,6 @@ const BookingTripHub = ({ tripToken }: BookingTripHubProps) => {
               href={tripUrl}
               target="_blank"
               rel="noopener noreferrer"
-              sx={{ textTransform: 'none', fontSize: 12, borderRadius: '6px' }}
             >
               {t('booking.open', 'Open ↗')}
             </Button>
@@ -105,7 +86,7 @@ const BookingTripHub = ({ tripToken }: BookingTripHubProps) => {
           <Typography sx={{ fontSize: 10.5, color: bbColors.gray500 }}>
             {t(
               'booking.trip-hub-hint',
-              'Customer scans the QR on a phone → adds the trip to the home screen. Crew-shareable; no prices shown.',
+              'Customer scans the QR on a phone → adds the trip to the home screen. Crew-shareable; no prices shown.'
             )}
           </Typography>
         </Stack>

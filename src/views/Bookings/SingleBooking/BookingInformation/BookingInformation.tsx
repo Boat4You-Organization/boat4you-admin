@@ -2,27 +2,27 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box, Button, Divider, Grid, Link as MuiLink, Stack, Typography } from '@mui/material';
+import { Box, Button, Link as MuiLink, Stack, Typography } from '@mui/material';
 import dayjs from 'dayjs';
 
 import Avatar from '@/components/Avatar';
+import { CardHead, DeskCard } from '@/components/Desk';
 import FlagIcon from '@/components/FlagIcon';
-import { api } from '@/config/axios.config';
 import StatusChip from '@/components/StatusChip';
 import Email from '@/components/SvgIcons/Contact/Email';
 import ExternalLink from '@/components/SvgIcons/ExternalLink';
 import PhoneOutlined from '@/components/SvgIcons/PhoneOutlined';
+import { api } from '@/config/axios.config';
 import {
-  RESERVATION_SYS_STATUS_COLOR_MAP,
   RESERVATION_SYS_STATUS_LABEL_MAP,
   ReservationModel,
   ReservationSysStatus,
   getEffectiveReservationSysStatus,
 } from '@/models/booking.model';
-import { bbColors } from '@/styles/bb';
+import { StatusTone, bbColors, bbOverlineSx, bbPillStyle } from '@/styles/bb';
 import colors from '@/styles/themes/colors';
-import { bankFeeShareForPhase } from '@/utils/static/bankTransferFee';
 import DateTime from '@/utils/static/DateTime';
+import { bankFeeShareForPhase } from '@/utils/static/bankTransferFee';
 import { formatPrice } from '@/utils/static/formatNumber';
 import { generateGoogleMapsLink } from '@/utils/static/googleMapsUtils';
 import { sortByNumericProp } from '@/utils/static/sortUtils';
@@ -34,6 +34,29 @@ import styles from './BookingInformation.module.scss';
 interface BookingInformationProps {
   selectedBooking: ReservationModel;
 }
+
+// Booking status tones (v2.2): confirmed = success, option = info, in charter = progress,
+// ended = neutral, cancelled = danger, waiting/unknown = warning.
+const STATUS_TONE: Record<string, StatusTone> = {
+  [ReservationSysStatus.RESERVATION]: 'success',
+  [ReservationSysStatus.OPTION]: 'info',
+  [ReservationSysStatus.OPTION_WAITING]: 'warning',
+  [ReservationSysStatus.CANCELLED]: 'danger',
+  [ReservationSysStatus.UNKNOWN]: 'warning',
+  IN_CHARTER: 'progress',
+  ENDED: 'neutral',
+};
+
+const prSx = {
+  display: 'flex',
+  justifyContent: 'space-between',
+  gap: 1.5,
+  py: '6px',
+  fontSize: 13,
+  '& > span:last-of-type': { fontVariantNumeric: 'tabular-nums', textAlign: 'right' },
+};
+
+const groupHeadSx = { ...bbOverlineSx, mt: 1.25, mb: '2px' };
 
 const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
   const { t } = useTranslation();
@@ -110,7 +133,7 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
   const obligatoryKeys = obligatoryExtrasKeys ?? [];
   const selectedKeys = new Set(sortedServices.map(s => s.key).filter(Boolean));
   const catalogObligatory = (services ?? []).filter(
-    s => (s.obligatory || obligatoryKeys.includes(s.key)) && !selectedKeys.has(s.key),
+    s => (s.obligatory || obligatoryKeys.includes(s.key)) && !selectedKeys.has(s.key)
   );
 
   // Split obligatory extras by where they're settled so the admin sees the
@@ -121,8 +144,12 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
   // meni u admin da vidim sta moraju jos platit u marini".
   type DisplayRow = { id: number | string; name: string; labelCode?: string; priceEur: number };
 
-  const obligatoryAtMarinaSelected: DisplayRow[] = sortedServices.filter(service => service.obligatory && service.payableInBase);
-  const obligatoryIncludedSelected: DisplayRow[] = sortedServices.filter(service => service.obligatory && !service.payableInBase);
+  const obligatoryAtMarinaSelected: DisplayRow[] = sortedServices.filter(
+    service => service.obligatory && service.payableInBase
+  );
+  const obligatoryIncludedSelected: DisplayRow[] = sortedServices.filter(
+    service => service.obligatory && !service.payableInBase
+  );
   const obligatoryAtMarinaCatalog: DisplayRow[] = catalogObligatory
     .filter(s => s.payableInBase)
     .map(s => ({ id: s.id, name: s.name, priceEur: s.priceEur }));
@@ -150,96 +177,84 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
   const hasMarinaItems = marinaTotal > 0;
   const depositCurrencySymbol = depositCurrency === 'EUR' ? '€' : (depositCurrency ?? '€');
 
+  const effStatus = getEffectiveReservationSysStatus(reservationSysStatus, reservationDateFrom, reservationDateTo);
+
   return (
-    <Stack className={styles.container}>
-      {selectedBooking.cancellationRequestAt && (() => {
-        // Cancellation banner has 3 mutually-exclusive states:
-        //   1. isRejected   — admin rejected the request (agency refused).
-        //                     Booking stays active. Banner is gray/red, shows
-        //                     both customer's reason and admin's rejection reason.
-        //   2. isFinalisedByAgent — admin confirmed the cancellation. Status
-        //                     flipped to CANCELLED, "[AGENT]" / "[ADMIN]" prefix
-        //                     stamped on the cancellation reason. Banner is blue.
-        //   3. isPending   — request received, not yet decided. Banner is amber.
-        // Stripping the agent prefix from the displayed reason so the customer's
-        // own words (or the agent's note minus the marker) read cleanly.
-        const raw = selectedBooking.cancellationRequest ?? '';
-        const agentPrefixes = ['[AGENT]', '[ADMIN]'];
-        const matchedPrefix = agentPrefixes.find(p => raw.startsWith(p));
-        const cleanedReason = matchedPrefix ? raw.slice(matchedPrefix.length).trim() : raw;
-        const isRejected = !!selectedBooking.cancellationRejectedAt;
-        const isFinalisedByAgent =
-          !isRejected &&
-          !!matchedPrefix &&
-          selectedBooking.reservationSysStatus === ReservationSysStatus.CANCELLED;
-        const isPending =
-          !isRejected &&
-          !isFinalisedByAgent &&
-          selectedBooking.reservationSysStatus !== ReservationSysStatus.CANCELLED;
+    <Stack className={styles.container} gap={1.5}>
+      <DeskCard>
+        {selectedBooking.cancellationRequestAt &&
+          (() => {
+            // Cancellation banner has 3 mutually-exclusive states:
+            //   1. isRejected   — admin rejected the request (agency refused).
+            //                     Booking stays active. Banner is gray/red, shows
+            //                     both customer's reason and admin's rejection reason.
+            //   2. isFinalisedByAgent — admin confirmed the cancellation. Status
+            //                     flipped to CANCELLED, "[AGENT]" / "[ADMIN]" prefix
+            //                     stamped on the cancellation reason. Banner is blue.
+            //   3. isPending   — request received, not yet decided. Banner is amber.
+            // Stripping the agent prefix from the displayed reason so the customer's
+            // own words (or the agent's note minus the marker) read cleanly.
+            const raw = selectedBooking.cancellationRequest ?? '';
+            const agentPrefixes = ['[AGENT]', '[ADMIN]'];
+            const matchedPrefix = agentPrefixes.find(p => raw.startsWith(p));
+            const cleanedReason = matchedPrefix ? raw.slice(matchedPrefix.length).trim() : raw;
+            const isRejected = !!selectedBooking.cancellationRejectedAt;
+            const isFinalisedByAgent =
+              !isRejected && !!matchedPrefix && selectedBooking.reservationSysStatus === ReservationSysStatus.CANCELLED;
+            const isPending =
+              !isRejected &&
+              !isFinalisedByAgent &&
+              selectedBooking.reservationSysStatus !== ReservationSysStatus.CANCELLED;
 
-        if (!isPending && !isFinalisedByAgent && !isRejected) return null;
+            if (!isPending && !isFinalisedByAgent && !isRejected) return null;
 
-        const bannerBg = isRejected
-          ? bbColors.gray100
-          : isFinalisedByAgent
-          ? colors.blue50
-          : colors.mandalay50;
-        const bannerHeading = isRejected
-          ? colors.red500
-          : isFinalisedByAgent
-          ? colors.blue500
-          : colors.mandalay900;
-        const bannerBody = isRejected
-          ? colors.black700
-          : isFinalisedByAgent
-          ? colors.blue500
-          : colors.mandalay800;
+            const bannerBg = isRejected ? bbColors.gray100 : isFinalisedByAgent ? colors.blue50 : colors.mandalay50;
+            const bannerHeading = isRejected ? colors.red500 : isFinalisedByAgent ? colors.blue500 : colors.mandalay900;
+            const bannerBody = isRejected ? colors.black700 : isFinalisedByAgent ? colors.blue500 : colors.mandalay800;
 
-        return (
-          <Stack
-            gap={2}
-            sx={{
-              backgroundColor: bannerBg,
-              borderRadius: 1.5,
-              padding: 2,
-              marginBottom: 3,
-              borderLeft: isRejected ? `4px solid ${colors.red500}` : undefined,
-            }}
-          >
-            <Stack gap={1}>
-              <Typography variant="h4" component="p" fontWeight={700} color={bannerHeading}>
-                {isRejected
-                  ? t('booking.cancellation-rejected', 'Cancellation rejected')
-                  : isFinalisedByAgent
-                  ? t('booking.cancelled-by-agent')
-                  : t('booking.cancellation-requested')}
-              </Typography>
-              {cleanedReason && (
-                <Typography variant="body1" color={bannerBody}>
-                  {t('booking.cancellation-reason')}: {cleanedReason}
+            return (
+              <Stack
+                gap={2}
+                sx={{
+                  backgroundColor: bannerBg,
+                  borderRadius: '12px',
+                  padding: '12px 14px',
+                  m: '16px 16px 0',
+                  lineHeight: 1.5,
+                  borderLeft: isRejected ? `4px solid ${colors.red500}` : undefined,
+                }}
+              >
+                <Stack gap={1}>
+                  <Typography component="p" sx={{ fontSize: 14, fontWeight: 700, color: bannerHeading }}>
+                    {isRejected
+                      ? t('booking.cancellation-rejected', 'Cancellation rejected')
+                      : isFinalisedByAgent
+                        ? t('booking.cancelled-by-agent')
+                        : t('booking.cancellation-requested')}
+                  </Typography>
+                  {cleanedReason && (
+                    <Typography variant="body1" color={bannerBody}>
+                      {t('booking.cancellation-reason')}: {cleanedReason}
+                    </Typography>
+                  )}
+                  {isRejected && selectedBooking.cancellationRejectedReason && (
+                    <Typography variant="body1" color={bannerBody}>
+                      <strong>{t('booking.rejection-reason', "Why we couldn't cancel")}:</strong>{' '}
+                      {selectedBooking.cancellationRejectedReason}
+                    </Typography>
+                  )}
+                </Stack>
+                <Typography variant="body2" color={bannerBody}>
+                  {isRejected && selectedBooking.cancellationRejectedAt
+                    ? `${t('booking.rejected-on', 'Rejected on')} ${DateTime.formatHR(
+                        dayjs(selectedBooking.cancellationRejectedAt)
+                      )}`
+                    : DateTime.formatHR(dayjs(selectedBooking.cancellationRequestAt))}
                 </Typography>
-              )}
-              {isRejected && selectedBooking.cancellationRejectedReason && (
-                <Typography variant="body1" color={bannerBody}>
-                  <strong>
-                    {t('booking.rejection-reason', 'Why we couldn\'t cancel')}:
-                  </strong>{' '}
-                  {selectedBooking.cancellationRejectedReason}
-                </Typography>
-              )}
-            </Stack>
-            <Typography variant="body2" color={bannerBody}>
-              {isRejected && selectedBooking.cancellationRejectedAt
-                ? `${t('booking.rejected-on', 'Rejected on')} ${DateTime.formatHR(
-                    dayjs(selectedBooking.cancellationRejectedAt),
-                  )}`
-                : DateTime.formatHR(dayjs(selectedBooking.cancellationRequestAt))}
-            </Typography>
-          </Stack>
-        );
-      })()}
-      <Stack direction="row" gap={2} justifyContent="space-between">
-        <Stack direction="row" spacing={2} alignItems="flex-start">
+              </Stack>
+            );
+          })()}
+        <Stack direction="row" flexWrap="wrap" gap={1.75} sx={{ p: 2, borderBottom: `1px solid ${bbColors.gray100}` }}>
           <Box className={styles.boatImage}>
             <img
               loading="lazy"
@@ -249,295 +264,311 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
               className={styles.image}
             />
           </Box>
-          <Stack maxWidth={280}>
-            <Typography component="p" variant="h3" fontWeight={700}>
+          <Box sx={{ flex: 1, minWidth: 220 }}>
+            <Typography component="p" sx={{ fontSize: 17, fontWeight: 800, lineHeight: 1.3 }}>
               {modelName} | {yachtName}
             </Typography>
-            <Stack direction="row" alignItems="center" spacing={1}>
+            <Stack direction="row" alignItems="center" spacing={1} sx={{ mt: '2px' }}>
               <FlagIcon countryCode={locationFromCountry} />
-              <Typography variant="body1">{locationFromName}</Typography>
+              <Typography sx={{ fontSize: 13, color: bbColors.gray500 }}>{locationFromName}</Typography>
             </Stack>
-          </Stack>
-          {(() => {
-            const effStatus = getEffectiveReservationSysStatus(
-              reservationSysStatus,
-              reservationDateFrom,
-              reservationDateTo
-            );
+            <Stack direction="row" gap={0.75} sx={{ mt: 1 }}>
+              <Box component="span" sx={bbPillStyle(STATUS_TONE[effStatus] ?? 'neutral')}>
+                {t(RESERVATION_SYS_STATUS_LABEL_MAP[effStatus])}
+              </Box>
+            </Stack>
+          </Box>
+          <Stack direction="column" alignItems="flex-end" gap={1} display={{ xs: 'none', md: 'flex' }}>
+            {reservationNumber && (
+              <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>#{reservationNumber}</Typography>
+            )}
 
-            
-return (
-              <StatusChip
-                label={t(RESERVATION_SYS_STATUS_LABEL_MAP[effStatus])}
-                color={RESERVATION_SYS_STATUS_COLOR_MAP[effStatus]}
-              />
-            );
-          })()}
-        </Stack>
-        <Stack
-          direction="column"
-          justifyContent="space-between"
-          alignItems="flex-end"
-          display={{ xs: 'none', md: 'flex' }}
-          flex={1}
-        >
-          {reservationNumber && <Typography variant="body1">#{reservationNumber}</Typography>}
-
-          {/* Customer-site link opens in a new tab — using plain anchor
+            {/* Customer-site link opens in a new tab — using plain anchor
               instead of react-router's Link so the absolute URL isn't
               rewritten as a SPA route (which produced the 404 "view boat
               doesn't work" report). VITE_CUSTOMER_WEB_URL is the env the
               rest of the admin already uses for this kind of jump. */}
-          <Button
-            component="a"
-            href={`${import.meta.env.VITE_CUSTOMER_WEB_URL || 'http://localhost:3000'}/boat/${yachtSlug}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            size="medium"
-            color="secondary"
-          >
-            {t('booking.view-boat')}
-          </Button>
+            <Button
+              component="a"
+              href={`${import.meta.env.VITE_CUSTOMER_WEB_URL || 'http://localhost:3000'}/boat/${yachtSlug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              size="small"
+              variant="outlined"
+            >
+              {t('booking.view-boat')}
+            </Button>
+          </Stack>
         </Stack>
-      </Stack>
-      <Divider sx={{ borderColor: colors.black200, paddingBlock: 1 }} />
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 6 }}>
-          <Typography component="p" variant="h3" fontWeight={700} pb={3}>
-            {t('booking.booking-info')}
-          </Typography>
-          <Stack direction="column" spacing={3}>
-            <BookingInfoItem
-              label={t('booking.check-in')}
-              value={`${DateTime.formatLong(dayjs(reservationDateFrom))}${offerCheckin ? ` ${offerCheckin}` : ''}`}
-            />
-            <BookingInfoItem
-              label={t('booking.check-out')}
-              value={`${DateTime.formatLong(dayjs(reservationDateTo))}${offerCheckout ? ` ${offerCheckout}` : ''}`}
-            />
-            <BookingInfoItem
-              label={t('booking.pickup-location')}
-              value={
-                <a href={googleMapsLink} target="_blank" rel="noopener noreferrer" className={styles.link}>
-                  <Typography variant="body1">{locationFromName}</Typography>
-                  <ExternalLink variant="secondary" />
-                </a>
-              }
-            />
-            <BookingInfoItem label={t('booking.charter-company')} value={agencyName} />
-          </Stack>
-        </Grid>
-        <Grid size={{ xs: 12, md: 6 }} className={styles.generalInfoWrapper}>
-          <Typography component="p" variant="h3" fontWeight={700} pb={3}>
-            {t('booking.guest-info')}
-          </Typography>
-          <Stack direction="column" spacing={3}>
-            <Stack direction="row" alignItems="center" spacing={1}>
-              <Avatar name={endUser} />
-              <Typography variant="body1">{endUser}</Typography>
-            </Stack>
-            <BookingInfoItem
-              icon={Email}
-              value={
-                <MuiLink
-                  component="button"
-                  type="button"
-                  onClick={() => setEmailModalOpen(true)}
-                  sx={{ font: 'inherit', textAlign: 'left' }}
-                  title={t('booking.email-client-title', 'Email the client')}
-                >
-                  <Typography variant="body1" component="span">
-                    {endUserEmail}
-                  </Typography>
-                </MuiLink>
-              }
-            />
-            <BookingInfoItem icon={PhoneOutlined} value={endUserPhone} />
-            {specialRequest && (
-              <Box sx={{ bgcolor: bbColors.amber100, borderRadius: 1, p: 1.5 }}>
-                <BookingInfoItem label={t('booking.special-request')} value={specialRequest} />
-              </Box>
-            )}
-          </Stack>
-        </Grid>
-      </Grid>
-      <Divider sx={{ borderColor: colors.black200, paddingBlock: 1 }} />
-      <Stack direction="column" spacing={2}>
-        <Typography component="p" variant="h3" fontWeight={700}>
-          {t('booking.payment-phases')}
-        </Typography>
-        {reservationPaymentPhases.map(({ id, paidOn, deadline, amount }, phaseIdx) => {
-          // Show the wire amount the customer is actually asked for: phase
-          // amount + this phase's share of the fixed bank fee (same split as
-          // the wire emails / payment page).
-          const feeShare = bankFeeShareForPhase(bankFeeEur, reservationPaymentPhases.length, phaseIdx);
-
-          return (
-            <Stack key={id} direction="row" justifyContent="space-between">
-              <Stack>
-                <Typography component="p" variant="h4" fontWeight={700}>
-                  {`${formatPrice((amount || 0) + feeShare)} €`}
-                </Typography>
-                <Typography variant="body2" color={colors.black500}>
-                  {DateTime.formatHR(dayjs(deadline))}
-                  {feeShare > 0 && ` · ${t('booking.bank-fee-note', { fee: feeShare })}`}
-                </Typography>
-              </Stack>
-              <StatusChip
-                label={paidOn ? t('booking.paid') : t('booking.not-paid')}
-                color={paidOn ? 'success' : 'error'}
-                sx={{
-                  alignSelf: 'center',
-                }}
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: 2.5,
+            p: 2,
+          }}
+        >
+          <Stack gap={1.25}>
+            <Typography component="h3" sx={bbOverlineSx}>
+              {t('booking.booking-info')}
+            </Typography>
+            <Stack gap={1}>
+              <BookingInfoItem
+                label={t('booking.check-in')}
+                value={`${DateTime.formatLong(dayjs(reservationDateFrom))}${offerCheckin ? ` ${offerCheckin}` : ''}`}
               />
+              <BookingInfoItem
+                label={t('booking.check-out')}
+                value={`${DateTime.formatLong(dayjs(reservationDateTo))}${offerCheckout ? ` ${offerCheckout}` : ''}`}
+              />
+              <BookingInfoItem
+                label={t('booking.pickup-location')}
+                value={
+                  <a href={googleMapsLink} target="_blank" rel="noopener noreferrer" className={styles.link}>
+                    <Typography component="span" sx={{ fontSize: 13, fontWeight: 500 }}>
+                      {locationFromName}
+                    </Typography>
+                    <ExternalLink variant="secondary" />
+                  </a>
+                }
+              />
+              <BookingInfoItem label={t('booking.charter-company')} value={agencyName} />
             </Stack>
-          );
-        })}
-      </Stack>
-      <Divider sx={{ borderColor: colors.black200, paddingBlock: 1 }} />
-      <Stack direction="column" spacing={2}>
-        <Typography component="p" variant="h3" fontWeight={700}>
-          {t('booking.price-information')}
-        </Typography>
-        <Stack direction="row" justifyContent="space-between">
-          <Typography variant="body1">{t('booking.charter-price')}</Typography>
-          <Typography variant="body1">{`${formatPrice(charterListPrice)} €`}</Typography>
-        </Stack>
-        {hasCharterDiscount && (
-          <Stack direction="row" justifyContent="space-between">
-            <Typography variant="body1">{t('booking.discount')}</Typography>
-            <Typography variant="body1" sx={{ color: '#15803d' }}>{`- ${formatPrice(charterDiscount)} €`}</Typography>
           </Stack>
-        )}
-        <Stack direction="row" justifyContent="space-between">
-          <Typography variant="body1" fontWeight={700}>{t('booking.client-price')}</Typography>
-          <Typography variant="body1" fontWeight={700}>{`${formatPrice(guestPrice)} €`}</Typography>
-        </Stack>
-        {(obligatoryAtMarina.length > 0 || hasDeposit || hasInsurance) && (
-          <>
-            <Typography variant="body1" fontWeight={700}>
-              {t('booking.obligatory-paid-at-marina')}
+          <Stack gap={1.25} className={styles.generalInfoWrapper}>
+            <Typography component="h3" sx={bbOverlineSx}>
+              {t('booking.guest-info')}
             </Typography>
-            {obligatoryAtMarina.map(({ id, name, labelCode, priceEur }) => (
-              <Stack key={id} direction="row" justifyContent="space-between">
-                <Typography variant="body1">{labelCode ? t(`extras.${labelCode}`) : name}</Typography>
-                <Typography variant="body1">{`${formatPrice(priceEur || 0)} €`}</Typography>
+            <Stack gap={1}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <Avatar name={endUser} />
+                <Typography sx={{ fontSize: 13, fontWeight: 500 }}>{endUser}</Typography>
               </Stack>
-            ))}
-            {hasDeposit && (
-              <Stack key="security-deposit" direction="row" justifyContent="space-between">
-                <Stack>
-                  <Typography variant="body1">{t('booking.refundable-security-deposit')}</Typography>
-                  <Typography variant="body2" color={colors.black500}>
-                    {t('booking.refundable-security-deposit-hint')}
+              <BookingInfoItem
+                icon={Email}
+                value={
+                  <MuiLink
+                    component="button"
+                    type="button"
+                    onClick={() => setEmailModalOpen(true)}
+                    sx={{ font: 'inherit', textAlign: 'left', justifySelf: 'start' }}
+                    title={t('booking.email-client-title', 'Email the client')}
+                  >
+                    <Typography component="span" sx={{ fontSize: 13, fontWeight: 600 }}>
+                      {endUserEmail}
+                    </Typography>
+                  </MuiLink>
+                }
+              />
+              <BookingInfoItem icon={PhoneOutlined} value={endUserPhone} />
+              {specialRequest && (
+                <Box sx={{ bgcolor: bbColors.amber100, borderRadius: '10px', p: '10px 12px' }}>
+                  <BookingInfoItem label={t('booking.special-request')} value={specialRequest} stacked />
+                </Box>
+              )}
+            </Stack>
+          </Stack>
+        </Box>
+      </DeskCard>
+
+      <DeskCard>
+        <CardHead title={t('booking.payment-phases')} />
+        <Box sx={{ p: '4px 16px 8px' }}>
+          {reservationPaymentPhases.map(({ id, paidOn, deadline, amount }, phaseIdx) => {
+            // Show the wire amount the customer is actually asked for: phase
+            // amount + this phase's share of the fixed bank fee (same split as
+            // the wire emails / payment page).
+            const feeShare = bankFeeShareForPhase(bankFeeEur, reservationPaymentPhases.length, phaseIdx);
+
+            return (
+              <Stack
+                key={id}
+                direction="row"
+                alignItems="center"
+                gap={1.5}
+                sx={{
+                  py: 1.25,
+                  '&:not(:last-of-type)': { borderBottom: `1px solid ${bbColors.gray100}` },
+                }}
+              >
+                <Box
+                  sx={{
+                    flex: 'none',
+                    width: 24,
+                    height: 24,
+                    borderRadius: '50%',
+                    backgroundColor: bbColors.gray100,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {phaseIdx + 1}
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 0 }}>
+                  <Typography component="p" sx={{ fontSize: 14, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>
+                    {`${formatPrice((amount || 0) + feeShare)} €`}
                   </Typography>
-                </Stack>
-                <Typography variant="body1">
-                  {`${formatPrice(securityDeposit as number)} ${depositCurrencySymbol}`}
-                </Typography>
+                  <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>
+                    {DateTime.formatHR(dayjs(deadline))}
+                    {feeShare > 0 && ` · ${t('booking.bank-fee-note', { fee: feeShare })}`}
+                  </Typography>
+                </Box>
+                <StatusChip
+                  label={paidOn ? t('booking.paid') : t('booking.not-paid')}
+                  color={paidOn ? 'success' : 'error'}
+                />
               </Stack>
-            )}
-            {hasInsurance && (
-              <Stack key="deposit-insurance" direction="row" justifyContent="space-between">
-                <Typography variant="body1">{t('booking.deposit-insurance')}</Typography>
-                <Typography variant="body1">
-                  {`${formatPrice(insuredSecurityDeposit as number)} ${depositCurrencySymbol}`}
-                </Typography>
-              </Stack>
-            )}
-          </>
-        )}
-        {obligatoryIncluded.length > 0 && (
-          <>
-            <Typography variant="body1" fontWeight={700}>
-              {t('booking.obligatory-included')}
-            </Typography>
-            {obligatoryIncluded.map(({ id, name, labelCode, priceEur }) => (
-              <Stack key={id} direction="row" justifyContent="space-between">
-                <Typography variant="body1">{labelCode ? t(`extras.${labelCode}`) : name}</Typography>
-                <Typography variant="body1">{`${formatPrice(priceEur || 0)} €`}</Typography>
-              </Stack>
-            ))}
-          </>
-        )}
-        {additionalPaidNow.length > 0 && (
-          <>
-            <Typography variant="body1" fontWeight={700}>
-              {t('booking.additional-paid-now')}
-            </Typography>
-            {additionalPaidNow.map(({ id, name, labelCode, priceEur }) => (
-              <Stack key={id} direction="row" justifyContent="space-between">
-                <Typography variant="body1">{labelCode ? t(`extras.${labelCode}`) : name}</Typography>
-                <Typography variant="body1">{`${formatPrice(priceEur || 0)} €`}</Typography>
-              </Stack>
-            ))}
-          </>
-        )}
-        {additionalAtMarina.length > 0 && (
-          <>
-            <Typography variant="body1" fontWeight={700}>
-              {t('booking.additional-paid-at-marina')}
-            </Typography>
-            {additionalAtMarina.map(({ id, name, labelCode, priceEur }) => (
-              <Stack key={id} direction="row" justifyContent="space-between">
-                <Typography variant="body1">{labelCode ? t(`extras.${labelCode}`) : name}</Typography>
-                <Typography variant="body1">{`${formatPrice(priceEur || 0)} €`}</Typography>
-              </Stack>
-            ))}
-          </>
-        )}
-        {/* Aggregate marina cash — visible whenever any obligatory or
-            additional row is paid at marina, so the admin sees the single
-            sum the customer brings to the dock without having to add up
-            obligatory + additional groups by hand. */}
-        {hasMarinaItems && (
+            );
+          })}
+        </Box>
+      </DeskCard>
+
+      <DeskCard>
+        <CardHead title={t('booking.price-information')} />
+        <Box sx={{ p: '8px 16px 14px', '& .pr': prSx }}>
+          <Stack direction="row" justifyContent="space-between" className="pr">
+            <span>{t('booking.charter-price')}</span>
+            <span>{`${formatPrice(charterListPrice)} €`}</span>
+          </Stack>
+          {hasCharterDiscount && (
+            <Stack direction="row" justifyContent="space-between" className="pr">
+              <span>{t('booking.discount')}</span>
+              <Box component="span" sx={{ color: bbColors.green700 }}>{`- ${formatPrice(charterDiscount)} €`}</Box>
+            </Stack>
+          )}
           <Stack
             direction="row"
             justifyContent="space-between"
-            sx={{
-              mt: 0.5,
-              pt: 1,
-              borderTop: `1px dashed ${colors.black200}`,
-            }}
+            className="pr"
+            sx={{ fontWeight: 700, borderTop: `1px solid ${bbColors.gray100}` }}
           >
-            <Typography variant="body1" fontWeight={700}>
-              {t('booking.marina-total')}
-            </Typography>
-            <Typography variant="body1" fontWeight={700} sx={{ color: bbColors.amber700 }}>
-              {`${formatPrice(marinaTotal)} €`}
-            </Typography>
+            <span>{t('booking.client-price')}</span>
+            <span>{`${formatPrice(guestPrice)} €`}</span>
           </Stack>
-        )}
-        <Stack direction="row" justifyContent="space-between" pt={1}>
-          <Stack>
-            <Typography component="p" variant="h3" fontWeight={700}>
-              {t('booking.total')}
-            </Typography>
-            {reservationPaymentPhases.length > 0 && bankFeeEur > 0 && (
-              <Typography variant="body2" color={colors.black500}>
-                {t('booking.bank-fee-note', { fee: bankFeeEur })}
+          {(obligatoryAtMarina.length > 0 || hasDeposit || hasInsurance) && (
+            <>
+              <Typography component="h3" sx={groupHeadSx}>
+                {t('booking.obligatory-paid-at-marina')}
               </Typography>
-            )}
-          </Stack>
-          <Typography
-            component="p"
-            variant="h3"
-            fontWeight={700}
-            color={colors.blue500}
-            display="flex"
+              {obligatoryAtMarina.map(({ id, name, labelCode, priceEur }) => (
+                <Stack key={id} direction="row" justifyContent="space-between" className="pr">
+                  <span>{labelCode ? t(`extras.${labelCode}`) : name}</span>
+                  <span>{`${formatPrice(priceEur || 0)} €`}</span>
+                </Stack>
+              ))}
+              {hasDeposit && (
+                <Stack key="security-deposit" direction="row" justifyContent="space-between" className="pr">
+                  <Box component="span">
+                    {t('booking.refundable-security-deposit')}
+                    <Box component="span" sx={{ display: 'block', fontSize: 12, color: bbColors.gray500 }}>
+                      {t('booking.refundable-security-deposit-hint')}
+                    </Box>
+                  </Box>
+                  <span>{`${formatPrice(securityDeposit as number)} ${depositCurrencySymbol}`}</span>
+                </Stack>
+              )}
+              {hasInsurance && (
+                <Stack key="deposit-insurance" direction="row" justifyContent="space-between" className="pr">
+                  <span>{t('booking.deposit-insurance')}</span>
+                  <span>{`${formatPrice(insuredSecurityDeposit as number)} ${depositCurrencySymbol}`}</span>
+                </Stack>
+              )}
+            </>
+          )}
+          {obligatoryIncluded.length > 0 && (
+            <>
+              <Typography component="h3" sx={groupHeadSx}>
+                {t('booking.obligatory-included')}
+              </Typography>
+              {obligatoryIncluded.map(({ id, name, labelCode, priceEur }) => (
+                <Stack key={id} direction="row" justifyContent="space-between" className="pr">
+                  <span>{labelCode ? t(`extras.${labelCode}`) : name}</span>
+                  <span>{`${formatPrice(priceEur || 0)} €`}</span>
+                </Stack>
+              ))}
+            </>
+          )}
+          {additionalPaidNow.length > 0 && (
+            <>
+              <Typography component="h3" sx={groupHeadSx}>
+                {t('booking.additional-paid-now')}
+              </Typography>
+              {additionalPaidNow.map(({ id, name, labelCode, priceEur }) => (
+                <Stack key={id} direction="row" justifyContent="space-between" className="pr">
+                  <span>{labelCode ? t(`extras.${labelCode}`) : name}</span>
+                  <span>{`${formatPrice(priceEur || 0)} €`}</span>
+                </Stack>
+              ))}
+            </>
+          )}
+          {additionalAtMarina.length > 0 && (
+            <>
+              <Typography component="h3" sx={groupHeadSx}>
+                {t('booking.additional-paid-at-marina')}
+              </Typography>
+              {additionalAtMarina.map(({ id, name, labelCode, priceEur }) => (
+                <Stack key={id} direction="row" justifyContent="space-between" className="pr">
+                  <span>{labelCode ? t(`extras.${labelCode}`) : name}</span>
+                  <span>{`${formatPrice(priceEur || 0)} €`}</span>
+                </Stack>
+              ))}
+            </>
+          )}
+          {/* Aggregate marina cash — visible whenever any obligatory or
+              additional row is paid at marina, so the admin sees the single
+              sum the customer brings to the dock without having to add up
+              obligatory + additional groups by hand. */}
+          {hasMarinaItems && (
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              className="pr"
+              sx={{
+                mt: 0.75,
+                borderTop: `1px dashed ${bbColors.gray300}`,
+                color: bbColors.amber800,
+                fontWeight: 700,
+              }}
+            >
+              <span>{t('booking.marina-total')}</span>
+              <span>{`${formatPrice(marinaTotal)} €`}</span>
+            </Stack>
+          )}
+          <Stack
+            direction="row"
+            justifyContent="space-between"
             alignItems="center"
+            sx={{ mt: 1, p: '12px 14px', borderRadius: '10px', backgroundColor: bbColors.gray50 }}
           >
-            {/* Booking total = the wire transfers we actually ask for: sum of
-                phases + the full fixed bank fee. Falls back to the stored
-                total when a legacy booking has no phases. */}
-            {`${formatPrice(
-              reservationPaymentPhases.length > 0
-                ? reservationPaymentPhases.reduce((sum, p) => sum + (p.amount || 0), 0) + bankFeeEur
-                : reservationTotalPrice || 0,
-            )} €`}
-          </Typography>
-        </Stack>
-      </Stack>
+            <Box>
+              <Typography component="p" sx={{ fontSize: 14, fontWeight: 700 }}>
+                {t('booking.total')}
+              </Typography>
+              {reservationPaymentPhases.length > 0 && bankFeeEur > 0 && (
+                <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>
+                  {t('booking.bank-fee-note', { fee: bankFeeEur })}
+                </Typography>
+              )}
+            </Box>
+            <Typography
+              component="p"
+              sx={{ fontSize: 22, fontWeight: 800, fontVariantNumeric: 'tabular-nums', color: bbColors.navy900 }}
+            >
+              {/* Booking total = the wire transfers we actually ask for: sum of
+                  phases + the full fixed bank fee. Falls back to the stored
+                  total when a legacy booking has no phases. */}
+              {`${formatPrice(
+                reservationPaymentPhases.length > 0
+                  ? reservationPaymentPhases.reduce((sum, p) => sum + (p.amount || 0), 0) + bankFeeEur
+                  : reservationTotalPrice || 0
+              )} €`}
+            </Typography>
+          </Stack>
+        </Box>
+      </DeskCard>
       <EmailClientModal isOpen={emailModalOpen} onClose={() => setEmailModalOpen(false)} booking={selectedBooking} />
     </Stack>
   );

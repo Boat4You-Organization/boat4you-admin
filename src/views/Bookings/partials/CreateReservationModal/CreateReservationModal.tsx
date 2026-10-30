@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define, @typescript-eslint/no-explicit-any, no-nested-ternary, react/no-array-index-key, react/no-unescaped-entities */
-import { useEffect, useMemo, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined';
@@ -23,6 +23,7 @@ import Close from '@/components/SvgIcons/Close';
 import { api } from '@/config/axios.config';
 import ReservationsService from '@/services/reservations.service';
 import UsersService from '@/services/users.service';
+import { bbColors } from '@/styles/bb';
 import colors from '@/styles/themes/colors';
 import { CapacityDto } from '@/utils/yachtCapacity';
 import { capacityChipsEn } from '@/utils/yachtCapacityEn';
@@ -59,7 +60,7 @@ interface PickedYacht {
   slug: string;
   name: string;
   modelName: string;
-  clientPriceEur: number;   // per-day from backend; multiply by nights for total
+  clientPriceEur: number; // per-day from backend; multiply by nights for total
   agencyName: string;
   locationName: string;
   cabins?: number;
@@ -201,8 +202,8 @@ const CreateReservationModal = ({ isOpen, onClose }: CreateReservationModalProps
 
     if (!Number.isInteger(id) || id <= 0) {
       setCustomerError('Enter a numeric user ID (shown in /users or as #NN on a booking row)');
-      
-return;
+
+      return;
     }
 
     try {
@@ -210,8 +211,8 @@ return;
 
       if (!user) {
         setCustomerError(`No user with ID ${id}`);
-        
-return;
+
+        return;
       }
 
       setCustomerPreview({
@@ -353,10 +354,7 @@ return;
   const updatePhase = (idx: number, patch: Partial<PhaseRow>) =>
     setPhases(prev => prev.map((p, i) => (i === idx ? { ...p, ...patch } : p)));
 
-  const phasesTotal = useMemo(
-    () => phases.reduce((sum, p) => sum + (Number(p.amount) || 0), 0),
-    [phases]
-  );
+  const phasesTotal = useMemo(() => phases.reduce((sum, p) => sum + (Number(p.amount) || 0), 0), [phases]);
   const totalPriceNum = Number(totalPrice) || 0;
   const phasesMatchTotal = Math.abs(phasesTotal - totalPriceNum) < 0.01;
 
@@ -373,14 +371,12 @@ return;
 
       if (includeUnavailable) return true;
 
-      
-return pickedYacht.offerId > 0;
+      return pickedYacht.offerId > 0;
     }
 
     if (step === 2) return totalPriceNum > 0 && phases.length > 0 && phasesMatchTotal;
 
-    
-return true;
+    return true;
   };
 
   const handleSubmit = async () => {
@@ -421,7 +417,10 @@ return true;
     setSubmitting(false);
 
     if (payload) {
-      showToast({ status: 'success', text: `Reservation ${payload.reservationNumber ?? payload.reservationId} created` });
+      showToast({
+        status: 'success',
+        text: `Reservation ${payload.reservationNumber ?? payload.reservationId} created`,
+      });
       toggleCreateReservationModal(false);
       onClose();
 
@@ -438,8 +437,8 @@ return true;
   const renderStep0 = () => (
     <Stack spacing={2}>
       <Typography variant="body2" color={colors.black600}>
-        Which existing customer is this reservation for? Type the user ID (shown as "#17" on a booking row in
-        the list, or the numeric ID column in /users).
+        Which existing customer is this reservation for? Type the user ID (shown as "#17" on a booking row in the list,
+        or the numeric ID column in /users).
       </Typography>
       <Stack direction="row" spacing={1} alignItems="center">
         <TextField
@@ -597,10 +596,7 @@ return true;
           </Typography>
         )}
         {includeUnavailable && (
-          <Typography
-            variant="body2"
-            sx={{ fontSize: 11.5, fontWeight: 700, color: '#a85a00', ml: 'auto' }}
-          >
+          <Typography variant="body2" sx={{ fontSize: 11.5, fontWeight: 700, color: '#a85a00', ml: 'auto' }}>
             Replacement flow — showing unavailable yachts
           </Typography>
         )}
@@ -612,9 +608,7 @@ return true;
         </Typography>
       )}
 
-      {pickingOffer && (
-        <Alert severity="info">Resolving offer for the selected yacht…</Alert>
-      )}
+      {pickingOffer && <Alert severity="info">Resolving offer for the selected yacht…</Alert>}
       {pickOfferError && <Alert severity="error">{pickOfferError}</Alert>}
 
       <Stack spacing={1} sx={{ maxHeight: 480, overflowY: 'auto', pr: 1 }}>
@@ -640,8 +634,7 @@ return true;
             y.buildYear != null ? `${y.buildYear}` : null,
           ].filter(Boolean);
 
-          
-return (
+          return (
             <Box
               key={`${y.yachtId}-${y.slug}`}
               onClick={() => handlePickYacht(y)}
@@ -713,10 +706,9 @@ return (
   const renderStep2 = () => (
     <Stack spacing={2}>
       <Alert severity="info" sx={{ alignItems: 'flex-start' }}>
-        Admin override: total + phases are NOT derived from the yacht's catalogue price. Customer sees
-        exactly what you type below on their /my-bookings page. Tick <strong>Paid</strong> on phase 1 if
-        the customer already paid that amount on the cancelled reservation — we'll record it as paid
-        without a Stripe charge.
+        Admin override: total + phases are NOT derived from the yacht's catalogue price. Customer sees exactly what you
+        type below on their /my-bookings page. Tick <strong>Paid</strong> on phase 1 if the customer already paid that
+        amount on the cancelled reservation — we'll record it as paid without a Stripe charge.
       </Alert>
 
       <TextField
@@ -753,12 +745,7 @@ return (
             inputProps={{ min: 0, step: 0.01 }}
           />
           <FormControlLabel
-            control={
-              <Checkbox
-                checked={p.markPaid}
-                onChange={e => updatePhase(idx, { markPaid: e.target.checked })}
-              />
-            }
+            control={<Checkbox checked={p.markPaid} onChange={e => updatePhase(idx, { markPaid: e.target.checked })} />}
             label="Already paid"
           />
           <IconButton onClick={() => removePhase(idx)} disabled={phases.length === 1}>
@@ -865,26 +852,77 @@ return (
       ConfirmBtnProps={{ disabled: !canProceed() || submitting }}
       zIndex={1400}
     >
+      {/* Step indicator: done steps get a check, the current one is navy. */}
+      <Box
+        component="ol"
+        aria-label="Steps"
+        sx={{
+          listStyle: 'none',
+          m: '0 0 18px',
+          p: 0,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1.25,
+          flexWrap: 'wrap',
+        }}
+      >
+        {stepTitles.map((label, i) => {
+          const state = i < step ? 'done' : i === step ? 'on' : 'todo';
+
+          return (
+            <Fragment key={label}>
+              {i > 0 && (
+                <Box
+                  component="li"
+                  aria-hidden
+                  sx={{ flex: '1 1 24px', maxWidth: 80, height: '1px', backgroundColor: bbColors.gray200 }}
+                />
+              )}
+              <Box
+                component="li"
+                aria-current={state === 'on' ? 'step' : undefined}
+                sx={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 1,
+                  fontSize: 12.5,
+                  fontWeight: state === 'on' ? 700 : 600,
+                  color: state === 'todo' ? bbColors.gray500 : bbColors.navy900,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                <Box
+                  component="i"
+                  sx={{
+                    fontStyle: 'normal',
+                    width: 22,
+                    height: 22,
+                    borderRadius: '50%',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 11,
+                    fontWeight: 800,
+                    backgroundColor:
+                      state === 'done' ? bbColors.green600 : state === 'on' ? bbColors.navy900 : bbColors.gray100,
+                    color: state === 'todo' ? bbColors.gray600 : bbColors.white,
+                  }}
+                >
+                  {state === 'done' ? '✓' : i + 1}
+                </Box>
+                {label}
+              </Box>
+            </Fragment>
+          );
+        })}
+      </Box>
       {step === 0 && renderStep0()}
       {step === 1 && renderStep1()}
       {step === 2 && renderStep2()}
       {step === 3 && renderStep3()}
       {step > 0 && (
         <Box mt={3}>
-          <Button
-            onClick={() => setStep(prev => (prev - 1) as 0 | 1 | 2 | 3)}
-            disabled={submitting}
-            sx={{
-              textTransform: 'none',
-              color: '#1a4fa8',
-              fontWeight: 700,
-              fontSize: 13,
-              padding: '4px 8px',
-              minWidth: 0,
-              backgroundColor: 'transparent',
-              '&:hover': { backgroundColor: '#eef3f9' },
-            }}
-          >
+          <Button onClick={() => setStep(prev => (prev - 1) as 0 | 1 | 2 | 3)} disabled={submitting} variant="text">
             ← Back
           </Button>
         </Box>

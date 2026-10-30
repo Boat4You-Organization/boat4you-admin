@@ -139,6 +139,15 @@ const KIND_SX: Record<Kind, object> = {
   danger: { bgcolor: cc.redDot, color: '#FFFFFF', '&:hover': { bgcolor: cc.red } },
 };
 
+// The theme's own disabled look (light blue) is not the board's: a disabled button keeps its colours, only fainter.
+const DISABLED_SX: Record<Kind, object> = {
+  fill: { bgcolor: cc.ink, color: '#FFFFFF' },
+  out: { bgcolor: '#FFFFFF', color: cc.ink, borderColor: cc.field },
+  txt: { bgcolor: 'transparent', color: cc.ink },
+  red: { bgcolor: 'transparent', color: cc.red },
+  danger: { bgcolor: cc.redDot, color: '#FFFFFF' },
+};
+
 /** A board button: navy fill, outline, text, red text or red fill. */
 export const CcButton = ({ kind = 'out', sx, ...props }: Omit<ButtonProps, 'variant' | 'color'> & { kind?: Kind }) => (
   <Button
@@ -156,9 +165,9 @@ export const CcButton = ({ kind = 'out', sx, ...props }: Omit<ButtonProps, 'vari
         whiteSpace: 'nowrap',
         border: '1px solid transparent',
         lineHeight: 1.2,
-        '&.Mui-disabled': { opacity: 0.45, color: kind === 'fill' || kind === 'danger' ? '#FFFFFF' : cc.ink },
       },
       KIND_SX[kind],
+      { '&.Mui-disabled': { opacity: 0.45, ...DISABLED_SX[kind] } },
       ...(Array.isArray(sx) ? sx : [sx]),
     ]}
   />
@@ -249,6 +258,7 @@ export const tableSx = {
   '& td': { p: '12px 14px', borderBottom: `1px solid ${cc.hair}`, fontSize: 13, verticalAlign: 'top' },
   '& tbody tr.click:hover td': { bgcolor: cc.rowHover, cursor: 'pointer' },
   '& .num': { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
+  '& .tnum': { fontVariantNumeric: 'tabular-nums' },
   '& .soft': { color: cc.text },
   '& .muted': { color: cc.muted },
   '& .nowrap': { whiteSpace: 'nowrap' },

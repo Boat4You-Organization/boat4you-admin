@@ -190,7 +190,7 @@ const Conversations = () => {
       sx={{
         display: 'grid',
         gap: 2,
-        gridTemplateColumns: { xs: '1fr', md: '340px minmax(0, 1fr)', lg: '340px minmax(0, 1fr) 320px' },
+        gridTemplateColumns: { xs: '1fr', md: '300px minmax(0, 1fr)', xl: '340px minmax(0, 1fr) 320px' },
         height: { xs: 'calc(100dvh - 150px)', md: 'calc(100vh - 150px)' },
         minHeight: 560,
       }}
@@ -265,7 +265,7 @@ const Conversations = () => {
       <Box
         component="aside"
         aria-label={t('clientCard')}
-        sx={{ ...columnSx, ...scrollSx, display: { xs: 'none', lg: 'block' } }}
+        sx={{ ...columnSx, ...scrollSx, display: { xs: 'none', xl: 'block' } }}
       >
         {detail ? card('column') : null}
       </Box>

@@ -469,7 +469,8 @@ interface Resources {
     openBoatPage: 'Open the boat page';
     pageOf: 'Page {{page}} · {{size}} per page';
     pages: 'pages: {{count}}';
-    pagesShort: '{{count}} pages';
+    pagesShort_one: '{{count}} page';
+    pagesShort_other: '{{count}} pages';
     persons: 'people: {{count}}';
     pickSession: 'Pick a conversation from the list.';
     prev: 'Previous';

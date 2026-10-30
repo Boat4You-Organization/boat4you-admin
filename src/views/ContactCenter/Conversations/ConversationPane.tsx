@@ -170,7 +170,7 @@ const ConversationPane = ({ detail, onChanged, onDeleted, onBack, onOpenCard }: 
             </Box>
           )}
           <Box sx={{ ml: 'auto', display: { xs: 'none', md: 'flex' }, flexWrap: 'wrap', gap: '4px' }}>
-            <CcButton kind="out" onClick={onOpenCard} sx={{ display: { md: 'inline-flex', lg: 'none' } }}>
+            <CcButton kind="out" onClick={onOpenCard} sx={{ display: { md: 'inline-flex', xl: 'none' } }}>
               {t('clientCard')}
             </CcButton>
             {canTakeOver && (

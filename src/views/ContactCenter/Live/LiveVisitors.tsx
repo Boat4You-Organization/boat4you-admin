@@ -119,7 +119,7 @@ const LiveVisitors = () => {
                         <PageLink siteId={v.siteId} path={v.currentPath} />
                       </Box>
                     </Box>
-                    <td className="nowrap num">{formatDuration(onPage)}</td>
+                    <td className="nowrap tnum">{formatDuration(onPage)}</td>
                     <td>
                       <Box sx={{ fontWeight: 500 }}>{r.contactName ?? t('anonymousVisitor')}</Box>
                       <Box sx={{ fontSize: 12, color: cc.muted }}>{v.returning ? t('returning') : t('new')}</Box>
@@ -143,7 +143,7 @@ const LiveVisitors = () => {
                         <Box sx={{ mt: '4px', fontSize: 12, fontWeight: 600, color: cc.red }}>{`● ${t('unread')}`}</Box>
                       )}
                     </td>
-                    <td className="num">{v.pageCount}</td>
+                    <td className="tnum">{v.pageCount}</td>
                     <Box component="td" sx={{ textAlign: 'right' }}>
                       <CcButton
                         onClick={e => {

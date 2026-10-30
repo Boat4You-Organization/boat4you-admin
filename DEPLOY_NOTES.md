@@ -1,5 +1,9 @@
 # boat4you-admin — deploy notes
 
+## 2026-10-30 — 🩹 Offers: „Copy as rich text“ opet vidljiv — ✅ DEPLOYANO 30.10.2026 (cusma1, main `3bf24d0`, entry `assets/index-DxHuPu4k.js`)
+
+Mario 30.10.2026 (screenshot): u modalu „Client offer“ gumb „Copy as rich text“ bio je tamni tekst na navy pozadini od teme v2.2 (contained = žuti gumb s tamnim tekstom; `sx` mijenjao samo pozadinu). Tekst gumba sada bijel. Skeniran cijeli admin: nema drugih tamnih contained gumba bez boje teksta.
+
 ## 2026-10-30 — 🎨 Broker Desk redizajn v2.2 na cijelom adminu (samo vizualni sloj) — ✅ LIVE 30.10.2026 (cusma1, main `7bf1bf1`, entry `assets/index-BsjmJMkY.js`), tag `live/2026-10-30-redesign-v22`
 
 Mario 30.10.2026: „sredi samo dizajn, funkcije se ne smiju dirat, sve mora biti pod istim funkcijama“. Dizajn: `_design/redesign-v2.2/index.html` (Claude Design, 31 ploča). Grana `feat/redesign-v2.2` (iz `main` `e157889`), commiti `e5a8a5f` … `502d807`, po fazama:

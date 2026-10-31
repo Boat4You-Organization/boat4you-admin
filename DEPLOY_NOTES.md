@@ -1,5 +1,17 @@
 # boat4you-admin — deploy notes
 
+## 2026-10-31 — 📉 Kontakt centar → Statistika: kartica „Lijevak upita“ (P6 R0) — ✅ LIVE 31.10.2026 09:51 UTC (cusma1, main `1e4151d`, entry `assets/index-VHei0SSJ.js`), tag `live/2026-10-31-cc-funnel`
+
+Mario 30.10.2026 („Da, kreni s R0“) i 31.10. („Da, deployaj R0“): gdje posjetitelji s pristankom odustaju prije upita.
+
+- Koraci posjet → stranica broda → obrazac upita ili rezervacije → poslan upit, svaki kao % posjeta i pad od prethodnog koraka; posjeti s otvorenim chatom.
+- Gdje odlaze bez upita (po vrsti stranice) i tablica izlaznih stranica (sajt kad su odabrani svi sajtovi, stranica, vrsta, posjeti, izlazi, stopa izlaza); najčešći klikovi.
+- Isti raspon i sajt kao ostatak Statistike; filteri uređaj i izvor samo za ovaj dio. Backend `GET /admin/cc/funnel` (backend `55abb80`, cusma2 09:11 UTC).
+- `Stats/parts.tsx`: KPI kartice i trake izdvojene da ih dijele Statistika i lijevak; `utils/contactCenter/funnel.ts` (postoci, testovi u `yarn test`).
+- Provjere: tsc 0, eslint src 0, `yarn test` 40/40, lokalni pregled s mock API-jem (filter uređaja, 390 px bez prelijevanja). Uživo: entry sadrži „Lijevak upita“ i `/admin/cc/funnel`, root/deep/asset 200.
+- Korak „Poslan upit“ broji se od widgeta `b4y-cc.81a862b0.js` (31.10. 09:31 UTC); prvih dana bit će nizak.
+- Rollback: prethodni build na cusma1 (admin_deploy.sh), `git revert` commitova `8352bd7`, `1e4151d`.
+
 ## 2026-10-30 — 🩹 Offers: „Copy as rich text“ opet vidljiv — ✅ DEPLOYANO 30.10.2026 (cusma1, main `3bf24d0`, entry `assets/index-DxHuPu4k.js`)
 
 Mario 30.10.2026 (screenshot): u modalu „Client offer“ gumb „Copy as rich text“ bio je tamni tekst na navy pozadini od teme v2.2 (contained = žuti gumb s tamnim tekstom; `sx` mijenjao samo pozadinu). Tekst gumba sada bijel. Skeniran cijeli admin: nema drugih tamnih contained gumba bez boje teksta.

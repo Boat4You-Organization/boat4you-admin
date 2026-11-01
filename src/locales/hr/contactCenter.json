@@ -4,7 +4,8 @@
     "conversations": "Razgovori",
     "live": "Live posjetitelji",
     "contacts": "Kontakti",
-    "stats": "Statistika"
+    "stats": "Statistika",
+    "recording": "Snimanje"
   },
   "status": {
     "AI": "AI",
@@ -259,5 +260,20 @@
       "BOOKING": "Obrazac / rezervacija",
       "OTHER": "Ostalo"
     }
+  },
+  "rec": {
+    "note": "Snimke posjeta rade se samo uz pristanak za analitiku. Isključen sajt ne snima ništa, a poslužitelj odbija njegove pakete. Udio je postotak posjeta s pristankom koje se snimaju; na mobitelu snimanje počinje tek nakon prvog dodira, scrolla ili tipke posjetitelja.",
+    "site": "Sajt",
+    "enabled": "Snimanje",
+    "sample": "Udio posjeta (%)",
+    "mobile": "Mobitel (%)",
+    "save": "Spremi",
+    "saved": "Spremljeno",
+    "saveFailed": "Spremanje nije uspjelo.",
+    "invalid": "Udio mora biti cijeli broj od 0 do 100.",
+    "staffTitle": "Ovaj preglednik kao tim",
+    "staffText": "Otvori link za svaki sajt u ovom pregledniku: tvoje posjete se tada ne snimaju i ne broje u statistici. Oznaka ostaje u tom pregledniku dok je ne ukloniš.",
+    "staffMark": "Označi",
+    "staffUnmark": "Ukloni oznaku"
   }
 }

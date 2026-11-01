@@ -4,8 +4,9 @@ import { describe, test } from 'node:test';
 
 import { displayName, formatDuration } from '../src/utils/contactCenter/display.ts';
 import { exitRate, funnelRows } from '../src/utils/contactCenter/funnel.ts';
+import { pctOk } from '../src/utils/contactCenter/rec.ts';
 import { createPoller } from '../src/utils/contactCenter/poller.ts';
-import { safeHref } from '../src/utils/contactCenter/safeLink.ts';
+import { safeHref, staffLinks } from '../src/utils/contactCenter/safeLink.ts';
 
 describe('safeHref', () => {
   test('a path on the conversation site becomes a link on its www host', () => {
@@ -198,5 +199,24 @@ describe('funnel (P6 R0)', () => {
   test('exit rate is exits of views, in whole percents', () => {
     assert.equal(exitRate(2, 3), 67);
     assert.equal(exitRate(0, 0), null);
+  });
+});
+
+describe('recording (P6 R1.6)', () => {
+  test('the staff links mark (or unmark) this browser on each of the seven sites', () => {
+    const on = staffLinks(true);
+
+    assert.equal(on.length, 7);
+    assert.deepEqual(on[0], { siteId: 'boat4you', label: 'Boat4You', href: 'https://www.boat4you.com/?cc-staff=1' });
+    assert.equal(staffLinks(false)[6].href, 'https://www.croatia-yachting.com/?cc-staff=0');
+  });
+
+  test('a share is a whole number from 0 to 100', () => {
+    assert.equal(pctOk(0), true);
+    assert.equal(pctOk(100), true);
+    assert.equal(pctOk(101), false);
+    assert.equal(pctOk(-1), false);
+    assert.equal(pctOk(12.5), false);
+    assert.equal(pctOk(Number.NaN), false);
   });
 });

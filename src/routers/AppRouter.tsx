@@ -29,6 +29,7 @@ const CONTACT_CENTER_PATHS = [
   '/contact-center/contacts',
   '/contact-center/contacts/:id',
   '/contact-center/stats',
+  '/contact-center/recording',
 ];
 
 const AppRouter: React.FC = () => (

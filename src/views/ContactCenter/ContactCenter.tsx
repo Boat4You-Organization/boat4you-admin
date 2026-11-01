@@ -11,16 +11,18 @@ import ContactDetail from './Contacts/ContactDetail';
 import Contacts from './Contacts/Contacts';
 import Conversations from './Conversations/Conversations';
 import LiveVisitors from './Live/LiveVisitors';
+import Recording from './Recording/Recording';
 import Stats from './Stats/Stats';
 import { cc } from './ui';
 
-type TabKey = 'conversations' | 'live' | 'contacts' | 'stats';
+type TabKey = 'conversations' | 'live' | 'contacts' | 'stats' | 'recording';
 
 const TABS: { key: TabKey; path: string }[] = [
   { key: 'conversations', path: '/contact-center' },
   { key: 'live', path: '/contact-center/live' },
   { key: 'contacts', path: '/contact-center/contacts' },
   { key: 'stats', path: '/contact-center/stats' },
+  { key: 'recording', path: '/contact-center/recording' },
 ];
 
 const tabOf = (path: string): TabKey => {
@@ -29,6 +31,8 @@ const tabOf = (path: string): TabKey => {
   if (path.startsWith('/contact-center/contacts')) return 'contacts';
 
   if (path.startsWith('/contact-center/stats')) return 'stats';
+
+  if (path.startsWith('/contact-center/recording')) return 'recording';
 
   return 'conversations';
 };
@@ -104,6 +108,7 @@ const ContactCenter = () => {
         {tab === 'live' && <LiveVisitors />}
         {tab === 'contacts' && (contactId ? <ContactDetail id={Number(contactId)} /> : <Contacts />)}
         {tab === 'stats' && <Stats />}
+        {tab === 'recording' && <Recording />}
       </Box>
     </Layout>
   );

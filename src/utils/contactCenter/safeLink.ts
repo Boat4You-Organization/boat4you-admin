@@ -57,3 +57,11 @@ export function safeHref(siteId: string, pathOrUrl: string | null | undefined): 
     return null;
   }
 }
+
+/** The links that mark this browser as the team's on each site (?cc-staff=1), or undo it (?cc-staff=0): never recorded (P6 R1.6). */
+export const staffLinks = (on: boolean): Array<{ siteId: SiteId; label: string; href: string }> =>
+  SITE_IDS.map(siteId => ({
+    siteId,
+    label: SITES[siteId].label,
+    href: `${SITES[siteId].base}/?cc-staff=${on ? 1 : 0}`,
+  }));

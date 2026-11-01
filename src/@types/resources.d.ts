@@ -531,6 +531,21 @@ interface Resources {
       today: 'Today';
     };
     rangeLabel: 'Period';
+    rec: {
+      enabled: 'Recording';
+      invalid: 'The share must be a whole number from 0 to 100.';
+      mobile: 'Mobile (%)';
+      note: 'Visits are recorded only with analytics consent. A site that is switched off records nothing and the server refuses its payloads. The share is the percentage of visits with consent that are recorded; on a phone recording starts only after the visitor\'s first touch, scroll or key.';
+      sample: 'Share of visits (%)';
+      save: 'Save';
+      saveFailed: 'Saving failed.';
+      saved: 'Saved';
+      site: 'Site';
+      staffMark: 'Mark';
+      staffText: 'Open the link for each site in this browser: your visits are then not recorded and not counted in the statistics. The mark stays in this browser until you remove it.';
+      staffTitle: 'This browser as the team';
+      staffUnmark: 'Remove the mark';
+    };
     referrer: 'referrer';
     removeTag: 'Remove tag {{tag}}';
     replyLabel: 'Reply';
@@ -598,6 +613,7 @@ interface Resources {
       contacts: 'Contacts';
       conversations: 'Conversations';
       live: 'Live visitors';
+      recording: 'Recording';
       stats: 'Statistics';
     };
     tagPlaceholder: 'e.g. vip';

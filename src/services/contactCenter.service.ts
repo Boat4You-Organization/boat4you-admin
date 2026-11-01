@@ -12,6 +12,7 @@ import {
   ConversationRow,
   LiveRow,
   ProactiveResult,
+  RecSiteSetting,
 } from '@/types/contactCenter.type';
 
 /** Drops empty and false-y defaults so the query string carries only the filters in use. */
@@ -53,6 +54,9 @@ const ContactCenterService = {
     api.get<CcStats>('/admin/cc/stats', { params: params(query) }),
   funnel: (query: { from?: string; to?: string; siteId?: string; device?: string; channel?: string }) =>
     api.get<CcFunnel>('/admin/cc/funnel', { params: params(query) }),
+  recSettings: () => api.get<RecSiteSetting[]>('/admin/cc/rec/settings'),
+  saveRecSetting: ({ siteId, ...values }: RecSiteSetting) =>
+    api.put<RecSiteSetting>(`/admin/cc/rec/settings/${siteId}`, values),
 };
 
 export default ContactCenterService;

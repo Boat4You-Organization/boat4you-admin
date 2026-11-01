@@ -237,3 +237,11 @@ export interface CcFunnel {
   exits: Array<{ siteId: string; path: string; pageType: string; views: number; exits: number }>;
   clicks: Array<{ pageType: string; label: string; clicks: number }>;
 }
+
+/** One site's recording switch (P6 R1.6, GET/PUT /admin/cc/rec/settings). */
+export interface RecSiteSetting {
+  siteId: string;
+  enabled: boolean;
+  samplePct: number;
+  mobilePct: number;
+}

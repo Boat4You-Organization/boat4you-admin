@@ -1,5 +1,13 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-01 — 🎥 Kontakt centar → Snimanje: prekidač i udio snimanja po sajtu, linkovi za oznaku tima (P6 R1) — ✅ LIVE 1.11.2026 11:15 UTC (cusma1, main `0466541`, entry `assets/index-fD2q2GFs.js`), tag `live/2026-11-01-cc-rec`
+
+Mario 1.11.2026 („Da, nastavi R1“, „Da, deployaj R1“).
+
+- Kartica „Snimanje“ (`/contact-center` → recording): po sajtu uključeno/isključeno, postotak posjeta (računalo) i mobitel (0–100), `GET/PUT /admin/cc/rec/settings` (SYSTEM_ADMIN). Bez spremljenog reda sajt je isključen.
+- Linkovi „Označi ovaj preglednik kao tim“ (`https://<sajt>/?cc-staff=1` za svih 7): widget taj preglednik ne prati ni ne snima.
+- Provjera: živi paket poziva `admin/cc/rec/settings`; endpoint bez prijave 403.
+
 ## 2026-10-31 — 📉 Kontakt centar → Statistika: kartica „Lijevak upita“ (P6 R0) — ✅ LIVE 31.10.2026 09:51 UTC (cusma1, main `1e4151d`, entry `assets/index-VHei0SSJ.js`), tag `live/2026-10-31-cc-funnel`
 
 Mario 30.10.2026 („Da, kreni s R0“) i 31.10. („Da, deployaj R0“): gdje posjetitelji s pristankom odustaju prije upita.

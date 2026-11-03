@@ -239,11 +239,13 @@ export interface CcFunnel {
 }
 
 /** One element of Top clicks (P7a). The optional fields are absent from an older backend; area is null for clicks recorded
- * before the widget sent it, path when the click had no page view, target for buttons. */
+ * before the widget sent it, siteId and path when the click had no page view, target for buttons. */
 export interface FunnelClick {
   pageType: string;
   label: string;
   clicks: number;
+  /** The site of path; pages counts distinct (site, path) pairs. */
+  siteId?: string | null;
   pages?: number;
   kind?: 'link' | 'button' | null;
   area?: 'gallery' | 'slider' | 'nav' | 'header' | 'footer' | 'form' | 'dialog' | 'main' | null;

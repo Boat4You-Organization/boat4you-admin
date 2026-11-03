@@ -10,6 +10,7 @@ import { CcFunnel, FunnelClick } from '@/types/contactCenter.type';
 import { exitRate, funnelRows } from '@/utils/contactCenter/funnel';
 import { siteLabel } from '@/utils/contactCenter/safeLink';
 import { Bars, barGrid, cardSx } from '@/views/ContactCenter/Stats/parts';
+import { PageLink, SiteChip } from '@/views/ContactCenter/common';
 import { LoadAlert, SectionLabel, cc, fieldSx, tableSx } from '@/views/ContactCenter/ui';
 
 const DEVICES = ['DESKTOP', 'TABLET', 'MOBILE'] as const;
@@ -55,8 +56,13 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
   const clickRow = (c: FunnelClick) => (
     <tr key={`${c.pageType}|${c.label}|${c.kind ?? ''}|${c.area ?? ''}`}>
       <td className="soft nowrap">{pageType(c.pageType)}</td>
-      <Box component="td" className="soft" sx={{ ...ellipsisSx, maxWidth: 240 }} title={c.path ?? undefined}>
-        {c.path ?? '—'}
+      <Box component="td" className="soft" sx={{ ...ellipsisSx, maxWidth: 280 }} title={c.path ?? undefined}>
+        {!siteId && c.siteId && (
+          <Box component="span" sx={{ mr: '6px' }}>
+            <SiteChip siteId={c.siteId} small />
+          </Box>
+        )}
+        {c.siteId ? <PageLink siteId={c.siteId} path={c.path} /> : (c.path ?? '—')}
       </Box>
       <Box component="td" sx={ellipsisSx} title={c.label}>
         {c.label}

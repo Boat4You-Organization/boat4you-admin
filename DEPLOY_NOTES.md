@@ -1,5 +1,11 @@
 # boat4you-admin — deploy notes
 
+## 3.11.2026 — admin stays signed in across reloads; Live visitors source chip (730eec2)
+
+- `src/config/tokenStore.ts`: access + refresh token JSON now persisted in localStorage (`b4y-admin-auth`), so a reload / new tab / browser restart keeps the session. Ends when the backend refresh token expires (3 days from login, `security.jwt.refresh-token.expiration`) or on Log out. Reverses the in-memory choice of S-002 (Mario's call).
+- Live visitors: the "from site" under Source is a coloured SiteChip.
+- Deployed to cusma1, entry `assets/index-BkXAuIsR.js`, root/deep/asset 200.
+
 ## 2026-11-03 — 📊 Kontakt centar → Statistika: „Tražilice: Google i Bing“ (F1) — ✅ LIVE 3.11.2026 13:24:50 UTC (cusma1, main `7664113` = grana `feat/cc-search-engines` `e55a2bf`, entry `assets/index-DWw8CtqE.js`, root/deep/asset 200)
 
 Mario 3.11.: „Da, kreni s F1“, „Da, deployaj“. Backend `GET /admin/cc/search-engines` live na cusma2 13:24:22 UTC (V9_119); podatke puni SearchImportJob na cusma3 (od cusma3 deploya 18:07 UTC; prvi uvoz povijesti ~16 h).

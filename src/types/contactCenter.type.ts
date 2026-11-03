@@ -238,6 +238,61 @@ export interface CcFunnel {
   clicks: Array<{ pageType: string; label: string; clicks: number }>;
 }
 
+/** Clicks and impressions of a range; position is the impression-weighted average, null when no impression has one. */
+export interface EngineTotals {
+  clicks: number;
+  impressions: number;
+  position: number | null;
+}
+
+export interface SearchQueryStat {
+  query: string;
+  siteIds: string[];
+  clicks: number;
+  impressions: number;
+  position: number | null;
+}
+
+/**
+ * GET /admin/cc/search-engines (F1): Google Search Console and Bing Webmaster Tools next to our organic visits. The engines
+ * give aggregates only, never a visitor. Bing has no country or device, so bing is null and its lists empty under such a filter.
+ */
+export interface CcSearchEngines {
+  from: string;
+  to: string;
+  siteId: string | null;
+  country: string | null;
+  device: string | null;
+  fromDay: string;
+  toDay: string;
+  lastDay: Partial<Record<'GOOGLE' | 'BING', string>>;
+  google: EngineTotals;
+  googleClicksWithQuery: number;
+  bing: EngineTotals | null;
+  organicVisits: number;
+  organicInquiries: number;
+  engines: Count[];
+  sites: Array<{
+    siteId: string;
+    google: EngineTotals;
+    bing: EngineTotals | null;
+    organicVisits: number;
+    organicInquiries: number;
+  }>;
+  googleQueries: SearchQueryStat[];
+  bingQueries: SearchQueryStat[];
+  pages: Array<{
+    siteId: string;
+    path: string;
+    clicks: number;
+    impressions: number;
+    position: number | null;
+    queries: string[];
+    visits: number;
+    inquiries: number;
+  }>;
+}
+
 /** One site's recording switch (P6 R1.6, GET/PUT /admin/cc/rec/settings). */
 export interface RecSiteSetting {
   siteId: string;

@@ -2,7 +2,15 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { elementLabel, heatPoints, reachAt, shownShare, toActivity, toHoverActivity, toScrollMap } from '../src/utils/contactCenter/heatmap.ts';
+import {
+  elementLabel,
+  heatPoints,
+  reachAt,
+  shownShare,
+  toActivity,
+  toHoverActivity,
+  toScrollMap,
+} from '../src/utils/contactCenter/heatmap.ts';
 
 const el = (hash: string, clicks: number, text: string | null = 'Reach out', tag: string | null = 'button') => ({
   hash,
@@ -96,6 +104,9 @@ describe('toHoverActivity', () => {
       { hash: 'b', selector: '', totalclicks: 9, x: [100], y: [100], clicks: [9], points: 1 },
     ]);
     assert.deepEqual(toHoverActivity({}), []);
+  });
+});
+
 describe('heatPoints', () => {
   test('page points from element rects: a 32767 grid within the rect, same spot merged, unknown or unlaid-out elements skipped', () => {
     const act = (hash: string, x: number[], y: number[], clicks: number[]) => ({

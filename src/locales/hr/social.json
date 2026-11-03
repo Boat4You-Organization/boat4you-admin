@@ -7,7 +7,8 @@
     "compose": "Nova objava",
     "edit": "Uredi objavu",
     "channels": "Kanali",
-    "automation": "Automatizacija"
+    "automation": "Automatizacija",
+    "ai": "AI dnevne objave"
   },
   "ui": {
     "cancel": "Odustani"
@@ -24,7 +25,8 @@
   },
   "source": {
     "ADMIN": "Admin",
-    "API": "Automatizacija"
+    "API": "Automatizacija",
+    "AI": "AI"
   },
   "issue": {
     "empty": "Nema što objaviti.",
@@ -63,7 +65,9 @@
     "emptyHint": "Napiši jednu objavu i pošalji je na sve kanale odjednom.",
     "loadError": "Objave se nisu učitale.",
     "noText": "(bez teksta)",
-    "addOnDay": "Nova objava za {{- date}}"
+    "addOnDay": "Nova objava za {{- date}}",
+    "site": "Sajt",
+    "generating": "video se radi"
   },
   "detail": {
     "title": "Objava #{{id}}",
@@ -170,7 +174,13 @@
     "credentialsTitle": "Spoji {{- platform}}",
     "identifier": "Handle",
     "secret": "App lozinka",
-    "secretHint": "Bluesky → Settings → Privacy and security → App passwords. Nikad glavna lozinka."
+    "secretHint": "Bluesky → Settings → Privacy and security → App passwords. Nikad glavna lozinka.",
+    "overview": "Kanali po sajtu",
+    "overviewHint": "Što je spojeno za svaki naš sajt.",
+    "notConfigured": "Nije postavljeno na serveru",
+    "connectFor": "Spoji {{- platform}}",
+    "continue": "Nastavi na {{- platform}}",
+    "siteSaved": "Sajt spremljen."
   },
   "automation": {
     "intro": "Ključ za automatizaciju omogućuje zakazanom Claude zadatku (ili bilo kojoj skripti) da priprema objave preko API-ja. S „Samo skice“ čovjek i dalje objavljuje svaku objavu iz admina.",
@@ -212,5 +222,51 @@
     "daily2": "napiše tekst našim stilom, kraći za X i Bluesky, hashtagove za Instagram i TikTok",
     "daily3": "uzme naše fotke tog broda (Brodovi · Mediji) i pošalje objavu preko ovog API-ja",
     "daily4": "s ključem „Samo skice“ čeka nas: ovdje u Objavama je odobrimo jednim klikom"
+  },
+  "sites": {
+    "all": "Svi sajtovi",
+    "shared": "Svi sajtovi (zajednički)",
+    "site": "Sajt",
+    "pick": "Za koji sajt je ovaj kanal?",
+    "pickHint": "Svaki sajt ima svoj Facebook, Instagram i TikTok; YouTube je jedan za sve sajtove.",
+    "selectSite": "Odaberi sve"
+  },
+  "ai": {
+    "intro": "Svako jutro AI odabere brod iz flote tog sajta koji nedavno nije bio u objavi, uzme naše fotke, napiše tekst za svaku mrežu i pripremi objavu. S uključenim odobravanjem čeka te u Objavama kao skica; inače se zakaže sama.",
+    "noAi": "Na serveru nema AI ključa (ANTHROPIC_API_KEY): dnevne objave ne mogu raditi.",
+    "noHiggsfield": "Higgsfield nije postavljen na serveru: objave koriste samo fotke.",
+    "enabled": "Dnevna objava",
+    "time": "Objavi u",
+    "timeHint": "Europe/Zagreb; AI je pripremi 3 sata ranije.",
+    "language": "Jezik",
+    "channels": "Kanali",
+    "noChannels": "Prvo spoji kanale ovog sajta.",
+    "approval": "Čekaj moje odobrenje",
+    "approvalHint": "Isključeno: AI sam zakaže objavu.",
+    "video": "Video s Higgsfieldom",
+    "videoHint": "Kratki video od najbolje fotke, za TikTok i YouTube.",
+    "guidance": "Napomene za AI",
+    "guidancePlaceholder": "npr. guraj rani booking za 2027.; bez guleta; spomeni Kornate i Vis.",
+    "save": "Spremi",
+    "saved": "Spremljeno.",
+    "runNow": "Napravi današnju objavu sada",
+    "ran": "Gotovo: {{- status}}",
+    "runError": "AI objava nije uspjela.",
+    "runs": "Zadnje AI objave",
+    "date": "Datum",
+    "topic": "Tema",
+    "status": "Status",
+    "post": "Objava",
+    "open": "Otvori",
+    "noRuns": "Još nema AI objava.",
+    "loadError": "AI postavke se nisu učitale.",
+    "saveError": "Spremanje nije uspjelo.",
+    "runStatus": {
+      "RUNNING": "Radi",
+      "WAITING_VIDEO": "Čeka video",
+      "DONE": "Gotovo",
+      "SKIPPED": "Preskočeno",
+      "FAILED": "Neuspjelo"
+    }
   }
 }

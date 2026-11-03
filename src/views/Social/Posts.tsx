@@ -2,7 +2,7 @@
  * with the state of every channel (published link, the network's error, retry / cancel / edit / duplicate). */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
@@ -30,6 +30,7 @@ import SocialService from '@/services/social.service';
 import { errorMessage } from '@/services/yacht-media.api';
 import { bbColors } from '@/styles/bb';
 import { SocialPlatform, SocialPost, SocialPostStatus } from '@/types/social.type';
+import { SITE_IDS, siteLabel } from '@/utils/contactCenter/safeLink';
 import { addMonths, dayKey, gridRange, groupByDay, monthGrid, postTime } from '@/utils/social/calendar';
 import { PLATFORMS, PLATFORM_RULES, canCancel, canDelete, canRetry, isEditable } from '@/utils/social/rules';
 import { showToast } from '@/valtio/global/global.actions';
@@ -294,6 +295,8 @@ const Posts = ({ accounts }: { accounts: AccountsState }) => {
   const [view, setView] = useState<View>(small ? 'list' : 'calendar');
   const [status, setStatus] = useState<SocialPostStatus | ''>('');
   const [platform, setPlatform] = useState<SocialPlatform | ''>('');
+  const [site, setSite] = useState('');
+  const [search, setSearch] = useSearchParams();
   const [posts, setPosts] = useState<SocialPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -307,6 +310,7 @@ const Posts = ({ accounts }: { accounts: AccountsState }) => {
         ...range,
         status: status || undefined,
         platform: platform || undefined,
+        site: site || undefined,
         size: PAGE_SIZE,
       });
 
@@ -317,7 +321,20 @@ const Posts = ({ accounts }: { accounts: AccountsState }) => {
     } finally {
       setLoading(false);
     }
-  }, [year, month0, status, platform, t]);
+  }, [year, month0, status, platform, site, t]);
+
+  // ?post=ID (from AI dnevne objave): open that post.
+  useEffect(() => {
+    const id = Number(search.get('post'));
+
+    if (!id) return;
+
+    SocialService.post(id)
+      .then(setOpen)
+      .catch(() => undefined)
+      .finally(() => setSearch({}, { replace: true }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per link
+  }, []);
 
   useEffect(() => {
     load();
@@ -410,6 +427,23 @@ const Posts = ({ accounts }: { accounts: AccountsState }) => {
           {(connectedPlatforms.length ? connectedPlatforms : PLATFORMS).map(p => (
             <MenuItem key={p} value={p}>
               {PLATFORM_RULES[p].label}
+            </MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          select
+          size="small"
+          label={t('posts.site')}
+          value={site}
+          onChange={e => setSite(e.target.value)}
+          SelectProps={{ displayEmpty: true }}
+          InputLabelProps={{ shrink: true }}
+          sx={{ minWidth: 170 }}
+        >
+          <MenuItem value="">{t('sites.all')}</MenuItem>
+          {SITE_IDS.map(id => (
+            <MenuItem key={id} value={id}>
+              {siteLabel(id)}
             </MenuItem>
           ))}
         </TextField>
@@ -611,10 +645,16 @@ const Posts = ({ accounts }: { accounts: AccountsState }) => {
                     <Typography sx={{ fontSize: 13.5, color: bbColors.navy900 }} noWrap>
                       {excerpt(p.text, 140) || t('posts.noText')}
                     </Typography>
-                    {(p.source === 'API' || p.note) && (
+                    {(p.source !== 'ADMIN' || p.note || p.site || p.generating) && (
                       <Typography sx={{ fontSize: 11.5, color: bbColors.gray500 }} noWrap>
-                        {p.source === 'API' ? `${t('source.API')} · ` : ''}
-                        {p.note}
+                        {[
+                          p.site ? siteLabel(p.site) : null,
+                          p.source !== 'ADMIN' ? t(`source.${p.source}`) : null,
+                          p.generating ? t('posts.generating') : null,
+                          p.note,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
                       </Typography>
                     )}
                   </Box>

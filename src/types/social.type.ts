@@ -22,6 +22,8 @@ export type SocialAccountStatus = 'CONNECTED' | 'EXPIRED' | 'ERROR';
 export interface SocialAccount {
   id: number;
   platform: SocialPlatform;
+  /** Our site this channel belongs to (Contact Center site id); null = shared by all sites (our one YouTube). */
+  site: string | null;
   /** Page / channel / handle name as the network shows it. */
   name: string;
   /** @handle, page URL or channel URL, when the network has one. */
@@ -58,14 +60,15 @@ export type SocialPostStatus = 'DRAFT' | 'SCHEDULED' | 'PUBLISHING' | 'PUBLISHED
 /** One channel of a post. */
 export type SocialTargetStatus = 'PENDING' | 'SCHEDULED' | 'PUBLISHING' | 'PUBLISHED' | 'FAILED' | 'CANCELLED';
 
-/** Who made the post: a person in the admin, or the automation API (e.g. the daily Claude task). */
-export type SocialPostSource = 'ADMIN' | 'API';
+/** Who made the post: a person in the admin, the automation API, or the daily AI post. */
+export type SocialPostSource = 'ADMIN' | 'API' | 'AI';
 
 export interface SocialPostTarget {
   id: number;
   accountId: number;
   platform: SocialPlatform;
   accountName: string;
+  site: string | null;
   /** This channel's own text; null = the post's text. */
   text: string | null;
   /** YouTube video title, Pinterest pin title, TikTok photo title. */
@@ -85,6 +88,8 @@ export interface SocialPost {
   link: string | null;
   media: SocialMedia[];
   status: SocialPostStatus;
+  /** The site the post is for (AI posts always; admin posts when all channels belong to one site). */
+  site: string | null;
   /** ISO, UTC; null = draft or "publish now". */
   scheduledAt: string | null;
   publishedAt: string | null;
@@ -95,6 +100,8 @@ export interface SocialPost {
   /** Free text from the automation (e.g. "daily-claude 2026-11-04: Kornati"). */
   note: string | null;
   targets: SocialPostTarget[];
+  /** A Higgsfield video is still being made for this post: it cannot be scheduled yet. */
+  generating?: boolean;
 }
 
 export type SocialPostAction = 'DRAFT' | 'SCHEDULE' | 'PUBLISH_NOW';
@@ -124,16 +131,15 @@ export interface SocialPostFilter {
   to?: string;
   status?: SocialPostStatus;
   platform?: SocialPlatform;
+  site?: string;
   page?: number;
   size?: number;
 }
 
+/** Spring's PagedModel. */
 export interface SocialPage<T> {
   content: T[];
-  totalElements: number;
-  totalPages: number;
-  number: number;
-  size: number;
+  page: { size: number; number: number; totalElements: number; totalPages: number };
 }
 
 /** Automation key for the public API (/api/social/v1/**, header X-Api-Key). The secret is shown once, on create. */
@@ -151,4 +157,44 @@ export interface SocialApiKey {
 export interface SocialApiKeyCreated extends SocialApiKey {
   /** The full key, returned once. */
   secret: string;
+}
+
+/** GET /admin/social/platforms: why a network cannot be connected on this server (missing app keys), or null. */
+export type SocialPlatformAvailability = Partial<Record<SocialPlatform, string | null>>;
+
+/** The daily AI post of one site. */
+export interface SocialAiSetting {
+  site: string;
+  siteName: string;
+  enabled: boolean;
+  /** HH:mm, Europe/Zagreb. */
+  publishTime: string;
+  language: string;
+  accountIds: number[];
+  /** true = the AI makes a draft and we approve it; false = it schedules the post by itself. */
+  requireApproval: boolean;
+  /** Higgsfield video from the best photo, posted to TikTok and YouTube. */
+  useVideo: boolean;
+  guidance: string | null;
+  updatedAt: string | null;
+}
+
+export type SocialAiRunStatus = 'RUNNING' | 'WAITING_VIDEO' | 'DONE' | 'SKIPPED' | 'FAILED';
+
+export interface SocialAiRun {
+  id: number;
+  site: string;
+  runDate: string;
+  status: SocialAiRunStatus;
+  topic: string | null;
+  postId: number | null;
+  error: string | null;
+  createdAt: string;
+}
+
+export interface SocialAiOverview {
+  aiConfigured: boolean;
+  higgsfieldConfigured: boolean;
+  settings: SocialAiSetting[];
+  runs: SocialAiRun[];
 }

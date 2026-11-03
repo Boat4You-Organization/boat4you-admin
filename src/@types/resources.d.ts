@@ -1045,6 +1045,44 @@ interface Resources {
     users: 'Users';
   };
   social: {
+    ai: {
+      approval: 'Wait for my approval';
+      approvalHint: 'Off: the AI schedules the post by itself.';
+      channels: 'Channels';
+      date: 'Date';
+      enabled: 'Daily post';
+      guidance: 'Notes for the AI';
+      guidancePlaceholder: 'e.g. push early booking for 2027; no gulets; mention Kornati and Vis.';
+      intro: "Every morning the AI picks a boat from the site's own fleet that was not featured lately, takes our photos of it, writes a text for each network and prepares the post. With approval on, it waits for you in Posts as a draft; otherwise it is scheduled by itself.";
+      language: 'Language';
+      loadError: 'The AI settings could not be loaded.';
+      noAi: 'The AI key is missing on the server (ANTHROPIC_API_KEY): daily posts cannot run.';
+      noChannels: "Connect this site's channels first.";
+      noHiggsfield: 'Higgsfield is not set up on the server: posts use photos only.';
+      noRuns: 'No AI posts yet.';
+      open: 'Open';
+      post: 'Post';
+      ran: 'Done: {{- status}}';
+      runError: 'The AI post failed.';
+      runNow: "Make today's post now";
+      runStatus: {
+        DONE: 'Done';
+        FAILED: 'Failed';
+        RUNNING: 'Working';
+        SKIPPED: 'Skipped';
+        WAITING_VIDEO: 'Waiting for video';
+      };
+      runs: 'Latest AI posts';
+      save: 'Save';
+      saveError: 'Saving failed.';
+      saved: 'Saved.';
+      status: 'Status';
+      time: 'Publish at';
+      timeHint: 'Europe/Zagreb; the AI prepares it 3 hours earlier.';
+      topic: 'Topic';
+      video: 'Video with Higgsfield';
+      videoHint: 'A short video from the best photo, posted to TikTok and YouTube.';
+    };
     automation: {
       accountIds: 'Channel ids';
       actionError: 'The action failed.';
@@ -1097,8 +1135,10 @@ interface Resources {
       connect: 'Connect';
       connectAnother: 'Connect another';
       connectError: 'Connecting {{- platform}} failed: {{- error}}';
+      connectFor: 'Connect {{- platform}}';
       connectStartError: 'The connection could not start.';
       connected: 'Connected: {{- platform}}.';
+      continue: 'Continue to {{- platform}}';
       credentialsTitle: 'Connect {{- platform}}';
       disconnect: 'Disconnect';
       disconnected: '{{- name}} disconnected.';
@@ -1108,11 +1148,15 @@ interface Resources {
       intro: "Connections go through each network's official API. Our backend keeps the access tokens; nobody pays a middleman.";
       loadError: 'The channels could not be loaded.';
       none: 'Not connected';
+      notConfigured: 'Not set up on the server';
+      overview: 'Channels per site';
+      overviewHint: 'What is connected for each of our sites.';
       privateOnly: 'Posts land as private until the network approves our app.';
       reconnect: 'Reconnect';
       secret: 'App password';
       secretHint: 'Bluesky → Settings → Privacy and security → App passwords. Never the main password.';
       since: 'connected {{- date}}';
+      siteSaved: 'Site saved.';
     };
     compose: {
       accountGone: 'no longer connected';
@@ -1225,17 +1269,28 @@ interface Resources {
       channel: 'Channel';
       empty: 'No posts this month';
       emptyHint: 'Write one post and send it to every channel at once.';
+      generating: 'video in progress';
       list: 'List';
       loadError: 'The posts could not be loaded.';
       more: '+{{count}} more';
       nextMonth: 'Next month';
       noText: '(no text)';
       prevMonth: 'Previous month';
+      site: 'Site';
       status: 'Status';
       today: 'Today';
     };
+    sites: {
+      all: 'All sites';
+      pick: 'Which site is this channel for?';
+      pickHint: 'Each site has its own Facebook, Instagram and TikTok; YouTube is one for all sites.';
+      selectSite: 'Select all';
+      shared: 'All sites (shared)';
+      site: 'Site';
+    };
     source: {
       ADMIN: 'Admin';
+      AI: 'AI';
       API: 'Automation';
     };
     status: {
@@ -1250,6 +1305,7 @@ interface Resources {
     };
     subtitle: 'One post, every channel: publish now or schedule it.';
     tab: {
+      ai: 'AI daily posts';
       automation: 'Automation';
       channels: 'Channels';
       compose: 'New post';

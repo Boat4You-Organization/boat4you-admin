@@ -34,6 +34,7 @@ import SocialService from '@/services/social.service';
 import { errorMessage } from '@/services/yacht-media.api';
 import { bbColors } from '@/styles/bb';
 import { SocialAccount, SocialPostAction } from '@/types/social.type';
+import { SITE_IDS, siteLabel } from '@/utils/contactCenter/safeLink';
 import {
   ComposerDraft,
   ComposerMedia,
@@ -324,6 +325,25 @@ const Composer = ({ editId, accounts }: { editId: number | null; accounts: Accou
         ...d.targets,
         ...usable
           .filter(a => !d.targets.some(x => x.accountId === a.id))
+          .map(a => ({ accountId: a.id, platform: a.platform, accountName: a.name, customText: null, title: '' })),
+      ],
+    }));
+
+  /** Channels grouped by site (our seven in order), shared channels (YouTube) last. */
+  const siteGroups = [...SITE_IDS, null]
+    .map(site => ({
+      site,
+      list: PLATFORMS.flatMap(p => accounts.list.filter(a => a.platform === p && (a.site ?? null) === site)),
+    }))
+    .filter(g => g.list.length > 0);
+
+  const selectGroup = (list: SocialAccount[]) =>
+    setDraft(d => ({
+      ...d,
+      targets: [
+        ...d.targets,
+        ...list
+          .filter(a => a.status === 'CONNECTED' && !d.targets.some(x => x.accountId === a.id))
           .map(a => ({ accountId: a.id, platform: a.platform, accountName: a.name, customText: null, title: '' })),
       ],
     }));
@@ -627,49 +647,63 @@ const Composer = ({ editId, accounts }: { editId: number | null; accounts: Accou
                 }
               />
             )}
-            <Stack direction="row" gap={1} flexWrap="wrap">
-              {PLATFORMS.flatMap(p => accounts.list.filter(a => a.platform === p)).map(a => {
-                const on = selected.has(a.id);
-                const ok = a.status === 'CONNECTED';
+            <Stack gap={1.5}>
+              {siteGroups.map(({ site, list }) => (
+                <Box key={site ?? 'shared'}>
+                  <Stack direction="row" alignItems="center" gap={1} sx={{ mb: 0.75 }}>
+                    <Typography sx={{ fontSize: 12.5, fontWeight: 700, color: bbColors.navy900 }}>
+                      {site ? siteLabel(site) : t('sites.shared')}
+                    </Typography>
+                    <Button size="small" variant="text" onClick={() => selectGroup(list)} sx={{ minHeight: 0, py: 0 }}>
+                      {t('sites.selectSite')}
+                    </Button>
+                  </Stack>
+                  <Stack direction="row" gap={1} flexWrap="wrap">
+                    {list.map(a => {
+                      const on = selected.has(a.id);
+                      const ok = a.status === 'CONNECTED';
 
-                return (
-                  <Box
-                    key={a.id}
-                    component="button"
-                    type="button"
-                    aria-pressed={on}
-                    disabled={!ok && !on}
-                    title={ok ? undefined : t('compose.accountNotUsable')}
-                    onClick={() => toggleAccount(a)}
-                    sx={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      minHeight: 38,
-                      pl: '6px',
-                      pr: '12px',
-                      borderRadius: 999,
-                      border: `1.5px solid ${on ? bbColors.navy900 : bbColors.fieldBorder}`,
-                      bgcolor: on ? bbColors.selectedRow : bbColors.white,
-                      color: bbColors.navy900,
-                      fontFamily: 'inherit',
-                      fontSize: 13,
-                      fontWeight: on ? 700 : 500,
-                      cursor: ok || on ? 'pointer' : 'not-allowed',
-                      opacity: ok ? 1 : 0.55,
-                      '&:hover': ok ? { borderColor: bbColors.navy700 } : undefined,
-                    }}
-                  >
-                    <PlatformBadge platform={a.platform} size={26} />
-                    {a.name}
-                    {on && (
-                      <Box component="span" aria-hidden sx={{ color: bbColors.green700, fontWeight: 800 }}>
-                        ✓
-                      </Box>
-                    )}
-                  </Box>
-                );
-              })}
+                      return (
+                        <Box
+                          key={a.id}
+                          component="button"
+                          type="button"
+                          aria-pressed={on}
+                          disabled={!ok && !on}
+                          title={ok ? undefined : t('compose.accountNotUsable')}
+                          onClick={() => toggleAccount(a)}
+                          sx={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            minHeight: 38,
+                            pl: '6px',
+                            pr: '12px',
+                            borderRadius: 999,
+                            border: `1.5px solid ${on ? bbColors.navy900 : bbColors.fieldBorder}`,
+                            bgcolor: on ? bbColors.selectedRow : bbColors.white,
+                            color: bbColors.navy900,
+                            fontFamily: 'inherit',
+                            fontSize: 13,
+                            fontWeight: on ? 700 : 500,
+                            cursor: ok || on ? 'pointer' : 'not-allowed',
+                            opacity: ok ? 1 : 0.55,
+                            '&:hover': ok ? { borderColor: bbColors.navy700 } : undefined,
+                          }}
+                        >
+                          <PlatformBadge platform={a.platform} size={26} />
+                          {a.name}
+                          {on && (
+                            <Box component="span" aria-hidden sx={{ color: bbColors.green700, fontWeight: 800 }}>
+                              ✓
+                            </Box>
+                          )}
+                        </Box>
+                      );
+                    })}
+                  </Stack>
+                </Box>
+              ))}
             </Stack>
           </Box>
         </DeskCard>

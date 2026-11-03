@@ -15,18 +15,20 @@ import SocialService from '@/services/social.service';
 import { errorMessage } from '@/services/yacht-media.api';
 import { SocialAccount } from '@/types/social.type';
 
+import AiTab from './AiTab';
 import Automation from './Automation';
 import Channels from './Channels';
 import Composer from './Composer';
 import Posts from './Posts';
 import { AccountsState } from './ui';
 
-type TabKey = 'posts' | 'compose' | 'channels' | 'automation';
+type TabKey = 'posts' | 'compose' | 'channels' | 'ai' | 'automation';
 
 const TAB_PATHS: Record<TabKey, string> = {
   posts: '/social',
   compose: '/social/new',
   channels: '/social/channels',
+  ai: '/social/ai',
   automation: '/social/automation',
 };
 
@@ -36,6 +38,8 @@ const tabOf = (path: string): TabKey => {
   if (path.startsWith('/social/channels')) return 'channels';
 
   if (path.startsWith('/social/automation')) return 'automation';
+
+  if (path.startsWith('/social/ai')) return 'ai';
 
   return 'posts';
 };
@@ -95,6 +99,7 @@ const Social = () => {
               label: t('tab.channels'),
               count: accounts.length || undefined,
             },
+            { value: 'ai', label: t('tab.ai') },
             { value: 'automation', label: t('tab.automation') },
           ]}
         />
@@ -104,6 +109,7 @@ const Social = () => {
           <Composer key={editId ?? `new${search}`} editId={editId ? Number(editId) : null} accounts={accountsState} />
         )}
         {tab === 'channels' && <Channels accounts={accountsState} />}
+        {tab === 'ai' && <AiTab accounts={accountsState} />}
         {tab === 'automation' && <Automation accounts={accountsState} />}
       </DeskPage>
     </Layout>

@@ -35,7 +35,7 @@ const CONTACT_CENTER_PATHS = [
   '/contact-center/recording/:id',
 ];
 
-const SOCIAL_PATHS = ['/social', '/social/new', '/social/edit/:id', '/social/channels', '/social/automation'];
+const SOCIAL_PATHS = ['/social', '/social/new', '/social/edit/:id', '/social/channels', '/social/ai', '/social/automation'];
 
 const AppRouter: React.FC = () => (
   <BrowserRouter>

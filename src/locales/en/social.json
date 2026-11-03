@@ -7,7 +7,8 @@
     "compose": "New post",
     "edit": "Edit post",
     "channels": "Channels",
-    "automation": "Automation"
+    "automation": "Automation",
+    "ai": "AI daily posts"
   },
   "ui": {
     "cancel": "Cancel"
@@ -24,7 +25,8 @@
   },
   "source": {
     "ADMIN": "Admin",
-    "API": "Automation"
+    "API": "Automation",
+    "AI": "AI"
   },
   "issue": {
     "empty": "Nothing to publish.",
@@ -63,7 +65,9 @@
     "emptyHint": "Write one post and send it to every channel at once.",
     "loadError": "The posts could not be loaded.",
     "noText": "(no text)",
-    "addOnDay": "New post on {{- date}}"
+    "addOnDay": "New post on {{- date}}",
+    "site": "Site",
+    "generating": "video in progress"
   },
   "detail": {
     "title": "Post #{{id}}",
@@ -171,7 +175,13 @@
     "credentialsTitle": "Connect {{- platform}}",
     "identifier": "Handle",
     "secret": "App password",
-    "secretHint": "Bluesky → Settings → Privacy and security → App passwords. Never the main password."
+    "secretHint": "Bluesky → Settings → Privacy and security → App passwords. Never the main password.",
+    "overview": "Channels per site",
+    "overviewHint": "What is connected for each of our sites.",
+    "notConfigured": "Not set up on the server",
+    "connectFor": "Connect {{- platform}}",
+    "continue": "Continue to {{- platform}}",
+    "siteSaved": "Site saved."
   },
   "automation": {
     "intro": "An automation key lets a scheduled Claude task (or any script) prepare posts through the API. With \"Drafts only\" a person still publishes every post from the admin.",
@@ -213,5 +223,51 @@
     "daily2": "writes the text in our voice, a shorter one for X and Bluesky, hashtags for Instagram and TikTok",
     "daily3": "takes our own photos of that boat (Boats · Media) and sends the post through this API",
     "daily4": "with a drafts-only key it waits for us: we approve it here in Posts with one click"
+  },
+  "sites": {
+    "all": "All sites",
+    "shared": "All sites (shared)",
+    "site": "Site",
+    "pick": "Which site is this channel for?",
+    "pickHint": "Each site has its own Facebook, Instagram and TikTok; YouTube is one for all sites.",
+    "selectSite": "Select all"
+  },
+  "ai": {
+    "intro": "Every morning the AI picks a boat from the site's own fleet that was not featured lately, takes our photos of it, writes a text for each network and prepares the post. With approval on, it waits for you in Posts as a draft; otherwise it is scheduled by itself.",
+    "noAi": "The AI key is missing on the server (ANTHROPIC_API_KEY): daily posts cannot run.",
+    "noHiggsfield": "Higgsfield is not set up on the server: posts use photos only.",
+    "enabled": "Daily post",
+    "time": "Publish at",
+    "timeHint": "Europe/Zagreb; the AI prepares it 3 hours earlier.",
+    "language": "Language",
+    "channels": "Channels",
+    "noChannels": "Connect this site's channels first.",
+    "approval": "Wait for my approval",
+    "approvalHint": "Off: the AI schedules the post by itself.",
+    "video": "Video with Higgsfield",
+    "videoHint": "A short video from the best photo, posted to TikTok and YouTube.",
+    "guidance": "Notes for the AI",
+    "guidancePlaceholder": "e.g. push early booking for 2027; no gulets; mention Kornati and Vis.",
+    "save": "Save",
+    "saved": "Saved.",
+    "runNow": "Make today's post now",
+    "ran": "Done: {{- status}}",
+    "runError": "The AI post failed.",
+    "runs": "Latest AI posts",
+    "date": "Date",
+    "topic": "Topic",
+    "status": "Status",
+    "post": "Post",
+    "open": "Open",
+    "noRuns": "No AI posts yet.",
+    "loadError": "The AI settings could not be loaded.",
+    "saveError": "Saving failed.",
+    "runStatus": {
+      "RUNNING": "Working",
+      "WAITING_VIDEO": "Waiting for video",
+      "DONE": "Done",
+      "SKIPPED": "Skipped",
+      "FAILED": "Failed"
+    }
   }
 }

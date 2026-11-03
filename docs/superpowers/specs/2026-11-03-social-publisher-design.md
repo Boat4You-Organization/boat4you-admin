@@ -6,6 +6,32 @@ da Claude dnevno objavljuje preko Scheduled … sve inhouse i da ne plaćamo nik
 Status: **S0 (admin UI + this contract) is in boat4you-admin. The backend part (S1–S2) is not built yet** — the admin
 page answers with errors until `/admin/social/**` exists.
 
+## Update 3.11.2026 (Mario): one channel set per site, AI daily posts, Higgsfield
+
+> „Svaki web ima svoj Facebook, Instagram i TikTok; YouTube jedan za sve. Mora biti samostalno objavljivanje, AI mora
+> raditi dnevne objave uz Higgsfield i slike koje već imamo, cijeli centar za sve društvene mreže.“
+
+What changed against the sections below (all built in S1, backend branch `claude/blissful-wright-sn6a9f`):
+
+- **Sites.** Every channel has a `site` (Contact Center site id; `null` = shared, our one YouTube). One Meta login brings
+  every page we manage and each page's Instagram; a channel gets the site its name points to and can be moved on the
+  Kanali tab (`PATCH /admin/social/accounts/{id} {site}`). Kanali shows a site × network overview; Nova objava groups
+  channels by site with "Odaberi sve" per site; Objave filters by site (`GET /admin/social/posts?site=`).
+- **AI dnevne objave** (new tab, `/admin/social/ai`): per site on/off, publish time (Europe/Zagreb), language, channels,
+  "wait for my approval" (default) or schedule by itself, Higgsfield video on/off, notes for the AI; "Napravi sada";
+  latest runs. Backend: 3 h before the time, pick a boat of the site's fleet (`/public/yachts`, country + boat types of
+  the site from BrandRegistry, not featured for 60 days), our photos (`/public/image/{id}`), Claude writes a text per
+  network (structured output; never prices or invented facts), post as DRAFT or SCHEDULED. With video: Higgsfield
+  image → 9:16 video from the best photo, a second post for TikTok + YouTube when it is ready.
+- **Higgsfield** over its HTTP API (`Authorization: Key id:secret`, model path and status path are configuration);
+  docs.higgsfield.ai was not reachable from the build session, so the paths must be checked when the account is set up.
+- **Media upload is the raw file as the body** (`POST /admin/social/media?fileName=`, Content-Type = the file's type), not
+  multipart: the server's multipart limit is 10 MB and videos are up to 500 MB.
+- **Lists are Spring `PagedModel`**: `{content, page: {size, number, totalElements, totalPages}}`.
+- `GET /admin/social/platforms` says which networks this server can connect (missing app keys → the reason).
+- Connectors in S1: Facebook, Instagram, TikTok, YouTube, Threads, LinkedIn, Bluesky. X, Pinterest, Google Business:
+  later (the admin shows "not available yet").
+
 ## Goal
 
 One place in the Broker Desk admin to:

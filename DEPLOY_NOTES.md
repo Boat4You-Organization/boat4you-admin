@@ -1,5 +1,15 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-03 — 🔥 Kontakt centar → Heatmape i „Što popraviti“ (P6 R3) — ✅ LIVE 3.11.2026 11:57 UTC (cusma1, grana `feat/cc-rec-r3` `9a559ab` → main, entry `assets/index-0HTRSdhK.js`, `HeatmapView-CZ3NybY3.js`, `Player-v7GejlKY.js`, `decode.worker-D1BoRNkW.js`), tag `live/2026-11-03-cc-rec-heatmaps`
+
+Mario 3.11.2026 („kreni sa izgradnjim“, „Da, deployaj R3“): cilj su heatmape (gdje se najviše i najmanje klika, greške u dizajnu, što dodati za više upita i rezervacija), ne gledanje pojedinih snimki.
+
+- Kartica „Heatmape“ (`/contact-center/recording`): sajt, uređaj (zadano mobitel), vrsta stranice (s brojem pregleda), 7/30/90 dana, klikovi ili scroll. Podloga = najnovija snimka te skupine nacrtana na 3 s, cijela visina; sekcije visine ekrana (vh/svh) ostaju kakve su bile na snimljenom ekranu. Iznad: pregledi, klikovi, upiti, fold, doseg 50/75/100 %. Ispod: koliki je udio klikova na slici (ostali su na izbornicima i prozorima koji se pojave kasnije) i tablica elemenata (najviše/najmanje klikani, % pregleda, mrtvi i bijesni klikovi, udio upita, link). „Snimke ove stranice“ vodi na popis.
+- „Što popraviti“ (`/contact-center/recording/insights`): kartice DEAD, RAGE, INQUIRY_ELEMENT, CTA_REACH (imenuje gumb), LOW_REACH, najgore prvo, s „Otvori heatmapu“. Treba barem 20 pregleda po vrsti stranice.
+- Popis snimki i player su sada `/contact-center/recording/list` i `/list/:id`; postavke ostaju `/settings`.
+- Provjera: testovi 59/59, tsc 0, eslint 0 grešaka; harness (spike fikstura, sandbox + inert): clickmap 13,8k px na vidljivim elementima, scrollmap cijela stranica, sekcija 78vh ostaje 0,78 ekrana. Završni pregled (Opus): 0 kritičnih; I7 (vh) i podignuti M1 (stara podloga u novom okviru) popravljeni.
+- Backend: API R3 na cusma2 od 11:36 UTC (vidi backend DEPLOY_NOTES); worker za mrtve klikove kreće s cusma3 deployem 18:07 UTC (BOAT4YOU 3, jar 5c32cbd).
+
 ## 2026-11-03 — 🎬 Kontakt centar → Snimke: popis snimki i player (P6 R2) — ✅ LIVE 3.11.2026 09:13 UTC (cusma1, main `3f64802`, entry `assets/index-PS7NtQJP.js`, player `Player-BbQHCEHy.js` 802 kB lijeno, `decode.worker-D1BoRNkW.js`), tag `live/2026-11-03-cc-rec-player`
 
 Mario 3.11.2026 („Da, kreni s R2“, „da“).

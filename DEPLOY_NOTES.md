@@ -1,5 +1,9 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-03 — 🅱️ Novi logo „B“ umjesto „B4“ — ✅ DEPLOYANO 3.11.2026 (cusma1, main `8aa877d`, entry `assets/index-EGLXedaN.js`)
+
+Mario 3.11.2026: okrugli logo B (jedro + trup u brojaču), žuta pozadina, navy slovo. Komponenta `src/components/BrandMark` (inline SVG) u headeru i AuthShell (3 mjesta); favikoni admina (`public/favicons/*`) iz istog znaka. Izvorni SVG/PNG/ICO u `_design/logo-b` (delivery repo, nije u gitu). Verifikacija: root/deep/asset 200, live == new.
+
 ## 2026-11-01 — 🎥 Kontakt centar → Snimanje: prekidač i udio snimanja po sajtu, linkovi za oznaku tima (P6 R1) — ✅ LIVE 1.11.2026 11:15 UTC (cusma1, main `0466541`, entry `assets/index-fD2q2GFs.js`), tag `live/2026-11-01-cc-rec`
 
 Mario 1.11.2026 („Da, nastavi R1“, „Da, deployaj R1“).

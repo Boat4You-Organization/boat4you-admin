@@ -20,6 +20,8 @@ import {
   RecInsight,
   RecRow,
   RecSiteSetting,
+  SearchQuerySort,
+  SearchQueryStat,
 } from '@/types/contactCenter.type';
 
 /** Drops empty and false-y defaults so the query string carries only the filters in use. */
@@ -63,6 +65,17 @@ const ContactCenterService = {
     api.get<CcFunnel>('/admin/cc/funnel', { params: params(query) }),
   searchEngines: (query: { from?: string; to?: string; siteId?: string; country?: string; device?: string }) =>
     api.get<CcSearchEngines>('/admin/cc/search-engines', { params: params(query) }),
+  /** Google's query table in its own order, for one landing page when path (of siteId) is given. */
+  searchEngineQueries: (query: {
+    from?: string;
+    to?: string;
+    siteId?: string;
+    country?: string;
+    device?: string;
+    path?: string;
+    sort?: SearchQuerySort;
+    dir?: 'asc' | 'desc';
+  }) => api.get<SearchQueryStat[]>('/admin/cc/search-engines/queries', { params: params(query) }),
   recSettings: () => api.get<RecSiteSetting[]>('/admin/cc/rec/settings'),
   recordings: (filter: RecFilter) => api.get<RecRow[]>('/admin/cc/rec/page-views', { params: params(filter) }),
   recording: (id: number) => api.get<RecDetail>(`/admin/cc/rec/page-views/${id}`),

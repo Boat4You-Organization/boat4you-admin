@@ -245,6 +245,9 @@ export interface EngineTotals {
   position: number | null;
 }
 
+/** The order of GET /admin/cc/search-engines/queries; CTR and position rank only queries with ten impressions or more. */
+export type SearchQuerySort = 'CLICKS' | 'IMPRESSIONS' | 'CTR' | 'POSITION';
+
 export interface SearchQueryStat {
   query: string;
   siteIds: string[];

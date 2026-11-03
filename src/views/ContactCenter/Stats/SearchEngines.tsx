@@ -1,13 +1,14 @@
 /* Search engines (F1, backend SearchEngineQuery): Google Search Console and Bing Webmaster Tools next to our organic visits.
- * Same range and site as the rest of Statistics; country and device filter only this section (Bing has neither). */
+ * Same range and site as the rest of Statistics; country and device filter only this section (Bing has neither). The Google
+ * query table has its own order and landing page: anything but clicks for the whole site asks /search-engines/queries. */
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { Box } from '@mui/material';
+import { Box, TableSortLabel } from '@mui/material';
 import dayjs from 'dayjs';
 
 import ContactCenterService from '@/services/contactCenter.service';
-import { CcSearchEngines, EngineTotals, SearchQueryStat } from '@/types/contactCenter.type';
+import { CcSearchEngines, EngineTotals, SearchQuerySort, SearchQueryStat } from '@/types/contactCenter.type';
 import { siteLabel } from '@/utils/contactCenter/safeLink';
 import { Bars, Metric, barGrid, cardSx, kpiGrid } from '@/views/ContactCenter/Stats/parts';
 import { InfoIcon, LoadAlert, SectionLabel, cc, fieldSx, tableSx } from '@/views/ContactCenter/ui';
@@ -38,7 +39,21 @@ const COUNTRIES = [
   'AU',
 ];
 
+/** The sortable columns with their translation key; position starts best first, the rest most first. */
+const SORTS: Array<[SearchQuerySort, 'clicks' | 'impressions' | 'ctr' | 'position']> = [
+  ['CLICKS', 'clicks'],
+  ['IMPRESSIONS', 'impressions'],
+  ['CTR', 'ctr'],
+  ['POSITION', 'position'],
+];
+const MIN_IMPRESSIONS = 10; // backend SearchEngineQuery.MIN_IMPRESSIONS
+
+type Sort = { key: SearchQuerySort; asc: boolean };
+
+const BY_CLICKS: Sort = { key: 'CLICKS', asc: false };
+
 const titleSx = { m: 0, fontSize: 14, fontWeight: 700, color: cc.ink } as const;
+const sortSx = { color: 'inherit', fontSize: 'inherit', fontWeight: 'inherit', flexDirection: 'row-reverse' } as const;
 const ellipsisSx = { maxWidth: 360, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } as const;
 
 const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?: string }) => {
@@ -47,6 +62,22 @@ const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?
   const [device, setDevice] = useState('');
   const [data, setData] = useState<CcSearchEngines | null>(null);
   const [failed, setFailed] = useState(false);
+  const [page, setPage] = useState(''); // `${siteId}|${path}` of the landing page, '' = whole site
+  const [pageOf, setPageOf] = useState(siteId);
+  const [sort, setSort] = useState<Sort>(BY_CLICKS);
+  const [own, setOwn] = useState<{ key: string; rows: SearchQueryStat[] } | null>(null);
+
+  if (pageOf !== siteId) {
+    // A page of another site does not fit the new site filter.
+    setPageOf(siteId);
+    setPage('');
+  }
+
+  const cut = page.indexOf('|');
+  const pageSite = page ? page.slice(0, cut) : undefined;
+  const pagePath = page ? page.slice(cut + 1) : undefined;
+  const custom = page !== '' || sort.key !== BY_CLICKS.key || sort.asc !== BY_CLICKS.asc;
+  const ownKey = [from, to, siteId, country, device, page, sort.key, sort.asc].join('~');
 
   useEffect(() => {
     let current = true;
@@ -65,6 +96,29 @@ const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?
     };
   }, [from, to, siteId, country, device]);
 
+  useEffect(() => {
+    if (!custom) return undefined;
+
+    let current = true;
+
+    ContactCenterService.searchEngineQueries({
+      from,
+      to,
+      siteId: pageSite ?? siteId,
+      country: country || undefined,
+      device: device || undefined,
+      path: pagePath,
+      sort: sort.key,
+      dir: sort.asc ? 'asc' : 'desc',
+    })
+      .then(({ data: rows }) => current && setOwn({ key: ownKey, rows }))
+      .catch(() => current && setFailed(true));
+
+    return () => {
+      current = false;
+    };
+  }, [custom, ownKey]); // eslint-disable-line react-hooks/exhaustive-deps -- ownKey carries every input
+
   const fmt = new Intl.NumberFormat(i18n.language);
   const fmt1 = new Intl.NumberFormat(i18n.language, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
   const countryName = (code: string) => new Intl.DisplayNames([i18n.language], { type: 'region' }).of(code) ?? code;
@@ -77,20 +131,62 @@ const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?
   const hidden =
     data && data.google.clicks ? Math.round((1 - data.googleClicksWithQuery / data.google.clicks) * 100) : null;
 
-  const queryTable = (title: string, rows: SearchQueryStat[]) => (
+  const ariaDir = sort.asc ? 'ascending' : 'descending';
+  const onSort = (key: SearchQuerySort) =>
+    setSort(s => (s.key === key ? { key, asc: !s.asc } : { key, asc: key === 'POSITION' }));
+  const pageOptions = data ? data.pages.map(p => ({ siteId: p.siteId, path: p.path })) : [];
+
+  if (pageSite && pagePath && !pageOptions.some(p => p.siteId === pageSite && p.path === pagePath)) {
+    pageOptions.unshift({ siteId: pageSite, path: pagePath });
+  }
+
+  /** A query table; [sortable] (Google) adds the landing page choice and the column order. */
+  const queryTable = (title: string, rows: SearchQueryStat[], sortable = false, pending = false) => (
     <Box sx={{ ...cardSx, mb: '12px', overflowX: 'auto' }}>
-      <Box component="h3" sx={titleSx}>
-        {title}
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 14px' }}>
+        <Box component="h3" sx={titleSx}>
+          {title}
+        </Box>
+        {sortable && (
+          <Box
+            component="select"
+            aria-label={t('searchEngines.page')}
+            value={page}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPage(e.target.value)}
+            sx={{ ...fieldSx, width: { xs: '100%', sm: 340 } }}
+          >
+            <option value="">{t('searchEngines.pageAll')}</option>
+            {pageOptions.map(p => (
+              <option key={`${p.siteId}|${p.path}`} value={`${p.siteId}|${p.path}`}>
+                {siteId ? p.path : `${siteLabel(p.siteId)} ${p.path}`}
+              </option>
+            ))}
+          </Box>
+        )}
       </Box>
-      <Box component="table" sx={tableSx}>
+      <Box component="table" sx={{ ...tableSx, opacity: pending ? 0.5 : 1 }}>
         <thead>
           <tr>
             <th>{t('searchEngines.query')}</th>
             {!siteId && <th>{t('filter.site')}</th>}
-            <th className="num">{t('searchEngines.clicks')}</th>
-            <th className="num">{t('searchEngines.impressions')}</th>
-            <th className="num">{t('searchEngines.ctr')}</th>
-            <th className="num">{t('searchEngines.position')}</th>
+            {SORTS.map(([key, label]) =>
+              sortable ? (
+                <th key={key} className="num" aria-sort={sort.key === key ? ariaDir : undefined}>
+                  <TableSortLabel
+                    active={sort.key === key}
+                    direction={(sort.key === key ? sort.asc : key === 'POSITION') ? 'asc' : 'desc'}
+                    onClick={() => onSort(key)}
+                    sx={sortSx}
+                  >
+                    {t(`searchEngines.${label}`)}
+                  </TableSortLabel>
+                </th>
+              ) : (
+                <th key={key} className="num">
+                  {t(`searchEngines.${label}`)}
+                </th>
+              )
+            )}
           </tr>
         </thead>
         <tbody>
@@ -109,6 +205,11 @@ const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?
         </tbody>
       </Box>
       {!rows.length && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
+      {sortable && (sort.key === 'CTR' || sort.key === 'POSITION') && (
+        <Box sx={{ fontSize: 12, color: cc.muted, lineHeight: 1.5 }}>
+          {t('searchEngines.minImpressions', { n: MIN_IMPRESSIONS })}
+        </Box>
+      )}
     </Box>
   );
 
@@ -229,7 +330,12 @@ const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?
               </Box>
             </Box>
           )}
-          {queryTable(t('searchEngines.googleQueries'), data.googleQueries)}
+          {queryTable(
+            t('searchEngines.googleQueries'),
+            custom ? (own?.rows ?? []) : data.googleQueries,
+            true,
+            custom && own?.key !== ownKey
+          )}
           {data.bing && queryTable(t('searchEngines.bingQueries'), data.bingQueries)}
           <Box sx={{ ...cardSx, overflowX: 'auto' }}>
             <Box component="h3" sx={titleSx}>

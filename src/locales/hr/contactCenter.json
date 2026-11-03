@@ -399,9 +399,11 @@
       "noBackground": "Za ovu skupinu nema podloge (snimke su starije od 60 dana): prikazuje se samo popis elemenata.",
       "noMouse": "Za ovaj uređaj nema podataka o mišu. Mobitel i tablet nemaju miš, a snimke prije uključenja praćenja miša ne nose element pokreta.",
       "shown": "Na slici je {{pct}} % klikova. Ostali su na elementima koji se pojave kasnije (izbornik, prozor, galerija) i vide se samo u tablici.",
+      "shownHover": "Na slici je {{pct}} % vremena miša. Ostatak je na elementima koji se pojave kasnije (izbornik, prozor, galerija) i vidi se samo u tablici.",
       "empty": "Nema podataka za odabrane filtre.",
       "loading": "Učitavam heatmapu…",
       "note": "Klikovi se zbrajaju po elementu svih posjeta u razdoblju; crveno je najviše klikano. Mrtvi klik: ništa se nije dogodilo. Bijesni: isti element 3+ puta unutar sekunde.",
+      "noteHover": "Gdje miš najdulje stoji: crveno = najdulje, plavo = najkraće. Samo desktop; svako zadržavanje broji najviše 2 sekunde, pa parkirani miš ne iskrivljuje kartu.",
       "watch": "Snimke ove stranice"
     },
     "ins": {

@@ -201,12 +201,16 @@ const HeatmapView = () => {
         replay.clickmap(toActivity(data.elements, data.points));
         setShown(shownShare(data.elements, h => replay.has(h)));
       } else if (mode === 'hover') {
-        replay.clickmap(toHoverActivity(data.hover));
+        const hover = data.hover ?? {};
+
+        replay.clickmap(toHoverActivity(hover));
         setShown(
-          shownShare(
-            Object.entries(data.hover).map(([hash, pts]) => ({ hash, clicks: pts.reduce((n, p) => n + p.ms, 0) })),
-            h => replay.has(h)
-          )
+          Object.keys(hover).length
+            ? shownShare(
+                Object.entries(hover).map(([hash, pts]) => ({ hash, clicks: pts.reduce((n, p) => n + p.ms, 0) })),
+                h => replay.has(h)
+              )
+            : null
         );
       } else replay.scrollmap(toScrollMap(data.scroll), Math.round((data.foldPct / 100) * size.h));
     });
@@ -305,7 +309,9 @@ const HeatmapView = () => {
           ]}
         />
       </Box>
-      <Box sx={{ fontSize: 12, color: cc.muted, mb: '10px', lineHeight: 1.5 }}>{t('rec.heat.note')}</Box>
+      <Box sx={{ fontSize: 12, color: cc.muted, mb: '10px', lineHeight: 1.5 }}>
+        {t(mode === 'hover' ? 'rec.heat.noteHover' : 'rec.heat.note')}
+      </Box>
       {failed && (
         <Box sx={{ mb: 2 }}>
           <LoadAlert text={t('loadFailed')} />
@@ -317,7 +323,7 @@ const HeatmapView = () => {
           <span>{`${t('rec.heat.pageViews')}: ${data.pageViews}`}</span>
           <span>{`${t('rec.heat.clicks')}: ${data.clicks}`}</span>
           <span>{`${t('rec.heat.inquiries')}: ${data.inquiryPageViews}`}</span>
-          <span>{`${t('rec.heat.mouse')}: ${data.hoverPageViews}`}</span>
+          <span>{`${t('rec.heat.mouse')}: ${data.hoverPageViews ?? 0}`}</span>
           <span>{`${t('rec.heat.fold')}: ${t('rec.heat.foldValue', { pct: data.foldPct })}`}</span>
           {[50, 75, 100].map(d => (
             <span
@@ -336,7 +342,7 @@ const HeatmapView = () => {
       {data && bgState === 'none' && (
         <Box sx={{ fontSize: 12.5, color: cc.muted, mb: '10px' }}>{t('rec.heat.noBackground')}</Box>
       )}
-      {data && mode === 'hover' && Object.keys(data.hover).length === 0 && (
+      {data && mode === 'hover' && Object.keys(data.hover ?? {}).length === 0 && (
         <Box sx={{ fontSize: 12.5, color: cc.muted, mb: '10px' }}>{t('rec.heat.noMouse')}</Box>
       )}
       {data && bgState === 'failed' && <LoadAlert text={t('rec.player.failed')} />}
@@ -382,7 +388,7 @@ const HeatmapView = () => {
       </Box>
       {bgState === 'ready' && mode !== 'scroll' && shown !== null && shown < 100 && (
         <Box sx={{ fontSize: 12.5, color: cc.muted, mt: '-6px', mb: '12px', textAlign: 'center' }}>
-          {t('rec.heat.shown', { pct: shown })}
+          {t(mode === 'hover' ? 'rec.heat.shownHover' : 'rec.heat.shown', { pct: shown })}
         </Box>
       )}
       {data && data.elements.length > 0 && (
@@ -437,7 +443,7 @@ const HeatmapView = () => {
                       {e.rage}
                     </td>
                     <td className="num">{`${pct(e.inquiryClicks, e.clicks)} %`}</td>
-                    <td className="num">{`${Math.round(e.hoverMs / 1000)} s`}</td>
+                    <td className="num">{`${Math.round((e.hoverMs ?? 0) / 1000)} s`}</td>
                     <td>
                       <Box
                         component="span"

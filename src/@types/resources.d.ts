@@ -559,12 +559,14 @@ interface Resources {
         noBackground: 'No background for this group (its recordings are older than 60 days): only the element list is shown.';
         noMouse: 'No mouse data for this device. Phones and tablets have no mouse, and recordings made before mouse tracking was switched on carry no element on a move.';
         note: 'Clicks add up per element across all visits of the period; red is the most clicked. Dead click: nothing happened. Rage: the same element 3+ times within a second.';
+        noteHover: 'Where the mouse rests longest: red = longest, blue = shortest. Desktop only; each stay counts at most 2 seconds, so a parked mouse does not skew the map.';
         pageType: 'Page type';
         pageViews: 'Page views';
         range90: '90 days';
         reach: 'Reach';
         reachValue: 'to {{pct}} % of the page: {{share}} % of page views';
         shown: '{{pct}} % of the clicks are on the picture. The rest are on elements that appear later (a menu, dialog or gallery) and are only in the table.';
+        shownHover: '{{pct}} % of the mouse time is on the picture. The rest is on elements that appear later (a menu, dialog or gallery) and is only in the table.';
         sortLeast: 'Least clicked';
         sortMost: 'Most clicked';
         watch: 'Recordings of this page';

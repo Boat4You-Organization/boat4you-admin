@@ -16,6 +16,35 @@ Deploy:
 - [ ] nginx na api.boat4you.com: `client_max_body_size 512m` samo za `/admin/social/media` (video).
 - [ ] Developer aplikacije mreža (Meta, LinkedIn, Google, TikTok, Pinterest, X) — popis u specu, § „What Mario has to do“.
 
+## 3.11.2026 — admin installable on the phone (PWA) (a5f6d73)
+
+- `public/manifest.json` (Boat4You Admin / B4Y Admin, start `/bookings`, standalone, navy theme), maskable 192/512 icons, full-bleed yellow `apple-touch-icon` (`?v=4`), iOS/Android web-app meta in `index.html`. Old placeholder `favicons/site.webmanifest` removed. No service worker (nothing cached, deploys show at once).
+- Live on cusma1; manifest served as application/json, icons 200.
+
+## 3.11.2026 — admin stays signed in across reloads; Live visitors source chip (730eec2)
+
+- `src/config/tokenStore.ts`: access + refresh token JSON now persisted in localStorage (`b4y-admin-auth`), so a reload / new tab / browser restart keeps the session. Ends when the backend refresh token expires (3 days from login, `security.jwt.refresh-token.expiration`) or on Log out. Reverses the in-memory choice of S-002 (Mario's call).
+- Live visitors: the "from site" under Source is a coloured SiteChip.
+- Deployed to cusma1, entry `assets/index-BkXAuIsR.js`, root/deep/asset 200.
+
+## 2026-11-03 — 📊 Kontakt centar → Statistika: „Tražilice: Google i Bing“ (F1) — ✅ LIVE 3.11.2026 13:24:50 UTC (cusma1, main `7664113` = grana `feat/cc-search-engines` `e55a2bf`, entry `assets/index-DWw8CtqE.js`, root/deep/asset 200)
+
+Mario 3.11.: „Da, kreni s F1“, „Da, deployaj“. Backend `GET /admin/cc/search-engines` live na cusma2 13:24:22 UTC (V9_119); podatke puni SearchImportJob na cusma3 (od cusma3 deploya 18:07 UTC; prvi uvoz povijesti ~16 h).
+- Nova sekcija ispod lijevka, isti raspon i sajt kao ostatak Statistike, vlastiti filter zemlje i uređaja (uz njih Bing nestaje: nema zemlju ni uređaj). KPI Google/Bing uz naše organske posjete i upite iz njih, posjeti po tražilici, tablica po sajtu, top traženi pojmovi (Google, Bing), ulazne stranice s 3 glavna pojma.
+- Napomena: samo zbirne brojke, kašnjenje 2–3 dana (zadnji uvezeni dan), udio klikova kojima Google skriva pojam; prije prvog uvoza „—“ i rečenica o 16 h.
+- Kanal ORGANIC sada „Tražilice (organski)“ (bio „Google (organski)“, a uvijek je uključivao i Bing i ostale).
+- Provjere: tsc 0, eslint 0 grešaka (15 starih upozorenja drugdje), `yarn test` 59/59, `vite build` OK; lokalno s mock API-jem i pravim GSC podacima (hr/en, filter zemlje šalje `country=US`, prazno stanje, 390 px bez horizontalnog skrola). Pravi backend s podacima još nije viđen (čeka cusma3 import).
+
+## 2026-11-03 — 🔥 Kontakt centar → Heatmape i „Što popraviti“ (P6 R3) — ✅ LIVE 3.11.2026 11:57 UTC (cusma1, grana `feat/cc-rec-r3` `9a559ab` → main, entry `assets/index-0HTRSdhK.js`, `HeatmapView-CZ3NybY3.js`, `Player-v7GejlKY.js`, `decode.worker-D1BoRNkW.js`), tag `live/2026-11-03-cc-rec-heatmaps`
+
+Mario 3.11.2026 („kreni sa izgradnjim“, „Da, deployaj R3“): cilj su heatmape (gdje se najviše i najmanje klika, greške u dizajnu, što dodati za više upita i rezervacija), ne gledanje pojedinih snimki.
+
+- Kartica „Heatmape“ (`/contact-center/recording`): sajt, uređaj (zadano mobitel), vrsta stranice (s brojem pregleda), 7/30/90 dana, klikovi ili scroll. Podloga = najnovija snimka te skupine nacrtana na 3 s, cijela visina; sekcije visine ekrana (vh/svh) ostaju kakve su bile na snimljenom ekranu. Iznad: pregledi, klikovi, upiti, fold, doseg 50/75/100 %. Ispod: koliki je udio klikova na slici (ostali su na izbornicima i prozorima koji se pojave kasnije) i tablica elemenata (najviše/najmanje klikani, % pregleda, mrtvi i bijesni klikovi, udio upita, link). „Snimke ove stranice“ vodi na popis.
+- „Što popraviti“ (`/contact-center/recording/insights`): kartice DEAD, RAGE, INQUIRY_ELEMENT, CTA_REACH (imenuje gumb), LOW_REACH, najgore prvo, s „Otvori heatmapu“. Treba barem 20 pregleda po vrsti stranice.
+- Popis snimki i player su sada `/contact-center/recording/list` i `/list/:id`; postavke ostaju `/settings`.
+- Provjera: testovi 59/59, tsc 0, eslint 0 grešaka; harness (spike fikstura, sandbox + inert): clickmap 13,8k px na vidljivim elementima, scrollmap cijela stranica, sekcija 78vh ostaje 0,78 ekrana. Završni pregled (Opus): 0 kritičnih; I7 (vh) i podignuti M1 (stara podloga u novom okviru) popravljeni.
+- Backend: API R3 na cusma2 od 11:36 UTC (vidi backend DEPLOY_NOTES); worker za mrtve klikove kreće s cusma3 deployem 18:07 UTC (BOAT4YOU 3, jar 5c32cbd).
+
 ## 2026-11-03 — 🎬 Kontakt centar → Snimke: popis snimki i player (P6 R2) — ✅ LIVE 3.11.2026 09:13 UTC (cusma1, main `3f64802`, entry `assets/index-PS7NtQJP.js`, player `Player-BbQHCEHy.js` 802 kB lijeno, `decode.worker-D1BoRNkW.js`), tag `live/2026-11-03-cc-rec-player`
 
 Mario 3.11.2026 („Da, kreni s R2“, „da“).

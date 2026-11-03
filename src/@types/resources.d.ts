@@ -360,7 +360,7 @@ interface Resources {
       ADS: 'Ads';
       DIRECT: 'Direct';
       EMAIL: 'E-mail';
-      ORGANIC: 'Google (organic)';
+      ORGANIC: 'Search engines (organic)';
       OTHER: 'Other';
       REFERRAL: 'Other site';
       SISTER: 'Our sister site';
@@ -534,6 +534,49 @@ interface Resources {
     rec: {
       conversationLink: 'Recordings of this visit';
       enabled: 'Recording';
+      heat: {
+        clicks: 'Clicks';
+        col: {
+          clicks: 'Clicks';
+          dead: 'Dead';
+          element: 'Element';
+          inquiryShare: 'From visits with an inquiry';
+          link: 'Goes to';
+          pageViewShare: '% of page views';
+          rage: 'Rage';
+        };
+        device: 'Device';
+        empty: 'No data for these filters.';
+        fold: 'First screen';
+        foldValue: '{{pct}} % of the page';
+        inquiries: 'Page views of visits with an inquiry';
+        loading: 'Loading the heatmap…';
+        modeClicks: 'Clicks';
+        modeScroll: 'Scroll';
+        noBackground: 'No background for this group (its recordings are older than 60 days): only the element list is shown.';
+        note: 'Clicks add up per element across all visits of the period; red is the most clicked. Dead click: nothing happened. Rage: the same element 3+ times within a second.';
+        pageType: 'Page type';
+        pageViews: 'Page views';
+        range90: '90 days';
+        reach: 'Reach';
+        reachValue: 'to {{pct}} % of the page: {{share}} % of page views';
+        shown: '{{pct}} % of the clicks are on the picture. The rest are on elements that appear later (a menu, dialog or gallery) and are only in the table.';
+        sortLeast: 'Least clicked';
+        sortMost: 'Most clicked';
+        watch: 'Recordings of this page';
+      };
+      ins: {
+        empty: 'No findings yet. A page type needs at least 20 page views; data is collected every day.';
+        kind: {
+          CTA_REACH: 'On the {{page}} page only {{percent}} % of page views get as far as the "{{label}}" button (at {{count}} % of the page height). Move it up or add it at the top too.';
+          DEAD: '"{{label}}" on the {{page}} page: {{count}} clicks with no reaction ({{percent}} % of its clicks). People expect it to open something: make it clickable or change it.';
+          INQUIRY_ELEMENT: 'Visitors who send an inquiry often click "{{label}}" on the {{page}} page ({{percent}} % of their page views, at least twice as often as the others). Make it stand out for everyone.';
+          LOW_REACH: 'On the {{page}} page only {{percent}} % of page views see the lower half of the page. Put important content higher.';
+          RAGE: '"{{label}}" on the {{page}} page: clicked again and again {{count}} times. It is probably slow or broken.';
+        };
+        openHeatmap: 'Open the heatmap';
+        pageViews: '{{count}} page views';
+      };
       invalid: 'The share must be a whole number from 0 to 100.';
       list: {
         clearScope: 'All visits';
@@ -591,6 +634,8 @@ interface Resources {
       staffTitle: 'This browser as the team';
       staffUnmark: 'Remove the mark';
       views: {
+        heatmaps: 'Heatmaps';
+        insights: 'What to fix';
         list: 'Recordings';
         settings: 'Settings';
       };
@@ -613,6 +658,49 @@ interface Resources {
     saveFailed: 'Saving failed.';
     savesNow: 'saves at once';
     search: 'Search';
+    searchEngines: {
+      bingClicks: 'Bing clicks';
+      bingImpressions: 'Bing impressions';
+      bingNoFilter: 'Bing has no country or device, so it is left out with that filter.';
+      bingQueries: 'Top queries on Bing';
+      bingShort: 'Bing clicks / impressions';
+      byEngine: 'Our organic visits by search engine';
+      bySite: 'By site';
+      clicks: 'Clicks';
+      country: 'Country';
+      countryAll: 'Country: all';
+      ctr: 'CTR';
+      engine: {
+        BING: 'Bing';
+        DUCKDUCKGO: 'DuckDuckGo';
+        ECOSIA: 'Ecosia';
+        GOOGLE: 'Google';
+        OTHER: 'Other';
+        YAHOO: 'Yahoo';
+        YANDEX: 'Yandex';
+      };
+      firstImport: "The first import of Google's history (16 months) takes about 16 hours after it is switched on.";
+      googleClicks: 'Google clicks';
+      googleCtr: 'Google CTR';
+      googleImpressions: 'Google impressions';
+      googlePosition: 'Google avg. position';
+      googleQueries: 'Top queries on Google';
+      googleShort: 'Google clicks / impressions';
+      hidden: 'Google hides the query of {{n}} % of clicks, so the clicks by query are not all traffic.';
+      impressions: 'Impressions';
+      inquiries: 'Inquiries';
+      none: '—';
+      note: 'Google and Bing give totals per query and page only, never a single visitor. Their data is 2 to 3 days late (last imported day: Google {{google}}, Bing {{bing}}). Our organic visits count only visitors who consented.';
+      organicInquiries: 'Inquiries from organic visits';
+      organicVisits: 'Our organic visits';
+      pages: 'Landing pages';
+      pagesNote: "Clicks, impressions and queries are Google's for the page. Org. visits and inquiries are our visits that came from a search engine to that page and the inquiries sent in those visits.";
+      position: 'Position';
+      query: 'Query';
+      title: 'Search engines: Google and Bing';
+      topQueries: 'Main queries (Google)';
+      visits: 'Org. visits';
+    };
     searchPlaceholder: 'Search name, e-mail or message text';
     selectAll: 'Select all';
     selectConversation: 'Select conversation';
@@ -662,7 +750,7 @@ interface Resources {
       contacts: 'Contacts';
       conversations: 'Conversations';
       live: 'Live visitors';
-      recording: 'Recordings';
+      recording: 'Heatmaps';
       stats: 'Statistics';
     };
     tagPlaceholder: 'e.g. vip';

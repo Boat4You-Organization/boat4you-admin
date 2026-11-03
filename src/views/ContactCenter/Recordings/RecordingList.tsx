@@ -24,6 +24,10 @@ const RANGES: Range[] = ['today', '7d', '30d'];
 export interface RecScope {
   visitId?: number;
   conversationId?: number;
+  /** From a heatmap: its site, page type and device as the starting filters. */
+  siteId?: string;
+  pageType?: string;
+  device?: string;
 }
 
 const startOf = (range: Range) =>
@@ -53,9 +57,9 @@ const RecordingList = ({
   const { t } = useTranslation('contactCenter');
   const scoped = scope.visitId !== undefined || scope.conversationId !== undefined;
   const [range, setRange] = useState<Range>('7d');
-  const [siteId, setSiteId] = useState('');
-  const [device, setDevice] = useState('');
-  const [pageType, setPageType] = useState('');
+  const [siteId, setSiteId] = useState(scope.siteId ?? '');
+  const [device, setDevice] = useState(scope.device ?? '');
+  const [pageType, setPageType] = useState(scope.pageType ?? '');
   const [rageOnly, setRageOnly] = useState(false);
   const [noInquiry, setNoInquiry] = useState(false);
   const [rows, setRows] = useState<RecRow[] | null>(null);

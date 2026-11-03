@@ -5,7 +5,7 @@
     "live": "Live visitors",
     "contacts": "Contacts",
     "stats": "Statistics",
-    "recording": "Recordings"
+    "recording": "Heatmaps"
   },
   "status": {
     "AI": "AI",
@@ -30,7 +30,7 @@
     "SYSTEM": "System"
   },
   "channel": {
-    "ORGANIC": "Google (organic)",
+    "ORGANIC": "Search engines (organic)",
     "ADS": "Ads",
     "SISTER": "Our sister site",
     "DIRECT": "Direct",
@@ -260,6 +260,49 @@
       "OTHER": "Other"
     }
   },
+  "searchEngines": {
+    "title": "Search engines: Google and Bing",
+    "country": "Country",
+    "countryAll": "Country: all",
+    "none": "—",
+    "firstImport": "The first import of Google's history (16 months) takes about 16 hours after it is switched on.",
+    "note": "Google and Bing give totals per query and page only, never a single visitor. Their data is 2 to 3 days late (last imported day: Google {{google}}, Bing {{bing}}). Our organic visits count only visitors who consented.",
+    "hidden": "Google hides the query of {{n}} % of clicks, so the clicks by query are not all traffic.",
+    "bingNoFilter": "Bing has no country or device, so it is left out with that filter.",
+    "googleClicks": "Google clicks",
+    "googleImpressions": "Google impressions",
+    "googleCtr": "Google CTR",
+    "googlePosition": "Google avg. position",
+    "bingClicks": "Bing clicks",
+    "bingImpressions": "Bing impressions",
+    "organicVisits": "Our organic visits",
+    "organicInquiries": "Inquiries from organic visits",
+    "byEngine": "Our organic visits by search engine",
+    "bySite": "By site",
+    "googleShort": "Google clicks / impressions",
+    "bingShort": "Bing clicks / impressions",
+    "visits": "Org. visits",
+    "inquiries": "Inquiries",
+    "googleQueries": "Top queries on Google",
+    "bingQueries": "Top queries on Bing",
+    "query": "Query",
+    "clicks": "Clicks",
+    "impressions": "Impressions",
+    "ctr": "CTR",
+    "position": "Position",
+    "pages": "Landing pages",
+    "topQueries": "Main queries (Google)",
+    "pagesNote": "Clicks, impressions and queries are Google's for the page. Org. visits and inquiries are our visits that came from a search engine to that page and the inquiries sent in those visits.",
+    "engine": {
+      "GOOGLE": "Google",
+      "BING": "Bing",
+      "DUCKDUCKGO": "DuckDuckGo",
+      "YAHOO": "Yahoo",
+      "ECOSIA": "Ecosia",
+      "YANDEX": "Yandex",
+      "OTHER": "Other"
+    }
+  },
   "rec": {
     "note": "Visits are recorded only with analytics consent. A site that is switched off records nothing and the server refuses its payloads. The share is the percentage of visits with consent that are recorded; on a phone recording starts only after the visitor's first touch, scroll or key.",
     "site": "Site",
@@ -276,7 +319,9 @@
     "staffUnmark": "Remove the mark",
     "views": {
       "list": "Recordings",
-      "settings": "Settings"
+      "settings": "Settings",
+      "heatmaps": "Heatmaps",
+      "insights": "What to fix"
     },
     "list": {
       "empty": "No recordings for these filters.",
@@ -322,6 +367,49 @@
         "errors": "Errors"
       }
     },
-    "conversationLink": "Recordings of this visit"
+    "conversationLink": "Recordings of this visit",
+    "heat": {
+      "pageType": "Page type",
+      "device": "Device",
+      "range90": "90 days",
+      "modeClicks": "Clicks",
+      "modeScroll": "Scroll",
+      "pageViews": "Page views",
+      "clicks": "Clicks",
+      "inquiries": "Page views of visits with an inquiry",
+      "fold": "First screen",
+      "foldValue": "{{pct}} % of the page",
+      "reach": "Reach",
+      "reachValue": "to {{pct}} % of the page: {{share}} % of page views",
+      "col": {
+        "element": "Element",
+        "clicks": "Clicks",
+        "pageViewShare": "% of page views",
+        "rage": "Rage",
+        "dead": "Dead",
+        "inquiryShare": "From visits with an inquiry",
+        "link": "Goes to"
+      },
+      "sortMost": "Most clicked",
+      "sortLeast": "Least clicked",
+      "noBackground": "No background for this group (its recordings are older than 60 days): only the element list is shown.",
+      "shown": "{{pct}} % of the clicks are on the picture. The rest are on elements that appear later (a menu, dialog or gallery) and are only in the table.",
+      "empty": "No data for these filters.",
+      "loading": "Loading the heatmap…",
+      "note": "Clicks add up per element across all visits of the period; red is the most clicked. Dead click: nothing happened. Rage: the same element 3+ times within a second.",
+      "watch": "Recordings of this page"
+    },
+    "ins": {
+      "empty": "No findings yet. A page type needs at least 20 page views; data is collected every day.",
+      "openHeatmap": "Open the heatmap",
+      "pageViews": "{{count}} page views",
+      "kind": {
+        "DEAD": "\"{{label}}\" on the {{page}} page: {{count}} clicks with no reaction ({{percent}} % of its clicks). People expect it to open something: make it clickable or change it.",
+        "RAGE": "\"{{label}}\" on the {{page}} page: clicked again and again {{count}} times. It is probably slow or broken.",
+        "INQUIRY_ELEMENT": "Visitors who send an inquiry often click \"{{label}}\" on the {{page}} page ({{percent}} % of their page views, at least twice as often as the others). Make it stand out for everyone.",
+        "CTA_REACH": "On the {{page}} page only {{percent}} % of page views get as far as the \"{{label}}\" button (at {{count}} % of the page height). Move it up or add it at the top too.",
+        "LOW_REACH": "On the {{page}} page only {{percent}} % of page views see the lower half of the page. Put important content higher."
+      }
+    }
   }
 }

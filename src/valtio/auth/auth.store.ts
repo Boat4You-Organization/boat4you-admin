@@ -14,8 +14,7 @@ export const authStore = proxy<AuthStore>({
   user: null,
   userSettings: null,
   authenticating: true,
-  // In-memory only — null on a fresh load/reload, so the app shows the login
-  // screen until the user re-authenticates (token no longer persisted).
+  // Restored from localStorage on load (tokenStore), so a reload keeps the session.
   token: getStoredToken(),
 });
 

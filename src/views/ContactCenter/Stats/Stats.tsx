@@ -11,6 +11,7 @@ import { CcStats } from '@/types/contactCenter.type';
 import { formatDuration } from '@/utils/contactCenter/display';
 import { SITE_IDS, siteLabel } from '@/utils/contactCenter/safeLink';
 import Funnel from '@/views/ContactCenter/Stats/Funnel';
+import SearchEngines from '@/views/ContactCenter/Stats/SearchEngines';
 import { Bars, Metric, barGrid, kpiGrid } from '@/views/ContactCenter/Stats/parts';
 import { InfoIcon, LoadAlert, SectionLabel, Segmented, cc, fieldSx } from '@/views/ContactCenter/ui';
 
@@ -181,6 +182,7 @@ const Stats = () => {
         </>
       )}
       {query && <Funnel {...query} />}
+      {query && <SearchEngines {...query} />}
     </Box>
   );
 };

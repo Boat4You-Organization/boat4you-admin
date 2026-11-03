@@ -238,6 +238,61 @@ export interface CcFunnel {
   clicks: Array<{ pageType: string; label: string; clicks: number }>;
 }
 
+/** Clicks and impressions of a range; position is the impression-weighted average, null when no impression has one. */
+export interface EngineTotals {
+  clicks: number;
+  impressions: number;
+  position: number | null;
+}
+
+export interface SearchQueryStat {
+  query: string;
+  siteIds: string[];
+  clicks: number;
+  impressions: number;
+  position: number | null;
+}
+
+/**
+ * GET /admin/cc/search-engines (F1): Google Search Console and Bing Webmaster Tools next to our organic visits. The engines
+ * give aggregates only, never a visitor. Bing has no country or device, so bing is null and its lists empty under such a filter.
+ */
+export interface CcSearchEngines {
+  from: string;
+  to: string;
+  siteId: string | null;
+  country: string | null;
+  device: string | null;
+  fromDay: string;
+  toDay: string;
+  lastDay: Partial<Record<'GOOGLE' | 'BING', string>>;
+  google: EngineTotals;
+  googleClicksWithQuery: number;
+  bing: EngineTotals | null;
+  organicVisits: number;
+  organicInquiries: number;
+  engines: Count[];
+  sites: Array<{
+    siteId: string;
+    google: EngineTotals;
+    bing: EngineTotals | null;
+    organicVisits: number;
+    organicInquiries: number;
+  }>;
+  googleQueries: SearchQueryStat[];
+  bingQueries: SearchQueryStat[];
+  pages: Array<{
+    siteId: string;
+    path: string;
+    clicks: number;
+    impressions: number;
+    position: number | null;
+    queries: string[];
+    visits: number;
+    inquiries: number;
+  }>;
+}
+
 /** One site's recording switch (P6 R1.6, GET/PUT /admin/cc/rec/settings). */
 export interface RecSiteSetting {
   siteId: string;
@@ -293,4 +348,62 @@ export interface RecDetail {
   clicks: Array<{ tMs: number; x: number | null; y: number | null }>;
   rage: number[];
   errors: Array<{ tMs: number; message: string | null }>;
+}
+
+/** One element of a heatmap (P6 R3); [pageViews] is how many page views clicked it at least once. */
+export interface HeatmapElement {
+  hash: string;
+  text: string | null;
+  tag: string | null;
+  link: string | null;
+  clicks: number;
+  pageViews: number;
+  rage: number;
+  dead: number;
+  inquiryClicks: number;
+  inquiryPageViews: number;
+}
+
+export interface HeatPoint {
+  eX: number;
+  eY: number;
+  clicks: number;
+}
+
+export interface ScrollReach {
+  pct: number;
+  pageViews: number;
+}
+
+/** GET /admin/cc/rec/heatmap: one site + page type + device + range. */
+export interface Heatmap {
+  siteId: string;
+  pageType: string;
+  device: string;
+  pageViews: number;
+  inquiryPageViews: number;
+  clicks: number;
+  elements: HeatmapElement[];
+  points: Record<string, HeatPoint[]>;
+  scroll: ScrollReach[];
+  foldPct: number;
+  background: number | null;
+}
+
+export interface HeatmapGroup {
+  pageType: string;
+  pageViews: number;
+  clicks: number;
+}
+
+/** One finding of "what to fix" (GET /admin/cc/rec/insights); the admin words it by [kind]. */
+export interface RecInsight {
+  kind: 'DEAD' | 'RAGE' | 'INQUIRY_ELEMENT' | 'CTA_REACH' | 'LOW_REACH';
+  pageType: string;
+  hash: string | null;
+  text: string | null;
+  tag: string | null;
+  count: number;
+  percent: number | null;
+  pageViews: number;
 }

@@ -3,6 +3,7 @@
 import { api } from '@/config/axios.config';
 import {
   CcFunnel,
+  CcSearchEngines,
   CcStats,
   ContactCard,
   ContactPatch,
@@ -10,10 +11,13 @@ import {
   ConversationDetail,
   ConversationFilter,
   ConversationRow,
+  Heatmap,
+  HeatmapGroup,
   LiveRow,
   ProactiveResult,
   RecDetail,
   RecFilter,
+  RecInsight,
   RecRow,
   RecSiteSetting,
 } from '@/types/contactCenter.type';
@@ -57,6 +61,8 @@ const ContactCenterService = {
     api.get<CcStats>('/admin/cc/stats', { params: params(query) }),
   funnel: (query: { from?: string; to?: string; siteId?: string; device?: string; channel?: string }) =>
     api.get<CcFunnel>('/admin/cc/funnel', { params: params(query) }),
+  searchEngines: (query: { from?: string; to?: string; siteId?: string; country?: string; device?: string }) =>
+    api.get<CcSearchEngines>('/admin/cc/search-engines', { params: params(query) }),
   recSettings: () => api.get<RecSiteSetting[]>('/admin/cc/rec/settings'),
   recordings: (filter: RecFilter) => api.get<RecRow[]>('/admin/cc/rec/page-views', { params: params(filter) }),
   recording: (id: number) => api.get<RecDetail>(`/admin/cc/rec/page-views/${id}`),
@@ -68,6 +74,12 @@ const ContactCenterService = {
     }),
   recordingAssets: (siteId: string, paths: string[]) =>
     api.post<Record<string, string>>('/admin/cc/rec/assets', { siteId, paths }),
+  heatmap: (query: { siteId: string; pageType: string; device: string; from?: string }) =>
+    api.get<Heatmap>('/admin/cc/rec/heatmap', { params: params(query) }),
+  heatmapGroups: (query: { siteId: string; device: string; from?: string }) =>
+    api.get<HeatmapGroup[]>('/admin/cc/rec/heatmap/groups', { params: params(query) }),
+  insights: (query: { siteId: string; device: string; from?: string }) =>
+    api.get<RecInsight[]>('/admin/cc/rec/insights', { params: params(query) }),
   saveRecSetting: ({ siteId, ...values }: RecSiteSetting) =>
     api.put<RecSiteSetting>(`/admin/cc/rec/settings/${siteId}`, values),
 };

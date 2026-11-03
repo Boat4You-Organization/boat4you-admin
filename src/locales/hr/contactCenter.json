@@ -5,7 +5,7 @@
     "live": "Live posjetitelji",
     "contacts": "Kontakti",
     "stats": "Statistika",
-    "recording": "Snimke"
+    "recording": "Heatmape"
   },
   "status": {
     "AI": "AI",
@@ -30,7 +30,7 @@
     "SYSTEM": "Sustav"
   },
   "channel": {
-    "ORGANIC": "Google (organski)",
+    "ORGANIC": "Tražilice (organski)",
     "ADS": "Oglasi",
     "SISTER": "Naš sestrinski sajt",
     "DIRECT": "Direktno",
@@ -261,6 +261,49 @@
       "OTHER": "Ostalo"
     }
   },
+  "searchEngines": {
+    "title": "Tražilice: Google i Bing",
+    "country": "Zemlja",
+    "countryAll": "Zemlja: sve",
+    "none": "—",
+    "firstImport": "Prvi uvoz Googleove povijesti (16 mjeseci) traje oko 16 sati od uključivanja.",
+    "note": "Google i Bing daju samo zbirne brojke po traženom pojmu i stranici, nikad pojedinog posjetitelja. Podaci kasne 2 do 3 dana (zadnji uvezeni dan: Google {{google}}, Bing {{bing}}). Naši organski posjeti broje samo posjetitelje koji su dali pristanak.",
+    "hidden": "Google ne pokazuje traženi pojam za {{n}} % klikova, pa zbroj klikova po pojmovima nije cijeli promet.",
+    "bingNoFilter": "Bing ne daje zemlju ni uređaj, pa ga uz taj filter nema.",
+    "googleClicks": "Google klikovi",
+    "googleImpressions": "Google pojavljivanja",
+    "googleCtr": "Google CTR",
+    "googlePosition": "Google prosj. pozicija",
+    "bingClicks": "Bing klikovi",
+    "bingImpressions": "Bing pojavljivanja",
+    "organicVisits": "Naši organski posjeti",
+    "organicInquiries": "Upiti iz organskih posjeta",
+    "byEngine": "Naši organski posjeti po tražilici",
+    "bySite": "Po sajtu",
+    "googleShort": "Google klikovi / pojavljivanja",
+    "bingShort": "Bing klikovi / pojavljivanja",
+    "visits": "Org. posjeti",
+    "inquiries": "Upiti",
+    "googleQueries": "Najčešći traženi pojmovi na Googleu",
+    "bingQueries": "Najčešći traženi pojmovi na Bingu",
+    "query": "Traženi pojam",
+    "clicks": "Klikovi",
+    "impressions": "Pojavljivanja",
+    "ctr": "CTR",
+    "position": "Pozicija",
+    "pages": "Ulazne stranice",
+    "topQueries": "Glavni pojmovi (Google)",
+    "pagesNote": "Klikovi, pojavljivanja i pojmovi su Googleovi za tu stranicu. Org. posjeti i upiti su naši posjeti koji su s tražilice došli na tu stranicu i upiti poslani u tim posjetima.",
+    "engine": {
+      "GOOGLE": "Google",
+      "BING": "Bing",
+      "DUCKDUCKGO": "DuckDuckGo",
+      "YAHOO": "Yahoo",
+      "ECOSIA": "Ecosia",
+      "YANDEX": "Yandex",
+      "OTHER": "Ostale"
+    }
+  },
   "rec": {
     "note": "Snimke posjeta rade se samo uz pristanak za analitiku. Isključen sajt ne snima ništa, a poslužitelj odbija njegove pakete. Udio je postotak posjeta s pristankom koje se snimaju; na mobitelu snimanje počinje tek nakon prvog dodira, scrolla ili tipke posjetitelja.",
     "site": "Sajt",
@@ -277,7 +320,9 @@
     "staffUnmark": "Ukloni oznaku",
     "views": {
       "list": "Snimke",
-      "settings": "Postavke"
+      "settings": "Postavke",
+      "heatmaps": "Heatmape",
+      "insights": "Što popraviti"
     },
     "list": {
       "empty": "Nema snimki za odabrane filtre.",
@@ -323,6 +368,49 @@
         "errors": "Greške"
       }
     },
-    "conversationLink": "Snimke ovog posjeta"
+    "conversationLink": "Snimke ovog posjeta",
+    "heat": {
+      "pageType": "Vrsta stranice",
+      "device": "Uređaj",
+      "range90": "90 dana",
+      "modeClicks": "Klikovi",
+      "modeScroll": "Scroll",
+      "pageViews": "Pregleda stranica",
+      "clicks": "Klikova",
+      "inquiries": "Pregleda iz posjeta s upitom",
+      "fold": "Prvi ekran",
+      "foldValue": "{{pct}} % stranice",
+      "reach": "Doseg",
+      "reachValue": "do {{pct}} % stranice: {{share}} % pregleda",
+      "col": {
+        "element": "Element",
+        "clicks": "Klikovi",
+        "pageViewShare": "% pregleda",
+        "rage": "Bijesni",
+        "dead": "Mrtvi",
+        "inquiryShare": "Od posjeta s upitom",
+        "link": "Vodi na"
+      },
+      "sortMost": "Najviše klikova",
+      "sortLeast": "Najmanje klikova",
+      "noBackground": "Za ovu skupinu nema podloge (snimke su starije od 60 dana): prikazuje se samo popis elemenata.",
+      "shown": "Na slici je {{pct}} % klikova. Ostali su na elementima koji se pojave kasnije (izbornik, prozor, galerija) i vide se samo u tablici.",
+      "empty": "Nema podataka za odabrane filtre.",
+      "loading": "Učitavam heatmapu…",
+      "note": "Klikovi se zbrajaju po elementu svih posjeta u razdoblju; crveno je najviše klikano. Mrtvi klik: ništa se nije dogodilo. Bijesni: isti element 3+ puta unutar sekunde.",
+      "watch": "Snimke ove stranice"
+    },
+    "ins": {
+      "empty": "Za sada nema nalaza. Potrebno je barem 20 pregleda iste vrste stranice; podaci se skupljaju svaki dan.",
+      "openHeatmap": "Otvori heatmapu",
+      "pageViews": "{{count}} pregleda",
+      "kind": {
+        "DEAD": "„{{label}}“ na stranici {{page}}: {{count}} klikova bez ikakve reakcije ({{percent}} % klikova na njega). Ljudi očekuju da nešto otvori: napravi ga klikabilnim ili ga promijeni.",
+        "RAGE": "„{{label}}“ na stranici {{page}}: {{count}} puta kliknut više puta zaredom. Vjerojatno je spor ili ne radi.",
+        "INQUIRY_ELEMENT": "Posjetitelji koji pošalju upit često klikaju „{{label}}“ na stranici {{page}} ({{percent}} % njihovih pregleda, barem dvostruko češće od ostalih). Istakni ga i pokaži svima.",
+        "CTA_REACH": "Na stranici {{page}} samo {{percent}} % pregleda dođe do gumba „{{label}}“ (na {{count}} % visine stranice). Pomakni ga više ili ga dodaj i na vrh.",
+        "LOW_REACH": "Na stranici {{page}} samo {{percent}} % pregleda vidi donju polovicu stranice. Važan sadržaj stavi više."
+      }
+    }
   }
 }

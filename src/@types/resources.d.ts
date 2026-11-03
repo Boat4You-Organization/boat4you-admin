@@ -568,9 +568,9 @@ interface Resources {
       ins: {
         empty: 'No findings yet. A page type needs at least 20 page views; data is collected every day.';
         kind: {
-          CTA_REACH: 'On the {{page}} page only {{percent}} % of page views get as far as the inquiry or booking button (at {{count}} % of the page height). Move it up or add it at the top too.';
+          CTA_REACH: 'On the {{page}} page only {{percent}} % of page views get as far as the "{{label}}" button (at {{count}} % of the page height). Move it up or add it at the top too.';
           DEAD: '"{{label}}" on the {{page}} page: {{count}} clicks with no reaction ({{percent}} % of its clicks). People expect it to open something: make it clickable or change it.';
-          INQUIRY_ELEMENT: 'Visitors who send an inquiry often click "{{label}}" on the {{page}} page ({{count}} clicks). Make it stand out for everyone.';
+          INQUIRY_ELEMENT: 'Visitors who send an inquiry often click "{{label}}" on the {{page}} page ({{percent}} % of their page views, at least twice as often as the others). Make it stand out for everyone.';
           LOW_REACH: 'On the {{page}} page only {{percent}} % of page views see the lower half of the page. Put important content higher.';
           RAGE: '"{{label}}" on the {{page}} page: clicked again and again {{count}} times. It is probably slow or broken.';
         };

@@ -363,8 +363,8 @@
       "kind": {
         "DEAD": "\"{{label}}\" on the {{page}} page: {{count}} clicks with no reaction ({{percent}} % of its clicks). People expect it to open something: make it clickable or change it.",
         "RAGE": "\"{{label}}\" on the {{page}} page: clicked again and again {{count}} times. It is probably slow or broken.",
-        "INQUIRY_ELEMENT": "Visitors who send an inquiry often click \"{{label}}\" on the {{page}} page ({{count}} clicks). Make it stand out for everyone.",
-        "CTA_REACH": "On the {{page}} page only {{percent}} % of page views get as far as the inquiry or booking button (at {{count}} % of the page height). Move it up or add it at the top too.",
+        "INQUIRY_ELEMENT": "Visitors who send an inquiry often click \"{{label}}\" on the {{page}} page ({{percent}} % of their page views, at least twice as often as the others). Make it stand out for everyone.",
+        "CTA_REACH": "On the {{page}} page only {{percent}} % of page views get as far as the \"{{label}}\" button (at {{count}} % of the page height). Move it up or add it at the top too.",
         "LOW_REACH": "On the {{page}} page only {{percent}} % of page views see the lower half of the page. Put important content higher."
       }
     }

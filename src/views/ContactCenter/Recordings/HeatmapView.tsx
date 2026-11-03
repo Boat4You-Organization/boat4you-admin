@@ -123,6 +123,10 @@ const HeatmapView = () => {
     }
 
     setBgState('loading');
+
+    // The frame of this background (a new one per background: key={backgroundId}), so a slower earlier load never draws into it.
+    const frame = iframeRef.current;
+
     (async () => {
       try {
         const { data: d } = await ContactCenterService.recording(backgroundId);
@@ -142,32 +146,33 @@ const HeatmapView = () => {
 
         rewriteDomUrls(decoded, makeUseproxy(pageUrl, assets, window.location.origin));
 
-        if (!current || !iframeRef.current) return;
+        if (!current || !frame) return;
 
         let width = d.row.viewportW ?? 1280;
-        const replay = await Replay.create(iframeRef.current, {
+        let height = d.row.viewportH ?? 800;
+        const replay = await Replay.create(frame, {
           decoded,
           pageUrl,
           assets,
           mobile: d.row.device === 'MOBILE',
-          onresize: w => {
+          onresize: (w, h) => {
             width = w;
+            height = h;
           },
         });
+
+        if (!current) return;
 
         await replay.seek(Math.min(BACKGROUND_AT_MS, replay.duration));
 
         if (!current) return;
 
-        // Width first, so the page lays out at its recorded width; then the iframe takes the page's full height.
-        setSize({ w: width, h: 800 });
-        requestAnimationFrame(() => {
-          if (!current) return;
+        // At the recorded width, then at the page's full height with screen-height sections kept at the recorded viewport.
+        const full = replay.fullHeight(frame, width, height);
 
-          setSize({ w: width, h: Math.min(MAX_HEIGHT, Math.max(400, replay.docHeight())) });
-          replayRef.current = replay;
-          setBgState('ready');
-        });
+        setSize({ w: width, h: Math.min(MAX_HEIGHT, Math.max(400, full)) });
+        replayRef.current = replay;
+        setBgState('ready');
       } catch {
         if (current) setBgState('failed');
       }
@@ -336,6 +341,7 @@ const HeatmapView = () => {
           }}
         >
           <iframe
+            key={backgroundId ?? 'none'}
             ref={iframeRef}
             title={t('rec.views.heatmaps')}
             sandbox="allow-same-origin"

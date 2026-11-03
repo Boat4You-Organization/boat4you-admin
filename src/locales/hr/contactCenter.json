@@ -364,8 +364,8 @@
       "kind": {
         "DEAD": "„{{label}}“ na stranici {{page}}: {{count}} klikova bez ikakve reakcije ({{percent}} % klikova na njega). Ljudi očekuju da nešto otvori: napravi ga klikabilnim ili ga promijeni.",
         "RAGE": "„{{label}}“ na stranici {{page}}: {{count}} puta kliknut više puta zaredom. Vjerojatno je spor ili ne radi.",
-        "INQUIRY_ELEMENT": "Posjetitelji koji pošalju upit često klikaju „{{label}}“ na stranici {{page}} ({{count}} klikova). Istakni ga i pokaži svima.",
-        "CTA_REACH": "Na stranici {{page}} samo {{percent}} % pregleda dođe do gumba za upit ili rezervaciju (na {{count}} % visine stranice). Pomakni ga više ili ga dodaj i na vrh.",
+        "INQUIRY_ELEMENT": "Posjetitelji koji pošalju upit često klikaju „{{label}}“ na stranici {{page}} ({{percent}} % njihovih pregleda, barem dvostruko češće od ostalih). Istakni ga i pokaži svima.",
+        "CTA_REACH": "Na stranici {{page}} samo {{percent}} % pregleda dođe do gumba „{{label}}“ (na {{count}} % visine stranice). Pomakni ga više ili ga dodaj i na vrh.",
         "LOW_REACH": "Na stranici {{page}} samo {{percent}} % pregleda vidi donju polovicu stranice. Važan sadržaj stavi više."
       }
     }

@@ -14,6 +14,7 @@ const el = (hash: string, clicks: number, text: string | null = 'Reach out', tag
   rage: 0,
   dead: 0,
   inquiryClicks: 0,
+  inquiryPageViews: 0,
 });
 
 describe('toActivity', () => {

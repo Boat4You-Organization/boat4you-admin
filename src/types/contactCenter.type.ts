@@ -306,6 +306,7 @@ export interface HeatmapElement {
   rage: number;
   dead: number;
   inquiryClicks: number;
+  inquiryPageViews: number;
 }
 
 export interface HeatPoint {

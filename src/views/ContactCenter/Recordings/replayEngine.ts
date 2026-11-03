@@ -115,6 +115,51 @@ export class Replay {
     return !!this.v.get(hash);
   }
 
+  /**
+   * Lays the drawn page out at [width] and its full height in [frame] without stretching what is sized in screen heights (a hero
+   * of 95svh would grow with the frame): every element whose height changes as the frame grows from the recorded [viewportH]
+   * keeps the height, padding and margin it had there (P6 R3 review I7). Returns the full height; [frame] is left at it.
+   */
+  fullHeight(frame: HTMLIFrameElement, width: number, viewportH: number): number {
+    const d = this.win.document;
+    const els = d.body ? Array.from(d.body.querySelectorAll<HTMLElement>('*')) : [];
+
+    frame.setAttribute('width', String(width));
+    frame.setAttribute('height', String(viewportH));
+
+    const before = els.map(e => e.getBoundingClientRect().height);
+    const was = els.map(e => {
+      const cs = this.win.getComputedStyle(e);
+
+      return [cs.height, cs.paddingTop, cs.paddingBottom, cs.marginTop, cs.marginBottom];
+    });
+
+    frame.setAttribute('height', String(Math.max(viewportH, this.docHeight())));
+    els
+      .map((e, i) => (Math.abs(e.getBoundingClientRect().height - before[i]) >= 0.5 ? i : -1))
+      .filter(i => i >= 0)
+      .forEach(i => {
+        const [h, pt, pb, mt, mb] = was[i];
+        const s = els[i].style;
+
+        s.setProperty('height', h, 'important');
+        s.setProperty('min-height', h, 'important');
+        s.setProperty('max-height', h, 'important');
+        s.setProperty('padding-top', pt, 'important');
+        s.setProperty('padding-bottom', pb, 'important');
+        s.setProperty('margin-top', mt, 'important');
+        s.setProperty('margin-bottom', mb, 'important');
+      });
+    // Back at the recorded viewport, the height measured is the page's own and not the frame's.
+    frame.setAttribute('height', String(viewportH));
+
+    const full = this.docHeight();
+
+    frame.setAttribute('height', String(full));
+
+    return full;
+  }
+
   /** The full height of the drawn page. */
   docHeight(): number {
     const d = this.win.document;

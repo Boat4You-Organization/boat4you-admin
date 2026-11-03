@@ -1,5 +1,20 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-03 — 📣 Objave (Social publisher S0): jedna objava na više kanala, zakazivanje, ključevi za automatizaciju — ⏳ NIJE DEPLOYANO (čeka backend S1)
+
+Mario 3.11.2026: „alat s kojim ćemo moći objavljivati jednu objavu na više kanala, a s vremenom da Claude dnevno objavljuje preko Scheduled … sve inhouse i da ne plaćamo nikome“. Plan i API ugovor: `docs/superpowers/specs/2026-11-03-social-publisher-design.md`.
+
+- Nova stavka izbornika **Objave** (`/social`, samo SYSTEM_ADMIN), odmah iza Kontakt centra. Kartice: **Objave** (mjesečni kalendar i popis po danima, filteri status/kanal, detalj objave sa stanjem po kanalu, link na objavu, greška mreže, ponovi neuspjele / otkaži zakazano / uredi / dupliciraj / obriši), **Nova objava** (tekst s brojačem po mreži, link, interna bilješka, fotke/video s napretkom i redoslijedom, odabir kanala, vlastiti tekst i naslov po kanalu, provjere pravila svake mreže dok pišeš, pregled po kanalu, Spremi skicu / Zakaži / Objavi odmah uz potvrdu), **Kanali** (10 mreža: Facebook, Instagram, Threads, LinkedIn, X, TikTok, YouTube, Pinterest, Bluesky, Google Business; spoji preko OAuth-a ili Bluesky app lozinke, odspoji, istek pristupa, „privatno do revizije“), **Automatizacija** (API ključevi, „samo skice“ zadano; primjer curl poziva i id-jevi kanala; opis dnevnog Claude zadatka).
+- Pravila po mreži (`src/utils/social/rules.ts`): duljina teksta (X ponderirano, link = 23; Bluesky grafemi), obavezni mediji/video/naslov, broj fotki, miješanje fotki i videa, hashtagovi, omjer fotke za Instagram, `<` `>` na YouTubeu, neklikabilni linkovi (IG/TikTok).
+- Backend `/admin/social/**` i `/api/social/v1/**` još NE postoje: stranica se otvori, ali učitavanje javlja grešku. Backend repo nije bio dostupan ovoj sesiji.
+- Provjere: `tsc` 0, eslint `src/` 0 grešaka, `yarn test` 85/85 (novo `tests/social.test.ts`, 31), `yarn build` OK (0× localhost:3000); lokalni pregled s lažnim API-jem (HR, 1440 i 390 px, bez horizontalnog skrola): kalendar, popis, detalj, objava s greškama po kanalu, zakazivanje, kanali, automatizacija. Nije viđeno protiv pravog backenda.
+
+Deploy:
+
+- [ ] TEK NAKON backend S1 (`/admin/social/**`, tablice, scheduler) — inače Objave javljaju grešku.
+- [ ] nginx na api.boat4you.com: `client_max_body_size 512m` samo za `/admin/social/media` (video).
+- [ ] Developer aplikacije mreža (Meta, LinkedIn, Google, TikTok, Pinterest, X) — popis u specu, § „What Mario has to do“.
+
 ## 2026-11-03 — 🎬 Kontakt centar → Snimke: popis snimki i player (P6 R2) — ✅ LIVE 3.11.2026 09:13 UTC (cusma1, main `3f64802`, entry `assets/index-PS7NtQJP.js`, player `Player-BbQHCEHy.js` 802 kB lijeno, `decode.worker-D1BoRNkW.js`), tag `live/2026-11-03-cc-rec-player`
 
 Mario 3.11.2026 („Da, kreni s R2“, „da“).

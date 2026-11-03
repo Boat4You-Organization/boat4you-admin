@@ -31,6 +31,8 @@ const CONTACT_CENTER_PATHS = [
   '/contact-center/stats',
   '/contact-center/recording',
   '/contact-center/recording/settings',
+  '/contact-center/recording/insights',
+  '/contact-center/recording/list',
   '/contact-center/recording/:id',
 ];
 

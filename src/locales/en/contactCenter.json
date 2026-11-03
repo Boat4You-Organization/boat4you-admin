@@ -5,7 +5,7 @@
     "live": "Live visitors",
     "contacts": "Contacts",
     "stats": "Statistics",
-    "recording": "Recordings"
+    "recording": "Heatmaps"
   },
   "status": {
     "AI": "AI",
@@ -276,7 +276,9 @@
     "staffUnmark": "Remove the mark",
     "views": {
       "list": "Recordings",
-      "settings": "Settings"
+      "settings": "Settings",
+      "heatmaps": "Heatmaps",
+      "insights": "What to fix"
     },
     "list": {
       "empty": "No recordings for these filters.",
@@ -322,6 +324,49 @@
         "errors": "Errors"
       }
     },
-    "conversationLink": "Recordings of this visit"
+    "conversationLink": "Recordings of this visit",
+    "heat": {
+      "pageType": "Page type",
+      "device": "Device",
+      "range90": "90 days",
+      "modeClicks": "Clicks",
+      "modeScroll": "Scroll",
+      "pageViews": "Page views",
+      "clicks": "Clicks",
+      "inquiries": "Page views of visits with an inquiry",
+      "fold": "First screen",
+      "foldValue": "{{pct}} % of the page",
+      "reach": "Reach",
+      "reachValue": "to {{pct}} % of the page: {{share}} % of page views",
+      "col": {
+        "element": "Element",
+        "clicks": "Clicks",
+        "pageViewShare": "% of page views",
+        "rage": "Rage",
+        "dead": "Dead",
+        "inquiryShare": "From visits with an inquiry",
+        "link": "Goes to"
+      },
+      "sortMost": "Most clicked",
+      "sortLeast": "Least clicked",
+      "noBackground": "No background for this group (its recordings are older than 60 days): only the element list is shown.",
+      "shown": "{{pct}} % of the clicks are on the picture. The rest are on elements that appear later (a menu, dialog or gallery) and are only in the table.",
+      "empty": "No data for these filters.",
+      "loading": "Loading the heatmap…",
+      "note": "Clicks add up per element across all visits of the period; red is the most clicked. Dead click: nothing happened. Rage: the same element 3+ times within a second.",
+      "watch": "Recordings of this page"
+    },
+    "ins": {
+      "empty": "No findings yet. A page type needs at least 20 page views; data is collected every day.",
+      "openHeatmap": "Open the heatmap",
+      "pageViews": "{{count}} page views",
+      "kind": {
+        "DEAD": "\"{{label}}\" on the {{page}} page: {{count}} clicks with no reaction ({{percent}} % of its clicks). People expect it to open something: make it clickable or change it.",
+        "RAGE": "\"{{label}}\" on the {{page}} page: clicked again and again {{count}} times. It is probably slow or broken.",
+        "INQUIRY_ELEMENT": "Visitors who send an inquiry often click \"{{label}}\" on the {{page}} page ({{count}} clicks). Make it stand out for everyone.",
+        "CTA_REACH": "On the {{page}} page only {{percent}} % of page views get as far as the inquiry or booking button (at {{count}} % of the page height). Move it up or add it at the top too.",
+        "LOW_REACH": "On the {{page}} page only {{percent}} % of page views see the lower half of the page. Put important content higher."
+      }
+    }
   }
 }

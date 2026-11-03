@@ -534,6 +534,49 @@ interface Resources {
     rec: {
       conversationLink: 'Recordings of this visit';
       enabled: 'Recording';
+      heat: {
+        clicks: 'Clicks';
+        col: {
+          clicks: 'Clicks';
+          dead: 'Dead';
+          element: 'Element';
+          inquiryShare: 'From visits with an inquiry';
+          link: 'Goes to';
+          pageViewShare: '% of page views';
+          rage: 'Rage';
+        };
+        device: 'Device';
+        empty: 'No data for these filters.';
+        fold: 'First screen';
+        foldValue: '{{pct}} % of the page';
+        inquiries: 'Page views of visits with an inquiry';
+        loading: 'Loading the heatmap…';
+        modeClicks: 'Clicks';
+        modeScroll: 'Scroll';
+        noBackground: 'No background for this group (its recordings are older than 60 days): only the element list is shown.';
+        shown: '{{pct}} % of the clicks are on the picture. The rest are on elements that appear later (a menu, dialog or gallery) and are only in the table.';
+        note: 'Clicks add up per element across all visits of the period; red is the most clicked. Dead click: nothing happened. Rage: the same element 3+ times within a second.';
+        pageType: 'Page type';
+        pageViews: 'Page views';
+        range90: '90 days';
+        reach: 'Reach';
+        reachValue: 'to {{pct}} % of the page: {{share}} % of page views';
+        sortLeast: 'Least clicked';
+        sortMost: 'Most clicked';
+        watch: 'Recordings of this page';
+      };
+      ins: {
+        empty: 'No findings yet. A page type needs at least 20 page views; data is collected every day.';
+        kind: {
+          CTA_REACH: 'On the {{page}} page only {{percent}} % of page views get as far as the inquiry or booking button (at {{count}} % of the page height). Move it up or add it at the top too.';
+          DEAD: '"{{label}}" on the {{page}} page: {{count}} clicks with no reaction ({{percent}} % of its clicks). People expect it to open something: make it clickable or change it.';
+          INQUIRY_ELEMENT: 'Visitors who send an inquiry often click "{{label}}" on the {{page}} page ({{count}} clicks). Make it stand out for everyone.';
+          LOW_REACH: 'On the {{page}} page only {{percent}} % of page views see the lower half of the page. Put important content higher.';
+          RAGE: '"{{label}}" on the {{page}} page: clicked again and again {{count}} times. It is probably slow or broken.';
+        };
+        openHeatmap: 'Open the heatmap';
+        pageViews: '{{count}} page views';
+      };
       invalid: 'The share must be a whole number from 0 to 100.';
       list: {
         clearScope: 'All visits';
@@ -591,6 +634,8 @@ interface Resources {
       staffTitle: 'This browser as the team';
       staffUnmark: 'Remove the mark';
       views: {
+        heatmaps: 'Heatmaps';
+        insights: 'What to fix';
         list: 'Recordings';
         settings: 'Settings';
       };
@@ -662,7 +707,7 @@ interface Resources {
       contacts: 'Contacts';
       conversations: 'Conversations';
       live: 'Live visitors';
-      recording: 'Recordings';
+      recording: 'Heatmaps';
       stats: 'Statistics';
     };
     tagPlaceholder: 'e.g. vip';

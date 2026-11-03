@@ -294,3 +294,60 @@ export interface RecDetail {
   rage: number[];
   errors: Array<{ tMs: number; message: string | null }>;
 }
+
+/** One element of a heatmap (P6 R3); [pageViews] is how many page views clicked it at least once. */
+export interface HeatmapElement {
+  hash: string;
+  text: string | null;
+  tag: string | null;
+  link: string | null;
+  clicks: number;
+  pageViews: number;
+  rage: number;
+  dead: number;
+  inquiryClicks: number;
+}
+
+export interface HeatPoint {
+  eX: number;
+  eY: number;
+  clicks: number;
+}
+
+export interface ScrollReach {
+  pct: number;
+  pageViews: number;
+}
+
+/** GET /admin/cc/rec/heatmap: one site + page type + device + range. */
+export interface Heatmap {
+  siteId: string;
+  pageType: string;
+  device: string;
+  pageViews: number;
+  inquiryPageViews: number;
+  clicks: number;
+  elements: HeatmapElement[];
+  points: Record<string, HeatPoint[]>;
+  scroll: ScrollReach[];
+  foldPct: number;
+  background: number | null;
+}
+
+export interface HeatmapGroup {
+  pageType: string;
+  pageViews: number;
+  clicks: number;
+}
+
+/** One finding of "what to fix" (GET /admin/cc/rec/insights); the admin words it by [kind]. */
+export interface RecInsight {
+  kind: 'DEAD' | 'RAGE' | 'INQUIRY_ELEMENT' | 'CTA_REACH' | 'LOW_REACH';
+  pageType: string;
+  hash: string | null;
+  text: string | null;
+  tag: string | null;
+  count: number;
+  percent: number | null;
+  pageViews: number;
+}

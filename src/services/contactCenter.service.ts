@@ -10,10 +10,13 @@ import {
   ConversationDetail,
   ConversationFilter,
   ConversationRow,
+  Heatmap,
+  HeatmapGroup,
   LiveRow,
   ProactiveResult,
   RecDetail,
   RecFilter,
+  RecInsight,
   RecRow,
   RecSiteSetting,
 } from '@/types/contactCenter.type';
@@ -68,6 +71,12 @@ const ContactCenterService = {
     }),
   recordingAssets: (siteId: string, paths: string[]) =>
     api.post<Record<string, string>>('/admin/cc/rec/assets', { siteId, paths }),
+  heatmap: (query: { siteId: string; pageType: string; device: string; from?: string }) =>
+    api.get<Heatmap>('/admin/cc/rec/heatmap', { params: params(query) }),
+  heatmapGroups: (query: { siteId: string; device: string; from?: string }) =>
+    api.get<HeatmapGroup[]>('/admin/cc/rec/heatmap/groups', { params: params(query) }),
+  insights: (query: { siteId: string; device: string; from?: string }) =>
+    api.get<RecInsight[]>('/admin/cc/rec/insights', { params: params(query) }),
   saveRecSetting: ({ siteId, ...values }: RecSiteSetting) =>
     api.put<RecSiteSetting>(`/admin/cc/rec/settings/${siteId}`, values),
 };

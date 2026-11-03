@@ -4,6 +4,7 @@
 import { Data } from 'clarity-decode';
 import { Visualizer } from 'clarity-visualize';
 
+import { ActivityElement, ScrollMapStep } from '@/utils/contactCenter/heatmap';
 import { eventsBetween, makeUseproxy } from '@/utils/contactCenter/replay';
 
 type Event = Data.DecodedEvent;
@@ -95,6 +96,30 @@ export class Replay {
 
     this.v.render(eventsBetween(this.events, this.at, t));
     this.at = t;
+  }
+
+  /** The click heatmap (P6 R3) over the drawn page; an earlier map is cleared first. */
+  clickmap(activity: ActivityElement[]): void {
+    this.v.clearmap();
+    this.v.clickmap(activity as unknown as Parameters<Visualizer['clickmap']>[0]);
+  }
+
+  /** The scroll heatmap with the average fold at [foldPx] and the 75/50/25 % markers. */
+  scrollmap(steps: ScrollMapStep[], foldPx: number): void {
+    this.v.clearmap();
+    this.v.scrollmap(steps as unknown as Parameters<Visualizer['scrollmap']>[0], foldPx, true);
+  }
+
+  /** Whether the drawn page has the element of [hash]. */
+  has(hash: string): boolean {
+    return !!this.v.get(hash);
+  }
+
+  /** The full height of the drawn page. */
+  docHeight(): number {
+    const d = this.win.document;
+
+    return Math.max(d.body?.scrollHeight ?? 0, d.documentElement?.scrollHeight ?? 0);
   }
 
   private options() {

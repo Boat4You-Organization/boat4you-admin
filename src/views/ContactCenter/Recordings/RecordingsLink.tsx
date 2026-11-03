@@ -31,7 +31,7 @@ const RecordingsLink = ({ conversationId }: { conversationId: number }) => {
   return (
     <Box
       component={RouterLink}
-      to={`/contact-center/recording?conversationId=${conversationId}`}
+      to={`/contact-center/recording/list?conversationId=${conversationId}`}
       sx={{ ...linkSx, display: 'inline-block', fontSize: 12.5, mt: '6px' }}
     >
       {t('rec.conversationLink')}

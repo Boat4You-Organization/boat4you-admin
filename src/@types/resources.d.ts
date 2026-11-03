@@ -541,6 +541,7 @@ interface Resources {
           dead: 'Dead';
           element: 'Element';
           inquiryShare: 'From visits with an inquiry';
+          hover: 'Mouse (s)';
           link: 'Goes to';
           pageViewShare: '% of page views';
           rage: 'Rage';
@@ -550,10 +551,13 @@ interface Resources {
         fold: 'First screen';
         foldValue: '{{pct}} % of the page';
         inquiries: 'Page views of visits with an inquiry';
+        mouse: 'Page views with a mouse';
         loading: 'Loading the heatmap…';
         modeClicks: 'Clicks';
         modeScroll: 'Scroll';
+        modeHover: 'Mouse';
         noBackground: 'No background for this group (its recordings are older than 60 days): only the element list is shown.';
+        noMouse: 'No mouse data for this device. Phones and tablets have no mouse, and recordings made before mouse tracking was switched on carry no element on a move.';
         note: 'Clicks add up per element across all visits of the period; red is the most clicked. Dead click: nothing happened. Rage: the same element 3+ times within a second.';
         pageType: 'Page type';
         pageViews: 'Page views';

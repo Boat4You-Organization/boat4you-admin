@@ -11,7 +11,14 @@ import dayjs from 'dayjs';
 
 import ContactCenterService from '@/services/contactCenter.service';
 import { Heatmap, HeatmapGroup } from '@/types/contactCenter.type';
-import { elementLabel, reachAt, shownShare, toActivity, toScrollMap } from '@/utils/contactCenter/heatmap';
+import {
+  elementLabel,
+  reachAt,
+  shownShare,
+  toActivity,
+  toHoverActivity,
+  toScrollMap,
+} from '@/utils/contactCenter/heatmap';
 import { makeUseproxy, rewriteDomUrls, stylesheetPaths } from '@/utils/contactCenter/replay';
 import { SITE_IDS, siteLabel } from '@/utils/contactCenter/safeLink';
 import { CcButton, Empty, LoadAlert, Segmented, cc, fieldSx, tableSx } from '@/views/ContactCenter/ui';
@@ -25,7 +32,7 @@ const BACKGROUND_AT_MS = 3000;
 const MAX_HEIGHT = 30000;
 
 type Days = '7' | '30' | '90';
-type Mode = 'clicks' | 'scroll';
+type Mode = 'clicks' | 'scroll' | 'hover';
 type Order = 'most' | 'least';
 
 const decodeInWorker = (lines: string[]) =>
@@ -193,6 +200,14 @@ const HeatmapView = () => {
       if (mode === 'clicks') {
         replay.clickmap(toActivity(data.elements, data.points));
         setShown(shownShare(data.elements, h => replay.has(h)));
+      } else if (mode === 'hover') {
+        replay.clickmap(toHoverActivity(data.hover));
+        setShown(
+          shownShare(
+            Object.entries(data.hover).map(([hash, pts]) => ({ hash, clicks: pts.reduce((n, p) => n + p.ms, 0) })),
+            h => replay.has(h)
+          )
+        );
       } else replay.scrollmap(toScrollMap(data.scroll), Math.round((data.foldPct / 100) * size.h));
     });
 
@@ -286,6 +301,7 @@ const HeatmapView = () => {
           options={[
             { value: 'clicks', label: t('rec.heat.modeClicks') },
             { value: 'scroll', label: t('rec.heat.modeScroll') },
+            { value: 'hover', label: t('rec.heat.modeHover') },
           ]}
         />
       </Box>
@@ -301,6 +317,7 @@ const HeatmapView = () => {
           <span>{`${t('rec.heat.pageViews')}: ${data.pageViews}`}</span>
           <span>{`${t('rec.heat.clicks')}: ${data.clicks}`}</span>
           <span>{`${t('rec.heat.inquiries')}: ${data.inquiryPageViews}`}</span>
+          <span>{`${t('rec.heat.mouse')}: ${data.hoverPageViews}`}</span>
           <span>{`${t('rec.heat.fold')}: ${t('rec.heat.foldValue', { pct: data.foldPct })}`}</span>
           {[50, 75, 100].map(d => (
             <span
@@ -318,6 +335,9 @@ const HeatmapView = () => {
       )}
       {data && bgState === 'none' && (
         <Box sx={{ fontSize: 12.5, color: cc.muted, mb: '10px' }}>{t('rec.heat.noBackground')}</Box>
+      )}
+      {data && mode === 'hover' && Object.keys(data.hover).length === 0 && (
+        <Box sx={{ fontSize: 12.5, color: cc.muted, mb: '10px' }}>{t('rec.heat.noMouse')}</Box>
       )}
       {data && bgState === 'failed' && <LoadAlert text={t('rec.player.failed')} />}
       {bgState === 'loading' && <Box sx={{ fontSize: 13, color: cc.text, mb: '10px' }}>{t('rec.heat.loading')}</Box>}
@@ -360,7 +380,7 @@ const HeatmapView = () => {
           />
         </Box>
       </Box>
-      {bgState === 'ready' && mode === 'clicks' && shown !== null && shown < 100 && (
+      {bgState === 'ready' && mode !== 'scroll' && shown !== null && shown < 100 && (
         <Box sx={{ fontSize: 12.5, color: cc.muted, mt: '-6px', mb: '12px', textAlign: 'center' }}>
           {t('rec.heat.shown', { pct: shown })}
         </Box>
@@ -387,6 +407,7 @@ const HeatmapView = () => {
                   <th className="num">{t('rec.heat.col.dead')}</th>
                   <th className="num">{t('rec.heat.col.rage')}</th>
                   <th className="num">{t('rec.heat.col.inquiryShare')}</th>
+                  <th className="num">{t('rec.heat.col.hover')}</th>
                   <th>{t('rec.heat.col.link')}</th>
                 </tr>
               </thead>
@@ -416,6 +437,7 @@ const HeatmapView = () => {
                       {e.rage}
                     </td>
                     <td className="num">{`${pct(e.inquiryClicks, e.clicks)} %`}</td>
+                    <td className="num">{`${Math.round(e.hoverMs / 1000)} s`}</td>
                     <td>
                       <Box
                         component="span"

@@ -532,10 +532,55 @@ interface Resources {
     };
     rangeLabel: 'Period';
     rec: {
+      conversationLink: 'Recordings of this visit';
       enabled: 'Recording';
       invalid: 'The share must be a whole number from 0 to 100.';
+      list: {
+        clearScope: 'All visits';
+        col: {
+          chat: 'Chat';
+          clicks: 'Clicks';
+          device: 'Device';
+          duration: 'Duration';
+          errors: 'Errors';
+          inquiry: 'Inquiry';
+          page: 'Page';
+          rage: 'Rage clicks';
+          site: 'Site';
+          started: 'Started';
+        };
+        conversationScope: 'Conversation #{{id}}';
+        deviceAll: 'All devices';
+        empty: 'No recordings for these filters.';
+        noInquiry: 'Only without an inquiry';
+        pageTypeAll: 'All page types';
+        rageOnly: 'Only with rage clicks';
+        visitScope: 'Visit #{{id}}';
+        watch: 'Watch';
+      };
       mobile: 'Mobile (%)';
-      note: 'Visits are recorded only with analytics consent. A site that is switched off records nothing and the server refuses its payloads. The share is the percentage of visits with consent that are recorded; on a phone recording starts only after the visitor\'s first touch, scroll or key.';
+      note: "Visits are recorded only with analytics consent. A site that is switched off records nothing and the server refuses its payloads. The share is the percentage of visits with consent that are recorded; on a phone recording starts only after the visitor's first touch, scroll or key.";
+      player: {
+        back: '← Back to the recordings';
+        busy: 'The recordings storage does not answer right now. Try again in a minute.';
+        failed: 'The recording could not be loaded.';
+        gone: 'This recording is no longer available (recordings are deleted after 60 days).';
+        loading: 'Loading the recording…';
+        markers: {
+          clicks: 'Clicks';
+          errors: 'Errors';
+          rage: 'Rage clicks';
+        };
+        next: 'Next page';
+        noStyles: "This page's styles were not archived: the recording plays without its design.";
+        pages: 'Pages of this visit';
+        pause: 'Pause';
+        play: 'Play';
+        privacy: 'Recordings are masked: what visitors type and their names, e-mails and phones are not shown.';
+        skipIdle: 'Skip inactivity';
+        speed: 'Speed';
+        timeline: 'Timeline';
+      };
       sample: 'Share of visits (%)';
       save: 'Save';
       saveFailed: 'Saving failed.';
@@ -545,6 +590,10 @@ interface Resources {
       staffText: 'Open the link for each site in this browser: your visits are then not recorded and not counted in the statistics. The mark stays in this browser until you remove it.';
       staffTitle: 'This browser as the team';
       staffUnmark: 'Remove the mark';
+      views: {
+        list: 'Recordings';
+        settings: 'Settings';
+      };
     };
     referrer: 'referrer';
     removeTag: 'Remove tag {{tag}}';
@@ -613,7 +662,7 @@ interface Resources {
       contacts: 'Contacts';
       conversations: 'Conversations';
       live: 'Live visitors';
-      recording: 'Recording';
+      recording: 'Recordings';
       stats: 'Statistics';
     };
     tagPlaceholder: 'e.g. vip';

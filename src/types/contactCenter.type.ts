@@ -245,3 +245,46 @@ export interface RecSiteSetting {
   samplePct: number;
   mobilePct: number;
 }
+
+/** One recorded page view in the recordings list (P6 R2, GET /admin/cc/rec/page-views). */
+export interface RecRow {
+  id: number;
+  siteId: string;
+  url: string | null;
+  pageType: string | null;
+  startedAt: string;
+  durationMs: number | null;
+  viewportW: number | null;
+  viewportH: number | null;
+  device: string;
+  clicks: number;
+  rageClicks: number;
+  errors: number;
+  visitId: number | null;
+  inquiry: boolean;
+  chat: boolean;
+}
+
+export interface RecFilter {
+  from?: string;
+  to?: string;
+  siteId?: string;
+  device?: string;
+  pageType?: string;
+  rageOnly?: boolean;
+  noInquiry?: boolean;
+  visitId?: number;
+  conversationId?: number;
+  before?: string;
+  beforeId?: number;
+  size?: number;
+}
+
+/** A recording opened in the player (GET /admin/cc/rec/page-views/{id}): the pages of its visit and its timeline marks. */
+export interface RecDetail {
+  row: RecRow;
+  visitPages: Array<{ id: number; url: string | null; pageType: string | null; startedAt: string; durationMs: number | null }>;
+  clicks: Array<{ tMs: number; x: number | null; y: number | null }>;
+  rage: number[];
+  errors: Array<{ tMs: number; message: string | null }>;
+}

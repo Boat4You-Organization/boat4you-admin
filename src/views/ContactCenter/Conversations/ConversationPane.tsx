@@ -12,6 +12,7 @@ import ContactCenterService from '@/services/contactCenter.service';
 import { ConversationDetail } from '@/types/contactCenter.type';
 import { displayName, isLiveNow } from '@/utils/contactCenter/display';
 import { showToast } from '@/valtio/global/global.actions';
+import RecordingsLink from '@/views/ContactCenter/Recordings/RecordingsLink';
 import { ChatStatusChip, SiteChip, countryText, formatAt, isSuspicious } from '@/views/ContactCenter/common';
 import { CcButton, Dot, MoreIcon, Pill, cc, scrollSx } from '@/views/ContactCenter/ui';
 
@@ -266,6 +267,7 @@ const ConversationPane = ({ detail, onChanged, onDeleted, onBack, onOpenCard }: 
       <Box sx={{ ...scrollSx, flex: 1, minHeight: 120, display: 'flex', flexDirection: 'column' }}>
         <Box sx={{ m: { xs: '8px 12px 0', md: '12px 18px 0' } }}>
           <NavigationHistory detail={detail} />
+          <RecordingsLink conversationId={row.id} />
         </Box>
         <Box
           sx={{ flex: 1, p: { xs: '12px', md: '16px 18px' }, display: 'flex', flexDirection: 'column', gap: '14px' }}

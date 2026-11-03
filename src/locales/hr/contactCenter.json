@@ -5,7 +5,7 @@
     "live": "Live posjetitelji",
     "contacts": "Kontakti",
     "stats": "Statistika",
-    "recording": "Snimanje"
+    "recording": "Snimke"
   },
   "status": {
     "AI": "AI",
@@ -274,6 +274,55 @@
     "staffTitle": "Ovaj preglednik kao tim",
     "staffText": "Otvori link za svaki sajt u ovom pregledniku: tvoje posjete se tada ne snimaju i ne broje u statistici. Oznaka ostaje u tom pregledniku dok je ne ukloniš.",
     "staffMark": "Označi",
-    "staffUnmark": "Ukloni oznaku"
+    "staffUnmark": "Ukloni oznaku",
+    "views": {
+      "list": "Snimke",
+      "settings": "Postavke"
+    },
+    "list": {
+      "empty": "Nema snimki za odabrane filtre.",
+      "deviceAll": "Svi uređaji",
+      "pageTypeAll": "Sve vrste stranica",
+      "rageOnly": "Samo s bijesnim klikovima",
+      "noInquiry": "Samo bez upita",
+      "visitScope": "Posjet #{{id}}",
+      "conversationScope": "Razgovor #{{id}}",
+      "clearScope": "Svi posjeti",
+      "col": {
+        "started": "Početak",
+        "site": "Sajt",
+        "page": "Stranica",
+        "device": "Uređaj",
+        "duration": "Trajanje",
+        "clicks": "Klikovi",
+        "rage": "Bijesni klikovi",
+        "errors": "Greške",
+        "inquiry": "Upit",
+        "chat": "Chat"
+      },
+      "watch": "Pogledaj"
+    },
+    "player": {
+      "back": "← Natrag na snimke",
+      "play": "Pokreni",
+      "pause": "Pauza",
+      "speed": "Brzina",
+      "skipIdle": "Preskoči neaktivnost",
+      "pages": "Stranice ovog posjeta",
+      "next": "Sljedeća stranica",
+      "loading": "Učitavam snimku…",
+      "gone": "Snimka više nije dostupna (snimke se brišu nakon 60 dana).",
+      "busy": "Spremište snimki trenutno ne odgovara. Pokušaj za minutu.",
+      "failed": "Snimku nije moguće učitati.",
+      "timeline": "Vremenska crta",
+      "noStyles": "Stilovi ove stranice nisu arhivirani: snimka se prikazuje bez dizajna.",
+      "privacy": "Snimke su maskirane: unos posjetitelja, imena, e-mailovi i telefoni se ne vide.",
+      "markers": {
+        "clicks": "Klikovi",
+        "rage": "Bijesni klikovi",
+        "errors": "Greške"
+      }
+    },
+    "conversationLink": "Snimke ovog posjeta"
   }
 }

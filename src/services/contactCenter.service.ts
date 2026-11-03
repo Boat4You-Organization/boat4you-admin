@@ -12,6 +12,9 @@ import {
   ConversationRow,
   LiveRow,
   ProactiveResult,
+  RecDetail,
+  RecFilter,
+  RecRow,
   RecSiteSetting,
 } from '@/types/contactCenter.type';
 
@@ -55,6 +58,13 @@ const ContactCenterService = {
   funnel: (query: { from?: string; to?: string; siteId?: string; device?: string; channel?: string }) =>
     api.get<CcFunnel>('/admin/cc/funnel', { params: params(query) }),
   recSettings: () => api.get<RecSiteSetting[]>('/admin/cc/rec/settings'),
+  recordings: (filter: RecFilter) => api.get<RecRow[]>('/admin/cc/rec/page-views', { params: params(filter) }),
+  recording: (id: number) => api.get<RecDetail>(`/admin/cc/rec/page-views/${id}`),
+  /** The recording as stored, one payload per line; the API sends it gzip-encoded and the browser unzips it. */
+  recordingRaw: (id: number) =>
+    api.get<string>(`/admin/cc/rec/page-views/${id}/raw`, { responseType: 'text', transformResponse: (r: string) => r }),
+  recordingAssets: (siteId: string, paths: string[]) =>
+    api.post<Record<string, string>>('/admin/cc/rec/assets', { siteId, paths }),
   saveRecSetting: ({ siteId, ...values }: RecSiteSetting) =>
     api.put<RecSiteSetting>(`/admin/cc/rec/settings/${siteId}`, values),
 };

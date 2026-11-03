@@ -5,7 +5,7 @@
     "live": "Live visitors",
     "contacts": "Contacts",
     "stats": "Statistics",
-    "recording": "Recording"
+    "recording": "Recordings"
   },
   "status": {
     "AI": "AI",
@@ -273,6 +273,55 @@
     "staffTitle": "This browser as the team",
     "staffText": "Open the link for each site in this browser: your visits are then not recorded and not counted in the statistics. The mark stays in this browser until you remove it.",
     "staffMark": "Mark",
-    "staffUnmark": "Remove the mark"
+    "staffUnmark": "Remove the mark",
+    "views": {
+      "list": "Recordings",
+      "settings": "Settings"
+    },
+    "list": {
+      "empty": "No recordings for these filters.",
+      "deviceAll": "All devices",
+      "pageTypeAll": "All page types",
+      "rageOnly": "Only with rage clicks",
+      "noInquiry": "Only without an inquiry",
+      "visitScope": "Visit #{{id}}",
+      "conversationScope": "Conversation #{{id}}",
+      "clearScope": "All visits",
+      "col": {
+        "started": "Started",
+        "site": "Site",
+        "page": "Page",
+        "device": "Device",
+        "duration": "Duration",
+        "clicks": "Clicks",
+        "rage": "Rage clicks",
+        "errors": "Errors",
+        "inquiry": "Inquiry",
+        "chat": "Chat"
+      },
+      "watch": "Watch"
+    },
+    "player": {
+      "back": "← Back to the recordings",
+      "play": "Play",
+      "pause": "Pause",
+      "speed": "Speed",
+      "skipIdle": "Skip inactivity",
+      "pages": "Pages of this visit",
+      "next": "Next page",
+      "loading": "Loading the recording…",
+      "gone": "This recording is no longer available (recordings are deleted after 60 days).",
+      "busy": "The recordings storage does not answer right now. Try again in a minute.",
+      "failed": "The recording could not be loaded.",
+      "timeline": "Timeline",
+      "noStyles": "This page's styles were not archived: the recording plays without its design.",
+      "privacy": "Recordings are masked: what visitors type and their names, e-mails and phones are not shown.",
+      "markers": {
+        "clicks": "Clicks",
+        "rage": "Rage clicks",
+        "errors": "Errors"
+      }
+    },
+    "conversationLink": "Recordings of this visit"
   }
 }

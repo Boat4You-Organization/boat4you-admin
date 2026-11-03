@@ -11,7 +11,7 @@ import ContactDetail from './Contacts/ContactDetail';
 import Contacts from './Contacts/Contacts';
 import Conversations from './Conversations/Conversations';
 import LiveVisitors from './Live/LiveVisitors';
-import Recording from './Recording/Recording';
+import RecordingsTab from './Recordings/RecordingsTab';
 import Stats from './Stats/Stats';
 import { cc } from './ui';
 
@@ -108,7 +108,7 @@ const ContactCenter = () => {
         {tab === 'live' && <LiveVisitors />}
         {tab === 'contacts' && (contactId ? <ContactDetail id={Number(contactId)} /> : <Contacts />)}
         {tab === 'stats' && <Stats />}
-        {tab === 'recording' && <Recording />}
+        {tab === 'recording' && <RecordingsTab />}
       </Box>
     </Layout>
   );

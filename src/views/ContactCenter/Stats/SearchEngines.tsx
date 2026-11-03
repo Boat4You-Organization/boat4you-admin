@@ -47,6 +47,7 @@ const SORTS: Array<[SearchQuerySort, 'clicks' | 'impressions' | 'ctr' | 'positio
   ['POSITION', 'position'],
 ];
 const MIN_IMPRESSIONS = 10; // backend SearchEngineQuery.MIN_IMPRESSIONS
+const PATH_MAX = 1000; // backend SearchText.PATH_MAX: a longer page (our tracker's) has no Google rows anyway
 
 type Sort = { key: SearchQuerySort; asc: boolean };
 
@@ -65,7 +66,8 @@ const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?
   const [page, setPage] = useState(''); // `${siteId}|${path}` of the landing page, '' = whole site
   const [pageOf, setPageOf] = useState(siteId);
   const [sort, setSort] = useState<Sort>(BY_CLICKS);
-  const [own, setOwn] = useState<{ key: string; rows: SearchQueryStat[] } | null>(null);
+  // The table's own answer, tagged with the request it belongs to; failed = that request failed (the section stays).
+  const [own, setOwn] = useState<{ key: string; rows: SearchQueryStat[]; failed?: boolean } | null>(null);
 
   if (pageOf !== siteId) {
     // A page of another site does not fit the new site filter.
@@ -112,7 +114,7 @@ const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?
       dir: sort.asc ? 'asc' : 'desc',
     })
       .then(({ data: rows }) => current && setOwn({ key: ownKey, rows }))
-      .catch(() => current && setFailed(true));
+      .catch(() => current && setOwn({ key: ownKey, rows: [], failed: true }));
 
     return () => {
       current = false;
@@ -134,14 +136,16 @@ const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?
   const ariaDir = sort.asc ? 'ascending' : 'descending';
   const onSort = (key: SearchQuerySort) =>
     setSort(s => (s.key === key ? { key, asc: !s.asc } : { key, asc: key === 'POSITION' }));
-  const pageOptions = data ? data.pages.map(p => ({ siteId: p.siteId, path: p.path })) : [];
+  const pageOptions = data
+    ? data.pages.filter(p => p.path.length <= PATH_MAX).map(p => ({ siteId: p.siteId, path: p.path }))
+    : [];
 
   if (pageSite && pagePath && !pageOptions.some(p => p.siteId === pageSite && p.path === pagePath)) {
     pageOptions.unshift({ siteId: pageSite, path: pagePath });
   }
 
   /** A query table; [sortable] (Google) adds the landing page choice and the column order. */
-  const queryTable = (title: string, rows: SearchQueryStat[], sortable = false, pending = false) => (
+  const queryTable = (title: string, rows: SearchQueryStat[], sortable = false, pending = false, broken = false) => (
     <Box sx={{ ...cardSx, mb: '12px', overflowX: 'auto' }}>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 14px' }}>
         <Box component="h3" sx={titleSx}>
@@ -204,7 +208,8 @@ const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?
           ))}
         </tbody>
       </Box>
-      {!rows.length && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
+      {broken && <LoadAlert text={t('loadFailed')} />}
+      {!rows.length && !broken && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
       {sortable && (sort.key === 'CTR' || sort.key === 'POSITION') && (
         <Box sx={{ fontSize: 12, color: cc.muted, lineHeight: 1.5 }}>
           {t('searchEngines.minImpressions', { n: MIN_IMPRESSIONS })}
@@ -334,7 +339,8 @@ const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?
             t('searchEngines.googleQueries'),
             custom ? (own?.rows ?? []) : data.googleQueries,
             true,
-            custom && own?.key !== ownKey
+            custom && own?.key !== ownKey,
+            custom && own?.key === ownKey && !!own.failed
           )}
           {data.bing && queryTable(t('searchEngines.bingQueries'), data.bingQueries)}
           <Box sx={{ ...cardSx, overflowX: 'auto' }}>

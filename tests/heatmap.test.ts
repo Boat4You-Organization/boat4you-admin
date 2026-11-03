@@ -2,14 +2,7 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import {
-  elementLabel,
-  reachAt,
-  shownShare,
-  toActivity,
-  toHoverActivity,
-  toScrollMap,
-} from '../src/utils/contactCenter/heatmap.ts';
+import { elementLabel, heatPoints, reachAt, shownShare, toActivity, toHoverActivity, toScrollMap } from '../src/utils/contactCenter/heatmap.ts';
 
 const el = (hash: string, clicks: number, text: string | null = 'Reach out', tag: string | null = 'button') => ({
   hash,
@@ -103,5 +96,42 @@ describe('toHoverActivity', () => {
       { hash: 'b', selector: '', totalclicks: 9, x: [100], y: [100], clicks: [9], points: 1 },
     ]);
     assert.deepEqual(toHoverActivity({}), []);
+describe('heatPoints', () => {
+  test('page points from element rects: a 32767 grid within the rect, same spot merged, unknown or unlaid-out elements skipped', () => {
+    const act = (hash: string, x: number[], y: number[], clicks: number[]) => ({
+      hash,
+      selector: '',
+      totalclicks: clicks.reduce((n, v) => n + v, 0),
+      x,
+      y,
+      clicks,
+      points: x.length,
+    });
+    const rects: Record<string, { left: number; top: number; width: number; height: number }> = {
+      a: { left: 10, top: 20, width: 100, height: 50 },
+      z: { left: 0, top: 0, width: 0, height: 0 },
+    };
+    const out = heatPoints(
+      [
+        act('a', [0, 32767, 16383], [0, 32767, 16383], [3, 1, 2]),
+        act('a', [16384], [16384], [4]),
+        act('z', [0], [0], [9]),
+        act('q', [0], [0], [9]),
+      ],
+      h => rects[h] ?? null
+    );
+
+    assert.deepEqual(out, {
+      points: [
+        { x: 10, y: 20, w: 3 },
+        { x: 110, y: 70, w: 1 },
+        { x: 60, y: 45, w: 6 },
+      ],
+      max: 6,
+    });
+    assert.deepEqual(
+      heatPoints([], () => null),
+      { points: [], max: 0 }
+    );
   });
 });

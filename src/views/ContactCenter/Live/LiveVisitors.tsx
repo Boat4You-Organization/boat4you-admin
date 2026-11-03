@@ -11,7 +11,6 @@ import ContactCenterService from '@/services/contactCenter.service';
 import { LiveRow } from '@/types/contactCenter.type';
 import { formatDuration } from '@/utils/contactCenter/display';
 import { createPoller } from '@/utils/contactCenter/poller';
-import { siteLabel } from '@/utils/contactCenter/safeLink';
 import { PageLink, SiteChip, countryText } from '@/views/ContactCenter/common';
 import { CHAT_STATUS_COLORS, CcButton, Dot, LoadAlert, Pill, cc, panelSx, tableSx } from '@/views/ContactCenter/ui';
 
@@ -127,7 +126,11 @@ const LiveVisitors = () => {
                     <td>{countryText(v.countryCode)}</td>
                     <td>
                       <Box>{t(`channel.${v.channel}`, { defaultValue: v.channel })}</Box>
-                      {v.fromSiteId && <Box sx={{ fontSize: 12, color: cc.muted }}>{siteLabel(v.fromSiteId)}</Box>}
+                      {v.fromSiteId && (
+                        <Box sx={{ mt: '2px' }}>
+                          <SiteChip siteId={v.fromSiteId} small />
+                        </Box>
+                      )}
                     </td>
                     <td>
                       <Box sx={{ fontSize: 12, fontWeight: 600, letterSpacing: '.03em' }}>{v.deviceClass ?? '—'}</Box>

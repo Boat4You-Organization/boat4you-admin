@@ -15,6 +15,7 @@ import inquiriesEn from '@/locales/en/inquiries.json';
 import invoicesEn from '@/locales/en/invoices.json';
 import loginEn from '@/locales/en/login.json';
 import navigationEn from '@/locales/en/navigation.json';
+import socialEn from '@/locales/en/social.json';
 import tableEn from '@/locales/en/table.json';
 import tabsEn from '@/locales/en/tabs.json';
 import toastMessagesEn from '@/locales/en/toast-messages.json';
@@ -31,6 +32,7 @@ import inquiriesHr from '@/locales/hr/inquiries.json';
 import invoicesHr from '@/locales/hr/invoices.json';
 import loginHr from '@/locales/hr/login.json';
 import navigationHr from '@/locales/hr/navigation.json';
+import socialHr from '@/locales/hr/social.json';
 import tableHr from '@/locales/hr/table.json';
 import tabsHr from '@/locales/hr/tabs.json';
 import toastMessagesHr from '@/locales/hr/toast-messages.json';
@@ -56,6 +58,7 @@ i18n.use(initReactI18next).init({
       invoices: invoicesEn,
       chat: chatEn,
       contactCenter: contactCenterEn,
+      social: socialEn,
     },
     hr: {
       common: commonHr,
@@ -74,6 +77,7 @@ i18n.use(initReactI18next).init({
       invoices: invoicesHr,
       chat: chatHr,
       contactCenter: contactCenterHr,
+      social: socialHr,
     },
   },
 
@@ -96,6 +100,7 @@ i18n.use(initReactI18next).init({
     'invoices',
     'chat',
     'contactCenter',
+    'social',
   ],
   defaultNS: 'common',
   nsSeparator: '.',

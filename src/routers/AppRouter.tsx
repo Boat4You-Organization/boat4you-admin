@@ -18,6 +18,7 @@ const Invoices = lazy(() => import('@/views/Invoices'));
 const Offers = lazy(() => import('@/views/Offers'));
 const Users = lazy(() => import('@/views/Users'));
 const ContactCenter = lazy(() => import('@/views/ContactCenter'));
+const Social = lazy(() => import('@/views/Social'));
 const Login = lazy(() => import('@/views/Login'));
 const MyProfile = lazy(() => import('@/views/MyProfile'));
 const SignUp = lazy(() => import('@/views/SignUp'));
@@ -33,6 +34,8 @@ const CONTACT_CENTER_PATHS = [
   '/contact-center/recording/settings',
   '/contact-center/recording/:id',
 ];
+
+const SOCIAL_PATHS = ['/social', '/social/new', '/social/edit/:id', '/social/channels', '/social/automation'];
 
 const AppRouter: React.FC = () => (
   <BrowserRouter>
@@ -61,6 +64,14 @@ const AppRouter: React.FC = () => (
             element={
               <AppRoute variant="protected" accessLevel={[UserRoleName.SYSTEM_ADMIN]} component={<ContactCenter />} />
             }
+          />
+        ))}
+        {/* Objave (Social publisher S0): SYSTEM_ADMIN only, like the backend /admin/social/** (channel tokens, API keys). */}
+        {SOCIAL_PATHS.map(path => (
+          <Route
+            key={path}
+            path={path}
+            element={<AppRoute variant="protected" accessLevel={[UserRoleName.SYSTEM_ADMIN]} component={<Social />} />}
           />
         ))}
         <Route path="/login" element={<AppRoute variant="anonymous" component={<Login />} />} />

@@ -5,6 +5,7 @@ import { People } from '@/components/SvgIcons/BoatFeatures';
 import Bookings from '@/components/SvgIcons/Bookings';
 import Contact from '@/components/SvgIcons/Contact';
 import Invoices from '@/components/SvgIcons/Invoices';
+import Share from '@/components/SvgIcons/Share';
 import { UserRoleName } from '@/models/user.model';
 
 export interface NavigationLink {
@@ -34,6 +35,13 @@ const navigation: NavigationLink[] = [
     id: 'contactCenter',
     icon: Contact,
     path: '/contact-center',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
+    // Objave (Social publisher S0, 3.11.2026): one post to many channels; backend /admin/social/** is SYSTEM_ADMIN only.
+    id: 'social',
+    icon: Share,
+    path: '/social',
     accessLevel: [UserRoleName.SYSTEM_ADMIN],
   },
   {

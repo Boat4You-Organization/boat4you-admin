@@ -1,5 +1,14 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-03 — 🔥 Heatmape: karta više ne nestaje (crtamo je sami) — ✅ LIVE 3.11.2026 14:33 UTC (cusma1, `fix/heatmap-draw` `a61c434` → main, entry `assets/index-DQa7fVTS.js`), tag `live/2026-11-03-cc-heatmap-draw`
+
+Mario 3.11.2026: „gledam heatmap preko računala, pojavi se pa nestane odmah“; „vidi home mobile, stvori se di su klikovi bili pa nestane“; „Da, deployaj“.
+
+- **Uzrok:** clarity-visualize nakon prvog crtanja sam ponovno crta kartu klikova pri svakoj promjeni veličine stranice u podlozi (ResizeObserver, u petlji: „ResizeObserver loop completed…“ u konzoli) i pri tome zadrži samo elemente koje njegov `visible()` (elementsFromPoint) prihvati — na stvarnim stranicama gotovo nijedan, pa karta ostane prazna (reproducirano u Claudeovom pregledniku s Mariovom prijavom: canvas klikova 0 obojenih px, scroll mapa 5,7 M).
+- **Popravak:** `Replay.clickmap` i `Replay.scrollmap` crtaju sami, jednom, na jedan canvas preko cijele stranice (`b4y-heat-canvas`, bez promatrača): točke svakog elementa koji je u layoutu (i ako ga nešto prekriva), meki diskovi obojeni plavo→crveno po gustoći; scroll gradijent s foldom i 75/50/25 %. Čisti dio `heatPoints()` ima node test.
+- Provjera: testovi 60/60, tsc 0, eslint 0 grešaka; harness 13.808 px i isto nakon rasta stranice; live u pregledniku nakon deploya (vidi ledger).
+- Grana je od živog maina `722a9be` (ADMIN: trajna prijava, PWA), pa ništa njihovo nije vraćeno.
+
 ## 3.11.2026 — admin installable on the phone (PWA) (a5f6d73)
 
 - `public/manifest.json` (Boat4You Admin / B4Y Admin, start `/bookings`, standalone, navy theme), maskable 192/512 icons, full-bleed yellow `apple-touch-icon` (`?v=4`), iOS/Android web-app meta in `index.html`. Old placeholder `favicons/site.webmanifest` removed. No service worker (nothing cached, deploys show at once).

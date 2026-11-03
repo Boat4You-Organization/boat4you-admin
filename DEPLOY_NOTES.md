@@ -1,12 +1,14 @@
 # boat4you-admin — deploy notes
 
-## 2026-11-03 — 🔥 Heatmape: karta više ne nestaje (crtamo je sami) — ✅ LIVE 3.11.2026 14:33 UTC (cusma1, `fix/heatmap-draw` `a61c434` → main, entry `assets/index-DQa7fVTS.js`), tag `live/2026-11-03-cc-heatmap-draw`
+## 2026-11-03 — 🔥 Heatmape: karta više ne nestaje (crtamo je sami) + točke se čitaju kao `ex`/`ey` — ✅ LIVE 3.11.2026 14:33 UTC (`a61c434`, `assets/index-DQa7fVTS.js`) i 14:53 UTC (`34ef98b`, `assets/index-D51SXnvk.js`; cusma1, `fix/heatmap-draw` → main), tag `live/2026-11-03-cc-heatmap-draw`
 
 Mario 3.11.2026: „gledam heatmap preko računala, pojavi se pa nestane odmah“; „vidi home mobile, stvori se di su klikovi bili pa nestane“; „Da, deployaj“.
 
 - **Uzrok:** clarity-visualize nakon prvog crtanja sam ponovno crta kartu klikova pri svakoj promjeni veličine stranice u podlozi (ResizeObserver, u petlji: „ResizeObserver loop completed…“ u konzoli) i pri tome zadrži samo elemente koje njegov `visible()` (elementsFromPoint) prihvati — na stvarnim stranicama gotovo nijedan, pa karta ostane prazna (reproducirano u Claudeovom pregledniku s Mariovom prijavom: canvas klikova 0 obojenih px, scroll mapa 5,7 M).
 - **Popravak:** `Replay.clickmap` i `Replay.scrollmap` crtaju sami, jednom, na jedan canvas preko cijele stranice (`b4y-heat-canvas`, bez promatrača): točke svakog elementa koji je u layoutu (i ako ga nešto prekriva), meki diskovi obojeni plavo→crveno po gustoći; scroll gradijent s foldom i 75/50/25 %. Čisti dio `heatPoints()` ima node test.
 - Provjera: testovi 60/60, tsc 0, eslint 0 grešaka; harness 13.808 px i isto nakon rasta stranice; live u pregledniku nakon deploya (vidi ledger).
+- **Pravi uzrok (drugi deploy 14:53):** backend šalje `HeatPoint.eX/eY` kao `ex`/`ey` (Jackson tako imenuje Kotlin `eX`), a admin je čitao `eX`/`eY` → svaka stvarna točka bila je NaN: stara biblioteka ju je tiho ispustila (R3 karta je prikazivala samo sredine elemenata, pa ih brisala), naše crtanje je bacilo grešku u `createRadialGradient`. `toActivity` čita oba zapisa, `heatPoints` preskače ne-konačne vrijednosti; backend od R4 šalje `eX`/`eY` (`@JsonProperty`).
+- Provjera live 14:55 UTC (Claudeov preglednik, Mariova prijava): Home/mobile 9.918 obojenih px, isto nakon 18 s; bez grešaka u konzoli.
 - Grana je od živog maina `722a9be` (ADMIN: trajna prijava, PWA), pa ništa njihovo nije vraćeno.
 
 ## 3.11.2026 — admin installable on the phone (PWA) (a5f6d73)

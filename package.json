@@ -18,6 +18,8 @@
     "@types/qrcode": "^1.5.6",
     "@vitejs/plugin-react-swc": "^4.2.2",
     "axios": "^1.13.2",
+    "clarity-decode": "0.8.73",
+    "clarity-visualize": "0.8.73",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.19",
     "file-saver": "^2.0.5",
@@ -94,5 +96,9 @@
     "stylelint-scss": "^6.13.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.0"
+  },
+  "resolutions": {
+    "clarity-decode": "0.8.73",
+    "clarity-js": "0.8.73"
   }
 }

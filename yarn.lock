@@ -1877,6 +1877,25 @@ chokidar@^5.0.0:
   dependencies:
     readdirp "^5.0.0"
 
+clarity-decode@0.8.73, clarity-decode@^0.8.73:
+  version "0.8.73"
+  resolved "https://registry.yarnpkg.com/clarity-decode/-/clarity-decode-0.8.73.tgz#04fb038061f84d6c6dfe0f191dde97ca74223f09"
+  integrity sha512-rGA4EwCBAodVnBjw0NEF+pyoZCXUl+3opm7dE+7MRkDOzeo4WyWeimyRZZNRSzk1jawX63obNXhTfSJNJjvgeg==
+  dependencies:
+    clarity-js "^0.8.73"
+
+clarity-js@0.8.73, clarity-js@^0.8.73:
+  version "0.8.73"
+  resolved "https://registry.yarnpkg.com/clarity-js/-/clarity-js-0.8.73.tgz#0d8e56d694df60e9de9c1748a56ec1d0e40fc4e7"
+  integrity sha512-xSbhsDm7S2KdFnfu2Pn14bRSiGnlMWLpYW/vZ0vkNPOIDpEpuFQF/D1n0O+Gs6643YWC6CqaPrgohIoQOuwZ4w==
+
+clarity-visualize@0.8.73:
+  version "0.8.73"
+  resolved "https://registry.yarnpkg.com/clarity-visualize/-/clarity-visualize-0.8.73.tgz#85550be3b7918e9f1d81d151e678a27dc27aa84e"
+  integrity sha512-61HrZjnbhMTQaOE1pBIuM7ov2msK9enaK6UhtDHxi3YBB8f25zj1qWTIqFsMDCi8cSMtbAUxPvPUaLxnYuohAQ==
+  dependencies:
+    clarity-decode "^0.8.73"
+
 cliui@^6.0.0:
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/cliui/-/cliui-6.0.0.tgz#511d702c0c4e41ca156d7d0e96021f23e13225b1"

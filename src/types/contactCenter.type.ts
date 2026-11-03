@@ -283,7 +283,13 @@ export interface RecFilter {
 /** A recording opened in the player (GET /admin/cc/rec/page-views/{id}): the pages of its visit and its timeline marks. */
 export interface RecDetail {
   row: RecRow;
-  visitPages: Array<{ id: number; url: string | null; pageType: string | null; startedAt: string; durationMs: number | null }>;
+  visitPages: Array<{
+    id: number;
+    url: string | null;
+    pageType: string | null;
+    startedAt: string;
+    durationMs: number | null;
+  }>;
   clicks: Array<{ tMs: number; x: number | null; y: number | null }>;
   rage: number[];
   errors: Array<{ tMs: number; message: string | null }>;

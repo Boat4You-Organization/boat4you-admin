@@ -62,7 +62,10 @@ const ContactCenterService = {
   recording: (id: number) => api.get<RecDetail>(`/admin/cc/rec/page-views/${id}`),
   /** The recording as stored, one payload per line; the API sends it gzip-encoded and the browser unzips it. */
   recordingRaw: (id: number) =>
-    api.get<string>(`/admin/cc/rec/page-views/${id}/raw`, { responseType: 'text', transformResponse: (r: string) => r }),
+    api.get<string>(`/admin/cc/rec/page-views/${id}/raw`, {
+      responseType: 'text',
+      transformResponse: (r: string) => r,
+    }),
   recordingAssets: (siteId: string, paths: string[]) =>
     api.post<Record<string, string>>('/admin/cc/rec/assets', { siteId, paths }),
   saveRecSetting: ({ siteId, ...values }: RecSiteSetting) =>

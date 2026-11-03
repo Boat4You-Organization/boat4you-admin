@@ -25,7 +25,11 @@ export function stylesheetPaths(lines: string[], host: string): string[] {
  * site goes to its archived copy (`assets`, path → /replay-assets/…); any other link of that site to the live site (images load;
  * the admin CSP keeps out its styles and fonts); anything else is returned unchanged for the CSP to decide.
  */
-export function makeUseproxy(pageUrl: string, assets: Record<string, string>, adminOrigin: string): (link: string) => string {
+export function makeUseproxy(
+  pageUrl: string,
+  assets: Record<string, string>,
+  adminOrigin: string
+): (link: string) => string {
   const page = new URL(pageUrl);
 
   return (link: string) => {

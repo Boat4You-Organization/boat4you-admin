@@ -1,5 +1,9 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-03 — 🅱️ Admin logo vraćen na žuto (žuti favikon) — ✅ DEPLOYANO 3.11.2026 (cusma1, main `440909b`, entry `assets/index-EGLXedaN.js`)
+
+Mario 3.11.2026: „ostavi admin, da bude žuta pozadina i stavi žuti favicon“. Revert `922a79d`: BrandMark žuti krug + navy slovo, favikoni žuti. Plava verzija ostaje samo u paketu logotipa (`_design/Boat4You logo B/`).
+
 ## 2026-11-03 — 🅱️ Logo B u plavoj boji boat4you.com, bijelo slovo — ✅ DEPLOYANO 3.11.2026 (cusma1, main `922a79d`, entry `assets/index-DSonKHtR.js`)
 
 Mario 3.11.2026: pozadina kao hero na boat4you.com (gradijent #1F35D0 → #1722B6 → #19238F), bijelo B. `BrandMark` (gradijent s id-em po instanci) + favikoni. Svi formati: `_design/Boat4You logo B/` (+ `~/Downloads/Boat4You logo B.zip`).

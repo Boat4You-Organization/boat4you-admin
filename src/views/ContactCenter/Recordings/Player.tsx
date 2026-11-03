@@ -9,7 +9,16 @@ import { Data } from 'clarity-decode';
 
 import ContactCenterService from '@/services/contactCenter.service';
 import { RecDetail } from '@/types/contactCenter.type';
-import { formatClock, markerLeft, skipIdle, stylesheetPaths } from '@/utils/contactCenter/replay';
+import {
+  createSeekQueue,
+  formatClock,
+  loadErrorKind,
+  makeUseproxy,
+  markerLeft,
+  rewriteDomUrls,
+  skipIdle,
+  stylesheetPaths,
+} from '@/utils/contactCenter/replay';
 import { safeHref } from '@/utils/contactCenter/safeLink';
 import { SiteChip, formatAt, linkSx } from '@/views/ContactCenter/common';
 import { CcButton, LoadAlert, Segmented, cc } from '@/views/ContactCenter/ui';
@@ -35,14 +44,6 @@ const decodeInWorker = (lines: string[]) =>
     };
     worker.postMessage(lines);
   });
-
-const statusOf = (e: unknown): Phase => {
-  const status = (e as { response?: { status?: number } })?.response?.status;
-
-  if (status === 404) return 'gone';
-
-  return status === 503 ? 'busy' : 'failed';
-};
 
 const Mark = ({ left, color, title, onClick }: { left: number; color: string; title: string; onClick(): void }) => (
   <Box
@@ -74,7 +75,7 @@ const Player = ({ id, onOpen, onBack }: { id: number; onOpen(id: number): void; 
   const playingRef = useRef(false);
   const speedRef = useRef(1);
   const skipRef = useRef(true);
-  const seekingRef = useRef<Promise<void>>(Promise.resolve());
+  const seeksRef = useRef<ReturnType<typeof createSeekQueue> | null>(null);
   const [phase, setPhase] = useState<Phase>('loading');
   const [detail, setDetail] = useState<RecDetail | null>(null);
   const [size, setSize] = useState({ w: 1280, h: 800 });
@@ -95,16 +96,19 @@ const Player = ({ id, onOpen, onBack }: { id: number; onOpen(id: number): void; 
     setPhase('loading');
     setTime(0);
     replayRef.current = null;
+    seeksRef.current = null;
     (async () => {
       try {
-        const [{ data: d }, { data: raw }] = await Promise.all([
-          ContactCenterService.recording(id),
-          ContactCenterService.recordingRaw(id),
-        ]);
+        // The details first: the raw file is fetched (and its view audited) only for a recording the admin can open.
+        const { data: d } = await ContactCenterService.recording(id);
 
         if (!current) return;
 
         setDetail(d);
+
+        const { data: raw } = await ContactCenterService.recordingRaw(id);
+
+        if (!current) return;
 
         const lines = raw.split('\n').filter(l => l.trim() !== '');
         const pageUrl = d.row.url ?? 'https://www.boat4you.com/';
@@ -115,9 +119,12 @@ const Player = ({ id, onOpen, onBack }: { id: number; onOpen(id: number): void; 
               .catch(() => ({}) as Record<string, string>)
           : {};
 
-        setNoStyles(paths.some(p => !assets[p]));
+        // Preloaded chunks are never archived (P0 S8): only a recording none of whose stylesheets is archived plays without them.
+        setNoStyles(paths.length > 0 && Object.keys(assets).length === 0);
 
         const decoded = await decodeInWorker(lines);
+
+        rewriteDomUrls(decoded, makeUseproxy(pageUrl, assets, window.location.origin));
 
         if (!current || !iframeRef.current) return;
 
@@ -132,10 +139,11 @@ const Player = ({ id, onOpen, onBack }: { id: number; onOpen(id: number): void; 
         if (!current) return;
 
         replayRef.current = replay;
+        seeksRef.current = createSeekQueue(at => replay.seek(at));
         setDuration(replay.duration);
         setPhase('ready');
       } catch (e) {
-        if (current) setPhase(statusOf(e));
+        if (current) setPhase(loadErrorKind(e));
       }
     })();
 
@@ -165,20 +173,22 @@ const Player = ({ id, onOpen, onBack }: { id: number; onOpen(id: number): void; 
 
   const play = () => {
     const replay = replayRef.current;
+    const seeks = seeksRef.current;
 
-    if (!replay || playingRef.current) return;
+    if (!replay || !seeks || playingRef.current) return;
 
-    if (replay.time >= replay.duration) {
-      seekingRef.current = seekingRef.current.then(() => replay.seek(0));
-    }
+    if (replay.time >= replay.duration) seeks.seek(0);
 
     playingRef.current = true;
     setPlaying(true);
 
-    let last = performance.now();
+    let last = -1;
     let shown = 0;
     const tick = (now: number) => {
       if (!playingRef.current || replayRef.current !== replay) return;
+
+      // The clock starts at the first frame, after any pending seek.
+      if (last < 0) last = now;
 
       let target = replay.time + (now - last) * speedRef.current;
 
@@ -204,7 +214,7 @@ const Player = ({ id, onOpen, onBack }: { id: number; onOpen(id: number): void; 
       requestAnimationFrame(tick);
     };
 
-    seekingRef.current.then(() => requestAnimationFrame(tick));
+    seeks.idle().then(() => requestAnimationFrame(tick));
   };
 
   const seek = (to: number) => {
@@ -217,7 +227,7 @@ const Player = ({ id, onOpen, onBack }: { id: number; onOpen(id: number): void; 
     const target = Math.max(0, Math.min(replay.duration, to));
 
     setTime(target);
-    seekingRef.current = seekingRef.current.then(() => replay.seek(target));
+    seeksRef.current?.seek(target);
   };
 
   const changeSpeed = (v: (typeof SPEEDS)[number]) => {
@@ -312,9 +322,18 @@ const Player = ({ id, onOpen, onBack }: { id: number; onOpen(id: number): void; 
           ref={iframeRef}
           title={t('rec.player.timeline')}
           sandbox="allow-same-origin"
+          // Not clickable: a click on a recorded link would navigate the frame away (P6 R2 review I1).
+          inert
+          tabIndex={-1}
           width={size.w}
           height={size.h}
-          style={{ border: 0, display: 'block', transform: `scale(${scale})`, transformOrigin: '0 0' }}
+          style={{
+            border: 0,
+            display: 'block',
+            transform: `scale(${scale})`,
+            transformOrigin: '0 0',
+            pointerEvents: 'none',
+          }}
         />
       </Box>
       {phase === 'ready' && (

@@ -6,13 +6,30 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Box } from '@mui/material';
 
+import { lazyWithReload } from '@/utils/contactCenter/replay';
 import Recording from '@/views/ContactCenter/Recording/Recording';
 import { Segmented, cc } from '@/views/ContactCenter/ui';
 
 import RecordingList, { RecScope } from './RecordingList';
 
+const RELOAD_KEY = 'cc-player-reload';
+
+// After an admin deploy the old chunk is gone: reload once (not again within a minute) instead of blanking the admin.
+const reloadOnce = () => {
+  try {
+    const last = Number(sessionStorage.getItem(RELOAD_KEY) ?? 0);
+
+    if (Date.now() - last < 60_000) return;
+
+    sessionStorage.setItem(RELOAD_KEY, String(Date.now()));
+  } catch {
+    // storage blocked: reload anyway
+  }
+  window.location.reload();
+};
+
 // clarity-visualize and the decode worker load only when a recording is opened.
-const Player = lazy(() => import('./Player'));
+const Player = lazy(lazyWithReload(() => import('./Player'), reloadOnce));
 
 const BASE = '/contact-center/recording';
 

@@ -1,5 +1,13 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-03 — 📊 Kontakt centar → Statistika: „Tražilice: Google i Bing“ (F1) — ✅ LIVE 3.11.2026 13:24:50 UTC (cusma1, main `7664113` = grana `feat/cc-search-engines` `e55a2bf`, entry `assets/index-DWw8CtqE.js`, root/deep/asset 200)
+
+Mario 3.11.: „Da, kreni s F1“, „Da, deployaj“. Backend `GET /admin/cc/search-engines` live na cusma2 13:24:22 UTC (V9_119); podatke puni SearchImportJob na cusma3 (od cusma3 deploya 18:07 UTC; prvi uvoz povijesti ~16 h).
+- Nova sekcija ispod lijevka, isti raspon i sajt kao ostatak Statistike, vlastiti filter zemlje i uređaja (uz njih Bing nestaje: nema zemlju ni uređaj). KPI Google/Bing uz naše organske posjete i upite iz njih, posjeti po tražilici, tablica po sajtu, top traženi pojmovi (Google, Bing), ulazne stranice s 3 glavna pojma.
+- Napomena: samo zbirne brojke, kašnjenje 2–3 dana (zadnji uvezeni dan), udio klikova kojima Google skriva pojam; prije prvog uvoza „—“ i rečenica o 16 h.
+- Kanal ORGANIC sada „Tražilice (organski)“ (bio „Google (organski)“, a uvijek je uključivao i Bing i ostale).
+- Provjere: tsc 0, eslint 0 grešaka (15 starih upozorenja drugdje), `yarn test` 59/59, `vite build` OK; lokalno s mock API-jem i pravim GSC podacima (hr/en, filter zemlje šalje `country=US`, prazno stanje, 390 px bez horizontalnog skrola). Pravi backend s podacima još nije viđen (čeka cusma3 import).
+
 ## 2026-11-03 — 🔥 Kontakt centar → Heatmape i „Što popraviti“ (P6 R3) — ✅ LIVE 3.11.2026 11:57 UTC (cusma1, grana `feat/cc-rec-r3` `9a559ab` → main, entry `assets/index-0HTRSdhK.js`, `HeatmapView-CZ3NybY3.js`, `Player-v7GejlKY.js`, `decode.worker-D1BoRNkW.js`), tag `live/2026-11-03-cc-rec-heatmaps`
 
 Mario 3.11.2026 („kreni sa izgradnjim“, „Da, deployaj R3“): cilj su heatmape (gdje se najviše i najmanje klika, greške u dizajnu, što dodati za više upita i rezervacija), ne gledanje pojedinih snimki.

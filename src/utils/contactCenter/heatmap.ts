@@ -22,6 +22,13 @@ export interface ScrollMapStep {
 const CENTRE = 16383;
 const PRECISION = 32767;
 
+/** A point's eX/eY: the backend serialised them as ex/ey until 3.11.2026 (Jackson's name for a Kotlin `eX`), so both are read. */
+const coord = (q: HeatPoint, key: 'eX' | 'eY'): number => {
+  const legacy = q as unknown as Record<string, number | undefined>;
+
+  return q[key] ?? legacy[key.toLowerCase()] ?? NaN;
+};
+
 export interface HeatRect {
   left: number;
   top: number;
@@ -54,6 +61,9 @@ export function heatPoints(
     e.x.forEach((ex, i) => {
       const x = Math.round(r.left + (ex / PRECISION) * r.width);
       const y = Math.round(r.top + (e.y[i] / PRECISION) * r.height);
+
+      if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(e.clicks[i])) return;
+
       const key = `${x}:${y}`;
       const p = byKey.get(key);
 
@@ -76,8 +86,8 @@ export function toActivity(elements: HeatmapElement[], points: Record<string, He
       hash: e.hash,
       selector: '',
       totalclicks: e.clicks,
-      x: p.map(q => q.eX),
-      y: p.map(q => q.eY),
+      x: p.map(q => coord(q, 'eX')),
+      y: p.map(q => coord(q, 'eY')),
       clicks: p.map(q => q.clicks),
       points: p.length,
     };

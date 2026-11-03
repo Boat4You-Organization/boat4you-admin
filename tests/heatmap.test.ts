@@ -146,3 +146,20 @@ describe('heatPoints', () => {
     );
   });
 });
+
+describe('the API spells a point ex/ey (Jackson) — 3.11.2026, the map had no real points', () => {
+  test('toActivity reads eX/eY and ex/ey alike, heatPoints skips what is not a finite number', () => {
+    const legacy = toActivity([el('a', 2)], {
+      a: [{ ex: 1000, ey: 2000, clicks: 2 } as unknown as { eX: number; eY: number; clicks: number }],
+    });
+
+    assert.deepEqual(legacy[0].x, [1000]);
+    assert.deepEqual(legacy[0].y, [2000]);
+    const out = heatPoints(
+      [{ hash: 'a', selector: '', totalclicks: 3, x: [NaN, 0], y: [0, 0], clicks: [2, 1], points: 2 }],
+      () => ({ left: 5, top: 5, width: 10, height: 10 })
+    );
+
+    assert.deepEqual(out, { points: [{ x: 5, y: 5, w: 1 }], max: 1 });
+  });
+});

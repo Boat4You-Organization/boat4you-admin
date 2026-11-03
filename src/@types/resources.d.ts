@@ -679,6 +679,7 @@ interface Resources {
         YAHOO: 'Yahoo';
         YANDEX: 'Yandex';
       };
+      firstImport: "The first import of Google's history (16 months) takes about 16 hours after it is switched on.";
       googleClicks: 'Google clicks';
       googleCtr: 'Google CTR';
       googleImpressions: 'Google impressions';
@@ -688,8 +689,8 @@ interface Resources {
       hidden: 'Google hides the query of {{n}} % of clicks, so the clicks by query are not all traffic.';
       impressions: 'Impressions';
       inquiries: 'Inquiries';
-      none: 'nothing yet';
-      note: 'Google and Bing give totals per query and page only, never a single visitor. Their data is 2 to 3 days late (Google up to {{google}}, Bing up to {{bing}}). Our organic visits count only visitors who consented.';
+      none: '—';
+      note: 'Google and Bing give totals per query and page only, never a single visitor. Their data is 2 to 3 days late (last imported day: Google {{google}}, Bing {{bing}}). Our organic visits count only visitors who consented.';
       organicInquiries: 'Inquiries from organic visits';
       organicVisits: 'Our organic visits';
       pages: 'Landing pages';

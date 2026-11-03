@@ -173,6 +173,7 @@ const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?
             </Box>
             <span>
               {t('searchEngines.note', { google: day(data.lastDay.GOOGLE), bing: day(data.lastDay.BING) })}
+              {!data.lastDay.GOOGLE && ` ${t('searchEngines.firstImport')}`}
               {hidden !== null && ` ${t('searchEngines.hidden', { n: hidden })}`}
               {!data.bing && ` ${t('searchEngines.bingNoFilter')}`}
             </span>

@@ -689,10 +689,13 @@ interface Resources {
       hidden: 'Google hides the query of {{n}} % of clicks, so the clicks by query are not all traffic.';
       impressions: 'Impressions';
       inquiries: 'Inquiries';
+      minImpressions: 'CTR and position rank only queries with at least {{n}} impressions.';
       none: '—';
       note: 'Google and Bing give totals per query and page only, never a single visitor. Their data is 2 to 3 days late (last imported day: Google {{google}}, Bing {{bing}}). Our organic visits count only visitors who consented.';
       organicInquiries: 'Inquiries from organic visits';
       organicVisits: 'Our organic visits';
+      page: 'Landing page';
+      pageAll: 'Landing page: all';
       pages: 'Landing pages';
       pagesNote: "Clicks, impressions and queries are Google's for the page. Org. visits and inquiries are our visits that came from a search engine to that page and the inquiries sent in those visits.";
       position: 'Position';

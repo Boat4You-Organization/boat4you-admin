@@ -4,12 +4,18 @@
 import { Data } from 'clarity-decode';
 import { Visualizer } from 'clarity-visualize';
 
-import { ActivityElement, ScrollMapStep } from '@/utils/contactCenter/heatmap';
+import { ActivityElement, ScrollMapStep, heatPoints } from '@/utils/contactCenter/heatmap';
 import { eventsBetween, makeUseproxy } from '@/utils/contactCenter/replay';
 
 type Event = Data.DecodedEvent;
 
 const RESIZE = 11; // clarity Data.Event.Resize: { width, height }
+const HEAT_CANVAS = 'b4y-heat-canvas';
+const HEAT_RADIUS = 20;
+const HEAT_ALPHA_BOOST = 0.15;
+const HEAT_COLORS = ['blue', 'cyan', 'lime', 'yellow', 'red'];
+// Chrome draws no canvas taller than this.
+const HEAT_MAX_HEIGHT = 32767;
 
 export interface ReplaySource {
   decoded: Data.DecodedPayload[];
@@ -98,16 +104,154 @@ export class Replay {
     this.at = t;
   }
 
-  /** The click heatmap (P6 R3) over the drawn page; an earlier map is cleared first. */
+  /**
+   * The click heatmap (P6 R3) over the drawn page, drawn by us (3.11.2026): clarity-visualize's clickmap redrew itself on every
+   * resize of the page and then kept only the elements it judged visible, so the map showed and vanished. One canvas over the
+   * whole page, every laid-out element's points, no observers; an earlier map is replaced.
+   */
   clickmap(activity: ActivityElement[]): void {
-    this.v.clearmap();
-    this.v.clickmap(activity as unknown as Parameters<Visualizer['clickmap']>[0]);
+    const canvas = this.heatCanvas();
+    const ctx = canvas?.getContext('2d');
+
+    if (!canvas || !ctx) return;
+
+    const scrollX = this.win.pageXOffset;
+    const scrollY = this.win.pageYOffset;
+    const { points, max } = heatPoints(activity, hash => {
+      const el = this.v.get(hash) as Element | null | undefined;
+
+      if (!el || typeof el.getBoundingClientRect !== 'function') return null;
+
+      const r = el.getBoundingClientRect();
+
+      return { left: r.left + scrollX, top: r.top + scrollY, width: r.width, height: r.height };
+    });
+
+    if (!points.length || max <= 0) return;
+
+    // Soft black discs whose alpha adds up, then the alpha picks the colour (blue → red), as clarity does.
+    const top = Math.max(0, Math.min(...points.map(p => p.y)) - HEAT_RADIUS);
+    const bottom = Math.min(canvas.height, Math.max(...points.map(p => p.y)) + HEAT_RADIUS);
+
+    points.forEach(p => {
+      const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, HEAT_RADIUS);
+
+      g.addColorStop(0, 'rgba(0,0,0,1)');
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.globalAlpha = Math.min(p.w / max + HEAT_ALPHA_BOOST, 1);
+      ctx.fillStyle = g;
+      ctx.fillRect(p.x - HEAT_RADIUS, p.y - HEAT_RADIUS, HEAT_RADIUS * 2, HEAT_RADIUS * 2);
+    });
+    ctx.globalAlpha = 1;
+
+    if (bottom <= top) return;
+
+    const band = ctx.getImageData(0, top, canvas.width, bottom - top);
+    const palette = this.heatPalette();
+
+    for (let i = 0; i < band.data.length; i += 4) {
+      const alpha = band.data[i + 3];
+
+      if (alpha > 0) {
+        const o = (alpha - 1) * 4;
+
+        band.data[i] = palette[o];
+        band.data[i + 1] = palette[o + 1];
+        band.data[i + 2] = palette[o + 2];
+      }
+    }
+
+    ctx.putImageData(band, 0, top);
   }
 
-  /** The scroll heatmap with the average fold at [foldPx] and the 75/50/25 % markers. */
+  /** The scroll heatmap, drawn by us: the page from blue (everyone got here) to red (hardly anyone), the fold and 75/50/25 %. */
   scrollmap(steps: ScrollMapStep[], foldPx: number): void {
-    this.v.clearmap();
-    this.v.scrollmap(steps as unknown as Parameters<Visualizer['scrollmap']>[0], foldPx, true);
+    const canvas = this.heatCanvas();
+    const ctx = canvas?.getContext('2d');
+    const all = steps[0]?.cumulativeSum ?? 0;
+
+    if (!canvas || !ctx || all <= 0) return;
+
+    const grd = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    const pageH = this.docHeight();
+
+    steps.forEach(s => {
+      const stop = (s.scrollReachY / 100) * (pageH / canvas.height);
+      const hue = (1 - s.cumulativeSum / all) * 240;
+
+      if (stop >= 0 && stop <= 1) grd.addColorStop(stop, `hsla(${Math.round(hue)}, 100%, 50%, 0.6)`);
+    });
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    this.marker(ctx, canvas.width, 'Average fold', foldPx, 84);
+    [75, 50, 25].forEach(m => {
+      const closest = steps.reduce((prev, cur) =>
+        Math.abs(cur.percUsers - m) < Math.abs(prev.percUsers - m) ? cur : prev
+      );
+
+      if (Math.abs(closest.percUsers - m) <= 2) {
+        this.marker(ctx, canvas.width, `${m}%`, (closest.scrollReachY / 100) * canvas.height, 35);
+      }
+    });
+  }
+
+  /** One canvas over the whole drawn page (created once, cleared every time), above everything, never catching clicks. */
+  private heatCanvas(): HTMLCanvasElement | null {
+    const d = this.win.document;
+    const de = d.documentElement;
+
+    if (!de) return null;
+
+    let c = d.getElementById(HEAT_CANVAS) as HTMLCanvasElement | null;
+
+    if (!c) {
+      c = d.createElement('canvas');
+      c.id = HEAT_CANVAS;
+      c.style.cssText = 'position:absolute;left:0;top:0;z-index:2147483647;pointer-events:none';
+      de.appendChild(c);
+    }
+
+    c.width = de.clientWidth;
+    c.height = Math.min(this.docHeight(), HEAT_MAX_HEIGHT);
+    c.getContext('2d')?.clearRect(0, 0, c.width, c.height);
+
+    return c;
+  }
+
+  /** 256 colours from blue to red, one per alpha value. */
+  private heatPalette(): Uint8ClampedArray {
+    const c = this.win.document.createElement('canvas');
+
+    c.width = 1;
+    c.height = 256;
+
+    const ctx = c.getContext('2d');
+
+    if (!ctx) return new Uint8ClampedArray(256 * 4);
+
+    const g = ctx.createLinearGradient(0, 0, 0, 256);
+
+    HEAT_COLORS.forEach((colour, i) => g.addColorStop((i + 1) / HEAT_COLORS.length, colour));
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 1, 256);
+
+    return ctx.getImageData(0, 0, 1, 256).data;
+  }
+
+  private marker(ctx: CanvasRenderingContext2D, width: number, label: string, y: number, boxW: number): void {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.setLineDash([2, 2]);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'white';
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#323130';
+    ctx.fillRect(0, y - 16, boxW, 32);
+    ctx.fillStyle = 'white';
+    ctx.font = '500 12px system-ui, sans-serif';
+    ctx.fillText(label, 5, y + 5);
   }
 
   /** Whether the drawn page has the element of [hash]. */

@@ -20,6 +20,62 @@ export interface ScrollMapStep {
 }
 
 const CENTRE = 16383;
+const PRECISION = 32767;
+
+/** A point's eX/eY: the backend serialised them as ex/ey until 3.11.2026 (Jackson's name for a Kotlin `eX`), so both are read. */
+const coord = (q: HeatPoint, key: 'eX' | 'eY'): number => {
+  const legacy = q as unknown as Record<string, number | undefined>;
+
+  return q[key] ?? legacy[key.toLowerCase()] ?? NaN;
+};
+
+export interface HeatRect {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
+
+export interface HeatPointPx {
+  x: number;
+  y: number;
+  w: number;
+}
+
+/**
+ * Where the clickmap's points land on the drawn page (P6 R3 fix 3.11.2026): each element's points at their place within its
+ * rect (page pixels, rounded), the same spot merged, an element the page has not got or has not laid out skipped. Replaces
+ * clarity-visualize's clickmap, whose redraw after a resize kept only "visible" elements and so wiped the map.
+ */
+export function heatPoints(
+  activity: ActivityElement[],
+  rectOf: (hash: string) => HeatRect | null
+): { points: HeatPointPx[]; max: number } {
+  const byKey = new Map<string, HeatPointPx>();
+
+  activity.forEach(e => {
+    const r = rectOf(e.hash);
+
+    if (!r || r.width <= 0 || r.height <= 0) return;
+
+    e.x.forEach((ex, i) => {
+      const x = Math.round(r.left + (ex / PRECISION) * r.width);
+      const y = Math.round(r.top + (e.y[i] / PRECISION) * r.height);
+
+      if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(e.clicks[i])) return;
+
+      const key = `${x}:${y}`;
+      const p = byKey.get(key);
+
+      if (p) p.w += e.clicks[i];
+      else byKey.set(key, { x, y, w: e.clicks[i] });
+    });
+  });
+
+  const points = Array.from(byKey.values());
+
+  return { points, max: points.reduce((m, p) => Math.max(m, p.w), 0) };
+}
 
 /** The clickmap input: one entry per element, its points as clarity-visualize reads them (an element without points: its centre). */
 export function toActivity(elements: HeatmapElement[], points: Record<string, HeatPoint[]>): ActivityElement[] {
@@ -30,8 +86,8 @@ export function toActivity(elements: HeatmapElement[], points: Record<string, He
       hash: e.hash,
       selector: '',
       totalclicks: e.clicks,
-      x: p.map(q => q.eX),
-      y: p.map(q => q.eY),
+      x: p.map(q => coord(q, 'eX')),
+      y: p.map(q => coord(q, 'eY')),
       clicks: p.map(q => q.clicks),
       points: p.length,
     };

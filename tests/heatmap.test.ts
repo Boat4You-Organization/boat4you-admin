@@ -2,7 +2,14 @@
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
-import { elementLabel, reachAt, shownShare, toActivity, toScrollMap } from '../src/utils/contactCenter/heatmap.ts';
+import {
+  elementLabel,
+  heatPoints,
+  reachAt,
+  shownShare,
+  toActivity,
+  toScrollMap,
+} from '../src/utils/contactCenter/heatmap.ts';
 
 const el = (hash: string, clicks: number, text: string | null = 'Reach out', tag: string | null = 'button') => ({
   hash,
@@ -77,5 +84,62 @@ describe('shownShare', () => {
       shownShare([], () => true),
       0
     );
+  });
+});
+
+describe('heatPoints', () => {
+  test('page points from element rects: a 32767 grid within the rect, same spot merged, unknown or unlaid-out elements skipped', () => {
+    const act = (hash: string, x: number[], y: number[], clicks: number[]) => ({
+      hash,
+      selector: '',
+      totalclicks: clicks.reduce((n, v) => n + v, 0),
+      x,
+      y,
+      clicks,
+      points: x.length,
+    });
+    const rects: Record<string, { left: number; top: number; width: number; height: number }> = {
+      a: { left: 10, top: 20, width: 100, height: 50 },
+      z: { left: 0, top: 0, width: 0, height: 0 },
+    };
+    const out = heatPoints(
+      [
+        act('a', [0, 32767, 16383], [0, 32767, 16383], [3, 1, 2]),
+        act('a', [16384], [16384], [4]),
+        act('z', [0], [0], [9]),
+        act('q', [0], [0], [9]),
+      ],
+      h => rects[h] ?? null
+    );
+
+    assert.deepEqual(out, {
+      points: [
+        { x: 10, y: 20, w: 3 },
+        { x: 110, y: 70, w: 1 },
+        { x: 60, y: 45, w: 6 },
+      ],
+      max: 6,
+    });
+    assert.deepEqual(
+      heatPoints([], () => null),
+      { points: [], max: 0 }
+    );
+  });
+});
+
+describe('the API spells a point ex/ey (Jackson) — 3.11.2026, the map had no real points', () => {
+  test('toActivity reads eX/eY and ex/ey alike, heatPoints skips what is not a finite number', () => {
+    const legacy = toActivity([el('a', 2)], {
+      a: [{ ex: 1000, ey: 2000, clicks: 2 } as unknown as { eX: number; eY: number; clicks: number }],
+    });
+
+    assert.deepEqual(legacy[0].x, [1000]);
+    assert.deepEqual(legacy[0].y, [2000]);
+    const out = heatPoints(
+      [{ hash: 'a', selector: '', totalclicks: 3, x: [NaN, 0], y: [0, 0], clicks: [2, 1], points: 2 }],
+      () => ({ left: 5, top: 5, width: 10, height: 10 })
+    );
+
+    assert.deepEqual(out, { points: [{ x: 5, y: 5, w: 1 }], max: 1 });
   });
 });

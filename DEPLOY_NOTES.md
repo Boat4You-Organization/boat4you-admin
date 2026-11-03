@@ -1,5 +1,9 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-03 — 🎨 Kontakt centar: boja po sajtu na oznaci sajta — ✅ DEPLOYANO 3.11.2026 (cusma1, main `bd17634`, entry `assets/index-v4APSc8V.js`)
+
+Mario 3.11.2026. `SiteChip` (common.tsx): Boat4You plava, Catamaran Croatia crvena, Greece nebesko plava, Italy zelena, Caribbean narančasta, Europe Yachts ljubičasta, Croatia Yachting ružičasta; nepoznati sajt ostaje sivi obrub. Vrijedi u popisu, razgovoru, povijesti navigacije i Live posjetiteljima.
+
 ## 2026-11-03 — 🅱️ Admin logo vraćen na žuto (žuti favikon) — ✅ DEPLOYANO 3.11.2026 (cusma1, main `440909b`, entry `assets/index-EGLXedaN.js`)
 
 Mario 3.11.2026: „ostavi admin, da bude žuta pozadina i stavi žuti favicon“. Revert `922a79d`: BrandMark žuti krug + navy slovo, favikoni žuti. Plava verzija ostaje samo u paketu logotipa (`_design/Boat4You logo B/`).

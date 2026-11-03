@@ -36,9 +36,31 @@ export const ContactStatusChip = ({ status }: { status: string }) => {
   );
 };
 
-export const SiteChip = ({ siteId, small }: { siteId: string; small?: boolean }) => (
-  <OutlinePill sx={small ? { height: 20, fontSize: 11 } : undefined}>{siteLabel(siteId)}</OutlinePill>
-);
+/** One colour per site so the list and Live visitors show at a glance where a visitor is (Mario 3.11.2026). */
+const SITE_COLORS: Record<string, { bg: string; fg: string; bd: string }> = {
+  boat4you: { bg: '#E8EBFF', fg: '#1722B6', bd: '#C7CEFF' },
+  'catamaran-croatia': { bg: '#FEE4E2', fg: '#B42318', bd: '#FECDCA' },
+  'catamaran-greece': { bg: '#E0F2FE', fg: '#0369A1', bd: '#B9E6FE' },
+  'catamaran-italy': { bg: '#DCFCE7', fg: '#15803D', bd: '#BBF7D0' },
+  'catamaran-caribbean': { bg: '#FEF0C7', fg: '#B54708', bd: '#FEDF89' },
+  'europe-yachts': { bg: '#EDE9FE', fg: '#6D28D9', bd: '#DDD6FE' },
+  'croatia-yachting': { bg: '#FCE7F3', fg: '#BE185D', bd: '#FBCFE8' },
+};
+
+export const SiteChip = ({ siteId, small }: { siteId: string; small?: boolean }) => {
+  const c = SITE_COLORS[siteId];
+
+  return (
+    <OutlinePill
+      sx={[
+        c ? { bgcolor: c.bg, color: c.fg, borderColor: c.bd, fontWeight: 600 } : {},
+        small ? { height: 20, fontSize: 11 } : {},
+      ]}
+    >
+      {siteLabel(siteId)}
+    </OutlinePill>
+  );
+};
 
 /** A country as text (ISO code and name); no flag emoji, they do not render without an emoji font. */
 export const countryText = (code: string | null | undefined, name?: string | null) =>

@@ -30,7 +30,7 @@
     "SYSTEM": "Sustav"
   },
   "channel": {
-    "ORGANIC": "Google (organski)",
+    "ORGANIC": "Tražilice (organski)",
     "ADS": "Oglasi",
     "SISTER": "Naš sestrinski sajt",
     "DIRECT": "Direktno",
@@ -259,6 +259,48 @@
       "ITINERARY": "Itinerar",
       "BOOKING": "Obrazac / rezervacija",
       "OTHER": "Ostalo"
+    }
+  },
+  "searchEngines": {
+    "title": "Tražilice: Google i Bing",
+    "country": "Zemlja",
+    "countryAll": "Zemlja: sve",
+    "none": "još ništa",
+    "note": "Google i Bing daju samo zbirne brojke po traženom pojmu i stranici, nikad pojedinog posjetitelja. Podaci kasne 2 do 3 dana (Google do {{google}}, Bing do {{bing}}). Naši organski posjeti broje samo posjetitelje koji su dali pristanak.",
+    "hidden": "Google ne pokazuje traženi pojam za {{n}} % klikova, pa zbroj klikova po pojmovima nije cijeli promet.",
+    "bingNoFilter": "Bing ne daje zemlju ni uređaj, pa ga uz taj filter nema.",
+    "googleClicks": "Google klikovi",
+    "googleImpressions": "Google pojavljivanja",
+    "googleCtr": "Google CTR",
+    "googlePosition": "Google prosj. pozicija",
+    "bingClicks": "Bing klikovi",
+    "bingImpressions": "Bing pojavljivanja",
+    "organicVisits": "Naši organski posjeti",
+    "organicInquiries": "Upiti iz organskih posjeta",
+    "byEngine": "Naši organski posjeti po tražilici",
+    "bySite": "Po sajtu",
+    "googleShort": "Google klikovi / pojavljivanja",
+    "bingShort": "Bing klikovi / pojavljivanja",
+    "visits": "Org. posjeti",
+    "inquiries": "Upiti",
+    "googleQueries": "Najčešći traženi pojmovi na Googleu",
+    "bingQueries": "Najčešći traženi pojmovi na Bingu",
+    "query": "Traženi pojam",
+    "clicks": "Klikovi",
+    "impressions": "Pojavljivanja",
+    "ctr": "CTR",
+    "position": "Pozicija",
+    "pages": "Ulazne stranice",
+    "topQueries": "Glavni pojmovi (Google)",
+    "pagesNote": "Klikovi, pojavljivanja i pojmovi su Googleovi za tu stranicu. Org. posjeti i upiti su naši posjeti koji su s tražilice došli na tu stranicu i upiti poslani u tim posjetima.",
+    "engine": {
+      "GOOGLE": "Google",
+      "BING": "Bing",
+      "DUCKDUCKGO": "DuckDuckGo",
+      "YAHOO": "Yahoo",
+      "ECOSIA": "Ecosia",
+      "YANDEX": "Yandex",
+      "OTHER": "Ostale"
     }
   },
   "rec": {

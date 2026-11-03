@@ -3,6 +3,7 @@
 import { api } from '@/config/axios.config';
 import {
   CcFunnel,
+  CcSearchEngines,
   CcStats,
   ContactCard,
   ContactPatch,
@@ -60,6 +61,8 @@ const ContactCenterService = {
     api.get<CcStats>('/admin/cc/stats', { params: params(query) }),
   funnel: (query: { from?: string; to?: string; siteId?: string; device?: string; channel?: string }) =>
     api.get<CcFunnel>('/admin/cc/funnel', { params: params(query) }),
+  searchEngines: (query: { from?: string; to?: string; siteId?: string; country?: string; device?: string }) =>
+    api.get<CcSearchEngines>('/admin/cc/search-engines', { params: params(query) }),
   recSettings: () => api.get<RecSiteSetting[]>('/admin/cc/rec/settings'),
   recordings: (filter: RecFilter) => api.get<RecRow[]>('/admin/cc/rec/page-views', { params: params(filter) }),
   recording: (id: number) => api.get<RecDetail>(`/admin/cc/rec/page-views/${id}`),

@@ -1,0 +1,278 @@
+/* Search engines (F1, backend SearchEngineQuery): Google Search Console and Bing Webmaster Tools next to our organic visits.
+ * Same range and site as the rest of Statistics; country and device filter only this section (Bing has neither). */
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { Box } from '@mui/material';
+import dayjs from 'dayjs';
+
+import ContactCenterService from '@/services/contactCenter.service';
+import { CcSearchEngines, EngineTotals, SearchQueryStat } from '@/types/contactCenter.type';
+import { siteLabel } from '@/utils/contactCenter/safeLink';
+import { Bars, Metric, barGrid, cardSx, kpiGrid } from '@/views/ContactCenter/Stats/parts';
+import { InfoIcon, LoadAlert, SectionLabel, cc, fieldSx, tableSx } from '@/views/ContactCenter/ui';
+
+const DEVICES = ['DESKTOP', 'TABLET', 'MOBILE'] as const;
+/** The markets worth a filter; any other country still counts in "all". */
+const COUNTRIES = [
+  'US',
+  'GB',
+  'DE',
+  'AT',
+  'CH',
+  'FR',
+  'IT',
+  'NL',
+  'BE',
+  'PL',
+  'CZ',
+  'SK',
+  'HU',
+  'SI',
+  'HR',
+  'SE',
+  'NO',
+  'DK',
+  'ES',
+  'CA',
+  'AU',
+];
+
+const titleSx = { m: 0, fontSize: 14, fontWeight: 700, color: cc.ink } as const;
+const ellipsisSx = { maxWidth: 360, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } as const;
+
+const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?: string }) => {
+  const { t, i18n } = useTranslation('contactCenter');
+  const [country, setCountry] = useState('');
+  const [device, setDevice] = useState('');
+  const [data, setData] = useState<CcSearchEngines | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let current = true;
+
+    ContactCenterService.searchEngines({ from, to, siteId, country: country || undefined, device: device || undefined })
+      .then(({ data: d }) => {
+        if (!current) return;
+
+        setData(d);
+        setFailed(false);
+      })
+      .catch(() => current && setFailed(true));
+
+    return () => {
+      current = false;
+    };
+  }, [from, to, siteId, country, device]);
+
+  const fmt = new Intl.NumberFormat(i18n.language);
+  const fmt1 = new Intl.NumberFormat(i18n.language, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const countryName = (code: string) => new Intl.DisplayNames([i18n.language], { type: 'region' }).of(code) ?? code;
+  const pos = (p: number | null) => (p === null ? '—' : fmt1.format(p));
+  const ctr = (x: { clicks: number; impressions: number }) =>
+    x.impressions ? `${fmt1.format((x.clicks / x.impressions) * 100)} %` : '—';
+  const dayFmt = new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'numeric' });
+  const day = (d?: string) => (d ? dayFmt.format(dayjs(d).toDate()) : t('searchEngines.none'));
+  const engine = (k: string) => t(`searchEngines.engine.${k}`, { defaultValue: k });
+  const hidden =
+    data && data.google.clicks ? Math.round((1 - data.googleClicksWithQuery / data.google.clicks) * 100) : null;
+
+  const queryTable = (title: string, rows: SearchQueryStat[]) => (
+    <Box sx={{ ...cardSx, mb: '12px', overflowX: 'auto' }}>
+      <Box component="h3" sx={titleSx}>
+        {title}
+      </Box>
+      <Box component="table" sx={tableSx}>
+        <thead>
+          <tr>
+            <th>{t('searchEngines.query')}</th>
+            {!siteId && <th>{t('filter.site')}</th>}
+            <th className="num">{t('searchEngines.clicks')}</th>
+            <th className="num">{t('searchEngines.impressions')}</th>
+            <th className="num">{t('searchEngines.ctr')}</th>
+            <th className="num">{t('searchEngines.position')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(q => (
+            <tr key={q.query}>
+              <Box component="td" sx={ellipsisSx} title={q.query}>
+                {q.query}
+              </Box>
+              {!siteId && <td className="soft">{q.siteIds.map(siteLabel).join(', ')}</td>}
+              <td className="num">{fmt.format(q.clicks)}</td>
+              <td className="num">{fmt.format(q.impressions)}</td>
+              <td className="num">{ctr(q)}</td>
+              <td className="num">{pos(q.position)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </Box>
+      {!rows.length && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
+    </Box>
+  );
+
+  const totals = (e: EngineTotals | null) => (e ? `${fmt.format(e.clicks)} / ${fmt.format(e.impressions)}` : '—');
+
+  return (
+    <Box sx={{ mt: '26px' }}>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px 14px', mb: '10px' }}>
+        <SectionLabel>{t('searchEngines.title')}</SectionLabel>
+        <Box
+          component="select"
+          aria-label={t('searchEngines.country')}
+          value={country}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setCountry(e.target.value)}
+          sx={{ ...fieldSx, width: 'auto', minWidth: 170 }}
+        >
+          <option value="">{t('searchEngines.countryAll')}</option>
+          {COUNTRIES.map(c => (
+            <option key={c} value={c}>
+              {countryName(c)}
+            </option>
+          ))}
+        </Box>
+        <Box
+          component="select"
+          aria-label={t('liveTable.device')}
+          value={device}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDevice(e.target.value)}
+          sx={{ ...fieldSx, width: 'auto', minWidth: 150 }}
+        >
+          <option value="">{t('funnel.deviceAll')}</option>
+          {DEVICES.map(d => (
+            <option key={d} value={d}>
+              {t(`funnel.devices.${d}`)}
+            </option>
+          ))}
+        </Box>
+      </Box>
+      {failed && (
+        <Box sx={{ mb: 2 }}>
+          <LoadAlert text={t('loadFailed')} />
+        </Box>
+      )}
+      {data && (
+        <>
+          <Box
+            sx={{
+              display: 'flex',
+              gap: '10px',
+              alignItems: 'flex-start',
+              p: '10px 14px',
+              mb: '12px',
+              borderRadius: '10px',
+              bgcolor: cc.note,
+              color: cc.text,
+              fontSize: 13,
+              lineHeight: 1.5,
+            }}
+          >
+            <Box component="span" sx={{ mt: '2px', display: 'flex' }}>
+              <InfoIcon />
+            </Box>
+            <span>
+              {t('searchEngines.note', { google: day(data.lastDay.GOOGLE), bing: day(data.lastDay.BING) })}
+              {hidden !== null && ` ${t('searchEngines.hidden', { n: hidden })}`}
+              {!data.bing && ` ${t('searchEngines.bingNoFilter')}`}
+            </span>
+          </Box>
+          <Box sx={{ ...kpiGrid, mb: '12px' }}>
+            <Metric label={t('searchEngines.googleClicks')} value={fmt.format(data.google.clicks)} />
+            <Metric label={t('searchEngines.googleImpressions')} value={fmt.format(data.google.impressions)} />
+            <Metric label={t('searchEngines.googleCtr')} value={ctr(data.google)} />
+            <Metric label={t('searchEngines.googlePosition')} value={pos(data.google.position)} />
+            <Metric label={t('searchEngines.bingClicks')} value={data.bing ? fmt.format(data.bing.clicks) : '—'} />
+            <Metric
+              label={t('searchEngines.bingImpressions')}
+              value={data.bing ? fmt.format(data.bing.impressions) : '—'}
+            />
+            <Metric label={t('searchEngines.organicVisits')} value={fmt.format(data.organicVisits)} />
+            <Metric
+              label={t('searchEngines.organicInquiries')}
+              value={fmt.format(data.organicInquiries)}
+              color={cc.greenKpi}
+            />
+          </Box>
+          <Box sx={{ ...barGrid, mb: '12px' }}>
+            <Bars title={t('searchEngines.byEngine')} rows={data.engines} label={engine} color={cc.searchBar} />
+          </Box>
+          {!siteId && (
+            <Box sx={{ ...cardSx, mb: '12px', overflowX: 'auto' }}>
+              <Box component="h3" sx={titleSx}>
+                {t('searchEngines.bySite')}
+              </Box>
+              <Box component="table" sx={tableSx}>
+                <thead>
+                  <tr>
+                    <th>{t('filter.site')}</th>
+                    <th className="num">{t('searchEngines.googleShort')}</th>
+                    <th className="num">{t('searchEngines.position')}</th>
+                    <th className="num">{t('searchEngines.bingShort')}</th>
+                    <th className="num">{t('searchEngines.visits')}</th>
+                    <th className="num">{t('searchEngines.inquiries')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.sites.map(s => (
+                    <tr key={s.siteId}>
+                      <td className="nowrap">{siteLabel(s.siteId)}</td>
+                      <td className="num">{totals(s.google)}</td>
+                      <td className="num">{pos(s.google.position)}</td>
+                      <td className="num">{totals(s.bing)}</td>
+                      <td className="num">{fmt.format(s.organicVisits)}</td>
+                      <td className="num">{fmt.format(s.organicInquiries)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Box>
+            </Box>
+          )}
+          {queryTable(t('searchEngines.googleQueries'), data.googleQueries)}
+          {data.bing && queryTable(t('searchEngines.bingQueries'), data.bingQueries)}
+          <Box sx={{ ...cardSx, overflowX: 'auto' }}>
+            <Box component="h3" sx={titleSx}>
+              {t('searchEngines.pages')}
+            </Box>
+            <Box component="table" sx={tableSx}>
+              <thead>
+                <tr>
+                  {!siteId && <th>{t('filter.site')}</th>}
+                  <th>{t('funnel.path')}</th>
+                  <th className="num">{t('searchEngines.clicks')}</th>
+                  <th className="num">{t('searchEngines.impressions')}</th>
+                  <th className="num">{t('searchEngines.position')}</th>
+                  <th>{t('searchEngines.topQueries')}</th>
+                  <th className="num">{t('searchEngines.visits')}</th>
+                  <th className="num">{t('searchEngines.inquiries')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.pages.map(p => (
+                  <tr key={`${p.siteId}|${p.path}`}>
+                    {!siteId && <td className="soft nowrap">{siteLabel(p.siteId)}</td>}
+                    <Box component="td" sx={ellipsisSx} title={p.path}>
+                      {p.path}
+                    </Box>
+                    <td className="num">{fmt.format(p.clicks)}</td>
+                    <td className="num">{fmt.format(p.impressions)}</td>
+                    <td className="num">{pos(p.position)}</td>
+                    <Box component="td" className="soft" sx={ellipsisSx} title={p.queries.join(' · ')}>
+                      {p.queries.join(' · ') || '—'}
+                    </Box>
+                    <td className="num">{fmt.format(p.visits)}</td>
+                    <td className="num">{fmt.format(p.inquiries)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Box>
+            {!data.pages.length && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
+            <Box sx={{ fontSize: 12, color: cc.muted, lineHeight: 1.5 }}>{t('searchEngines.pagesNote')}</Box>
+          </Box>
+        </>
+      )}
+    </Box>
+  );
+};
+
+export default SearchEngines;

@@ -1,5 +1,15 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-03 — 🎬 Kontakt centar → Snimke: popis snimki i player (P6 R2) — ✅ LIVE 3.11.2026 09:13 UTC (cusma1, main `3f64802`, entry `assets/index-PS7NtQJP.js`, player `Player-BbQHCEHy.js` 802 kB lijeno, `decode.worker-D1BoRNkW.js`), tag `live/2026-11-03-cc-rec-player`
+
+Mario 3.11.2026 („Da, kreni s R2“, „da“).
+
+- Kartica „Snimke“ (`/contact-center/recording`): popis zatvorenih snimki s filtrima (danas/7/30 dana, sajt, uređaj, vrsta stranice, samo s bijesnim klikovima, samo bez upita), trajanje, klikovi, bijesni klikovi, greške, upit, chat; „Pogledaj“ → player (`/contact-center/recording/:id`). Postavke snimanja (R1) su sada `/contact-center/recording/settings`.
+- Player: iframe `sandbox="allow-same-origin"` + `inert` (snimka ne izvršava ništa i ne prima klikove), dekodiranje u Web Workeru (clarity-decode/visualize/js 0.8.73 kroz `resolutions`), pokreni/pauza, 1–8×, preskakanje neaktivnosti, premotavanje (red sa zadnjim ciljem), oznake klikova, bijesnih klikova i grešaka, stranice istog posjeta. Stilovi iz arhive `/replay-assets/` (cusma1 proxy), `srcset` i `url()` slika prepisani na sajt.
+- U razgovoru: „Snimke ovog posjeta“ kad posjet ima snimku.
+- Poruke: snimka obrisana (60 dana) / spremište ne odgovara; nakon deploya admina zastarjeli paket playera jednom osvježi stranicu.
+- Provjera: test-stranica s CSP-om admina na fiksturama spikea — ubačeni inline handler izvrši se samo bez CSP-a i bez sandboxa; premotavanje 615 s snimke ≤ 400 ms. Testovi 54/54; završni pregled (Opus): 0 kritičnih, 2 važna (+3 podignuta) popravljena testom.
+
 ## 2026-11-03 — 🎨 Kontakt centar: boja po sajtu na oznaci sajta — ✅ DEPLOYANO 3.11.2026 (cusma1, main `bd17634`, entry `assets/index-v4APSc8V.js`)
 
 Mario 3.11.2026. `SiteChip` (common.tsx): Boat4You plava, Catamaran Croatia crvena, Greece nebesko plava, Italy zelena, Caribbean narančasta, Europe Yachts ljubičasta, Croatia Yachting ružičasta; nepoznati sajt ostaje sivi obrub. Vrijedi u popisu, razgovoru, povijesti navigacije i Live posjetiteljima.

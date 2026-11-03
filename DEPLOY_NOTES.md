@@ -1,5 +1,10 @@
 # boat4you-admin — deploy notes
 
+## 3.11.2026 — admin installable on the phone (PWA) (a5f6d73)
+
+- `public/manifest.json` (Boat4You Admin / B4Y Admin, start `/bookings`, standalone, navy theme), maskable 192/512 icons, full-bleed yellow `apple-touch-icon` (`?v=4`), iOS/Android web-app meta in `index.html`. Old placeholder `favicons/site.webmanifest` removed. No service worker (nothing cached, deploys show at once).
+- Live on cusma1; manifest served as application/json, icons 200.
+
 ## 3.11.2026 — admin stays signed in across reloads; Live visitors source chip (730eec2)
 
 - `src/config/tokenStore.ts`: access + refresh token JSON now persisted in localStorage (`b4y-admin-auth`), so a reload / new tab / browser restart keeps the session. Ends when the backend refresh token expires (3 days from login, `security.jwt.refresh-token.expiration`) or on Log out. Reverses the in-memory choice of S-002 (Mario's call).

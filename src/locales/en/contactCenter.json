@@ -258,7 +258,15 @@
       "ITINERARY": "Itinerary",
       "BOOKING": "Form / booking",
       "OTHER": "Other"
-    }
+    },
+    "target": "Leads to",
+    "onPages": "on {{count}} pages",
+    "kind": {
+      "link": "link",
+      "button": "button"
+    },
+    "navGroup": "Navigation and galleries ({{count}})",
+    "navGroupHint": "Photo gallery, slider, menu, header and footer clicks"
   },
   "searchEngines": {
     "title": "Search engines: Google and Bing",

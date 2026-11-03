@@ -259,7 +259,15 @@
       "ITINERARY": "Itinerar",
       "BOOKING": "Obrazac / rezervacija",
       "OTHER": "Ostalo"
-    }
+    },
+    "target": "Vodi na",
+    "onPages": "na {{count}} str.",
+    "kind": {
+      "link": "link",
+      "button": "gumb"
+    },
+    "navGroup": "Navigacija i galerije ({{count}})",
+    "navGroupHint": "Klikovi po galeriji fotografija, slideru, izborniku, zaglavlju i podnožju"
   },
   "searchEngines": {
     "title": "Tražilice: Google i Bing",

@@ -6,13 +6,14 @@ import { useTranslation } from 'react-i18next';
 import { Box } from '@mui/material';
 
 import ContactCenterService from '@/services/contactCenter.service';
-import { CcFunnel } from '@/types/contactCenter.type';
+import { CcFunnel, FunnelClick } from '@/types/contactCenter.type';
 import { exitRate, funnelRows } from '@/utils/contactCenter/funnel';
 import { siteLabel } from '@/utils/contactCenter/safeLink';
 import { Bars, barGrid, cardSx } from '@/views/ContactCenter/Stats/parts';
 import { LoadAlert, SectionLabel, cc, fieldSx, tableSx } from '@/views/ContactCenter/ui';
 
 const DEVICES = ['DESKTOP', 'TABLET', 'MOBILE'] as const;
+const NAV_AREAS: Array<FunnelClick['area']> = ['gallery', 'slider', 'nav', 'header', 'footer'];
 const CHANNELS = ['ORGANIC', 'ADS', 'SISTER', 'DIRECT', 'REFERRAL', 'SOCIAL', 'EMAIL', 'OTHER'];
 
 const titleSx = { m: 0, fontSize: 14, fontWeight: 700, color: cc.ink } as const;
@@ -24,6 +25,7 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
   const [channel, setChannel] = useState('');
   const [data, setData] = useState<CcFunnel | null>(null);
   const [failed, setFailed] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
 
   useEffect(() => {
     let current = true;
@@ -43,6 +45,40 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
   }, [from, to, siteId, device, channel]);
 
   const pageType = (k: string) => t(`funnel.pageType.${k}`, { defaultValue: k });
+
+  // Gallery, slider and menu clicks fold into one collapsed group so the CTAs lead the list.
+  const clicks = data?.clicks ?? [];
+  const isNav = (c: FunnelClick) => !!c.area && NAV_AREAS.includes(c.area);
+  const ctaClicks = clicks.filter(c => !isNav(c));
+  const navClicks = clicks.filter(isNav);
+
+  const clickRow = (c: FunnelClick) => (
+    <tr key={`${c.pageType}|${c.label}|${c.kind ?? ''}|${c.area ?? ''}`}>
+      <td className="soft nowrap">{pageType(c.pageType)}</td>
+      <Box component="td" className="soft" sx={{ ...ellipsisSx, maxWidth: 240 }} title={c.path ?? undefined}>
+        {c.path ?? '—'}
+      </Box>
+      <Box component="td" sx={ellipsisSx} title={c.label}>
+        {c.label}
+        {c.kind && (
+          <Box component="span" sx={{ ml: '6px', fontSize: 11.5, color: cc.muted }}>
+            {`(${t(`funnel.kind.${c.kind}`)})`}
+          </Box>
+        )}
+      </Box>
+      <Box component="td" className="soft" sx={{ ...ellipsisSx, maxWidth: 220 }} title={c.target ?? undefined}>
+        {c.target || '—'}
+      </Box>
+      <td className="num nowrap">
+        {c.clicks}
+        {(c.pages ?? 0) > 1 && (
+          <Box component="span" sx={{ ml: '6px', fontSize: 11.5, color: cc.muted }}>
+            {t('funnel.onPages', { count: c.pages })}
+          </Box>
+        )}
+      </td>
+    </tr>
+  );
 
   return (
     <Box sx={{ mt: '26px' }}>
@@ -160,20 +196,25 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
               <thead>
                 <tr>
                   <th>{t('funnel.type')}</th>
+                  <th>{t('funnel.path')}</th>
                   <th>{t('funnel.element')}</th>
+                  <th>{t('funnel.target')}</th>
                   <th className="num">{t('funnel.clickCount')}</th>
                 </tr>
               </thead>
               <tbody>
-                {data.clicks.map(c => (
-                  <tr key={`${c.pageType}|${c.label}`}>
-                    <td className="soft nowrap">{pageType(c.pageType)}</td>
-                    <Box component="td" sx={ellipsisSx} title={c.label}>
-                      {c.label}
+                {ctaClicks.map(clickRow)}
+                {navClicks.length > 0 && (
+                  <tr className="click" onClick={() => setNavOpen(o => !o)}>
+                    <Box component="td" colSpan={5} sx={{ fontWeight: 600, color: cc.text }}>
+                      {`${navOpen ? '▾' : '▸'} ${t('funnel.navGroup', { count: navClicks.length })}`}
+                      <Box component="span" sx={{ ml: '8px', fontWeight: 400, fontSize: 12, color: cc.muted }}>
+                        {t('funnel.navGroupHint')}
+                      </Box>
                     </Box>
-                    <td className="num">{c.clicks}</td>
                   </tr>
-                ))}
+                )}
+                {navOpen && navClicks.map(clickRow)}
               </tbody>
             </Box>
             {!data.clicks.length && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}

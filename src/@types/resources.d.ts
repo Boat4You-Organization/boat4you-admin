@@ -448,8 +448,15 @@ interface Resources {
       exitRate: 'Exit rate';
       exits: 'Exits';
       exitsByType: 'Where they leave without an inquiry';
+      kind: {
+        button: 'button';
+        link: 'link';
+      };
+      navGroup: 'Navigation and galleries ({{count}})';
+      navGroupHint: 'Photo gallery, slider, menu, header and footer clicks';
       note: 'A visit counts at its deepest step and at every step before it, so an inquiry sent from a pop-up on a sister site also counts as a form. Sent inquiries are counted from the start of this measurement.';
       ofVisits: '{{n}} % of visits';
+      onPages: 'on {{count}} pages';
       pageType: {
         BLOG: 'Blog';
         BOAT: 'Boat';
@@ -467,6 +474,7 @@ interface Resources {
         INQUIRY: 'Inquiry sent';
         VISIT: 'Visit';
       };
+      target: 'Leads to';
       title: 'Inquiry funnel';
       type: 'Type';
       views: 'Visits';

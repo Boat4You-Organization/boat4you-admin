@@ -235,7 +235,20 @@ export interface CcFunnel {
   chatOpened: number;
   exitsByType: Count[];
   exits: Array<{ siteId: string; path: string; pageType: string; views: number; exits: number }>;
-  clicks: Array<{ pageType: string; label: string; clicks: number }>;
+  clicks: FunnelClick[];
+}
+
+/** One element of Top clicks (P7a). The optional fields are absent from an older backend; area is null for clicks recorded
+ * before the widget sent it, path when the click had no page view, target for buttons. */
+export interface FunnelClick {
+  pageType: string;
+  label: string;
+  clicks: number;
+  pages?: number;
+  kind?: 'link' | 'button' | null;
+  area?: 'gallery' | 'slider' | 'nav' | 'header' | 'footer' | 'form' | 'dialog' | 'main' | null;
+  path?: string | null;
+  target?: string | null;
 }
 
 /** Clicks and impressions of a range; position is the impression-weighted average, null when no impression has one. */

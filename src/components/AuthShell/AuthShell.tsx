@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Box, Stack, Typography } from '@mui/material';
 
+import BrandMark from '@/components/BrandMark';
 import Layout from '@/components/Layout';
 import { bbColors, bbFont, bbTexture } from '@/styles/bb';
 
@@ -28,7 +29,7 @@ const AuthShell: React.FC<AuthShellProps> = ({ children }) => (
           '& a': { color: bbColors.navy700, fontWeight: 600 },
         }}
       >
-        {/* Phone: textured banner with the B4 tile, flush with the screen edges. */}
+        {/* Phone: textured banner with the B mark, flush with the screen edges. */}
         <Box
           sx={{
             display: { xs: 'flex', sm: 'none' },
@@ -43,44 +44,11 @@ const AuthShell: React.FC<AuthShellProps> = ({ children }) => (
             color: bbColors.white,
           }}
         >
-          <Box
-            sx={{
-              width: 32,
-              height: 32,
-              borderRadius: '8px',
-              boxShadow: 'inset 0 -2px 0 rgba(59,41,0,.16)',
-              backgroundColor: bbColors.yellow500,
-              color: bbColors.yellowText,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: 12,
-            }}
-          >
-            B4
-          </Box>
+          <BrandMark size={32} />
           <Typography sx={{ fontWeight: 800, fontSize: 16, color: bbColors.white }}>Broker Desk</Typography>
         </Box>
         <Stack direction="row" alignItems="center" gap={1.25} sx={{ display: { xs: 'none', sm: 'flex' } }}>
-          <Box
-            sx={{
-              width: 30,
-              height: 30,
-              borderRadius: '8px',
-              boxShadow: 'inset 0 -2px 0 rgba(59,41,0,.16)',
-              backgroundColor: bbColors.yellow500,
-              color: bbColors.yellowText,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 800,
-              fontSize: 13,
-              letterSpacing: '-0.02em',
-            }}
-          >
-            B4
-          </Box>
+          <BrandMark size={30} />
           <Typography sx={{ fontWeight: 800, fontSize: 14, color: bbColors.navy900 }}>
             boat4you
             <Box component="span" sx={{ color: bbColors.gray500, fontWeight: 500 }}>
@@ -106,23 +74,7 @@ const AuthShell: React.FC<AuthShellProps> = ({ children }) => (
           pb: 8,
         }}
       >
-        <Box
-          sx={{
-            width: 48,
-            height: 48,
-            borderRadius: '12px',
-            backgroundColor: bbColors.yellow500,
-            color: bbColors.yellowText,
-            boxShadow: 'inset 0 -2px 0 rgba(59,41,0,.16)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800,
-            fontSize: 17,
-          }}
-        >
-          B4
-        </Box>
+        <BrandMark size={48} />
         <Typography
           sx={{
             color: bbColors.white,

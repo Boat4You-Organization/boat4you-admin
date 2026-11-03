@@ -8,6 +8,7 @@ import MenuIcon from '@mui/icons-material/MenuRounded';
 import SettingsIcon from '@mui/icons-material/SettingsOutlined';
 import { AppBar, Box, Button, Divider, Drawer, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material';
 
+import BrandMark from '@/components/BrandMark';
 import navigation from '@/config/navigation.config';
 import { UserRoleName } from '@/models/user.model';
 import { bbColors, bbFont, bbTexture } from '@/styles/bb';
@@ -23,7 +24,7 @@ import LanguagePicker from './LanguagePicker';
 
 /**
  * Boat4You Broker Desk top navigation (v2.2): navy bar on the nautical-chart
- * texture, yellow B4 tile, centred nav (yellow pill = active), language and
+ * texture, yellow round B mark (BrandMark), centred nav (yellow pill = active), language and
  * profile glass buttons, user pill. Below md the nav and the right cluster
  * collapse into a 44px menu button that opens a textured drawer from the right.
  *
@@ -121,23 +122,7 @@ const Header = () => {
   const Brand = (
     <Link to="/bookings" style={{ textDecoration: 'none' }} aria-label="boat4you — Bookings">
       <Stack direction="row" alignItems="center" gap={1}>
-        <Box
-          sx={{
-            width: 30,
-            height: 30,
-            borderRadius: '8px',
-            backgroundColor: bbColors.yellow500,
-            color: bbColors.yellowText,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: 800,
-            fontSize: 12,
-            boxShadow: 'inset 0 -2px 0 rgba(59,41,0,.16)',
-          }}
-        >
-          B4
-        </Box>
+        <BrandMark size={30} />
         <Typography
           component="span"
           sx={{

@@ -1,5 +1,21 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-03 — 📣 Objave (Social publisher S0): jedna objava na više kanala, zakazivanje, ključevi za automatizaciju — ✅ LIVE 4.11.2026 18:52:57 UTC (`f588f28` = grana + main `31b50c8`, `assets/index-BChUh6VF.js`; cusma1 staging → test → swap, root/deep/asset 200), backend S1 na cusma2 od 18:30:23 UTC (jar d2efcc9a, V9_118); cusma1 `html.prev` = `index-D9rAwK_S.js`
+
+Mario 3.11.2026: „alat s kojim ćemo moći objavljivati jednu objavu na više kanala, a s vremenom da Claude dnevno objavljuje preko Scheduled … sve inhouse i da ne plaćamo nikome“. Plan i API ugovor: `docs/superpowers/specs/2026-11-03-social-publisher-design.md`.
+
+- Nova stavka izbornika **Objave** (`/social`, samo SYSTEM_ADMIN), odmah iza Kontakt centra. Kartice: **Objave** (mjesečni kalendar i popis po danima, filteri status/kanal, detalj objave sa stanjem po kanalu, link na objavu, greška mreže, ponovi neuspjele / otkaži zakazano / uredi / dupliciraj / obriši), **Nova objava** (tekst s brojačem po mreži, link, interna bilješka, fotke/video s napretkom i redoslijedom, odabir kanala, vlastiti tekst i naslov po kanalu, provjere pravila svake mreže dok pišeš, pregled po kanalu, Spremi skicu / Zakaži / Objavi odmah uz potvrdu), **Kanali** (10 mreža: Facebook, Instagram, Threads, LinkedIn, X, TikTok, YouTube, Pinterest, Bluesky, Google Business; spoji preko OAuth-a ili Bluesky app lozinke, odspoji, istek pristupa, „privatno do revizije“), **Automatizacija** (API ključevi, „samo skice“ zadano; primjer curl poziva i id-jevi kanala; opis dnevnog Claude zadatka).
+- Pravila po mreži (`src/utils/social/rules.ts`): duljina teksta (X ponderirano, link = 23; Bluesky grafemi), obavezni mediji/video/naslov, broj fotki, miješanje fotki i videa, hashtagovi, omjer fotke za Instagram, `<` `>` na YouTubeu, neklikabilni linkovi (IG/TikTok).
+- Backend: boat4you-backend grana `claude/blissful-wright-sn6a9f` (V9_118, `/admin/social/**`, `/api/social/v1/**`, objavljivač, AI dnevne objave, Higgsfield) — mora biti live prije admina.
+- Dopuna 3.11. (Mario: „svaki web svoj Facebook, Instagram, TikTok; YouTube jedan; AI dnevne objave uz Higgsfield i naše slike“): kanal ima sajt (pregled sajt × mreža na Kanalima, promjena sajta po kanalu, „za koji sajt“ pri spajanju), Nova objava grupira kanale po sajtu, Objave filtriraju po sajtu i otvaraju `?post=ID`, novi tab **AI dnevne objave** (po sajtu: uključeno, vrijeme, jezik, kanali, odobrenje, Higgsfield video, napomene, „Napravi sada“, zadnje izvedbe). Upload medija je sirovi fajl (ne multipart, video do 500 MB).
+- Provjere: `tsc` 0, eslint `src/` 0 grešaka, `yarn test` 85/85 (novo `tests/social.test.ts`, 31), `yarn build` OK (0× localhost:3000); lokalni pregled s lažnim API-jem (HR, 1440 i 390 px, bez horizontalnog skrola): kalendar, popis, detalj, objava s greškama po kanalu, zakazivanje, kanali, automatizacija. Nije viđeno protiv pravog backenda.
+
+Deploy:
+
+- [x] 4.11. 18:52:57 UTC, 22 min nakon backenda S1 na cusma2 (18:30:23 UTC): provjera u pregledniku s Mariovom prijavom — `/social` prazan kalendar studenog, Kanali: svaka mreža s razlogom iz backenda („Not set up on the server: Meta app not configured …“), Bluesky samo „Not connected“, X/Pinterest/Google Business „Not available yet“; konzola bez novih grešaka. ⚠️ Napomena: engleski UI, a opisi kanala (`Facebook stranica (Page) …`) hrvatski — provjeriti i18n ključeve opisa.
+- [x] 4.11. 10:34 UTC nginx cusma2: `/admin/social/media` + `/api/social/v1/media` 512m, `proxy_request_buffering off` (infra `social_env_set.sh`).
+- [ ] Developer aplikacije mreža (Meta, LinkedIn, Google, TikTok, Pinterest, X) — popis u specu, § „What Mario has to do“.
+
 ## 2026-11-04 — 🔥 Heatmape: karta se napokon VIDI — platno iznad iframea, ne u njemu — ✅ LIVE 4.11.2026 09:58:19 UTC (`cb35b60`, `assets/index-D9rAwK_S.js`; cusma1, `fix/heatmap-overlay` → main), tag `live/2026-11-04-cc-heatmap-overlay`
 
 Mario 4.11.: „Uopće ne radi heatmap, znači pokazuje mi stranicu i to je to“; „Da, deployaj“.

@@ -37,6 +37,7 @@
     "REFERRAL": "Other site",
     "SOCIAL": "Social",
     "EMAIL": "E-mail",
+    "AI": "AI assistants (ChatGPT, Perplexity…)",
     "OTHER": "Other"
   },
   "mode": {

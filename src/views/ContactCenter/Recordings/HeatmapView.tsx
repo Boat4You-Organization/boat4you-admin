@@ -123,6 +123,9 @@ const HeatmapView = () => {
 
     replayRef.current = null;
 
+    // The map of the previous background goes first: it is a canvas next to the frame, not inside it.
+    if (iframeRef.current) Replay.heatCanvasOf(iframeRef.current)?.remove();
+
     if (backgroundId === null) {
       setBgState('none');
 

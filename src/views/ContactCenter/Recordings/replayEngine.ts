@@ -4,13 +4,14 @@
 import { Data } from 'clarity-decode';
 import { Visualizer } from 'clarity-visualize';
 
-import { ActivityElement, ScrollMapStep, heatPoints } from '@/utils/contactCenter/heatmap';
+import { ActivityElement, ScrollMapStep, heatOverlayCss, heatPoints } from '@/utils/contactCenter/heatmap';
 import { eventsBetween, makeUseproxy } from '@/utils/contactCenter/replay';
 
 type Event = Data.DecodedEvent;
 
 const RESIZE = 11; // clarity Data.Event.Resize: { width, height }
-const HEAT_CANVAS = 'b4y-heat-canvas';
+const HEAT_CANVAS_ATTR = 'b4y-heat'; // data-b4y-heat on the map canvas
+const HEAT_CANVAS_KEY = 'b4yHeat';
 const HEAT_RADIUS = 20;
 const HEAT_ALPHA_BOOST = 0.15;
 const HEAT_COLORS = ['blue', 'cyan', 'lime', 'yellow', 'red'];
@@ -195,27 +196,39 @@ export class Replay {
     });
   }
 
-  /** One canvas over the whole drawn page (created once, cleared every time), above everything, never catching clicks. */
+  /**
+   * One canvas over the whole drawn page (created once, cleared every time), never catching clicks. It lives in the admin
+   * document, over the replay iframe (4.11.2026): the frame is sandboxed without scripts, and a canvas in a script-less
+   * document has no box and never paints its bitmap, so a map drawn inside the frame was invisible.
+   */
   private heatCanvas(): HTMLCanvasElement | null {
-    const d = this.win.document;
-    const de = d.documentElement;
+    const frame = this.win.frameElement as HTMLIFrameElement | null;
+    const host = frame?.parentElement;
 
-    if (!de) return null;
+    if (!frame || !host) return null;
 
-    let c = d.getElementById(HEAT_CANVAS) as HTMLCanvasElement | null;
+    let c = Replay.heatCanvasOf(frame);
 
     if (!c) {
-      c = d.createElement('canvas');
-      c.id = HEAT_CANVAS;
-      c.style.cssText = 'position:absolute;left:0;top:0;z-index:2147483647;pointer-events:none';
-      de.appendChild(c);
+      c = host.ownerDocument.createElement('canvas');
+      c.dataset[HEAT_CANVAS_KEY] = '1';
+      c.setAttribute('aria-hidden', 'true');
+      host.appendChild(c);
     }
 
-    c.width = de.clientWidth;
+    if (host.ownerDocument.defaultView?.getComputedStyle(host).position === 'static') host.style.position = 'relative';
+
+    c.width = frame.clientWidth;
     c.height = Math.min(this.docHeight(), HEAT_MAX_HEIGHT);
+    c.style.cssText = heatOverlayCss(c.width, c.height, frame.style.transform, frame.style.transformOrigin);
     c.getContext('2d')?.clearRect(0, 0, c.width, c.height);
 
     return c;
+  }
+
+  /** The map canvas laid over [frame], if one was drawn. */
+  static heatCanvasOf(frame: HTMLIFrameElement): HTMLCanvasElement | null {
+    return frame.parentElement?.querySelector<HTMLCanvasElement>(`:scope > canvas[data-${HEAT_CANVAS_ATTR}]`) ?? null;
   }
 
   /** 256 colours from blue to red, one per alpha value. */

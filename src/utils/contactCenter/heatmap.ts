@@ -1,6 +1,6 @@
 /* Heatmap helpers (P6 R3), pure so node --test covers them: the clickmap and scrollmap inputs of clarity-visualize 0.8.73,
  * reach at a depth and element labels. The view is views/ContactCenter/Recordings/HeatmapView.tsx. */
-import type { HeatPoint, HeatmapElement, ScrollReach } from '@/types/contactCenter.type';
+import type { HeatPoint, HeatmapElement, HoverPoint, ScrollReach } from '@/types/contactCenter.type';
 
 /** clarity-visualize's ElementData: eX/eY are 0..32767 within the element, found in the background by its hash. */
 export interface ActivityElement {
@@ -92,6 +92,25 @@ export function toActivity(elements: HeatmapElement[], points: Record<string, He
       points: p.length,
     };
   });
+}
+
+/** The hover map as a clickmap (P6 R4): every hovered element with its cells, weighted in tenths of a second (at least 1). */
+export function toHoverActivity(hover: Record<string, HoverPoint[]>): ActivityElement[] {
+  return Object.entries(hover)
+    .filter(([, pts]) => pts.length > 0)
+    .map(([hash, pts]) => {
+      const w = pts.map(p => Math.max(1, Math.round(p.ms / 100)));
+
+      return {
+        hash,
+        selector: '',
+        totalclicks: w.reduce((n, v) => n + v, 0),
+        x: pts.map(p => p.eX),
+        y: pts.map(p => p.eY),
+        clicks: w,
+        points: pts.length,
+      };
+    });
 }
 
 /** The scrollmap input: each step with the page views that reached it and their share of all page views (the 0 % step). */

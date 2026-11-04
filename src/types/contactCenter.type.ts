@@ -380,12 +380,21 @@ export interface HeatmapElement {
   dead: number;
   inquiryClicks: number;
   inquiryPageViews: number;
+  /** Milliseconds the mouse rested on it over the group's page views (desktop; 0 without mouse data). */
+  hoverMs: number;
 }
 
 export interface HeatPoint {
   eX: number;
   eY: number;
   clicks: number;
+}
+
+/** Where the mouse rested within an element (P6 R4): a 1024-grid cell centre and the milliseconds there. */
+export interface HoverPoint {
+  eX: number;
+  eY: number;
+  ms: number;
 }
 
 export interface ScrollReach {
@@ -403,6 +412,9 @@ export interface Heatmap {
   clicks: number;
   elements: HeatmapElement[];
   points: Record<string, HeatPoint[]>;
+  /** Hover cells per element (desktop page views without a touch; empty before the F8 recorder). */
+  hover: Record<string, HoverPoint[]>;
+  hoverPageViews: number;
   scroll: ScrollReach[];
   foldPct: number;
   background: number | null;

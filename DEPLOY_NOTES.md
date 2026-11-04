@@ -16,6 +16,16 @@ Deploy:
 - [ ] nginx na api.boat4you.com: `client_max_body_size 512m` samo za `/admin/social/media` (video).
 - [ ] Developer aplikacije mreža (Meta, LinkedIn, Google, TikTok, Pinterest, X) — popis u specu, § „What Mario has to do“.
 
+## 2026-11-04 — 🖱️ Heatmape: treći prikaz „Miš“ (hover mapa, P6 R4) + P7a Top clicks (stranica, element, kamo vodi) — ✅ LIVE 4.11.2026 07:47:45 UTC (`5423883`, `assets/index-DWIzU6w7.js`), tag `live/2026-11-04-cc-rec-hover`
+
+Mario 3.11.: „nama klijenti dolaze preko desktop, mobile i tablet tako da bi volio da imamo i mouse tracker“; „Da, kreni s R4“; „Da, sutra“ (deploy).
+- **„Miš“** uz Clicks/Scroll: gdje miš najdulje stoji, po elementu (crveno = najdulje, plavo = najkraće); samo desktop, svaki boravak najviše 2 s (parkirani miš ne iskrivljuje kartu). Stupac „Mouse (s)“ u tablici elemenata, „Page views with a mouse“ u brojkama. Podnosi stariji backend (bez `hover` = prazna karta, bez greške; pregled #4/#5).
+- Nosi i ADMIN-ov P7a Top clicks (`9bf7b30`, `a99898a`: stranica, element s vrstom, kamo vodi, broj stranica; galerija/slider/izbornik sklopljeni) — radi i sa starim backendom.
+- **Backend R4** (hover redovi, `GET /admin/cc/rec/heatmap` s `hover`, V9_120): ✅ cusma2 LIVE 08:32:29 UTC (backend `a186f8c`, jar md5 da6c40dd540a53c534a88b3422bd7bb1); prvi pokušaj 07:45 stao na prijavi cusma3 → cusma2 (nestale `/tmp/.aud_pw*`, Mario upisao datoteku). Podaci za „Miš“ kreću tek nakon cusma3 (worker) u večernjem gate prozoru (18:07 UTC); prva čitljiva karta ~2 tjedna.
+- **Provjera live 07:49 UTC (Claudeov preglednik, Mariova prijava):** entry `index-DWIzU6w7.js`; Boat4You Boat/mobile 30 d: Clicks i dalje crta (81.604 obojena px, platno 402×7680), „Miš“ bez novih grešaka u konzoli (samo stari `NotSupportedError` videa iz snimljene stranice), „Page views with a mouse: 0“ kako se i očekuje.
+- Provjere prije deploya: yarn test 62/62, tsc 0 nakon merge-a origin/main `a99898a`; admin redoslijed ispred backenda = svjesna odluka (build podnosi stari backend, backend korak čeka lozinku).
+- **Rollback:** cusma1 `html.prev` = `assets/index-Dp-6hNfq.js` (`28c34f2`).
+
 ## 2026-11-03 — 📊 Tražilice: tablica „Najčešći traženi pojmovi na Googleu“ — filtar ulazne stranice + sortiranje stupaca — ✅ LIVE 3.11.2026 22:50:32 UTC (`28c34f2`, `assets/index-Dp-6hNfq.js`)
 
 Mario 3.11. (preko sesije ADMIN), „Da, pregled + deploy“. Backend `GET /admin/cc/search-engines/queries` LIVE na cusma2 22:50:05 UTC (backend main `e3e8eda`).

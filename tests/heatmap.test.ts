@@ -8,6 +8,7 @@ import {
   reachAt,
   shownShare,
   toActivity,
+  toHoverActivity,
   toScrollMap,
 } from '../src/utils/contactCenter/heatmap.ts';
 
@@ -22,6 +23,7 @@ const el = (hash: string, clicks: number, text: string | null = 'Reach out', tag
   dead: 0,
   inquiryClicks: 0,
   inquiryPageViews: 0,
+  hoverMs: 0,
 });
 
 describe('toActivity', () => {
@@ -84,6 +86,24 @@ describe('shownShare', () => {
       shownShare([], () => true),
       0
     );
+  });
+});
+
+describe('toHoverActivity', () => {
+  test('one entry per hovered element, weights in tenths of a second (at least 1), the busiest cell first', () => {
+    const act = toHoverActivity({
+      a: [
+        { eX: 512, eY: 1536, ms: 2500 },
+        { eX: 16384, eY: 16384, ms: 40 },
+      ],
+      b: [{ eX: 100, eY: 100, ms: 900 }],
+    });
+
+    assert.deepEqual(act, [
+      { hash: 'a', selector: '', totalclicks: 26, x: [512, 16384], y: [1536, 16384], clicks: [25, 1], points: 2 },
+      { hash: 'b', selector: '', totalclicks: 9, x: [100], y: [100], clicks: [9], points: 1 },
+    ]);
+    assert.deepEqual(toHoverActivity({}), []);
   });
 });
 

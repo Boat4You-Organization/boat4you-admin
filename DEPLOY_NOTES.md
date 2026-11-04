@@ -1,6 +1,6 @@
 # boat4you-admin — deploy notes
 
-## 2026-11-03 — 📣 Objave (Social publisher S0): jedna objava na više kanala, zakazivanje, ključevi za automatizaciju — ⏳ NIJE DEPLOYANO (čeka backend S1)
+## 2026-11-03 — 📣 Objave (Social publisher S0): jedna objava na više kanala, zakazivanje, ključevi za automatizaciju — ✅ LIVE 4.11.2026 18:52:57 UTC (`f588f28` = grana + main `31b50c8`, `assets/index-BChUh6VF.js`; cusma1 staging → test → swap, root/deep/asset 200), backend S1 na cusma2 od 18:30:23 UTC (jar d2efcc9a, V9_118); cusma1 `html.prev` = `index-D9rAwK_S.js`
 
 Mario 3.11.2026: „alat s kojim ćemo moći objavljivati jednu objavu na više kanala, a s vremenom da Claude dnevno objavljuje preko Scheduled … sve inhouse i da ne plaćamo nikome“. Plan i API ugovor: `docs/superpowers/specs/2026-11-03-social-publisher-design.md`.
 
@@ -12,8 +12,8 @@ Mario 3.11.2026: „alat s kojim ćemo moći objavljivati jednu objavu na više 
 
 Deploy:
 
-- [ ] TEK NAKON backend S1 (`/admin/social/**`, tablice, scheduler) — inače Objave javljaju grešku.
-- [ ] nginx na api.boat4you.com: `client_max_body_size 512m` samo za `/admin/social/media` (video).
+- [x] 4.11. 18:52:57 UTC, 22 min nakon backenda S1 na cusma2 (18:30:23 UTC): provjera u pregledniku s Mariovom prijavom — `/social` prazan kalendar studenog, Kanali: svaka mreža s razlogom iz backenda („Not set up on the server: Meta app not configured …“), Bluesky samo „Not connected“, X/Pinterest/Google Business „Not available yet“; konzola bez novih grešaka. ⚠️ Napomena: engleski UI, a opisi kanala (`Facebook stranica (Page) …`) hrvatski — provjeriti i18n ključeve opisa.
+- [x] 4.11. 10:34 UTC nginx cusma2: `/admin/social/media` + `/api/social/v1/media` 512m, `proxy_request_buffering off` (infra `social_env_set.sh`).
 - [ ] Developer aplikacije mreža (Meta, LinkedIn, Google, TikTok, Pinterest, X) — popis u specu, § „What Mario has to do“.
 
 ## 2026-11-04 — 🔥 Heatmape: karta se napokon VIDI — platno iznad iframea, ne u njemu — ✅ LIVE 4.11.2026 09:58:19 UTC (`cb35b60`, `assets/index-D9rAwK_S.js`; cusma1, `fix/heatmap-overlay` → main), tag `live/2026-11-04-cc-heatmap-overlay`

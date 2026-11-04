@@ -258,7 +258,15 @@
       "ITINERARY": "Itinerary",
       "BOOKING": "Form / booking",
       "OTHER": "Other"
-    }
+    },
+    "target": "Leads to",
+    "onPages": "on {{count}} pages",
+    "kind": {
+      "link": "link",
+      "button": "button"
+    },
+    "navGroup": "Navigation and galleries ({{count}})",
+    "navGroupHint": "Photo gallery, slider, menu, header and footer clicks"
   },
   "searchEngines": {
     "title": "Search engines: Google and Bing",
@@ -290,6 +298,9 @@
     "impressions": "Impressions",
     "ctr": "CTR",
     "position": "Position",
+    "page": "Landing page",
+    "pageAll": "Landing page: all",
+    "minImpressions": "CTR and position rank only queries with at least {{n}} impressions.",
     "pages": "Landing pages",
     "topQueries": "Main queries (Google)",
     "pagesNote": "Clicks, impressions and queries are Google's for the page. Org. visits and inquiries are our visits that came from a search engine to that page and the inquiries sent in those visits.",

@@ -448,8 +448,15 @@ interface Resources {
       exitRate: 'Exit rate';
       exits: 'Exits';
       exitsByType: 'Where they leave without an inquiry';
+      kind: {
+        button: 'button';
+        link: 'link';
+      };
+      navGroup: 'Navigation and galleries ({{count}})';
+      navGroupHint: 'Photo gallery, slider, menu, header and footer clicks';
       note: 'A visit counts at its deepest step and at every step before it, so an inquiry sent from a pop-up on a sister site also counts as a form. Sent inquiries are counted from the start of this measurement.';
       ofVisits: '{{n}} % of visits';
+      onPages: 'on {{count}} pages';
       pageType: {
         BLOG: 'Blog';
         BOAT: 'Boat';
@@ -467,6 +474,7 @@ interface Resources {
         INQUIRY: 'Inquiry sent';
         VISIT: 'Visit';
       };
+      target: 'Leads to';
       title: 'Inquiry funnel';
       type: 'Type';
       views: 'Visits';
@@ -695,10 +703,13 @@ interface Resources {
       hidden: 'Google hides the query of {{n}} % of clicks, so the clicks by query are not all traffic.';
       impressions: 'Impressions';
       inquiries: 'Inquiries';
+      minImpressions: 'CTR and position rank only queries with at least {{n}} impressions.';
       none: '—';
       note: 'Google and Bing give totals per query and page only, never a single visitor. Their data is 2 to 3 days late (last imported day: Google {{google}}, Bing {{bing}}). Our organic visits count only visitors who consented.';
       organicInquiries: 'Inquiries from organic visits';
       organicVisits: 'Our organic visits';
+      page: 'Landing page';
+      pageAll: 'Landing page: all';
       pages: 'Landing pages';
       pagesNote: "Clicks, impressions and queries are Google's for the page. Org. visits and inquiries are our visits that came from a search engine to that page and the inquiries sent in those visits.";
       position: 'Position';

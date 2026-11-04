@@ -1,5 +1,14 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-04 — 🤖 Kontakt centar → Statistika → lijevak: filtar kanala „AI asistenti (ChatGPT, Perplexity…)“ + oznaka kanala `AI` u Statistici, Posjetiteljima uživo i kartici klijenta — ✅ LIVE 4.11.2026 20:37:4x UTC (`2419032` = `feat/cc-ai-channel` `9e3455a` + main `9039e1b`, `assets/index-D5pb23L-.js`; cusma1 staging → test → swap, root/deep/asset 200); backend `VisitChannel.AI` na cusma2 od 19:55:46 i cusma3 od 20:16:39 UTC (jar 5a20132c, bez migracije); cusma1 `html.prev` = `index-BChUh6VF.js`
+
+Mario 4.11.2026 („Da, kanal“): posjete iz AI odgovora do sada su padale u Referral. PR boat4you-admin#7; tsc 0, `npm test` 95/95, eslint 0 grešaka (19 starih upozorenja izvan ovih datoteka).
+
+- `Stats/Funnel.tsx`: `CHANNELS` + `'AI'` (prije OTHER); bez backenda filtar vraća „unknown channel“ → jar prije admina.
+- `locales/{en,hr}/contactCenter.json` `channel.AI` = „AI assistants (ChatGPT, Perplexity…)“ / „AI asistenti (ChatGPT, Perplexity…)“; `@types/resources.d.ts` regeneriran (`npm run i18next-resources-for-ts` + prettier).
+- SPA drži stari JS do reloada — hard reload ako filtar nema novu stavku.
+- Rollback: cusma1 `html.prev` swap.
+
 ## 2026-11-03 — 📣 Objave (Social publisher S0): jedna objava na više kanala, zakazivanje, ključevi za automatizaciju — ✅ LIVE 4.11.2026 18:52:57 UTC (`f588f28` = grana + main `31b50c8`, `assets/index-BChUh6VF.js`; cusma1 staging → test → swap, root/deep/asset 200), backend S1 na cusma2 od 18:30:23 UTC (jar d2efcc9a, V9_118); cusma1 `html.prev` = `index-D9rAwK_S.js`
 
 Mario 3.11.2026: „alat s kojim ćemo moći objavljivati jednu objavu na više kanala, a s vremenom da Claude dnevno objavljuje preko Scheduled … sve inhouse i da ne plaćamo nikome“. Plan i API ugovor: `docs/superpowers/specs/2026-11-03-social-publisher-design.md`.

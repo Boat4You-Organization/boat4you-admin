@@ -15,7 +15,7 @@ import { LoadAlert, SectionLabel, cc, fieldSx, tableSx } from '@/views/ContactCe
 
 const DEVICES = ['DESKTOP', 'TABLET', 'MOBILE'] as const;
 const NAV_AREAS: Array<FunnelClick['area']> = ['gallery', 'slider', 'nav', 'header', 'footer'];
-const CHANNELS = ['ORGANIC', 'ADS', 'SISTER', 'DIRECT', 'REFERRAL', 'SOCIAL', 'EMAIL', 'OTHER'];
+const CHANNELS = ['ORGANIC', 'ADS', 'SISTER', 'DIRECT', 'REFERRAL', 'SOCIAL', 'EMAIL', 'AI', 'OTHER'];
 
 const titleSx = { m: 0, fontSize: 14, fontWeight: 700, color: cc.ink } as const;
 const ellipsisSx = { maxWidth: 360, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } as const;

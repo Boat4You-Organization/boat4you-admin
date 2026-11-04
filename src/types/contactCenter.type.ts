@@ -235,7 +235,22 @@ export interface CcFunnel {
   chatOpened: number;
   exitsByType: Count[];
   exits: Array<{ siteId: string; path: string; pageType: string; views: number; exits: number }>;
-  clicks: Array<{ pageType: string; label: string; clicks: number }>;
+  clicks: FunnelClick[];
+}
+
+/** One element of Top clicks (P7a). The optional fields are absent from an older backend; area is null for clicks recorded
+ * before the widget sent it, siteId and path when the click had no page view, target for buttons. */
+export interface FunnelClick {
+  pageType: string;
+  label: string;
+  clicks: number;
+  /** The site of path; pages counts distinct (site, path) pairs. */
+  siteId?: string | null;
+  pages?: number;
+  kind?: 'link' | 'button' | null;
+  area?: 'gallery' | 'slider' | 'nav' | 'header' | 'footer' | 'form' | 'dialog' | 'main' | null;
+  path?: string | null;
+  target?: string | null;
 }
 
 /** Clicks and impressions of a range; position is the impression-weighted average, null when no impression has one. */
@@ -244,6 +259,9 @@ export interface EngineTotals {
   impressions: number;
   position: number | null;
 }
+
+/** The order of GET /admin/cc/search-engines/queries; CTR and position rank only queries with ten impressions or more. */
+export type SearchQuerySort = 'CLICKS' | 'IMPRESSIONS' | 'CTR' | 'POSITION';
 
 export interface SearchQueryStat {
   query: string;

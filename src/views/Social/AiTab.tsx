@@ -88,12 +88,18 @@ const SiteCard = ({
     try {
       const r = await SocialService.runAi(s.site);
 
-      showToast({
-        status: r.status === 'FAILED' ? 'error' : 'success',
-        text: r.error
-          ? `${t(`ai.runStatus.${r.status}`)}: ${r.error}`
-          : t('ai.ran', { status: t(`ai.runStatus.${r.status}`) }),
-      });
+      // The backend answers at once with the RUNNING run and makes the post in the background.
+      if (r.status === 'RUNNING') {
+        showToast({ status: 'info', text: t('ai.started') });
+      } else {
+        showToast({
+          status: r.status === 'FAILED' ? 'error' : 'success',
+          text: r.error
+            ? `${t(`ai.runStatus.${r.status}`)}: ${r.error}`
+            : t('ai.ran', { status: t(`ai.runStatus.${r.status}`) }),
+        });
+      }
+
       onSaved();
     } catch (e) {
       showToast({ status: 'error', text: errorMessage(e, t('ai.runError')) });
@@ -247,6 +253,17 @@ const AiTab = ({ accounts }: { accounts: AccountsState }) => {
   useEffect(() => {
     load();
   }, [load]);
+
+  // A run the AI is still making (started with "Napravi sada"): look again every 10 s until it is done.
+  const running = data?.runs.some(r => r.status === 'RUNNING') ?? false;
+
+  useEffect(() => {
+    if (!running) return undefined;
+
+    const id = window.setTimeout(load, 10_000);
+
+    return () => window.clearTimeout(id);
+  }, [running, data, load]);
 
   if (error) return <Alert severity="error">{error}</Alert>;
 

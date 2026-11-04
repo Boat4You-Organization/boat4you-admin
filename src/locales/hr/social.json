@@ -251,6 +251,7 @@
     "saved": "Spremljeno.",
     "runNow": "Napravi današnju objavu sada",
     "ran": "Gotovo: {{- status}}",
+    "started": "AI radi današnju objavu; pojavit će se u popisu ispod za nekoliko minuta.",
     "runError": "AI objava nije uspjela.",
     "runs": "Zadnje AI objave",
     "date": "Datum",

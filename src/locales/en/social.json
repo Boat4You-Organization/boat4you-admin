@@ -252,6 +252,7 @@
     "saved": "Saved.",
     "runNow": "Make today's post now",
     "ran": "Done: {{- status}}",
+    "started": "The AI is making today's post; it shows up in the list below in a few minutes.",
     "runError": "The AI post failed.",
     "runs": "Latest AI posts",
     "date": "Date",

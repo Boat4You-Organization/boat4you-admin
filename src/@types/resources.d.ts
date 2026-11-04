@@ -1168,6 +1168,7 @@ interface Resources {
       open: 'Open';
       post: 'Post';
       ran: 'Done: {{- status}}';
+      started: "The AI is making today's post; it shows up in the list below in a few minutes.";
       runError: 'The AI post failed.';
       runNow: "Make today's post now";
       runStatus: {

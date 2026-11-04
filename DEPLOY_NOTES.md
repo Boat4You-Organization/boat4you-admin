@@ -16,6 +16,14 @@ Deploy:
 - [ ] nginx na api.boat4you.com: `client_max_body_size 512m` samo za `/admin/social/media` (video).
 - [ ] Developer aplikacije mreža (Meta, LinkedIn, Google, TikTok, Pinterest, X) — popis u specu, § „What Mario has to do“.
 
+## 2026-11-04 — 🔥 Heatmape: karta se napokon VIDI — platno iznad iframea, ne u njemu — ✅ LIVE 4.11.2026 09:58:19 UTC (`cb35b60`, `assets/index-D9rAwK_S.js`; cusma1, `fix/heatmap-overlay` → main), tag `live/2026-11-04-cc-heatmap-overlay`
+
+Mario 4.11.: „Uopće ne radi heatmap, znači pokazuje mi stranicu i to je to“; „Da, deployaj“.
+- **Uzrok (od 3.11. 14:33):** karta se crtala na `canvas` unutar replay iframea (`sandbox="allow-same-origin"`, bez skripti). U dokumentu bez skripti `<canvas>` predstavlja fallback sadržaj: nema box (computed `width/height 0px`, rect 0×0) i bitmapa se nikad ne iscrta, ni uz CSS veličinu (crveni `fillRect` nevidljiv). Crtanje i `getImageData` rade, pa su sve provjere „obojenih px“ (3.11. 14:55, 4.11. 07:49) bile lažno zelene.
+- **Popravak:** `replayEngine.heatCanvas()` stvara platno u admin dokumentu, u Box-u iframea (`position:relative`), apsolutno iznad njega s istim `transform: scale()`; `heatOverlayCss()` u `utils/contactCenter/heatmap.ts` (test); `HeatmapView` uklanja staro platno pri promjeni pozadine (`Replay.heatCanvasOf`). Vrijedi za Clicks, Scroll i Miš.
+- **Provjere:** heatmap 10/10, suita 64/64, tsc 0, eslint 0 grešaka, build OK; simulacija sloja uživo u pregledniku prije deploya (mrlje na fotografiji i gumbu „Alle Fotos anzeigen“); provjera nakon deploya u ledgeru.
+- **Rollback:** cusma1 `html.prev` = `assets/index-DWIzU6w7.js` (`3b8169c`).
+
 ## 2026-11-04 — 🖱️ Heatmape: treći prikaz „Miš“ (hover mapa, P6 R4) + P7a Top clicks (stranica, element, kamo vodi) — ✅ LIVE 4.11.2026 07:47:45 UTC (`5423883`, `assets/index-DWIzU6w7.js`), tag `live/2026-11-04-cc-rec-hover`
 
 Mario 3.11.: „nama klijenti dolaze preko desktop, mobile i tablet tako da bi volio da imamo i mouse tracker“; „Da, kreni s R4“; „Da, sutra“ (deploy).

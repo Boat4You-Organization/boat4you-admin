@@ -149,3 +149,12 @@ export function elementLabel(e: Pick<HeatmapElement, 'text' | 'tag'>): string {
 
   return e.tag ? `<${e.tag.toLowerCase()}>` : '—';
 }
+
+/**
+ * The inline style of the map canvas (4.11.2026): it lives in the admin document, laid over the replay iframe, because a
+ * canvas inside the sandboxed, script-less frame has no box and never paints. Same bitmap size, the frame's own scale.
+ */
+export const heatOverlayCss = (width: number, height: number, transform: string, transformOrigin: string): string =>
+  `position:absolute;left:0;top:0;width:${width}px;height:${height}px;pointer-events:none;z-index:1;` +
+  `transform:${transform || 'none'};transform-origin:${transformOrigin || '0 0'}`;
+

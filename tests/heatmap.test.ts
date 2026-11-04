@@ -4,6 +4,7 @@ import { describe, test } from 'node:test';
 
 import {
   elementLabel,
+  heatOverlayCss,
   heatPoints,
   reachAt,
   shownShare,
@@ -161,5 +162,23 @@ describe('the API spells a point ex/ey (Jackson) — 3.11.2026, the map had no r
     );
 
     assert.deepEqual(out, { points: [{ x: 5, y: 5, w: 1 }], max: 1 });
+  });
+});
+
+// 4.11.2026: the map canvas lives in the admin document over the replay iframe (a canvas inside the sandboxed, script-less
+// frame has no box and never paints), so it copies the frame's scale.
+describe('heatOverlayCss', () => {
+  test('sizes the overlay like the frame bitmap and copies the frame transform', () => {
+    assert.equal(
+      heatOverlayCss(360, 7887, 'scale(0.5)', '0 0'),
+      'position:absolute;left:0;top:0;width:360px;height:7887px;pointer-events:none;z-index:1;transform:scale(0.5);transform-origin:0 0'
+    );
+  });
+
+  test('an unscaled frame gives no transform', () => {
+    assert.equal(
+      heatOverlayCss(1280, 4000, '', ''),
+      'position:absolute;left:0;top:0;width:1280px;height:4000px;pointer-events:none;z-index:1;transform:none;transform-origin:0 0'
+    );
   });
 });

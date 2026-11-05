@@ -1,5 +1,15 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-05 — 🧭 Marketing izbornik: Live posjetitelji kao vlastita stavka iza Statistike — ✅ LIVE 5.11.2026 09:32:14 UTC (main `f692175`, `assets/index-CYR0i_FP.js`; cusma1 staging → test → swap, root/deep/asset 200); tag `live/2026-11-05-admin-live-visitors`; cusma1 `html.prev` = `index-DU51y147.js`
+
+Mario 5.11.2026: „izbaci vanka nakon statistics i live visitors“. Redoslijed Marketinga: Statistika, Live posjetitelji, Kontakt centar, Heatmape, Objave.
+
+- `navigation.config.ts`: stavka `live` (`/contact-center/live`, SYSTEM_ADMIN) između `stats` i `contactCenter`; ruta nepromijenjena.
+- `ContactCenter.tsx`: kartice Kontakt centra = Razgovori, Kontakti; `live` u `STANDALONE` → vlastiti naslov „Live visitors / Live posjetitelji“ bez trake kartica (isti obrazac kao Statistika i Heatmape).
+- Prijevodi `navigation.live` en/hr; `resources.d.ts`; test `activeNavId`: `/contact-center/live` pali Live posjetitelje, `/contact-center/contacts/12` Kontakt centar.
+- Provjere: eslint 0 grešaka, tsc 0, `yarn test` 117/117; dev preview + mock (1100 px): redoslijed i aktivna stavka, naslov, skrivena traka, 0 grešaka u konzoli. Neovisni pregled (Opus 5.5 high): 0 blokera, 0 should-fix, komentar dopunjen (`f692175`). Deploy 20 min nakon prethodnog (09:11 → 09:32).
+- Rollback: cusma1 `html.prev` swap.
+
 ## 2026-11-05 — 🧭 Marketing izbornik: Statistika, Kontakt centar, Heatmape, Objave; preklopnik Charter | Marketing fiksno lijevo uz logo — ✅ LIVE 5.11.2026 09:11:40 UTC (main `e60ea46`, `assets/index-DU51y147.js` + `vendor-react-fBTcQOt-.js` + `vendor-mui-Bo47_LVX.js`; cusma1 staging → test → swap, root/deep/asset 200); tag `live/2026-11-05-admin-marketing-menu`; cusma1 `html.prev` = `index-D761iugy.js`
 
 Mario 5.11.2026: „u marketingu stavi statistics vanka contact centra i heatmaps isto da bude redoslijed Statistics, contact center, heatmaps, social posts i onda ce tu jos ici call center i backlinks“ + „charter marketing selection … na desktopu fixan lijevo do broker desk“.

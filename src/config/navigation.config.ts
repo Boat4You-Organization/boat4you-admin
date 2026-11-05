@@ -8,7 +8,7 @@ import Bookings from '@/components/SvgIcons/Bookings';
 import Contact from '@/components/SvgIcons/Contact';
 import Invoices from '@/components/SvgIcons/Invoices';
 import Share from '@/components/SvgIcons/Share';
-import { UserRoleName } from '@/models/user.model';
+import { UserModel, UserRoleName } from '@/models/user.model';
 
 export interface NavigationLink {
   id: string;
@@ -31,27 +31,6 @@ const navigation: NavigationLink[] = [
     icon: Boat,
     path: '/offers',
     accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
-  },
-  {
-    // Contact Center (P2, replaces /chat): backend /admin/cc/** and /admin/chat/** are SYSTEM_ADMIN only.
-    id: 'contactCenter',
-    icon: Contact,
-    path: '/contact-center',
-    accessLevel: [UserRoleName.SYSTEM_ADMIN],
-  },
-  {
-    // Objave (Social publisher S0, 3.11.2026): one post to many channels; backend /admin/social/** is SYSTEM_ADMIN only.
-    id: 'social',
-    icon: Share,
-    path: '/social',
-    accessLevel: [UserRoleName.SYSTEM_ADMIN],
-  },
-  {
-    // PR (4.11.2026): journalists, studies, pitches from press@; backend /admin/pr/** is SYSTEM_ADMIN only.
-    id: 'pr',
-    icon: Campaign,
-    path: '/pr',
-    accessLevel: [UserRoleName.SYSTEM_ADMIN],
   },
   {
     id: 'users',
@@ -84,6 +63,55 @@ const navigation: NavigationLink[] = [
     path: '/agencies',
     accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
   },
+  // --- Marketing workspace (Mario 5.11.2026): Statistics, Live visitors, Contact center, Heatmaps, Social posts; call center and
+  // backlinks come next. Statistics, Live visitors and Heatmaps keep their /contact-center/* routes (bookmarks, links) but
+  // are menu items of their own; the header lights the item with the longest matching path.
+  {
+    id: 'stats',
+    icon: Contact,
+    path: '/contact-center/stats',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
+    // Live visitors: own menu item since 5.11.2026 (Mario), keeps its /contact-center/live route.
+    id: 'live',
+    icon: Contact,
+    path: '/contact-center/live',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
+    // Contact Center (P2, replaces /chat): backend /admin/cc/** and /admin/chat/** are SYSTEM_ADMIN only.
+    id: 'contactCenter',
+    icon: Contact,
+    path: '/contact-center',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
+    id: 'heatmaps',
+    icon: Contact,
+    path: '/contact-center/recording',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
+    // Objave (Social publisher S0, 3.11.2026): one post to many channels; backend /admin/social/** is SYSTEM_ADMIN only.
+    id: 'social',
+    icon: Share,
+    path: '/social',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
+    // PR (5.11.2026): journalists, studies, pitches from press@; backend /admin/pr/** is SYSTEM_ADMIN only.
+    id: 'pr',
+    icon: Campaign,
+    path: '/pr',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
 ];
+
+/** Only the items this user's roles may open (a MANAGER does not see SYSTEM_ADMIN-only items). */
+export const navigationForUser = (user: Pick<UserModel, 'roles'> | null | undefined): NavigationLink[] =>
+  navigation.filter(
+    item => !item.accessLevel || !!user?.roles?.some(role => item.accessLevel?.includes(role.roleName))
+  );
 
 export default navigation;

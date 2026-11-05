@@ -23,6 +23,14 @@
     "title": "Postavke i profil",
     "language": "Jezik"
   },
+  "workspace": {
+    "title": "Radni prostor",
+    "charter": "Charter",
+    "marketing": "Marketing"
+  },
+  "stats": "Statistika",
+  "live": "Live posjetitelji",
+  "heatmaps": "Heatmape",
   "chat": "Chat",
   "contactCenter": "Kontakt centar",
   "social": "Objave",

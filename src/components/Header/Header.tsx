@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import CloseIcon from '@mui/icons-material/CloseRounded';
 import LogoutIcon from '@mui/icons-material/LogoutOutlined';
@@ -9,11 +9,21 @@ import SettingsIcon from '@mui/icons-material/SettingsOutlined';
 import { AppBar, Box, Button, Divider, Drawer, IconButton, Menu, MenuItem, Stack, Typography } from '@mui/material';
 
 import BrandMark from '@/components/BrandMark';
-import navigation from '@/config/navigation.config';
+import { navigationForUser } from '@/config/navigation.config';
 import { UserRoleName } from '@/models/user.model';
 import { bbColors, bbFont, bbTexture } from '@/styles/bb';
 import { createPoller } from '@/utils/contactCenter/poller';
 import useLogout from '@/utils/hooks/useLogout';
+import {
+  WORKSPACE_HOME,
+  WorkspaceId,
+  activeNavId,
+  browserStorage,
+  activeWorkspace as pickWorkspace,
+  rememberWorkspace,
+  workspaceForPath,
+  workspacesFor,
+} from '@/utils/workspace';
 import { useAuthStore } from '@/valtio/auth/auth.store';
 import { refreshUnviewedBookingsCount } from '@/valtio/bookings/bookings.actions';
 import { useBookingsStore } from '@/valtio/bookings/bookings.store';
@@ -43,7 +53,8 @@ const glassSx = {
   '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)', color: '#fff' },
 } as const;
 
-// NavLink marks the current route with the `active` class.
+// The item whose path is the longest match for the route carries the `active` class (activeNavId), so
+// Statistics / Heatmaps light up instead of Contact Center on their /contact-center/* routes.
 const navLinksSx = {
   '& a': {
     display: 'inline-flex',
@@ -79,10 +90,21 @@ const Header = () => {
   const isUserRole = user?.roles?.some(role => role.roleName === UserRoleName.USER);
   const isSystemAdmin = !!user?.roles?.some(role => role.roleName === UserRoleName.SYSTEM_ADMIN);
   const { unreadCount: contactCenterUnread } = useContactCenterStore();
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
   // Only the items this user's roles may open (a MANAGER does not see SYSTEM_ADMIN-only items).
-  const visibleNavigation = navigation.filter(
-    item => !item.accessLevel || !!user?.roles?.some(role => item.accessLevel?.includes(role.roleName))
-  );
+  const visibleNavigation = navigationForUser(user);
+  // Workspaces (Charter / Marketing, Mario 5.11.2026): the route decides which menu is shown, so every
+  // existing URL keeps working; neutral routes (profile, auth pages) keep the last one. A user whose roles
+  // reach only one workspace gets no switch. The active workspace is remembered per browser so `/` lands
+  // there next time (WorkspaceLanding).
+  const availableWorkspaces = workspacesFor(visibleNavigation);
+  const routeWorkspace = workspaceForPath(pathname);
+  const activeWorkspace = pickWorkspace(pathname, browserStorage(), availableWorkspaces);
+  const workspaceNavigation = visibleNavigation.filter(item => workspaceForPath(item.path ?? '/') === activeWorkspace);
+  const activeItemId = activeNavId(pathname, workspaceNavigation);
+  // Remember only what a signed-in user actually opened; the login page must not overwrite it.
+  const rememberable = !!user && !isUserRole && !!routeWorkspace && availableWorkspaces.includes(routeWorkspace);
   const badgeFor = (id: string, news?: number) => {
     if (id === 'bookings') return unviewedBookings;
 
@@ -90,6 +112,15 @@ const Header = () => {
 
     return news ?? 0;
   };
+  // Unread shown on the other workspace's tab, so new chats are not missed while working in Charter.
+  const unreadIn = (workspace: WorkspaceId) =>
+    visibleNavigation
+      .filter(item => workspaceForPath(item.path ?? '/') === workspace)
+      .reduce((sum, item) => sum + badgeFor(item.id, item.news), 0);
+
+  useEffect(() => {
+    if (rememberable && routeWorkspace) rememberWorkspace(browserStorage(), routeWorkspace);
+  }, [rememberable, routeWorkspace]);
 
   // Poll the unviewed-bookings count whenever the admin shell is mounted.
   // First fetch on mount, then every 60s so a parked tab still surfaces
@@ -120,7 +151,11 @@ const Header = () => {
   const initials = `${user.name?.[0] ?? ''}${user.surname?.[0] ?? ''}`.toUpperCase() || 'B4';
 
   const Brand = (
-    <Link to="/bookings" style={{ textDecoration: 'none' }} aria-label="boat4you — Bookings">
+    <Link
+      to={WORKSPACE_HOME[activeWorkspace]}
+      style={{ textDecoration: 'none' }}
+      aria-label={`boat4you — ${t(`workspace.${activeWorkspace}`, activeWorkspace)}`}
+    >
       <Stack direction="row" alignItems="center" gap={1}>
         <BrandMark size={30} />
         <Typography
@@ -174,6 +209,64 @@ const Header = () => {
     </Box>
   );
 
+  // Charter | Marketing switch: glass segmented control; the active segment is lit, the other one carries
+  // its unread count. `wide` = full-width row at the top of the mobile drawer. A plain render function (not
+  // a nested component) so the 30 s / 60 s polls do not remount it and steal keyboard focus.
+  const renderWorkspaceSwitch = (wide = false) =>
+    availableWorkspaces.length > 1 ? (
+      <Box
+        role="group"
+        aria-label={t('workspace.title', 'Workspace')}
+        sx={{
+          display: 'inline-flex',
+          flex: wide ? 1 : 'none',
+          p: '2px',
+          borderRadius: '9px',
+          backgroundColor: 'rgba(255,255,255,0.06)',
+          border: '1px solid rgba(255,255,255,0.14)',
+          '& button': {
+            flex: wide ? 1 : 'none',
+            height: wide ? 36 : 26,
+            px: wide ? '12px' : '10px',
+            border: 0,
+            borderRadius: '7px',
+            background: 'transparent',
+            color: bbColors.navyMist,
+            fontFamily: bbFont.stack,
+            fontSize: wide ? 13 : 12,
+            fontWeight: 700,
+            cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            whiteSpace: 'nowrap',
+            transition: 'background-color .15s, color .15s',
+          },
+          '& button:hover': { color: '#fff' },
+          '& button[aria-pressed="true"]': { backgroundColor: 'rgba(255,255,255,0.16)', color: '#fff' },
+        }}
+      >
+        {availableWorkspaces.map(id => {
+          const count = id === activeWorkspace ? 0 : unreadIn(id);
+
+          return (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={id === activeWorkspace}
+              onClick={() => {
+                if (id !== activeWorkspace) navigate(WORKSPACE_HOME[id]);
+              }}
+            >
+              {t(`workspace.${id}`, id)}
+              {count > 0 ? <NavBadge count={count} /> : null}
+            </button>
+          );
+        })}
+      </Box>
+    ) : null;
+
   const totalUnread = visibleNavigation.reduce((sum, item) => sum + badgeFor(item.id, item.news), 0);
 
   const roleLabel = user.roles?.[0]?.roleName;
@@ -206,7 +299,14 @@ const Header = () => {
           }}
         >
           {/* --- Brand (left) --- */}
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>{Brand}</Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            {Brand}
+            {/* Charter | Marketing sits fixed on the left next to the brand (Mario 5.11.2026); desktop only,
+                the mobile drawer carries its own copy. */}
+            {availableWorkspaces.length > 1 && (
+              <Box sx={{ display: { xs: 'none', md: 'flex' } }}>{renderWorkspaceSwitch()}</Box>
+            )}
+          </Box>
 
           {/* --- Nav (centered) --- Desktop only. */}
           <Stack
@@ -217,7 +317,9 @@ const Header = () => {
             gap="2px"
             sx={{
               display: { xs: 'none', md: 'flex' },
-              justifyContent: 'center',
+              // `safe` keeps the first items reachable when the nav overflows (7 Charter items ≤ 1280 px):
+              // plain `center` spilled them off the left edge where no scroll can reach them.
+              justifyContent: 'safe center',
               minWidth: 0,
               overflowX: 'auto',
               scrollbarWidth: 'none',
@@ -225,16 +327,22 @@ const Header = () => {
               ...navLinksSx,
             }}
           >
-            {visibleNavigation.map(item => {
+            {workspaceNavigation.map(item => {
               // Bookings and the Contact Center get live counts from their stores (polled); other
               // nav items fall back to the static `news` prop (kept for future module alerts).
               const count = badgeFor(item.id, item.news);
+              const active = item.id === activeItemId;
 
               return (
-                <NavLink key={item.id} to={item.path || '/'}>
+                <Link
+                  key={item.id}
+                  to={item.path || '/'}
+                  className={active ? 'active' : undefined}
+                  aria-current={active ? 'page' : undefined}
+                >
                   {t(item.id, item.id)}
                   {count > 0 ? <NavBadge count={count} /> : null}
-                </NavLink>
+                </Link>
               );
             })}
           </Stack>
@@ -439,11 +547,20 @@ const Header = () => {
               '& a': { ...navLinksSx['& a'], height: 44, px: '12px', fontSize: 14, justifyContent: 'space-between' },
             }}
           >
-            {visibleNavigation.map(item => (
-              <NavLink key={item.id} to={item.path || '/'} onClick={() => setDrawerOpen(false)}>
+            {availableWorkspaces.length > 1 && (
+              <Box sx={{ display: 'flex', mb: '8px' }}>{renderWorkspaceSwitch(true)}</Box>
+            )}
+            {workspaceNavigation.map(item => (
+              <Link
+                key={item.id}
+                to={item.path || '/'}
+                className={item.id === activeItemId ? 'active' : undefined}
+                aria-current={item.id === activeItemId ? 'page' : undefined}
+                onClick={() => setDrawerOpen(false)}
+              >
                 <span>{t(item.id, item.id)}</span>
                 {badgeFor(item.id, item.news) > 0 ? <NavBadge count={badgeFor(item.id, item.news)} /> : null}
-              </NavLink>
+              </Link>
             ))}
           </Stack>
 

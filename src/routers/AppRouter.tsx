@@ -6,6 +6,8 @@ import Loader from '@/components/Loader';
 import { UserRoleName } from '@/models/user.model';
 import Error404 from '@/views/Error404';
 
+import WorkspaceLanding from './WorkspaceLanding';
+
 const ResetPassword = lazy(() => import('@/views/ResetPassword'));
 const ForgotPassword = lazy(() => import('@/views/ForgotPassword'));
 const Agencies = lazy(() => import('@/views/Agencies'));
@@ -53,7 +55,8 @@ const AppRouter: React.FC = () => (
   <BrowserRouter>
     <Suspense fallback={<Loader />}>
       <Routes>
-        <Route path="/" element={<Navigate to="/bookings" />} />
+        {/* Last-used workspace (Charter → Bookings, Marketing → Contact Center); see utils/workspace. */}
+        <Route path="/" element={<WorkspaceLanding />} />
         {/* The Dashboard was folded into Bookings (Mario 30.10.2026); old bookmarks land there. */}
         <Route path="/dashboard" element={<Navigate to="/bookings" replace />} />
         <Route

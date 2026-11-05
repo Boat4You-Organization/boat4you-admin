@@ -1,5 +1,9 @@
-/* Contact Center (P2, design 2.3; redesign 30.10.2026): the admin's home for conversations, live visitors, contacts and
- * statistics. It replaces the /chat inbox (which now redirects here). SYSTEM_ADMIN only, like the /admin/cc API. */
+/* Contact Center (P2, design 2.3; redesign 30.10.2026): the admin's home for conversations and contacts.
+ * It replaces the /chat inbox (which now redirects here). SYSTEM_ADMIN only, like the /admin/cc API.
+ * Statistics (/contact-center/stats), Live visitors (/contact-center/live) and Heatmaps (/contact-center/recording/*) keep
+ * their routes and this view, but
+ * since 5.11.2026 they are menu items of their own in the Marketing workspace (Mario): they render with their own title
+ * and without the Contact Center tab bar. */
 import { useTranslation } from 'react-i18next';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 
@@ -17,13 +21,13 @@ import { cc } from './ui';
 
 type TabKey = 'conversations' | 'live' | 'contacts' | 'stats' | 'recording';
 
+/** Tabs of the Contact Center section proper; live, stats and recording are separate menu items (see header comment). */
 const TABS: { key: TabKey; path: string }[] = [
   { key: 'conversations', path: '/contact-center' },
-  { key: 'live', path: '/contact-center/live' },
   { key: 'contacts', path: '/contact-center/contacts' },
-  { key: 'stats', path: '/contact-center/stats' },
-  { key: 'recording', path: '/contact-center/recording' },
 ];
+
+const STANDALONE: TabKey[] = ['live', 'stats', 'recording'];
 
 const tabOf = (path: string): TabKey => {
   if (path.startsWith('/contact-center/live')) return 'live';
@@ -41,6 +45,7 @@ const ContactCenter = () => {
   const { t } = useTranslation('contactCenter');
   const { pathname } = useLocation();
   const tab = tabOf(pathname);
+  const standalone = STANDALONE.includes(tab);
   const contactId = /^\/contact-center\/contacts\/(\d+)/.exec(pathname)?.[1];
 
   return (
@@ -59,13 +64,13 @@ const ContactCenter = () => {
       >
         <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px 28px', mb: 2 }}>
           <Box component="h1" sx={{ m: 0, fontSize: 22, fontWeight: 800, letterSpacing: '-0.015em', color: cc.ink }}>
-            {t('title')}
+            {standalone ? t(`tab.${tab}`) : t('title')}
           </Box>
           <Box
             component="nav"
             aria-label={t('title')}
             sx={{
-              display: 'flex',
+              display: standalone ? 'none' : 'flex',
               gap: '2px',
               p: '3px',
               bgcolor: cc.seg,

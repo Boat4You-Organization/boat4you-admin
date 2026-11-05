@@ -1133,6 +1133,7 @@ interface Resources {
     customBoats: 'Custom boats';
     dashboard: 'Dashboard';
     extras: 'Extras';
+    heatmaps: 'Heatmaps';
     inquiries: 'Inquiries';
     invoices: 'Invoices';
     languagePicker: {
@@ -1140,6 +1141,7 @@ interface Resources {
       savePreferences: 'Save Preferences';
       title: 'Select Language';
     };
+    live: 'Live visitors';
     logout: 'Logout';
     offers: 'Offers';
     pr: 'PR';
@@ -1149,7 +1151,13 @@ interface Resources {
     };
     profileSettings: 'Profile Settings';
     social: 'Social posts';
+    stats: 'Statistics';
     users: 'Users';
+    workspace: {
+      charter: 'Charter';
+      marketing: 'Marketing';
+      title: 'Workspace';
+    };
   };
   pr: {
     contactStatus: {

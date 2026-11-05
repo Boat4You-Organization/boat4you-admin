@@ -30,6 +30,37 @@ export interface RecScope {
   device?: string;
 }
 
+/* The Watch column stays pinned to the right edge while the wide table scrolls, so the button never leaves the view; on a
+ * phone the row shrinks to two cells: when, site and page stacked in the first, Watch in the second. */
+const listSx = {
+  ...tableSx,
+  '& th:last-of-type, & td:last-of-type': {
+    position: 'sticky',
+    right: 0,
+    boxShadow: `inset 1px 0 0 ${cc.border}, -6px 0 8px -6px rgba(16, 24, 40, 0.18)`,
+  },
+  // A collapsed border does not follow a sticky cell, so its bottom rule is drawn as a shadow too.
+  '& td:last-of-type': {
+    bgcolor: '#FFFFFF',
+    boxShadow: `inset 1px 0 0 ${cc.border}, inset 0 -1px 0 ${cc.hair}, -6px 0 8px -6px rgba(16, 24, 40, 0.18)`,
+  },
+  '& th:last-of-type': { zIndex: 2 },
+  '& tbody tr.click:focus-visible td': { bgcolor: cc.rowHover },
+  '& tbody tr.click:focus-visible': { outline: `2px solid ${cc.link}`, outlineOffset: -2 },
+  '& .wide': { display: { xs: 'none', sm: 'table-cell' } },
+  '& .narrow': {
+    display: { xs: 'flex', sm: 'none' },
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '4px',
+    mt: '4px',
+    whiteSpace: 'normal',
+    wordBreak: 'break-all',
+    color: cc.text,
+    fontSize: 12,
+  },
+} as const;
+
 const startOf = (range: Range) =>
   range === 'today' ? dayjs().startOf('day') : dayjs().subtract(range === '7d' ? 7 : 30, 'day');
 
@@ -203,30 +234,48 @@ const RecordingList = ({
       {rows && rows.length === 0 && <Empty>{t('rec.list.empty')}</Empty>}
       {rows && rows.length > 0 && (
         <Box sx={{ overflowX: 'auto' }}>
-          <Box component="table" sx={tableSx}>
+          <Box component="table" sx={listSx}>
             <thead>
               <tr>
                 <th>{t('rec.list.col.started')}</th>
-                <th>{t('rec.list.col.site')}</th>
-                <th>{t('rec.list.col.page')}</th>
-                <th>{t('rec.list.col.device')}</th>
-                <th className="num">{t('rec.list.col.duration')}</th>
-                <th className="num">{t('rec.list.col.clicks')}</th>
-                <th className="num">{t('rec.list.col.rage')}</th>
-                <th className="num">{t('rec.list.col.errors')}</th>
-                <th>{t('rec.list.col.inquiry')}</th>
-                <th>{t('rec.list.col.chat')}</th>
+                <th className="wide">{t('rec.list.col.site')}</th>
+                <th className="wide">{t('rec.list.col.page')}</th>
+                <th className="wide">{t('rec.list.col.device')}</th>
+                <th className="num wide">{t('rec.list.col.duration')}</th>
+                <th className="num wide">{t('rec.list.col.clicks')}</th>
+                <th className="num wide">{t('rec.list.col.rage')}</th>
+                <th className="num wide">{t('rec.list.col.errors')}</th>
+                <th className="wide">{t('rec.list.col.inquiry')}</th>
+                <th className="wide">{t('rec.list.col.chat')}</th>
                 <th aria-label={t('rec.list.watch')} />
               </tr>
             </thead>
             <tbody>
               {rows.map(r => (
-                <tr key={r.id}>
-                  <td style={{ whiteSpace: 'nowrap' }}>{formatAt(r.startedAt)}</td>
-                  <td>
+                <tr
+                  key={r.id}
+                  className="click"
+                  tabIndex={0}
+                  onClick={() => {
+                    // Selecting the path to copy it is not a click on the row.
+                    if (!window.getSelection()?.toString()) onOpen(r.id);
+                  }}
+                  onKeyDown={e => {
+                    // Only the row itself: Enter on the Watch button already clicks it.
+                    if (e.key === 'Enter' && e.target === e.currentTarget) onOpen(r.id);
+                  }}
+                >
+                  <td style={{ whiteSpace: 'nowrap' }}>
+                    {formatAt(r.startedAt)}
+                    <Box className="narrow">
+                      <SiteChip siteId={r.siteId} small />
+                      {pathOf(r.url)}
+                    </Box>
+                  </td>
+                  <td className="wide">
                     <SiteChip siteId={r.siteId} small />
                   </td>
-                  <td>
+                  <td className="wide">
                     <Box
                       component="span"
                       title={r.url ?? undefined}
@@ -246,19 +295,25 @@ const RecordingList = ({
                       </Box>
                     )}
                   </td>
-                  <td>{t(`funnel.devices.${r.device}`, { defaultValue: r.device })}</td>
-                  <td className="num">{formatClock(r.durationMs ?? 0)}</td>
-                  <td className="num">{r.clicks}</td>
-                  <td className="num" style={r.rageClicks > 0 ? { color: cc.red, fontWeight: 700 } : undefined}>
+                  <td className="wide">{t(`funnel.devices.${r.device}`, { defaultValue: r.device })}</td>
+                  <td className="num wide">{formatClock(r.durationMs ?? 0)}</td>
+                  <td className="num wide">{r.clicks}</td>
+                  <td className="num wide" style={r.rageClicks > 0 ? { color: cc.red, fontWeight: 700 } : undefined}>
                     {r.rageClicks}
                   </td>
-                  <td className="num" style={r.errors > 0 ? { color: cc.red } : undefined}>
+                  <td className="num wide" style={r.errors > 0 ? { color: cc.red } : undefined}>
                     {r.errors}
                   </td>
-                  <td>{r.inquiry ? '✓' : ''}</td>
-                  <td>{r.chat ? '✓' : ''}</td>
+                  <td className="wide">{r.inquiry ? '✓' : ''}</td>
+                  <td className="wide">{r.chat ? '✓' : ''}</td>
                   <td>
-                    <CcButton kind="primary" onClick={() => onOpen(r.id)}>
+                    <CcButton
+                      kind="primary"
+                      onClick={e => {
+                        e.stopPropagation();
+                        onOpen(r.id);
+                      }}
+                    >
                       {t('rec.list.watch')}
                     </CcButton>
                   </td>

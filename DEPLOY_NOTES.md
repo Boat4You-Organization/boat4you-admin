@@ -1,6 +1,6 @@
 # boat4you-admin — deploy notes
 
-## 2026-11-05 — 📰 PR modul: nova stavka izbornika **PR** u radnom prostoru Marketing, iza Objava (`/pr`, samo SYSTEM_ADMIN) — mediji i novinari, istraživanja, pitchevi 1:1 s press@boat4you.com, objave i provjera linkova, spominjanja — ⏳ NIJE DEPLOYANO (grana `feat/pr-module`, deploya se **vrh grane u trenutku deploya** — SHA zapisati; backend `feat/pr-module` s V9_121 mora biti live na cusma2 PRIJE admina)
+## 2026-11-05 — 📰 PR modul: nova stavka izbornika **PR** u radnom prostoru Marketing, iza Objava (`/pr`, samo SYSTEM_ADMIN) — mediji i novinari, istraživanja, pitchevi 1:1 s press@boat4you.com, objave i provjera linkova, spominjanja — ✅ LIVE 5.11.2026 13:08 UTC `index-D1xktjrT.js` (`28c7bfe` = `feat/pr-module` + main `2a330a0`, build iz `wt-pr-release`, VERIFIED live == new, root/deep/asset 200, `/pr` 200); backend V9_121 LIVE oba čvora 13:08/13:09 UTC (backend DEPLOY_NOTES); **slanje ISKLJUČENO** (`PR_MAIL_ENABLED=false`, press@ lozinka još nije upisana). PR admin #8 otvoren, nije mergean. Rollback: cusma1 `html.prev` swap.
 
 Mario 4.11.2026 (program digitalnog PR-a, `DIGITAL-PR-PROGRAM-2026-11.md`; plan `infra/docs/superpowers/plans/2026-11-04-pr-module.md`). Backend: boat4you-backend DEPLOY_NOTES, unos 2026-11-05 PR modul (redoslijed deploya i rollback su tamo).
 

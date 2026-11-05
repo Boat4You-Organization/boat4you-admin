@@ -1,5 +1,15 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-05 — 🎬 Kontakt centar → Snimke: gumb Watch uvijek vidljiv, cijeli red otvara snimku, mobilni prikaz — ✅ LIVE 5.11.2026 08:01:07 UTC (main `fc2ea13`, `assets/index-DgMcCIDC.js`; cusma1 staging → test → swap, root/deep/asset 200, `localhost:8443`/`localhost:3000` u dist 0); tag `live/2026-11-05-cc-rec-list`
+
+Mario 4.11.: „/contact-center/recording/list ne radi baš najbolje, blokaje, ne vidi se sve“; 5.11. 07:40 UTC „da“. Tablica (11 stupaca, URL do 320 px) bila je 1147 px u 976 px sadržaja na 1024 px → Chat i Watch izvan vidika iza neočitog vodoravnog scrolla; na 375 px samo Started/Site/Page.
+
+- `Recordings/RecordingList.tsx`: zadnji stupac (Watch) `position: sticky; right: 0`, neprozirna pozadina, lijevi rub + sjena (i zaglavlje, `zIndex 2` iznad ljepljivog zaglavlja); donji rub ćelije kao box-shadow (collapsed border ne prati sticky ćeliju).
+- Cijeli red otvara snimku (`className="click"` iz `tableSx` = hover + pointer, `tabIndex 0` + Enter, fokus obrub); gumb ostaje i ne okida dvaput (`stopPropagation`, Enter na gumbu red ignorira); označavanje teksta putanje mišem ne otvara red.
+- < 600 px: stupci Site…Chat skriveni (`.wide`), u prvoj ćeliji složeno datum / sajt / putanja (`.narrow`), Watch desno → bez vodoravnog scrolla. Filtri, paginacija, `PAGE_SIZE`, servis i prijevodi nepromijenjeni.
+- Provjere: eslint 0 grešaka, tsc 0, build OK; lokalni harness s mock redovima (1024: Watch desni rub 973 < 985 i nakon scrolla; 375: tablica = kontejner 327 px; klik reda / gumba / Enter = po jedan `onOpen`); LIVE s pravim podacima 1024 px: Watch u vidiku bez scrolla, 50 redova; 375 px: dokument 375, tablica 351 = kontejner; klik na red otvorio snimku 8532. Repo nema RTL/vitest uzorak (testovi su `node --test` čistih funkcija) → bez komponentnog testa. Neovisni pregled (Opus 5.5 high): 0 FIX FIRST; napomene o označavanju teksta i donjem rubu ugrađene (`fc2ea13`).
+- Rollback: cusma1 `html.prev` swap (prethodno `index-D5pb23L-.js`).
+
 ## 2026-11-04 — 🤖 Kontakt centar → Statistika → lijevak: filtar kanala „AI asistenti (ChatGPT, Perplexity…)“ + oznaka kanala `AI` u Statistici, Posjetiteljima uživo i kartici klijenta — ✅ LIVE 4.11.2026 20:37:4x UTC (`2419032` = `feat/cc-ai-channel` `9e3455a` + main `9039e1b`, `assets/index-D5pb23L-.js`; cusma1 staging → test → swap, root/deep/asset 200); backend `VisitChannel.AI` na cusma2 od 19:55:46 i cusma3 od 20:16:39 UTC (jar 5a20132c, bez migracije); cusma1 `html.prev` = `index-BChUh6VF.js`
 
 Mario 4.11.2026 („Da, kanal“): posjete iz AI odgovora do sada su padale u Referral. PR boat4you-admin#7; tsc 0, `npm test` 95/95, eslint 0 grešaka (19 starih upozorenja izvan ovih datoteka).

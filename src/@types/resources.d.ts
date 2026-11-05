@@ -1149,6 +1149,11 @@ interface Resources {
     profileSettings: 'Profile Settings';
     social: 'Social posts';
     users: 'Users';
+    workspace: {
+      charter: 'Charter';
+      marketing: 'Marketing';
+      title: 'Workspace';
+    };
   };
   social: {
     ai: {
@@ -1169,7 +1174,6 @@ interface Resources {
       open: 'Open';
       post: 'Post';
       ran: 'Done: {{- status}}';
-      started: "The AI is making today's post; it shows up in the list below in a few minutes.";
       runError: 'The AI post failed.';
       runNow: "Make today's post now";
       runStatus: {
@@ -1183,6 +1187,7 @@ interface Resources {
       save: 'Save';
       saveError: 'Saving failed.';
       saved: 'Saved.';
+      started: "The AI is making today's post; it shows up in the list below in a few minutes.";
       status: 'Status';
       time: 'Publish at';
       timeHint: 'Europe/Zagreb; the AI prepares it 3 hours earlier.';

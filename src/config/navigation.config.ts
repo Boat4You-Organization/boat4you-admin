@@ -6,7 +6,7 @@ import Bookings from '@/components/SvgIcons/Bookings';
 import Contact from '@/components/SvgIcons/Contact';
 import Invoices from '@/components/SvgIcons/Invoices';
 import Share from '@/components/SvgIcons/Share';
-import { UserRoleName } from '@/models/user.model';
+import { UserModel, UserRoleName } from '@/models/user.model';
 
 export interface NavigationLink {
   id: string;
@@ -76,5 +76,11 @@ const navigation: NavigationLink[] = [
     accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
   },
 ];
+
+/** Only the items this user's roles may open (a MANAGER does not see SYSTEM_ADMIN-only items). */
+export const navigationForUser = (user: Pick<UserModel, 'roles'> | null | undefined): NavigationLink[] =>
+  navigation.filter(
+    item => !item.accessLevel || !!user?.roles?.some(role => item.accessLevel?.includes(role.roleName))
+  );
 
 export default navigation;

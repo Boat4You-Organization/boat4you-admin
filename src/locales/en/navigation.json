@@ -23,6 +23,11 @@
     "title": "Preferences and profile",
     "language": "Language"
   },
+  "workspace": {
+    "title": "Workspace",
+    "charter": "Charter",
+    "marketing": "Marketing"
+  },
   "chat": "Chat",
   "contactCenter": "Contact Center",
   "social": "Social posts"

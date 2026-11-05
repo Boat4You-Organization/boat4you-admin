@@ -21,7 +21,7 @@ import { cc } from './ui';
 
 type TabKey = 'conversations' | 'live' | 'contacts' | 'stats' | 'recording';
 
-/** Tabs of the Contact Center section proper; stats and recording are separate menu items (see header comment). */
+/** Tabs of the Contact Center section proper; live, stats and recording are separate menu items (see header comment). */
 const TABS: { key: TabKey; path: string }[] = [
   { key: 'conversations', path: '/contact-center' },
   { key: 'contacts', path: '/contact-center/contacts' },

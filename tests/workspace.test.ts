@@ -6,6 +6,7 @@ import { describe, test } from 'node:test';
 
 import {
   WORKSPACE_HOME,
+  activeNavId,
   activeWorkspace,
   landingPath,
   rememberWorkspace,
@@ -174,5 +175,35 @@ describe('rememberWorkspace', () => {
   test('blocked storage never throws', () => {
     assert.doesNotThrow(() => rememberWorkspace(throwingStorage, 'charter'));
     assert.doesNotThrow(() => rememberWorkspace(undefined, 'charter'));
+  });
+});
+
+describe('activeNavId', () => {
+  const items = [
+    { id: 'bookings', path: '/bookings' },
+    { id: 'stats', path: '/contact-center/stats' },
+    { id: 'contactCenter', path: '/contact-center' },
+    { id: 'heatmaps', path: '/contact-center/recording' },
+    { id: 'social', path: '/social' },
+  ];
+
+  test('the longest matching path wins, whatever the item order', () => {
+    assert.equal(activeNavId('/contact-center/stats', items), 'stats');
+    assert.equal(activeNavId('/contact-center/stats?range=30', items), 'stats');
+    assert.equal(activeNavId('/contact-center/recording/list', items), 'heatmaps');
+    assert.equal(activeNavId('/contact-center/recording/8532', items), 'heatmaps');
+  });
+
+  test('the section home and its other tabs light the section item', () => {
+    assert.equal(activeNavId('/contact-center', items), 'contactCenter');
+    assert.equal(activeNavId('/contact-center/live', items), 'contactCenter');
+    assert.equal(activeNavId('/contact-center/contacts/12', items), 'contactCenter');
+    assert.equal(activeNavId('/bookings/100197', items), 'bookings');
+  });
+
+  test('neutral or unknown routes light nothing; prefixes match on a boundary only', () => {
+    assert.equal(activeNavId('/my-profile', items), null);
+    assert.equal(activeNavId('/contact-centers', items), null);
+    assert.equal(activeNavId('/socials', items), null);
   });
 });

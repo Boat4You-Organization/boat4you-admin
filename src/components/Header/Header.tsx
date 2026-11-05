@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 import CloseIcon from '@mui/icons-material/CloseRounded';
 import LogoutIcon from '@mui/icons-material/LogoutOutlined';
@@ -17,6 +17,7 @@ import useLogout from '@/utils/hooks/useLogout';
 import {
   WORKSPACE_HOME,
   WorkspaceId,
+  activeNavId,
   browserStorage,
   activeWorkspace as pickWorkspace,
   rememberWorkspace,
@@ -52,7 +53,8 @@ const glassSx = {
   '&:hover': { backgroundColor: 'rgba(255,255,255,0.12)', color: '#fff' },
 } as const;
 
-// NavLink marks the current route with the `active` class.
+// The item whose path is the longest match for the route carries the `active` class (activeNavId), so
+// Statistics / Heatmaps light up instead of Contact Center on their /contact-center/* routes.
 const navLinksSx = {
   '& a': {
     display: 'inline-flex',
@@ -100,6 +102,7 @@ const Header = () => {
   const routeWorkspace = workspaceForPath(pathname);
   const activeWorkspace = pickWorkspace(pathname, browserStorage(), availableWorkspaces);
   const workspaceNavigation = visibleNavigation.filter(item => workspaceForPath(item.path ?? '/') === activeWorkspace);
+  const activeItemId = activeNavId(pathname, workspaceNavigation);
   // Remember only what a signed-in user actually opened; the login page must not overwrite it.
   const rememberable = !!user && !isUserRole && !!routeWorkspace && availableWorkspaces.includes(routeWorkspace);
   const badgeFor = (id: string, news?: number) => {
@@ -296,7 +299,14 @@ const Header = () => {
           }}
         >
           {/* --- Brand (left) --- */}
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>{Brand}</Box>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+            {Brand}
+            {/* Charter | Marketing sits fixed on the left next to the brand (Mario 5.11.2026); desktop only,
+                the mobile drawer carries its own copy. */}
+            {availableWorkspaces.length > 1 && (
+              <Box sx={{ display: { xs: 'none', md: 'flex' } }}>{renderWorkspaceSwitch()}</Box>
+            )}
+          </Box>
 
           {/* --- Nav (centered) --- Desktop only. */}
           <Stack
@@ -307,7 +317,9 @@ const Header = () => {
             gap="2px"
             sx={{
               display: { xs: 'none', md: 'flex' },
-              justifyContent: 'center',
+              // `safe` keeps the first items reachable when the nav overflows (7 Charter items ≤ 1280 px):
+              // plain `center` spilled them off the left edge where no scroll can reach them.
+              justifyContent: 'safe center',
               minWidth: 0,
               overflowX: 'auto',
               scrollbarWidth: 'none',
@@ -315,25 +327,22 @@ const Header = () => {
               ...navLinksSx,
             }}
           >
-            {availableWorkspaces.length > 1 && (
-              <>
-                {renderWorkspaceSwitch()}
-                <Box
-                  aria-hidden
-                  sx={{ flex: 'none', width: '1px', height: 18, mx: '8px', backgroundColor: 'rgba(255,255,255,0.14)' }}
-                />
-              </>
-            )}
             {workspaceNavigation.map(item => {
               // Bookings and the Contact Center get live counts from their stores (polled); other
               // nav items fall back to the static `news` prop (kept for future module alerts).
               const count = badgeFor(item.id, item.news);
+              const active = item.id === activeItemId;
 
               return (
-                <NavLink key={item.id} to={item.path || '/'}>
+                <Link
+                  key={item.id}
+                  to={item.path || '/'}
+                  className={active ? 'active' : undefined}
+                  aria-current={active ? 'page' : undefined}
+                >
                   {t(item.id, item.id)}
                   {count > 0 ? <NavBadge count={count} /> : null}
-                </NavLink>
+                </Link>
               );
             })}
           </Stack>
@@ -542,10 +551,16 @@ const Header = () => {
               <Box sx={{ display: 'flex', mb: '8px' }}>{renderWorkspaceSwitch(true)}</Box>
             )}
             {workspaceNavigation.map(item => (
-              <NavLink key={item.id} to={item.path || '/'} onClick={() => setDrawerOpen(false)}>
+              <Link
+                key={item.id}
+                to={item.path || '/'}
+                className={item.id === activeItemId ? 'active' : undefined}
+                aria-current={item.id === activeItemId ? 'page' : undefined}
+                onClick={() => setDrawerOpen(false)}
+              >
                 <span>{t(item.id, item.id)}</span>
                 {badgeFor(item.id, item.news) > 0 ? <NavBadge count={badgeFor(item.id, item.news)} /> : null}
-              </NavLink>
+              </Link>
             ))}
           </Stack>
 

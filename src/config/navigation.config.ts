@@ -31,20 +31,6 @@ const navigation: NavigationLink[] = [
     accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
   },
   {
-    // Contact Center (P2, replaces /chat): backend /admin/cc/** and /admin/chat/** are SYSTEM_ADMIN only.
-    id: 'contactCenter',
-    icon: Contact,
-    path: '/contact-center',
-    accessLevel: [UserRoleName.SYSTEM_ADMIN],
-  },
-  {
-    // Objave (Social publisher S0, 3.11.2026): one post to many channels; backend /admin/social/** is SYSTEM_ADMIN only.
-    id: 'social',
-    icon: Share,
-    path: '/social',
-    accessLevel: [UserRoleName.SYSTEM_ADMIN],
-  },
-  {
     id: 'users',
     icon: People,
     path: '/users',
@@ -74,6 +60,35 @@ const navigation: NavigationLink[] = [
     icon: Contact,
     path: '/agencies',
     accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
+  },
+  // --- Marketing workspace (Mario 5.11.2026): Statistics, Contact center, Heatmaps, Social posts; call center and
+  // backlinks come next. Statistics and Heatmaps keep their /contact-center/* routes (bookmarks, player links) but
+  // are menu items of their own; the header lights the item with the longest matching path.
+  {
+    id: 'stats',
+    icon: Contact,
+    path: '/contact-center/stats',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
+    // Contact Center (P2, replaces /chat): backend /admin/cc/** and /admin/chat/** are SYSTEM_ADMIN only.
+    id: 'contactCenter',
+    icon: Contact,
+    path: '/contact-center',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
+    id: 'heatmaps',
+    icon: Contact,
+    path: '/contact-center/recording',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
+    // Objave (Social publisher S0, 3.11.2026): one post to many channels; backend /admin/social/** is SYSTEM_ADMIN only.
+    id: 'social',
+    icon: Share,
+    path: '/social',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
   },
 ];
 

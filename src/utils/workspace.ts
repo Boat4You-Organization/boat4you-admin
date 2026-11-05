@@ -106,3 +106,18 @@ export const rememberWorkspace = (storage: StorageLike | undefined, id: Workspac
     // Private mode / blocked storage: the switch still works, only the landing page is not remembered.
   }
 };
+
+/**
+ * The menu item to light for a route: the one whose path is the longest prefix of the pathname (so
+ * "/contact-center/stats" lights Statistics, not Contact Center). Null when no item matches.
+ */
+export const activeNavId = (pathname: string, items: readonly { id: string; path?: string }[]): string | null => {
+  const path = pathname.split('?')[0];
+  const best = items.reduce<{ id: string; path: string } | null>((found, item) => {
+    if (!item.path || !underPrefix(path, item.path)) return found;
+
+    return !found || item.path.length > found.path.length ? { id: item.id, path: item.path } : found;
+  }, null);
+
+  return best?.id ?? null;
+};

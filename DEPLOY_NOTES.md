@@ -11,9 +11,10 @@ Mario 4.11.2026 (program digitalnog PR-a, `DIGITAL-PR-PROGRAM-2026-11.md`; plan 
 
 Deploy (**svaki korak tek uz Marijevo izričito „da“**; puni popis u backend DEPLOY_NOTES):
 
+- [ ] Izvor builda (backend korak 0): lokalni `boat4you-admin-main` je zastario (nema Objave ni CC AI filtar), `admin_deploy.sh` bez `ADMIN_REPO` gradi njega. Čisti release worktree iz `feat/pr-module` spojene sa svježim `origin/main`: `git -C /Users/mariokuzmanic/Downloads/boat4you-delivery/boat4you-admin/wt-pr fetch origin && git -C /Users/mariokuzmanic/Downloads/boat4you-delivery/boat4you-admin/wt-pr worktree add -b deploy/pr-module /Users/mariokuzmanic/Downloads/boat4you-delivery/boat4you-admin/wt-pr-release feat/pr-module && git -C /Users/mariokuzmanic/Downloads/boat4you-delivery/boat4you-admin/wt-pr-release merge --no-edit origin/main && (cd /Users/mariokuzmanic/Downloads/boat4you-delivery/boat4you-admin/wt-pr-release && yarn install --frozen-lockfile && yarn lint:base && yarn build && yarn test)`; sukob = stop.
 - [ ] Backend s V9_121 live na cusma2 (koraci 1–4 backend popisa).
-- [ ] Admin: cusma1 staging → test → swap (`admin_deploy.sh`), root/deep (`/pr`, `/pr/pitches`)/asset 200.
-- [ ] Klik-provjera u prod adminu s `PR_MAIL_ENABLED=false`: uvoz kontakata s 2 testna retka, istraživanje, nacrt; DE nacrt pokazuje blokadu i **Pošalji** je onemogućen; slanje odbijeno s `MAIL_DISABLED`.
+- [ ] Admin: `ADMIN_REPO=/Users/mariokuzmanic/Downloads/boat4you-delivery/boat4you-admin/wt-pr-release bash /Users/mariokuzmanic/Downloads/boat4you-delivery/infra/deploy-scripts/admin_deploy.sh` (cusma1 staging → test → swap), root/deep (`/pr`, `/pr/pitches`)/asset 200.
+- [ ] Klik-provjera u prod adminu s `PR_MAIL_ENABLED=false`: uvoz kontakata s 2 testna retka = Marijeve vlastite adrese, Gmail i Outlook (jedan s tržištem `DE`), istraživanje, nacrt; DE nacrt pokazuje blokadu i **Pošalji** je onemogućen; slanje odbijeno s `MAIL_DISABLED`.
 - [ ] SPA drži stari JS do reloada: hard reload ako stavka PR nije u izborniku.
 
 Rollback: cusma1 `html.prev` swap (backend `/admin/pr/**` može ostati; bez admina se jednostavno ne koristi).

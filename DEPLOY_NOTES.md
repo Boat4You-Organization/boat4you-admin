@@ -1,5 +1,16 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-05 — 🧭 Marketing izbornik: Statistika, Kontakt centar, Heatmape, Objave; preklopnik Charter | Marketing fiksno lijevo uz logo — ✅ LIVE 5.11.2026 09:11:40 UTC (main `e60ea46`, `assets/index-DU51y147.js` + `vendor-react-fBTcQOt-.js` + `vendor-mui-Bo47_LVX.js`; cusma1 staging → test → swap, root/deep/asset 200); tag `live/2026-11-05-admin-marketing-menu`; cusma1 `html.prev` = `index-D761iugy.js`
+
+Mario 5.11.2026: „u marketingu stavi statistics vanka contact centra i heatmaps isto da bude redoslijed Statistics, contact center, heatmaps, social posts i onda ce tu jos ici call center i backlinks“ + „charter marketing selection … na desktopu fixan lijevo do broker desk“.
+
+- `navigation.config.ts`: Marketing stavke `stats` (`/contact-center/stats`), `contactCenter`, `heatmaps` (`/contact-center/recording`), `social`, tim redom; Charter stavke nepromijenjene. Rute, player (`/contact-center/recording/:id`), lista i postavke ostaju na starim URL-ovima.
+- `ContactCenter.tsx`: kartice Kontakt centra su sada Razgovori, Live posjetitelji, Kontakti; na `/stats` i `/recording/*` stranica nosi vlastiti naslov (Statistika / Heatmape) bez trake kartica Kontakt centra. `TabKey`/`tabOf` nepromijenjeni.
+- `Header.tsx`: aktivna je stavka čija je putanja najdulji prefiks rute (`utils/workspace.ts` `activeNavId`, 3 nova testa → 117/117), `aria-current` po istom pravilu; preklopnik Charter | Marketing u lijevoj ćeliji uz logo (desktop), ladica na mobitelu zadržava svoj; desktop nav `justify-content: safe center` (7 stavki Chartera na ≤ 1280 px bilo odrezano slijeva, stari nalaz iz pregleda). Nav je sada ~65–90 px desno od sredine ekrana (prihvaćeno, Mario tražio preklopnik lijevo).
+- Prijevodi `navigation.stats` / `navigation.heatmaps` en/hr; `resources.d.ts` regeneriran + prettier.
+- Provjere: eslint 0 grešaka, tsc 0, `yarn test` 117/117; dev preview + mock API (mock dopunjen `/admin/cc/search-engines`, inače Statistika pada na `clicks` — mock, ne kod): redoslijed i aktivna stavka na `/contact-center`, `/stats`, `/recording`; naslovi i skrivena traka; mobilna ladica 375 px (preklopnik + 4 stavke). Neovisni pregled (Opus 5.5 high): 0 blokera, 1 should-fix (odrezan nav, ugrađen), 1 prihvaćena sitnica (nav nije centriran na ekran). ⚠️ Deploy 12 min nakon prethodnog admin deploya (pravilo ≥ 20 min nije ispoštovano; statični swap, bez posljedica). Hash vendor chunkova se ipak promijenio jer se skup korištenih exporta (NavLink → Link) promijenio — ostaje stabilan samo dok se taj skup ne mijenja.
+- Rollback: cusma1 `html.prev` swap.
+
 ## 2026-11-05 — 🧭 Dva radna prostora u adminu: Charter | Marketing preklopnik u zaglavlju, izbornik po ruti, pamćenje zadnjeg prostora — ✅ LIVE 5.11.2026 08:59:14 UTC (main `338300d`, `assets/index-D761iugy.js` + `vendor-react-BuOHRuzn.js` + `vendor-mui-DfU2p158.js`; cusma1 staging → test → swap, root/deep/asset 200, `localhost:8443` u dist 0); tag `live/2026-11-05-admin-workspaces`; cusma1 `html.prev` = `index-DgMcCIDC.js`
 
 Mario 5.11.2026 („Marketing i charter neka se zovu, kreni“), nakon mjerenja opterećenja (admin + Kontakt centar + Objave = 1,6 % zahtjeva API-ja, 0,5 % baze → lokalna aplikacija nema smisla, podjela admina ima).

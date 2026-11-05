@@ -1,16 +1,23 @@
-// PR module: decision labels, link-state colours, follow-up timing and every /admin/pr call of src/services/pr.api.ts,
-// run with `yarn test` (node --test, Node's own type stripping: no bundler, no axios instance, a fake HTTP client).
+// PR module: decision labels, link-state colours, follow-up timing, pitch actions / send preview and every /admin/pr call
+// of src/services/pr.api.ts, run with `yarn test` (node --test, Node's own type stripping: no bundler, a fake HTTP client).
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
 
 import { createPrApi } from '../src/services/pr.api.ts';
+import type { PrPitch } from '../src/types/pr.type.ts';
 import {
   PR_DECISION_CODES,
   PR_DECISION_UNKNOWN_KEY,
+  blockCodeOf,
+  contactFormMissing,
   decisionLabelKey,
   followUpDueOn,
+  followUpsDue,
   isFollowUpDue,
   linkStateTone,
+  pitchActions,
+  pitchesWithFollowUp,
+  sendPreviewText,
 } from '../src/utils/pr/format.ts';
 
 type Call = { method: string; url: string; data?: unknown; config?: Record<string, any> };
@@ -225,5 +232,184 @@ describe('createPrApi', () => {
     assert.equal(calls[0].url, '/admin/pr/contacts/import');
     assert.equal(calls[0].data, csv);
     assert.equal(calls[0].config?.headers['Content-Type'], 'text/csv');
+  });
+});
+
+const FOOTER =
+  'Boat4you Group, Vrboran 37, 21000 Split, Croatia · How we handle your data: https://www.boat4you.com/press/privacy\n' +
+  "Not the right person, or don't want these? Just reply and I won't email you again.";
+
+const pitch = (over: Partial<PrPitch> = {}): PrPitch => ({
+  id: 1,
+  studyId: 10,
+  contactId: 20,
+  contactEmail: 'anna@paper.co.uk',
+  contactName: 'Anna',
+  outletName: 'The Paper',
+  parentPitchId: null,
+  template: 'DATA_PITCH',
+  subject: 'Charter prices 2026',
+  body: 'Hi Anna,\n\nthe data.',
+  status: 'DRAFT',
+  decision: 'ALLOWED',
+  footer: FOOTER,
+  messageId: null,
+  sentAt: null,
+  error: null,
+  replyNote: null,
+  createdAt: '2026-11-01T08:00:00Z',
+  updatedAt: '2026-11-01T08:00:00Z',
+  ...over,
+});
+
+const NOW = '2026-11-10T12:00:00Z';
+
+describe('sendPreviewText (exactly what PrFooter.appendTo sends)', () => {
+  test('body, one empty line, the footer', () => {
+    assert.equal(sendPreviewText(pitch()), `Hi Anna,\n\nthe data.\n\n${FOOTER}`);
+  });
+
+  test('trailing blank lines and spaces of the body are dropped, leading text and inner blank lines kept', () => {
+    assert.equal(
+      sendPreviewText(pitch({ body: '  Hi,\n\n\nline two  \n\n \t\n' })),
+      `  Hi,\n\n\nline two\n\n${FOOTER}`
+    );
+    assert.equal(sendPreviewText(pitch({ body: 'Hi\r\n\r\n' })), `Hi\n\n${FOOTER}`);
+  });
+});
+
+describe('pitchActions', () => {
+  test('"Pošalji" is live only for a DRAFT whose decision is ALLOWED', () => {
+    assert.equal(pitchActions(pitch(), false, NOW).canSend, true);
+    assert.equal(pitchActions(pitch(), false, NOW).blockedBy, null);
+
+    PR_DECISION_CODES.filter(c => c !== 'ALLOWED').forEach(code => {
+      const a = pitchActions(pitch({ decision: code }), false, NOW);
+
+      assert.equal(a.canSend, false, code);
+      assert.equal(a.blockedBy, code);
+    });
+    (['SENDING', 'SENT', 'REPLIED', 'DECLINED', 'PUBLISHED', 'BOUNCED', 'FAILED'] as const).forEach(status => {
+      const a = pitchActions(pitch({ status, sentAt: '2026-11-01T08:00:00Z' }), false, NOW);
+
+      assert.equal(a.canSend, false, status);
+      assert.equal(a.blockedBy, null, status);
+      assert.equal(a.canEdit, false, status);
+    });
+    assert.equal(pitchActions(pitch({ decision: 'allowed' }), false, NOW).canSend, false);
+    assert.equal(pitchActions(pitch({ decision: 'SOMETHING_NEW' }), false, NOW).canSend, false);
+  });
+
+  test('the German cold mail stays blocked', () => {
+    const a = pitchActions(pitch({ decision: 'MARKET_DE_NO_COLD_EMAIL' }), false, NOW);
+
+    assert.equal(a.canSend, false);
+    assert.equal(decisionLabelKey(a.blockedBy as string), 'decision.deNoColdEmail');
+  });
+
+  test('SENDING (being sent or stuck) offers nothing', () => {
+    assert.deepEqual(pitchActions(pitch({ status: 'SENDING' }), false, NOW), {
+      canSend: false,
+      blockedBy: null,
+      canEdit: false,
+      followUp: 'hidden',
+      followUpOn: '',
+      canRetry: false,
+      stuck: true,
+      statusTargets: [],
+    });
+  });
+
+  test('FAILED offers only the way back to draft', () => {
+    const a = pitchActions(pitch({ status: 'FAILED', error: 'MailSendException: 550' }), false, NOW);
+
+    assert.equal(a.canRetry, true);
+    assert.equal(a.canSend, false);
+    assert.equal(a.followUp, 'hidden');
+    assert.deepEqual(a.statusTargets, []);
+  });
+
+  test('follow-up: SENT main pitch without one; the date is shown at once, the action only after 5 days', () => {
+    const sent = pitch({ status: 'SENT', sentAt: '2026-11-06T09:00:00Z' });
+
+    assert.equal(pitchActions(sent, false, '2026-11-11T08:59:59Z').followUp, 'wait');
+    assert.equal(pitchActions(sent, false, '2026-11-11T08:59:59Z').followUpOn, '2026-11-11');
+    assert.equal(pitchActions(sent, false, '2026-11-11T09:00:00Z').followUp, 'ready');
+    assert.equal(pitchActions(sent, true, NOW).followUp, 'hidden');
+    assert.equal(pitchActions(sent, true, NOW).followUpOn, '');
+    assert.equal(pitchActions({ ...sent, parentPitchId: 7 }, false, '2026-12-01T00:00:00Z').followUp, 'hidden');
+    assert.equal(pitchActions({ ...sent, status: 'REPLIED' }, false, '2026-12-01T00:00:00Z').followUp, 'hidden');
+    assert.equal(pitchActions({ ...sent, sentAt: null }, false, '2026-12-01T00:00:00Z').followUp, 'hidden');
+  });
+
+  test('statuses by hand after sending, the current one left out; none from DRAFT, BOUNCED or FAILED', () => {
+    assert.deepEqual(pitchActions(pitch({ status: 'SENT' }), false, NOW).statusTargets, [
+      'REPLIED',
+      'DECLINED',
+      'PUBLISHED',
+      'BOUNCED',
+    ]);
+    assert.deepEqual(pitchActions(pitch({ status: 'REPLIED' }), false, NOW).statusTargets, [
+      'DECLINED',
+      'PUBLISHED',
+      'BOUNCED',
+    ]);
+    assert.deepEqual(pitchActions(pitch(), false, NOW).statusTargets, []);
+    assert.deepEqual(pitchActions(pitch({ status: 'BOUNCED' }), false, NOW).statusTargets, []);
+  });
+});
+
+describe('follow-ups due (overview)', () => {
+  test('SENT main pitches 5+ days old without a follow-up, oldest first', () => {
+    const list = [
+      pitch({ id: 1, status: 'SENT', sentAt: '2026-11-04T10:00:00Z' }),
+      pitch({ id: 2, status: 'SENT', sentAt: '2026-11-01T10:00:00Z' }),
+      pitch({ id: 3, status: 'SENT', sentAt: '2026-11-08T10:00:00Z' }),
+      pitch({ id: 4, status: 'SENT', sentAt: '2026-11-02T10:00:00Z' }),
+      pitch({ id: 5, parentPitchId: 4, template: 'FOLLOW_UP' }),
+      pitch({ id: 6, status: 'REPLIED', sentAt: '2026-11-01T10:00:00Z' }),
+    ];
+
+    assert.deepEqual([...pitchesWithFollowUp(list)], [4]);
+    assert.deepEqual(
+      followUpsDue(list, NOW).map(p => p.id),
+      [2, 1]
+    );
+  });
+});
+
+describe('blockCodeOf', () => {
+  test('a send-rule code is a block; other codes, ALLOWED and odd values are not', () => {
+    assert.equal(blockCodeOf({ code: 'MARKET_DE_NO_COLD_EMAIL', message: 'x' }), 'MARKET_DE_NO_COLD_EMAIL');
+    assert.equal(blockCodeOf({ code: 'SUPPRESSED' }), 'SUPPRESSED');
+    [
+      'MAIL_DISABLED',
+      'MAIL_NOT_CONFIGURED',
+      'ALREADY_SENDING_OR_SENT',
+      'PITCH_NOT_DRAFT',
+      'FOLLOWUP_EXISTS',
+      'ALLOWED',
+    ].forEach(code => assert.equal(blockCodeOf({ code }), null, code));
+    [null, undefined, 'MARKET_UNKNOWN', 42, { code: 7 }, {}].forEach(e => assert.equal(blockCodeOf(e), null));
+  });
+});
+
+describe('contactFormMissing', () => {
+  test('address, where and when it was found are required; market only without an outlet', () => {
+    assert.deepEqual(contactFormMissing({}), ['email', 'emailSourceUrl', 'emailFoundOn', 'market']);
+    assert.deepEqual(contactFormMissing({ email: ' ', emailSourceUrl: '', emailFoundOn: null, outletId: 3 }), [
+      'email',
+      'emailSourceUrl',
+      'emailFoundOn',
+    ]);
+    assert.deepEqual(
+      contactFormMissing({
+        email: 'a@b.com',
+        emailSourceUrl: 'https://paper.co.uk/staff',
+        emailFoundOn: '2026-11-04',
+        market: 'GB',
+      }),
+      []
+    );
   });
 });

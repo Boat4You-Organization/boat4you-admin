@@ -39,8 +39,12 @@ const listSx = {
     right: 0,
     boxShadow: `inset 1px 0 0 ${cc.border}, -6px 0 8px -6px rgba(16, 24, 40, 0.18)`,
   },
+  // A collapsed border does not follow a sticky cell, so its bottom rule is drawn as a shadow too.
+  '& td:last-of-type': {
+    bgcolor: '#FFFFFF',
+    boxShadow: `inset 1px 0 0 ${cc.border}, inset 0 -1px 0 ${cc.hair}, -6px 0 8px -6px rgba(16, 24, 40, 0.18)`,
+  },
   '& th:last-of-type': { zIndex: 2 },
-  '& td:last-of-type': { bgcolor: '#FFFFFF' },
   '& tbody tr.click:focus-visible td': { bgcolor: cc.rowHover },
   '& tbody tr.click:focus-visible': { outline: `2px solid ${cc.link}`, outlineOffset: -2 },
   '& .wide': { display: { xs: 'none', sm: 'table-cell' } },
@@ -252,7 +256,10 @@ const RecordingList = ({
                   key={r.id}
                   className="click"
                   tabIndex={0}
-                  onClick={() => onOpen(r.id)}
+                  onClick={() => {
+                    // Selecting the path to copy it is not a click on the row.
+                    if (!window.getSelection()?.toString()) onOpen(r.id);
+                  }}
                   onKeyDown={e => {
                     // Only the row itself: Enter on the Watch button already clicks it.
                     if (e.key === 'Enter' && e.target === e.currentTarget) onOpen(r.id);

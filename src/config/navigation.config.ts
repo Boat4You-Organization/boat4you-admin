@@ -61,13 +61,20 @@ const navigation: NavigationLink[] = [
     path: '/agencies',
     accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
   },
-  // --- Marketing workspace (Mario 5.11.2026): Statistics, Contact center, Heatmaps, Social posts; call center and
-  // backlinks come next. Statistics and Heatmaps keep their /contact-center/* routes (bookmarks, player links) but
+  // --- Marketing workspace (Mario 5.11.2026): Statistics, Live visitors, Contact center, Heatmaps, Social posts; call center and
+  // backlinks come next. Statistics, Live visitors and Heatmaps keep their /contact-center/* routes (bookmarks, links) but
   // are menu items of their own; the header lights the item with the longest matching path.
   {
     id: 'stats',
     icon: Contact,
     path: '/contact-center/stats',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
+    // Live visitors: own menu item since 5.11.2026 (Mario), keeps its /contact-center/live route.
+    id: 'live',
+    icon: Contact,
+    path: '/contact-center/live',
     accessLevel: [UserRoleName.SYSTEM_ADMIN],
   },
   {

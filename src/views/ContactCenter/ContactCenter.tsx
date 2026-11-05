@@ -1,6 +1,7 @@
-/* Contact Center (P2, design 2.3; redesign 30.10.2026): the admin's home for conversations, live visitors and contacts.
+/* Contact Center (P2, design 2.3; redesign 30.10.2026): the admin's home for conversations and contacts.
  * It replaces the /chat inbox (which now redirects here). SYSTEM_ADMIN only, like the /admin/cc API.
- * Statistics (/contact-center/stats) and Heatmaps (/contact-center/recording/*) keep their routes and this view, but
+ * Statistics (/contact-center/stats), Live visitors (/contact-center/live) and Heatmaps (/contact-center/recording/*) keep
+ * their routes and this view, but
  * since 5.11.2026 they are menu items of their own in the Marketing workspace (Mario): they render with their own title
  * and without the Contact Center tab bar. */
 import { useTranslation } from 'react-i18next';
@@ -23,11 +24,10 @@ type TabKey = 'conversations' | 'live' | 'contacts' | 'stats' | 'recording';
 /** Tabs of the Contact Center section proper; stats and recording are separate menu items (see header comment). */
 const TABS: { key: TabKey; path: string }[] = [
   { key: 'conversations', path: '/contact-center' },
-  { key: 'live', path: '/contact-center/live' },
   { key: 'contacts', path: '/contact-center/contacts' },
 ];
 
-const STANDALONE: TabKey[] = ['stats', 'recording'];
+const STANDALONE: TabKey[] = ['live', 'stats', 'recording'];
 
 const tabOf = (path: string): TabKey => {
   if (path.startsWith('/contact-center/live')) return 'live';

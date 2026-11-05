@@ -182,6 +182,7 @@ describe('activeNavId', () => {
   const items = [
     { id: 'bookings', path: '/bookings' },
     { id: 'stats', path: '/contact-center/stats' },
+    { id: 'live', path: '/contact-center/live' },
     { id: 'contactCenter', path: '/contact-center' },
     { id: 'heatmaps', path: '/contact-center/recording' },
     { id: 'social', path: '/social' },
@@ -196,7 +197,7 @@ describe('activeNavId', () => {
 
   test('the section home and its other tabs light the section item', () => {
     assert.equal(activeNavId('/contact-center', items), 'contactCenter');
-    assert.equal(activeNavId('/contact-center/live', items), 'contactCenter');
+    assert.equal(activeNavId('/contact-center/live', items), 'live');
     assert.equal(activeNavId('/contact-center/contacts/12', items), 'contactCenter');
     assert.equal(activeNavId('/bookings/100197', items), 'bookings');
   });

@@ -1141,6 +1141,7 @@ interface Resources {
       savePreferences: 'Save Preferences';
       title: 'Select Language';
     };
+    live: 'Live visitors';
     logout: 'Logout';
     offers: 'Offers';
     preferences: {

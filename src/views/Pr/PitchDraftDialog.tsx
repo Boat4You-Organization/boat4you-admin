@@ -19,9 +19,10 @@ import {
 
 import PrService from '@/services/pr.service';
 import { PrContact, PrPitch, PrPitchTemplate, PrStudy } from '@/types/pr.type';
+import { templateTakesStudy } from '@/utils/pr/format';
 import { showToast } from '@/valtio/global/global.actions';
 
-import { textAreaSx, usePrError } from './ui';
+import { Label, textAreaSx, usePrError } from './ui';
 
 /** FOLLOW_UP is made from a sent pitch, never here. */
 const TEMPLATES: PrPitchTemplate[] = ['DATA_PITCH', 'BLOG_ARTICLE', 'NEWSJACK', 'CONSENT_REQUEST'];
@@ -85,6 +86,14 @@ const PitchDraftDialog = ({
   }, [open, search]);
 
   const valid = !!contact && !!subject.trim() && !!body.trim();
+  const takesStudy = templateTakesStudy(template);
+
+  const chooseTemplate = (tp: PrPitchTemplate) => {
+    setTemplate(tp);
+
+    // A consent request never carries a study (backend 400 CONSENT_REQUEST_NO_STUDY).
+    if (!templateTakesStudy(tp)) setStudy('');
+  };
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -94,7 +103,7 @@ const PitchDraftDialog = ({
     setBusy(true);
     try {
       const p = await PrService.createPitch({
-        studyId: study ? Number(study) : null,
+        studyId: takesStudy && study ? Number(study) : null,
         contactId: contact.id,
         template,
         subject: subject.trim(),
@@ -117,30 +126,37 @@ const PitchDraftDialog = ({
         <DialogContent>
           <Stack gap={1.5} sx={{ pt: 1 }}>
             <Stack direction={{ xs: 'column', sm: 'row' }} gap={1.5}>
-              <TextField
-                select
-                size="small"
-                fullWidth
-                label={t('pitches.study')}
-                value={study}
-                onChange={e => setStudy(e.target.value)}
-                SelectProps={{ displayEmpty: true }}
-                InputLabelProps={{ shrink: true }}
-              >
-                <MenuItem value="">{t('pitches.noStudy')}</MenuItem>
-                {studies.map(s => (
-                  <MenuItem key={s.id} value={String(s.id)}>
-                    #{s.number} {s.title}
-                  </MenuItem>
-                ))}
-              </TextField>
+              {takesStudy ? (
+                <TextField
+                  select
+                  size="small"
+                  fullWidth
+                  label={t('pitches.study')}
+                  value={study}
+                  onChange={e => setStudy(e.target.value)}
+                  SelectProps={{ displayEmpty: true }}
+                  InputLabelProps={{ shrink: true }}
+                >
+                  <MenuItem value="">{t('pitches.noStudy')}</MenuItem>
+                  {studies.map(s => (
+                    <MenuItem key={s.id} value={String(s.id)}>
+                      #{s.number} {s.title}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              ) : (
+                <Box sx={{ width: '100%' }}>
+                  <Label>{t('pitches.study')}</Label>
+                  <Box sx={{ fontSize: 13.5 }}>{t('pitches.consentNoStudy')}</Box>
+                </Box>
+              )}
               <TextField
                 select
                 size="small"
                 fullWidth
                 label={t('pitches.template')}
                 value={template}
-                onChange={e => setTemplate(e.target.value as PrPitchTemplate)}
+                onChange={e => chooseTemplate(e.target.value as PrPitchTemplate)}
               >
                 {TEMPLATES.map(tp => (
                   <MenuItem key={tp} value={tp}>

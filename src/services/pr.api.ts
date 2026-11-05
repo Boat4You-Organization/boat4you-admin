@@ -94,7 +94,8 @@ export const createPrApi = (api: AxiosInstance) => ({
   followUp: (id: number, body: PrFollowUpRequest) =>
     api.post<PrPitch>(`${BASE}/pitches/${id}/follow-up`, body).then(r => r.data),
 
-  /** REPLIED / DECLINED / PUBLISHED / BOUNCED after sending; DRAFT only from FAILED (the retry). */
+  /** REPLIED / DECLINED / PUBLISHED / BOUNCED after sending; DRAFT only from FAILED (the retry). optOut: true with
+   * DECLINED / REPLIED also opts the address out. */
   setPitchStatus: (id: number, body: PrPitchStatusRequest) =>
     api.patch<PrPitch>(`${BASE}/pitches/${id}/status`, body).then(r => r.data),
 

@@ -15,9 +15,11 @@ import {
   followUpsDue,
   isFollowUpDue,
   linkStateTone,
+  optOutDefaultFor,
   pitchActions,
   pitchesWithFollowUp,
   sendPreviewText,
+  templateTakesStudy,
 } from '../src/utils/pr/format.ts';
 
 type Call = { method: string; url: string; data?: unknown; config?: Record<string, any> };
@@ -52,6 +54,7 @@ describe('decisionLabelKey', () => {
     'MARKET_DE_NO_COLD_EMAIL',
     'ZA_CONSENT_REQUIRED',
     'MARKET_NOT_CLEARED',
+    'FOLLOWUP_PARENT_ANSWERED',
     'FOLLOWUP_TOO_EARLY',
     'ALLOWED',
   ];
@@ -67,6 +70,8 @@ describe('decisionLabelKey', () => {
     assert.equal(decisionLabelKey('MARKET_DE_NO_COLD_EMAIL'), 'decision.deNoColdEmail');
     assert.equal(decisionLabelKey('ALLOWED'), 'decision.allowed');
     assert.equal(decisionLabelKey('FOLLOWUP_TOO_EARLY'), 'decision.followUpTooEarly');
+    assert.equal(decisionLabelKey('FOLLOWUP_PARENT_ANSWERED'), 'decision.followUpParentAnswered');
+    assert.equal(blockCodeOf({ code: 'FOLLOWUP_PARENT_ANSWERED', message: 'x' }), 'FOLLOWUP_PARENT_ANSWERED');
   });
 
   test('exports exactly the backend codes, so the locale file can be built from them', () => {
@@ -146,6 +151,7 @@ describe('createPrApi', () => {
     await pr.updatePitch(7, { subject: 's2' });
     await pr.followUp(7, { body: 'nudge' });
     await pr.setPitchStatus(7, { status: 'REPLIED', replyNote: 'yes' });
+    await pr.setPitchStatus(7, { status: 'DECLINED', replyNote: null, optOut: true });
     await pr.send(7);
     await pr.createPlacement({ articleUrl: 'https://x.com/a' });
     await pr.updatePlacement(8, { anchorText: 'boat4you' });
@@ -174,6 +180,7 @@ describe('createPrApi', () => {
         ['patch', '/admin/pr/pitches/7', { subject: 's2' }],
         ['post', '/admin/pr/pitches/7/follow-up', { body: 'nudge' }],
         ['patch', '/admin/pr/pitches/7/status', { status: 'REPLIED', replyNote: 'yes' }],
+        ['patch', '/admin/pr/pitches/7/status', { status: 'DECLINED', replyNote: null, optOut: true }],
         ['post', '/admin/pr/pitches/7/send', undefined],
         ['post', '/admin/pr/placements', { articleUrl: 'https://x.com/a' }],
         ['patch', '/admin/pr/placements/8', { anchorText: 'boat4you' }],
@@ -374,6 +381,27 @@ describe('follow-ups due (overview)', () => {
     assert.deepEqual(
       followUpsDue(list, NOW).map(p => p.id),
       [2, 1]
+    );
+  });
+});
+
+describe('optOutDefaultFor (the "opt this address out" box)', () => {
+  test('checked for DECLINED, unchecked for REPLIED, not offered for anything else', () => {
+    assert.equal(optOutDefaultFor('DECLINED'), true);
+    assert.equal(optOutDefaultFor('REPLIED'), false);
+    (['PUBLISHED', 'BOUNCED', 'DRAFT', 'SENT', 'FAILED', 'SENDING'] as const).forEach(s =>
+      assert.equal(optOutDefaultFor(s), null, s)
+    );
+    assert.equal(optOutDefaultFor(''), null);
+    assert.equal(optOutDefaultFor(null), null);
+  });
+});
+
+describe('templateTakesStudy', () => {
+  test('a consent request has no study field, every other template has one', () => {
+    assert.equal(templateTakesStudy('CONSENT_REQUEST'), false);
+    (['DATA_PITCH', 'BLOG_ARTICLE', 'NEWSJACK', 'FOLLOW_UP'] as const).forEach(tp =>
+      assert.equal(templateTakesStudy(tp), true, tp)
     );
   });
 });

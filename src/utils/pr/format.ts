@@ -5,7 +5,7 @@
  * e.g. { "decision": { "deNoColdEmail": "…" } }.
  *
  * Type-only imports on purpose: tests/pr.test.ts runs this file with plain `node --test` (type stripping). */
-import type { PrContactRequest, PrLinkState, PrPitch, PrPitchStatus } from '@/types/pr.type';
+import type { PrContactRequest, PrLinkState, PrPitch, PrPitchStatus, PrPitchTemplate } from '@/types/pr.type';
 
 /** PrPitchDto.decision values: "ALLOWED" or a PrComplianceRules block code (backend rule order), with their pr keys. */
 export const PR_DECISION_LABEL_KEYS = {
@@ -19,6 +19,7 @@ export const PR_DECISION_LABEL_KEYS = {
   MARKET_DE_NO_COLD_EMAIL: 'decision.deNoColdEmail',
   ZA_CONSENT_REQUIRED: 'decision.zaConsentRequired',
   MARKET_NOT_CLEARED: 'decision.marketNotCleared',
+  FOLLOWUP_PARENT_ANSWERED: 'decision.followUpParentAnswered',
   FOLLOWUP_TOO_EARLY: 'decision.followUpTooEarly',
 } as const;
 
@@ -124,6 +125,20 @@ export const pitchActions = (pitch: PrPitch, hasFollowUp: boolean, nowIso: strin
     statusTargets: AFTER_SEND_SOURCES.includes(pitch.status) ? AFTER_SEND_TARGETS.filter(s => s !== pitch.status) : [],
   };
 };
+
+/** The "opt this address out" box next to a hand-set status: checked for DECLINED (the footer promises no more mail
+ * after a "no"), unchecked for REPLIED, and null = not offered (other statuses; BOUNCED suppresses the address anyway).
+ * The backend honours optOut only with DECLINED or REPLIED. */
+export const optOutDefaultFor = (status: PrPitchStatus | '' | null | undefined): boolean | null => {
+  if (status === 'DECLINED') return true;
+
+  if (status === 'REPLIED') return false;
+
+  return null;
+};
+
+/** A consent request is about the contact, never a study (backend 400 CONSENT_REQUEST_NO_STUDY): no study field. */
+export const templateTakesStudy = (template: PrPitchTemplate): boolean => template !== 'CONSENT_REQUEST';
 
 /** Ids of the main pitches that already have their (one) follow-up. */
 export const pitchesWithFollowUp = (pitches: PrPitch[]): Set<number> =>

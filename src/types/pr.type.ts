@@ -183,10 +183,12 @@ export interface PrFollowUpRequest {
 }
 
 /** status is REPLIED, DECLINED, PUBLISHED or BOUNCED after sending, DRAFT only from FAILED (retry); replyNote (typed in
- * by hand) replaces the stored one when given. */
+ * by hand) replaces the stored one when given. optOut (with DECLINED or REPLIED only; default false) also opts the
+ * contact's address out, as POST .../contacts/{id}/opt-out does. */
 export interface PrPitchStatusRequest {
   status?: PrPitchStatus | null;
   replyNote?: string | null;
+  optOut?: boolean;
 }
 
 export interface PrPitchFilter {

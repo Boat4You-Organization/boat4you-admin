@@ -9,11 +9,13 @@ import {
   Alert,
   Box,
   Button,
+  Checkbox,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
   MenuItem,
   Stack,
   TextField,
@@ -23,7 +25,7 @@ import {
 import PrService from '@/services/pr.service';
 import { bbColors } from '@/styles/bb';
 import { PrPitch, PrPitchStatus } from '@/types/pr.type';
-import { decisionLabelKey, pitchActions, sendPreviewText } from '@/utils/pr/format';
+import { decisionLabelKey, optOutDefaultFor, pitchActions, sendPreviewText } from '@/utils/pr/format';
 import { showToast } from '@/valtio/global/global.actions';
 
 import { ConfirmDialog, Label, PITCH_TONES, Pill, preSx, textAreaSx, useDates, usePrError } from './ui';
@@ -68,15 +70,24 @@ const PitchDetail = ({
   const [followUpBody, setFollowUpBody] = useState('');
   const [nextStatus, setNextStatus] = useState<PrPitchStatus | ''>('');
   const [replyNote, setReplyNote] = useState(pitch.replyNote ?? '');
+  const [optOut, setOptOut] = useState(false);
   const [confirmBounce, setConfirmBounce] = useState(false);
+  /** null = the opt-out box is not offered for the chosen status. */
+  const optOutOffered = optOutDefaultFor(nextStatus) !== null;
 
   useEffect(() => {
     setEditing(false);
     setSubject(pitch.subject);
     setBody(pitch.body);
     setNextStatus('');
+    setOptOut(false);
     setReplyNote(pitch.replyNote ?? '');
   }, [pitch]);
+
+  const chooseStatus = (s: PrPitchStatus) => {
+    setNextStatus(s);
+    setOptOut(optOutDefaultFor(s) ?? false);
+  };
 
   /** One call; on error the list reloads (the pitch may have moved on), except for an edit, which keeps the typing. */
   const run = async (call: () => Promise<PrPitch>, done: string, reloadOnError = true) => {
@@ -115,6 +126,8 @@ const PitchDetail = ({
       setConfirmSend(false);
       onChanged(p);
     } catch (e) {
+      // Without a backend answer (network drop, proxy 504) the send may still have gone: the text says "unknown", and
+      // the list reloads so the pitch's real status shows.
       showToast({ status: 'error', text: prError(e, t('pitches.sendError')) });
       setConfirmSend(false);
       onChanged();
@@ -125,7 +138,12 @@ const PitchDetail = ({
     if (!nextStatus) return;
 
     await run(
-      () => PrService.setPitchStatus(pitch.id, { status: nextStatus, replyNote: replyNote.trim() || null }),
+      () =>
+        PrService.setPitchStatus(pitch.id, {
+          status: nextStatus,
+          replyNote: replyNote.trim() || null,
+          optOut: optOutOffered && optOut,
+        }),
       t('pitches.statusSaved')
     );
     setConfirmBounce(false);
@@ -236,7 +254,7 @@ const PitchDetail = ({
                 size="small"
                 label={t('pitches.newStatus')}
                 value={nextStatus}
-                onChange={e => setNextStatus(e.target.value as PrPitchStatus)}
+                onChange={e => chooseStatus(e.target.value as PrPitchStatus)}
                 sx={{ minWidth: 180 }}
               >
                 {a.statusTargets.map(s => (
@@ -262,6 +280,19 @@ const PitchDetail = ({
                 {t('pitches.saveStatus')}
               </Button>
             </Stack>
+          )}
+          {a.statusTargets.length > 0 && optOutOffered && (
+            <Box>
+              <FormControlLabel
+                control={<Checkbox checked={optOut} onChange={e => setOptOut(e.target.checked)} />}
+                label={t('pitches.optOut')}
+              />
+              {optOut && (
+                <Typography sx={{ fontSize: 12.5, color: bbColors.gray600 }}>
+                  {t('pitches.optOutHint', { email: pitch.contactEmail })}
+                </Typography>
+              )}
+            </Box>
           )}
         </Stack>
       </DialogContent>

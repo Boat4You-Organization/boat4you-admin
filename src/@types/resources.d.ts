@@ -1207,6 +1207,7 @@ interface Resources {
       allowed: 'May be sent';
       deNoColdEmail: 'Germany: no cold email without consent';
       doNotContact: 'Contact is marked do not contact';
+      followUpParentAnswered: 'The pitch was already answered: no follow-up';
       followUpTooEarly: 'Follow-up too early (5 days after sending)';
       marketNotCleared: 'Market not cleared for sending';
       marketUnknown: 'Market unknown';
@@ -1286,6 +1287,7 @@ interface Resources {
       confirmSend: 'Send now';
       confirmSendHint: 'Sent 1:1 from press@boat4you.com as plain text, with a copy to press@.';
       confirmSendTitle: 'Send this pitch?';
+      consentNoStudy: 'A consent request is not tied to a study.';
       contact: 'Contact';
       decision: 'Send rule';
       detailTitle: 'Pitch';
@@ -1307,13 +1309,15 @@ interface Resources {
       noContacts: 'No contacts found';
       noError: 'No error text.';
       noStudy: 'No study';
+      optOut: 'Opt this address out — never email it again';
+      optOutHint: '{{email}} goes on the suppression list: no contact with this address will receive mail again.';
       recipient: 'Recipient';
       replyNote: 'Reply note';
       saveDraft: 'Save draft';
       saveStatus: 'Save status';
       saved: 'Pitch saved.';
       send: 'Send';
-      sendError: 'Pitch was not sent.';
+      sendError: 'Result unknown (the connection dropped or the server did not answer). The pitch may have been sent: check the list and the press@ copy before doing anything else.';
       sendFailed: 'Not sent: {{error}}';
       sendUnclear: 'Status after sending: {{status}}. Check the list.';
       sent: 'Pitch sent.';

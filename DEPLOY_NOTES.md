@@ -1,5 +1,23 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-05 — 📰 PR modul: nova stavka izbornika **PR** (`/pr`, samo SYSTEM_ADMIN) — mediji i novinari, istraživanja, pitchevi 1:1 s press@boat4you.com, objave i provjera linkova, spominjanja — ⏳ NIJE DEPLOYANO (grana `feat/pr-module`, `5081e4c`; backend `feat/pr-module` s V9_121 mora biti live na cusma2 PRIJE admina)
+
+Mario 4.11.2026 (program digitalnog PR-a, `DIGITAL-PR-PROGRAM-2026-11.md`; plan `infra/docs/superpowers/plans/2026-11-04-pr-module.md`). Backend: boat4you-backend DEPLOY_NOTES, unos 2026-11-05 PR modul (redoslijed deploya i rollback su tamo).
+
+- Kartice (`src/views/Pr/`): **Pregled** (po istraživanju poslano / odgovori / objavljeno / objave; živi linkovi follow i nofollow, upozorenja, nova i nepovezana spominjanja, follow-upovi na redu), **Mediji i kontakti** (popis s filterima, kontakt s izvorom adrese, uvoz CSV-a, odjava i povrat), **Istraživanja**, **Pitchevi** (nacrt iz predloška, uređivanje, odluka „smije li se poslati“ po pitchu s razlogom blokade, gumb **Pošalji** samo kad backend kaže da smije, follow-up, ručni status odgovora), **Objave i linkovi** (provjera linka, upozorenja, „očisti upozorenje“), **Spominjanja** (RSS feedovi Google Alerts / Talkwalker; status novo / zamoliti za link / zamoljeno / povezano / ignorirano).
+- Podnožje maila prikazuje se iz `dto.footer` (jedan izvor istine u backendu, R10); korisnik ga ne piše.
+- `src/services/pr.api.ts` + `pr.service.ts`, tipovi `src/types/pr.type.ts`, pomoćne funkcije `src/utils/pr/format.ts`, ruta i izbornik (`AppRouter.tsx`, `navigation.config.ts`, `accessLevel` SYSTEM_ADMIN), prijevodi `locales/{en,hr}/pr.json` + `navigation.json`, `@types/resources.d.ts` regeneriran.
+- Provjere (5.11.): `yarn lint:base` 0 grešaka (19 starih upozorenja, nijedno u PR datotekama), `yarn build` OK (tsc + vite), `yarn test` **119/119** (novo `tests/pr.test.ts`, 24). Lokalni pregled u pregledniku nije rađen (R12): zamjenjuje ga klik-provjera u prod adminu s `PR_MAIL_ENABLED=false` (korak 6 backend popisa).
+
+Deploy (**svaki korak tek uz Marijevo izričito „da“**; puni popis u backend DEPLOY_NOTES):
+
+- [ ] Backend s V9_121 live na cusma2 (koraci 1–4 backend popisa).
+- [ ] Admin: cusma1 staging → test → swap (`admin_deploy.sh`), root/deep (`/pr`, `/pr/pitches`)/asset 200.
+- [ ] Klik-provjera u prod adminu s `PR_MAIL_ENABLED=false`: uvoz kontakata s 2 testna retka, istraživanje, nacrt; DE nacrt pokazuje blokadu i **Pošalji** je onemogućen; slanje odbijeno s `MAIL_DISABLED`.
+- [ ] SPA drži stari JS do reloada: hard reload ako stavka PR nije u izborniku.
+
+Rollback: cusma1 `html.prev` swap (backend `/admin/pr/**` može ostati; bez admina se jednostavno ne koristi).
+
 ## 2026-11-04 — 🤖 Kontakt centar → Statistika → lijevak: filtar kanala „AI asistenti (ChatGPT, Perplexity…)“ + oznaka kanala `AI` u Statistici, Posjetiteljima uživo i kartici klijenta — ✅ LIVE 4.11.2026 20:37:4x UTC (`2419032` = `feat/cc-ai-channel` `9e3455a` + main `9039e1b`, `assets/index-D5pb23L-.js`; cusma1 staging → test → swap, root/deep/asset 200); backend `VisitChannel.AI` na cusma2 od 19:55:46 i cusma3 od 20:16:39 UTC (jar 5a20132c, bez migracije); cusma1 `html.prev` = `index-BChUh6VF.js`
 
 Mario 4.11.2026 („Da, kanal“): posjete iz AI odgovora do sada su padale u Referral. PR boat4you-admin#7; tsc 0, `npm test` 95/95, eslint 0 grešaka (19 starih upozorenja izvan ovih datoteka).

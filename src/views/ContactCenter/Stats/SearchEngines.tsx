@@ -426,7 +426,15 @@ const LandingPages = ({ base, filters }: { base: CcSearchEngines['pages']; filte
                   <td className="num">{fmt.format(p.visits)}</td>
                   <td className="num">{fmt.format(p.inquiries)}</td>
                 </tr>
-                {open === key && <PageQueries filters={filters} siteId={p.siteId} path={p.path} span={span} />}
+                {open === key && (
+                  <PageQueries
+                    key={[from, to, country, device].join('~')}
+                    filters={filters}
+                    siteId={p.siteId}
+                    path={p.path}
+                    span={span}
+                  />
+                )}
               </Fragment>
             );
           })}

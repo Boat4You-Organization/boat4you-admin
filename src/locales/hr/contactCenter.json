@@ -305,7 +305,7 @@
     "minImpressions": "Po CTR-u i poziciji rangiraju se samo pojmovi s barem {{n}} pojavljivanja.",
     "pages": "Ulazne stranice",
     "topQueries": "Glavni pojmovi (Google)",
-    "pagesNote": "Klikovi, pojavljivanja i pojmovi su Googleovi za tu stranicu; — znači da Google za nju u razdoblju nema brojki (naši posjeti su ipak došli). Prosj. pozicija je prosjek preko svih pojmova stranice, ponderiran pojavljivanjima: otvori stranicu (klik na red) i vidjet ćeš njene Google pojmove, svaki sa svojom pozicijom. Org. posjeti i upiti su naši posjeti koji su s tražilice došli na tu stranicu i upiti poslani u tim posjetima.",
+    "pagesNote": "Klikovi, pojavljivanja i pojmovi su Googleovi za tu stranicu; — znači da Google za nju u razdoblju nema brojki (naši posjeti su ipak došli). Prosj. pozicija je prosjek preko svih pojmova stranice, ponderiran pojavljivanjima: otvori stranicu (klik na red) i vidjet ćeš njezine Google pojmove, svaki sa svojom pozicijom. Org. posjeti i upiti su naši posjeti koji su s tražilice došli na tu stranicu i upiti poslani u tim posjetima.",
     "engine": {
       "GOOGLE": "Google",
       "BING": "Bing",

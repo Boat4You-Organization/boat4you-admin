@@ -1,8 +1,11 @@
 /* Building blocks of the Statistics view: KPI cards and bar lists (shared by Stats and Funnel). */
+import { useTranslation } from 'react-i18next';
+
 import { Box } from '@mui/material';
 
 import { Count } from '@/types/contactCenter.type';
-import { cc } from '@/views/ContactCenter/ui';
+import { SITE_IDS, siteLabel } from '@/utils/contactCenter/safeLink';
+import { cc, fieldSx } from '@/views/ContactCenter/ui';
 
 export const cardSx = {
   bgcolor: '#FFFFFF',
@@ -84,3 +87,25 @@ export const barGrid = {
   gridTemplateColumns: 'repeat(auto-fill, minmax(min(300px, 100%), 1fr))',
   gap: '12px',
 } as const;
+
+/** A table's own site: all sites, or one; shown only when Statistics has no site of its own. */
+export const SiteSelect = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
+  const { t } = useTranslation('contactCenter');
+
+  return (
+    <Box
+      component="select"
+      aria-label={t('filter.site')}
+      value={value}
+      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onChange(e.target.value)}
+      sx={{ ...fieldSx, width: 'auto', minWidth: 190 }}
+    >
+      <option value="">{t('searchEngines.siteAll')}</option>
+      {SITE_IDS.map(s => (
+        <option key={s} value={s}>
+          {siteLabel(s)}
+        </option>
+      ))}
+    </Box>
+  );
+};

@@ -9,7 +9,7 @@ import ContactCenterService from '@/services/contactCenter.service';
 import { CcFunnel, FunnelClick } from '@/types/contactCenter.type';
 import { exitRate, funnelRows } from '@/utils/contactCenter/funnel';
 import { siteLabel } from '@/utils/contactCenter/safeLink';
-import { Bars, barGrid, cardSx } from '@/views/ContactCenter/Stats/parts';
+import { Bars, SiteSelect, barGrid, cardSx } from '@/views/ContactCenter/Stats/parts';
 import { PageLink, SiteChip } from '@/views/ContactCenter/common';
 import { LoadAlert, SectionLabel, cc, fieldSx, tableSx } from '@/views/ContactCenter/ui';
 
@@ -27,6 +27,16 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
   const [data, setData] = useState<CcFunnel | null>(null);
   const [failed, setFailed] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
+  const [exitSite, setExitSite] = useState(''); // the exit table's own site, '' = all (only without the section's site)
+  const [exitSiteOf, setExitSiteOf] = useState(siteId);
+  const [ownExits, setOwnExits] = useState<{ key: string; exits: CcFunnel['exits']; failed?: boolean } | null>(null);
+
+  if (exitSiteOf !== siteId) {
+    setExitSiteOf(siteId);
+    setExitSite('');
+  }
+
+  const exitKey = [from, to, device, channel, exitSite].join('~');
 
   useEffect(() => {
     let current = true;
@@ -45,6 +55,27 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
     };
   }, [from, to, siteId, device, channel]);
 
+  useEffect(() => {
+    if (!exitSite) return undefined;
+
+    let current = true;
+
+    // The exits of one site: the section's list is the top pages of all sites.
+    ContactCenterService.funnel({
+      from,
+      to,
+      siteId: exitSite,
+      device: device || undefined,
+      channel: channel || undefined,
+    })
+      .then(({ data: d }) => current && setOwnExits({ key: exitKey, exits: d.exits }))
+      .catch(() => current && setOwnExits({ key: exitKey, exits: [], failed: true }));
+
+    return () => {
+      current = false;
+    };
+  }, [exitSite, exitKey]); // eslint-disable-line react-hooks/exhaustive-deps -- exitKey carries every input
+
   const pageType = (k: string) => t(`funnel.pageType.${k}`, { defaultValue: k });
 
   // Gallery, slider and menu clicks fold into one collapsed group so the CTAs lead the list.
@@ -52,6 +83,10 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
   const isNav = (c: FunnelClick) => !!c.area && NAV_AREAS.includes(c.area);
   const ctaClicks = clicks.filter(c => !isNav(c));
   const navClicks = clicks.filter(isNav);
+
+  const exits = exitSite ? (ownExits?.exits ?? []) : (data?.exits ?? []);
+  const exitsPending = !!exitSite && ownExits?.key !== exitKey;
+  const oneExitSite = !!(siteId || exitSite);
 
   const clickRow = (c: FunnelClick) => (
     <tr key={`${c.pageType}|${c.label}|${c.kind ?? ''}|${c.area ?? ''}`}>
@@ -163,13 +198,16 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
             <Bars title={t('funnel.exitsByType')} rows={data.exitsByType} label={pageType} color={cc.red} />
           </Box>
           <Box sx={{ ...cardSx, mb: '12px', overflowX: 'auto' }}>
-            <Box component="h3" sx={titleSx}>
-              {t('funnel.exitPages')}
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 14px' }}>
+              <Box component="h3" sx={titleSx}>
+                {t('funnel.exitPages')}
+              </Box>
+              {!siteId && <SiteSelect value={exitSite} onChange={setExitSite} />}
             </Box>
-            <Box component="table" sx={tableSx}>
+            <Box component="table" sx={{ ...tableSx, opacity: exitsPending ? 0.5 : 1 }}>
               <thead>
                 <tr>
-                  {!siteId && <th>{t('filter.site')}</th>}
+                  {!oneExitSite && <th>{t('filter.site')}</th>}
                   <th>{t('funnel.path')}</th>
                   <th>{t('funnel.type')}</th>
                   <th className="num">{t('funnel.views')}</th>
@@ -178,9 +216,9 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
                 </tr>
               </thead>
               <tbody>
-                {data.exits.map(e => (
+                {exits.map(e => (
                   <tr key={`${e.siteId}|${e.path}`}>
-                    {!siteId && <td className="soft nowrap">{siteLabel(e.siteId)}</td>}
+                    {!oneExitSite && <td className="soft nowrap">{siteLabel(e.siteId)}</td>}
                     <Box component="td" sx={ellipsisSx} title={e.path}>
                       {e.path}
                     </Box>
@@ -192,7 +230,8 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
                 ))}
               </tbody>
             </Box>
-            {!data.exits.length && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
+            {exitSite && ownExits?.key === exitKey && ownExits.failed && <LoadAlert text={t('loadFailed')} />}
+            {!exits.length && !exitsPending && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
           </Box>
           <Box sx={{ ...cardSx, overflowX: 'auto' }}>
             <Box component="h3" sx={titleSx}>

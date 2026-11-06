@@ -10,8 +10,8 @@ import dayjs from 'dayjs';
 
 import ContactCenterService from '@/services/contactCenter.service';
 import { CcSearchEngines, EngineTotals, SearchQuerySort, SearchQueryStat } from '@/types/contactCenter.type';
-import { SITE_IDS, siteLabel } from '@/utils/contactCenter/safeLink';
-import { Bars, Metric, barGrid, cardSx, kpiGrid } from '@/views/ContactCenter/Stats/parts';
+import { siteLabel } from '@/utils/contactCenter/safeLink';
+import { Bars, Metric, SiteSelect, barGrid, cardSx, kpiGrid } from '@/views/ContactCenter/Stats/parts';
 import { InfoIcon, LoadAlert, SectionLabel, cc, fieldSx, tableSx } from '@/views/ContactCenter/ui';
 
 const DEVICES = ['DESKTOP', 'TABLET', 'MOBILE'] as const;
@@ -74,28 +74,6 @@ const useFormats = () => {
     ctr: (x: { clicks: number; impressions: number }) =>
       x.impressions ? `${fmt1.format((x.clicks / x.impressions) * 100)} %` : '—',
   };
-};
-
-/** The table's own site: all sites, or one when the section has no site of its own. */
-const SiteSelect = ({ value, onChange }: { value: string; onChange: (v: string) => void }) => {
-  const { t } = useTranslation('contactCenter');
-
-  return (
-    <Box
-      component="select"
-      aria-label={t('filter.site')}
-      value={value}
-      onChange={(e: React.ChangeEvent<HTMLSelectElement>) => onChange(e.target.value)}
-      sx={{ ...fieldSx, width: 'auto', minWidth: 190 }}
-    >
-      <option value="">{t('searchEngines.siteAll')}</option>
-      {SITE_IDS.map(s => (
-        <option key={s} value={s}>
-          {siteLabel(s)}
-        </option>
-      ))}
-    </Box>
-  );
 };
 
 /**
@@ -329,6 +307,19 @@ const PageQueries = ({
   );
 };
 
+type PageKey = 'clicks' | 'impressions' | 'position' | 'visits' | 'inquiries';
+
+/** The sortable landing page columns with their translation key; position starts best first, the rest most first. */
+const PAGE_SORTS: Array<[PageKey, string]> = [
+  ['clicks', 'clicks'],
+  ['impressions', 'impressions'],
+  ['position', 'avgPosition'],
+];
+const PAGE_SORTS_OURS: Array<[PageKey, string]> = [
+  ['visits', 'visits'],
+  ['inquiries', 'inquiries'],
+];
+
 /** The landing pages with their own site; [base] are the section's pages, another site asks /search-engines for its own. */
 const LandingPages = ({ base, filters }: { base: CcSearchEngines['pages']; filters: Filters }) => {
   const { t } = useTranslation('contactCenter');
@@ -337,6 +328,7 @@ const LandingPages = ({ base, filters }: { base: CcSearchEngines['pages']; filte
   const [site, setSite] = useState('');
   const [siteOf, setSiteOf] = useState(siteId);
   const [open, setOpen] = useState(''); // `${siteId}|${path}` of the opened page
+  const [sort, setSort] = useState<{ key: PageKey; asc: boolean }>({ key: 'clicks', asc: false });
   const [own, setOwn] = useState<{ key: string; pages: CcSearchEngines['pages']; failed?: boolean } | null>(null);
 
   if (siteOf !== siteId) {
@@ -367,7 +359,37 @@ const LandingPages = ({ base, filters }: { base: CcSearchEngines['pages']; filte
     };
   }, [site, ownKey]); // eslint-disable-line react-hooks/exhaustive-deps -- ownKey carries every input
 
-  const pages = site ? (own?.pages ?? []) : base;
+  // Sorted here: the backend's order (clicks, then visits) breaks ties; a page Google has no position for goes last.
+  const pages = (site ? (own?.pages ?? []) : base)
+    .map((p, i) => ({ p, i }))
+    .sort((a, b) => {
+      const x = a.p[sort.key];
+      const y = b.p[sort.key];
+
+      if (x === null && y === null) return a.i - b.i;
+
+      if (x === null) return 1;
+
+      if (y === null) return -1;
+
+      return (sort.asc ? x - y : y - x) || a.i - b.i;
+    })
+    .map(({ p }) => p);
+  const onSort = (key: PageKey) =>
+    setSort(s => (s.key === key ? { key, asc: !s.asc } : { key, asc: key === 'position' }));
+  const ariaDir = sort.asc ? 'ascending' : 'descending';
+  const sortTh = ([key, label]: [PageKey, string]) => (
+    <th key={key} className="num" aria-sort={sort.key === key ? ariaDir : undefined}>
+      <TableSortLabel
+        active={sort.key === key}
+        direction={(sort.key === key ? sort.asc : key === 'position') ? 'asc' : 'desc'}
+        onClick={() => onSort(key)}
+        sx={sortSx}
+      >
+        {t(`searchEngines.${label}` as 'searchEngines.clicks')}
+      </TableSortLabel>
+    </th>
+  );
   const pending = !!site && own?.key !== ownKey;
   const oneSite = !!(siteId || site);
   const span = oneSite ? 7 : 8;
@@ -393,12 +415,9 @@ const LandingPages = ({ base, filters }: { base: CcSearchEngines['pages']; filte
           <tr>
             {!oneSite && <th>{t('filter.site')}</th>}
             <th>{t('funnel.path')}</th>
-            <th className="num">{t('searchEngines.clicks')}</th>
-            <th className="num">{t('searchEngines.impressions')}</th>
-            <th className="num">{t('searchEngines.avgPosition')}</th>
+            {PAGE_SORTS.map(sortTh)}
             <th>{t('searchEngines.topQueries')}</th>
-            <th className="num">{t('searchEngines.visits')}</th>
-            <th className="num">{t('searchEngines.inquiries')}</th>
+            {PAGE_SORTS_OURS.map(sortTh)}
           </tr>
         </thead>
         <tbody>

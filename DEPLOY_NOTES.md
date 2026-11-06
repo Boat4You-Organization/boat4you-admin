@@ -1,5 +1,7 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-06 — 🔎 Statistika → Tražilice: Bing upiti po sajtu + sortiranje, ulazne stranice po sajtu s pojmovima svake stranice — ✅ LIVE 6.11.2026 ~14:12 UTC `index-DyfTQ-6K.js` (`release/bing-plus-pr` = main `1be32ea` + `feat/pr-module` `f2b6e99`, jer je live bio PR modul `index-D1xktjrT.js`; VERIFIED live == new, root/deep/asset 200). Backend `engine=BING` na `/admin/cc/search-engines/queries` LIVE cusma2 14:05 UTC (backend DEPLOY_NOTES). ⚠️ Sljedeći admin deploy MORA nositi `feat/pr-module` dok PR #8 nije mergean. Rollback: cusma1 `html.prev` swap.
+
 ## 2026-11-05 — 📰 PR modul: nova stavka izbornika **PR** u radnom prostoru Marketing, iza Objava (`/pr`, samo SYSTEM_ADMIN) — mediji i novinari, istraživanja, pitchevi 1:1 s press@boat4you.com, objave i provjera linkova, spominjanja — ✅ LIVE 5.11.2026 13:08 UTC `index-D1xktjrT.js` (`28c7bfe` = `feat/pr-module` + main `2a330a0`, build iz `wt-pr-release`, VERIFIED live == new, root/deep/asset 200, `/pr` 200); backend V9_121 LIVE oba čvora 13:08/13:09 UTC (backend DEPLOY_NOTES); **slanje ISKLJUČENO** (`PR_MAIL_ENABLED=false`, press@ lozinka još nije upisana). PR admin #8 otvoren, nije mergean. Rollback: cusma1 `html.prev` swap.
 
 Mario 4.11.2026 (program digitalnog PR-a, `DIGITAL-PR-PROGRAM-2026-11.md`; plan `infra/docs/superpowers/plans/2026-11-04-pr-module.md`). Backend: boat4you-backend DEPLOY_NOTES, unos 2026-11-05 PR modul (redoslijed deploya i rollback su tamo).

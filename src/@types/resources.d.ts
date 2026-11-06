@@ -674,9 +674,11 @@ interface Resources {
     savesNow: 'saves at once';
     search: 'Search';
     searchEngines: {
+      avgPosition: 'Avg. position';
       bingClicks: 'Bing clicks';
       bingImpressions: 'Bing impressions';
       bingNoFilter: 'Bing has no country or device, so it is left out with that filter.';
+      bingNoPage: 'Bing gives its queries per site only, with no landing page, country or device.';
       bingQueries: 'Top queries on Bing';
       bingShort: 'Bing clicks / impressions';
       byEngine: 'Our organic visits by search engine';
@@ -711,10 +713,12 @@ interface Resources {
       organicVisits: 'Our organic visits';
       page: 'Landing page';
       pageAll: 'Landing page: all';
+      pageNoQueries: 'Google shows no query for this page in the range: it had no impressions, or Google lists it under another address.';
       pages: 'Landing pages';
-      pagesNote: "Clicks, impressions and queries are Google's for the page. Org. visits and inquiries are our visits that came from a search engine to that page and the inquiries sent in those visits.";
+      pagesNote: "Clicks, impressions and queries are Google's for the page; — means Google has no numbers for it in the range (our visits came anyway). Avg. position is the average over all queries of the page, weighted by impressions: open a page (click its row) to see its Google queries, each with its own position. Org. visits and inquiries are our visits that came from a search engine to that page and the inquiries sent in those visits.";
       position: 'Position';
       query: 'Query';
+      siteAll: 'Site: all';
       title: 'Search engines: Google and Bing';
       topQueries: 'Main queries (Google)';
       visits: 'Org. visits';

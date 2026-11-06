@@ -304,7 +304,7 @@
     "minImpressions": "CTR and position rank only queries with at least {{n}} impressions.",
     "pages": "Landing pages",
     "topQueries": "Main queries (Google)",
-    "pagesNote": "Clicks, impressions and queries are Google's for the page. Org. visits and inquiries are our visits that came from a search engine to that page and the inquiries sent in those visits.",
+    "pagesNote": "Clicks, impressions and queries are Google's for the page; — means Google has no numbers for it in the range (our visits came anyway). Avg. position is the average over all queries of the page, weighted by impressions: open a page (click its row) to see its Google queries, each with its own position. Org. visits and inquiries are our visits that came from a search engine to that page and the inquiries sent in those visits.",
     "engine": {
       "GOOGLE": "Google",
       "BING": "Bing",
@@ -313,7 +313,11 @@
       "ECOSIA": "Ecosia",
       "YANDEX": "Yandex",
       "OTHER": "Other"
-    }
+    },
+    "siteAll": "Site: all",
+    "avgPosition": "Avg. position",
+    "bingNoPage": "Bing gives its queries per site only, with no landing page, country or device.",
+    "pageNoQueries": "Google shows no query for this page in the range: it had no impressions, or Google lists it under another address."
   },
   "rec": {
     "note": "Visits are recorded only with analytics consent. A site that is switched off records nothing and the server refuses its payloads. The share is the percentage of visits with consent that are recorded; on a phone recording starts only after the visitor's first touch, scroll or key.",

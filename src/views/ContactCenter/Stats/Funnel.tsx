@@ -20,6 +20,35 @@ const CHANNELS = ['ORGANIC', 'ADS', 'SISTER', 'DIRECT', 'REFERRAL', 'SOCIAL', 'E
 const titleSx = { m: 0, fontSize: 14, fontWeight: 700, color: cc.ink } as const;
 const ellipsisSx = { maxWidth: 360, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } as const;
 
+/**
+ * The funnel of one site for a table's own site choice ('' = none: the table uses the section's answer); [pending] while
+ * the answer belongs to an older choice.
+ */
+const useSiteFunnel = (site: string, from: string, to: string, device: string, channel: string) => {
+  const [own, setOwn] = useState<{ key: string; data: CcFunnel | null; failed?: boolean } | null>(null);
+  const key = [from, to, device, channel, site].join('~');
+
+  useEffect(() => {
+    if (!site) return undefined;
+
+    let current = true;
+
+    ContactCenterService.funnel({ from, to, siteId: site, device: device || undefined, channel: channel || undefined })
+      .then(({ data: d }) => current && setOwn({ key, data: d }))
+      .catch(() => current && setOwn({ key, data: null, failed: true }));
+
+    return () => {
+      current = false;
+    };
+  }, [site, key]); // eslint-disable-line react-hooks/exhaustive-deps -- key carries every input
+
+  return {
+    data: own?.data ?? null,
+    pending: !!site && own?.key !== key,
+    failed: !!site && own?.key === key && !!own.failed,
+  };
+};
+
 const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: string }) => {
   const { t } = useTranslation('contactCenter');
   const [device, setDevice] = useState('');
@@ -27,16 +56,19 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
   const [data, setData] = useState<CcFunnel | null>(null);
   const [failed, setFailed] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
-  const [exitSite, setExitSite] = useState(''); // the exit table's own site, '' = all (only without the section's site)
-  const [exitSiteOf, setExitSiteOf] = useState(siteId);
-  const [ownExits, setOwnExits] = useState<{ key: string; exits: CcFunnel['exits']; failed?: boolean } | null>(null);
+  // The exit and click tables' own sites, '' = all (only without the section's site).
+  const [exitSite, setExitSite] = useState('');
+  const [clickSite, setClickSite] = useState('');
+  const [siteOf, setSiteOf] = useState(siteId);
 
-  if (exitSiteOf !== siteId) {
-    setExitSiteOf(siteId);
+  if (siteOf !== siteId) {
+    setSiteOf(siteId);
     setExitSite('');
+    setClickSite('');
   }
 
-  const exitKey = [from, to, device, channel, exitSite].join('~');
+  const exitOwn = useSiteFunnel(exitSite, from, to, device, channel);
+  const clickOwn = useSiteFunnel(clickSite, from, to, device, channel);
 
   useEffect(() => {
     let current = true;
@@ -55,44 +87,23 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
     };
   }, [from, to, siteId, device, channel]);
 
-  useEffect(() => {
-    if (!exitSite) return undefined;
-
-    let current = true;
-
-    // The exits of one site: the section's list is the top pages of all sites.
-    ContactCenterService.funnel({
-      from,
-      to,
-      siteId: exitSite,
-      device: device || undefined,
-      channel: channel || undefined,
-    })
-      .then(({ data: d }) => current && setOwnExits({ key: exitKey, exits: d.exits }))
-      .catch(() => current && setOwnExits({ key: exitKey, exits: [], failed: true }));
-
-    return () => {
-      current = false;
-    };
-  }, [exitSite, exitKey]); // eslint-disable-line react-hooks/exhaustive-deps -- exitKey carries every input
-
   const pageType = (k: string) => t(`funnel.pageType.${k}`, { defaultValue: k });
 
   // Gallery, slider and menu clicks fold into one collapsed group so the CTAs lead the list.
-  const clicks = data?.clicks ?? [];
+  const clicks = clickSite ? (clickOwn.data?.clicks ?? []) : (data?.clicks ?? []);
   const isNav = (c: FunnelClick) => !!c.area && NAV_AREAS.includes(c.area);
   const ctaClicks = clicks.filter(c => !isNav(c));
   const navClicks = clicks.filter(isNav);
 
-  const exits = exitSite ? (ownExits?.exits ?? []) : (data?.exits ?? []);
-  const exitsPending = !!exitSite && ownExits?.key !== exitKey;
+  const exits = exitSite ? (exitOwn.data?.exits ?? []) : (data?.exits ?? []);
   const oneExitSite = !!(siteId || exitSite);
+  const oneClickSite = !!(siteId || clickSite);
 
   const clickRow = (c: FunnelClick) => (
     <tr key={`${c.pageType}|${c.label}|${c.kind ?? ''}|${c.area ?? ''}`}>
       <td className="soft nowrap">{pageType(c.pageType)}</td>
       <Box component="td" className="soft" sx={{ ...ellipsisSx, maxWidth: 280 }} title={c.path ?? undefined}>
-        {!siteId && c.siteId && (
+        {!oneClickSite && c.siteId && (
           <Box component="span" sx={{ mr: '6px' }}>
             <SiteChip siteId={c.siteId} small />
           </Box>
@@ -204,7 +215,7 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
               </Box>
               {!siteId && <SiteSelect value={exitSite} onChange={setExitSite} />}
             </Box>
-            <Box component="table" sx={{ ...tableSx, opacity: exitsPending ? 0.5 : 1 }}>
+            <Box component="table" sx={{ ...tableSx, opacity: exitOwn.pending ? 0.5 : 1 }}>
               <thead>
                 <tr>
                   {!oneExitSite && <th>{t('filter.site')}</th>}
@@ -230,14 +241,17 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
                 ))}
               </tbody>
             </Box>
-            {exitSite && ownExits?.key === exitKey && ownExits.failed && <LoadAlert text={t('loadFailed')} />}
-            {!exits.length && !exitsPending && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
+            {exitOwn.failed && <LoadAlert text={t('loadFailed')} />}
+            {!exits.length && !exitOwn.pending && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
           </Box>
           <Box sx={{ ...cardSx, overflowX: 'auto' }}>
-            <Box component="h3" sx={titleSx}>
-              {t('funnel.clicks')}
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 14px' }}>
+              <Box component="h3" sx={titleSx}>
+                {t('funnel.clicks')}
+              </Box>
+              {!siteId && <SiteSelect value={clickSite} onChange={setClickSite} />}
             </Box>
-            <Box component="table" sx={tableSx}>
+            <Box component="table" sx={{ ...tableSx, opacity: clickOwn.pending ? 0.5 : 1 }}>
               <thead>
                 <tr>
                   <th>{t('funnel.type')}</th>
@@ -262,7 +276,8 @@ const Funnel = ({ from, to, siteId }: { from: string; to: string; siteId?: strin
                 {navOpen && navClicks.map(clickRow)}
               </tbody>
             </Box>
-            {!data.clicks.length && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
+            {clickOwn.failed && <LoadAlert text={t('loadFailed')} />}
+            {!clicks.length && !clickOwn.pending && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
           </Box>
         </>
       )}

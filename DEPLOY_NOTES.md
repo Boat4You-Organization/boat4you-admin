@@ -1,5 +1,7 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-07 — 📊 Statistika: Top clicks izbor sajta (kao Exit pages) — ✅ LIVE 7.11.2026 `index-CwXPjPbr.js` (`release/bing-plus-pr` d6b9de4 = main e2ee8b1 + `feat/pr-module`; VERIFIED live == new, root/deep/asset 200). Rollback: cusma1 `html.prev` swap (= `index-CrYMhYcU.js`).
+
 ## 2026-11-06 — 📊 Statistika: ulazne stranice sortiranje (klikovi, pojavljivanja, prosj. pozicija, posjeti, upiti) + Exit pages izbor sajta — ✅ LIVE 6.11.2026 `index-CrYMhYcU.js` (`release/bing-plus-pr` 6a5fb7a = main 2e368dc + `feat/pr-module`; VERIFIED live == new, root/deep/asset 200). Rollback: cusma1 `html.prev` swap (= `index-DyfTQ-6K.js`).
 
 ## 2026-11-06 — 🔎 Statistika → Tražilice: Bing upiti po sajtu + sortiranje, ulazne stranice po sajtu s pojmovima svake stranice — ✅ LIVE 6.11.2026 ~14:12 UTC `index-DyfTQ-6K.js` (`release/bing-plus-pr` = main `1be32ea` + `feat/pr-module` `f2b6e99`, jer je live bio PR modul `index-D1xktjrT.js`; VERIFIED live == new, root/deep/asset 200). Backend `engine=BING` na `/admin/cc/search-engines/queries` LIVE cusma2 14:05 UTC (backend DEPLOY_NOTES). ⚠️ Sljedeći admin deploy MORA nositi `feat/pr-module` dok PR #8 nije mergean. Rollback: cusma1 `html.prev` swap.

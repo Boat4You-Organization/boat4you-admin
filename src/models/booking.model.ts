@@ -123,8 +123,7 @@ export const getEffectiveReservationSysStatus = (
 
   if (today.getTime() >= from.getTime() && today.getTime() <= to.getTime()) return VIRTUAL_IN_CHARTER;
 
-  
-return raw;
+  return raw;
 };
 
 // Tabs hide both UNKNOWN (internal sync fallback) and OPTION_WAITING —
@@ -244,7 +243,12 @@ export interface ReservationPaymentPhase {
   deadline: string;
   amount: number;
   paidOn: string;
-  stripePaymentIntentId: string;
+  /** Old card payments (before Mollie). */
+  stripePaymentIntentId: string | null;
+  /** 'MOLLIE' when the phase was paid by card through Mollie; null = bank transfer or marked paid by hand. */
+  paymentProvider: string | null;
+  /** Mollie payment id (tr_…) when paymentProvider is MOLLIE. */
+  providerPaymentId: string | null;
 }
 
 export interface ReservationModelShortInfo {

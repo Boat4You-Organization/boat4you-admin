@@ -708,7 +708,7 @@ const CreateReservationModal = ({ isOpen, onClose }: CreateReservationModalProps
       <Alert severity="info" sx={{ alignItems: 'flex-start' }}>
         Admin override: total + phases are NOT derived from the yacht's catalogue price. Customer sees exactly what you
         type below on their /my-bookings page. Tick <strong>Paid</strong> on phase 1 if the customer already paid that
-        amount on the cancelled reservation — we'll record it as paid without a Stripe charge.
+        amount on the cancelled reservation — we'll record it as paid without a card charge.
       </Alert>
 
       <TextField

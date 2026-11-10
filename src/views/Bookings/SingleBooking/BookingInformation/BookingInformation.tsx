@@ -19,6 +19,7 @@ import {
   ReservationSysStatus,
   getEffectiveReservationSysStatus,
 } from '@/models/booking.model';
+import { UserRoleName } from '@/models/user.model';
 import { StatusTone, bbColors, bbOverlineSx, bbPillStyle } from '@/styles/bb';
 import colors from '@/styles/themes/colors';
 import DateTime from '@/utils/static/DateTime';
@@ -26,10 +27,13 @@ import { bankFeeShareForPhase } from '@/utils/static/bankTransferFee';
 import { formatPrice } from '@/utils/static/formatNumber';
 import { generateGoogleMapsLink } from '@/utils/static/googleMapsUtils';
 import { sortByNumericProp } from '@/utils/static/sortUtils';
+import { useAuthStore } from '@/valtio/auth/auth.store';
 import EmailClientModal from '@/views/Bookings/partials/EmailClientModal/EmailClientModal';
 
+import BookingCardPayments from './BookingCardPayments';
 import BookingInfoItem from './BookingInfoItem';
 import styles from './BookingInformation.module.scss';
+import PhasePaidBy from './PhasePaidBy';
 
 interface BookingInformationProps {
   selectedBooking: ReservationModel;
@@ -60,6 +64,8 @@ const groupHeadSx = { ...bbOverlineSx, mt: 1.25, mb: '2px' };
 
 const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
   const { t } = useTranslation();
+  const { user } = useAuthStore();
+  const isSystemAdmin = !!user?.roles?.some(role => role.roleName === UserRoleName.SYSTEM_ADMIN);
   // Fixed wire fee (BANK_TRANSFER_FIXED_FEE, e.g. 32 €) — the customer's wire
   // transfers carry per-phase shares of it, so the phases and the booking
   // total must show the fee-inclusive amounts the wire emails ask for
@@ -374,7 +380,8 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
       <DeskCard>
         <CardHead title={t('booking.payment-phases')} />
         <Box sx={{ p: '4px 16px 8px' }}>
-          {reservationPaymentPhases.map(({ id, paidOn, deadline, amount }, phaseIdx) => {
+          {reservationPaymentPhases.map((phase, phaseIdx) => {
+            const { id, paidOn, deadline, amount } = phase;
             // Show the wire amount the customer is actually asked for: phase
             // amount + this phase's share of the fixed bank fee (same split as
             // the wire emails / payment page).
@@ -415,6 +422,7 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
                     {DateTime.formatHR(dayjs(deadline))}
                     {feeShare > 0 && ` · ${t('booking.bank-fee-note', { fee: feeShare })}`}
                   </Typography>
+                  {paidOn && <PhasePaidBy phase={phase} />}
                 </Box>
                 <StatusChip
                   label={paidOn ? t('booking.paid') : t('booking.not-paid')}
@@ -425,6 +433,9 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
           })}
         </Box>
       </DeskCard>
+
+      {/* /admin/card-payments is SYSTEM_ADMIN only: a manager would get a 403 on every booking (and a token refresh). */}
+      {isSystemAdmin && <BookingCardPayments reservationId={selectedBooking.reservationId} />}
 
       <DeskCard>
         <CardHead title={t('booking.price-information')} />

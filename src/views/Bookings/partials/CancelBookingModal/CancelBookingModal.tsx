@@ -99,10 +99,9 @@ const CancelBookingModal = ({ isSinglePage = false, isOpen, onClose }: CancelBoo
         />
         {selectedBooking?.reservationSysStatus === ReservationSysStatus.RESERVATION && (
           <Alert severity="warning">
-            This booking is a <strong>confirmed reservation</strong>. Any payment the client has already
-            made must be refunded <strong>manually outside the app</strong>. The system will not trigger
-            a Stripe/bank refund automatically. Please contact the client and arrange the refund before
-            or after cancelling here.
+            This booking is a <strong>confirmed reservation</strong>. Any payment the client has already made must be
+            refunded <strong>manually outside the app</strong>. The system will not trigger a card or bank refund
+            automatically. Please contact the client and arrange the refund before or after cancelling here.
           </Alert>
         )}
         <TextField

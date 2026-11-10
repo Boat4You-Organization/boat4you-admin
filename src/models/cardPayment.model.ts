@@ -52,6 +52,8 @@ export interface CardPaymentModel {
   currency: string;
   /** Mollie payment id, tr_… */
   providerOrderId: string;
+  /** 'KLARNA' when the checkout offered Klarna; 'CARD' (cards, Apple Pay) otherwise. Absent from an older backend. */
+  method?: 'CARD' | 'KLARNA';
   payFullAmount: boolean;
   phaseIds: number[];
   reviewReason: string | null;

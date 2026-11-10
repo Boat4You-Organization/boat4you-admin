@@ -279,6 +279,7 @@ const BookingPaymentsTab = ({ onDetails }: BookingPaymentsTabProps) => {
                     </Box>
                     <Box component="td" sx={tdBase}>
                       <MollieLink paymentId={p.providerOrderId} />
+                      {p.method === 'KLARNA' && <Box sx={mutedLineSx}>Klarna</Box>}
                     </Box>
                     <Box component="td" sx={{ ...tdBase, textAlign: 'right' }}>
                       <CardPaymentActions

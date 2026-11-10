@@ -1,5 +1,10 @@
 # boat4you-admin — deploy notes
 
+
+## 2026-11-10 — 💳 Custom payments: lista kartičnih uplata s tajnog `/pay` linka (Mollie) — ⏳ NIJE DEPLOYANO (grana `feat/mollie-payments`, čeka Mariovo „da“; backend PRVI)
+
+Stranica `/custom-payments` (iza Invoices, isti pristup): datum, sajt, broj ugovora (+ link na booking kad odgovara web rezervaciji), iznos umanjen za povrate, status, e-mail platitelja, „Mollie payment“ (link na my.mollie.com), bilješka. Filtri po statusu i sajtu, pretraga, „Refresh from Mollie“ po retku, zbroj primljenog. Backend `GET /admin/custom-payments`, `PATCH …/note`, `POST …/refresh` (boat4you-backend `feat/mollie-payments`). en + hr. `yarn lint` 0 grešaka, `tsc` čist. Nije otvoreno u pregledniku protiv backenda.
+
 ## 2026-11-05 — 🧭 Marketing izbornik: Live posjetitelji kao vlastita stavka iza Statistike — ✅ LIVE 5.11.2026 09:32:14 UTC (main `f692175`, `assets/index-CYR0i_FP.js`; cusma1 staging → test → swap, root/deep/asset 200); tag `live/2026-11-05-admin-live-visitors`; cusma1 `html.prev` = `index-DU51y147.js`
 
 Mario 5.11.2026: „izbaci vanka nakon statistics i live visitors“. Redoslijed Marketinga: Statistika, Live posjetitelji, Kontakt centar, Heatmape, Objave.

@@ -7,6 +7,7 @@ import { CardHead, DeskCard } from '@/components/Desk';
 import { CardPaymentModel } from '@/models/cardPayment.model';
 import CardPaymentsService from '@/services/card-payments.service';
 import { bbColors } from '@/styles/bb';
+import { reloadSelectedBooking } from '@/valtio/bookings/bookings.actions';
 import { showToast } from '@/valtio/global/global.actions';
 import { AmountCell, CardPaymentActions } from '@/views/CustomPayments/partials/BookingPaymentsTab';
 import CardPaymentStatusCell from '@/views/CustomPayments/partials/CardPaymentStatusCell';
@@ -49,7 +50,12 @@ const BookingCardPayments = ({ reservationId }: { reservationId: number }) => {
       return;
     }
 
+    const before = rows.find(r => r.id === id);
+
     setRows(prev => prev.map(r => (r.id === id ? payload : r)));
+
+    // A payment that Mollie reports paid marks the instalment paid: show it without a manual reload.
+    if (before && before.status !== payload.status) await reloadSelectedBooking();
   };
 
   if (rows.length === 0) return null;

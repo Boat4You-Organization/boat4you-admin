@@ -1,6 +1,6 @@
 {
   "title": "Custom payments",
-  "subtitle": "Card payments made through the secret /pay link on the 7 sites (Revolut)",
+  "subtitle": "Card payments made through the secret /pay link on the 7 sites (Mollie)",
   "all": "All",
   "allSites": "All sites",
   "searchPlaceholder": "Search reference or e-mail… (Enter)",
@@ -18,7 +18,7 @@
     "amount": "Amount",
     "status": "Status",
     "email": "Payer e-mail",
-    "orderId": "Revolut order",
+    "orderId": "Mollie payment",
     "note": "Note"
   },
   "loading": "Loading…",
@@ -27,7 +27,7 @@
   "refunded": "Refunded",
   "booking": "Booking",
   "totalReceived": "Total received",
-  "refresh": "Refresh from Revolut",
+  "refresh": "Refresh from Mollie",
   "refreshFailed": "The payment could not be refreshed.",
   "editNote": "Edit note",
   "notePlaceholder": "Internal note for the office; the client never sees it.",

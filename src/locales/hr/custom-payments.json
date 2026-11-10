@@ -1,6 +1,6 @@
 {
   "title": "Plaćanja putem linka",
-  "subtitle": "Kartična plaćanja preko tajnog /pay linka na 7 stranica (Revolut)",
+  "subtitle": "Kartična plaćanja preko tajnog /pay linka na 7 stranica (Mollie)",
   "all": "Sve",
   "allSites": "Sve stranice",
   "searchPlaceholder": "Traži referencu ili e-mail… (Enter)",
@@ -18,7 +18,7 @@
     "amount": "Iznos",
     "status": "Status",
     "email": "E-mail platitelja",
-    "orderId": "Revolut narudžba",
+    "orderId": "Mollie plaćanje",
     "note": "Bilješka"
   },
   "loading": "Učitavanje…",
@@ -27,7 +27,7 @@
   "refunded": "Povrat",
   "booking": "Rezervacija",
   "totalReceived": "Ukupno primljeno",
-  "refresh": "Osvježi iz Revoluta",
+  "refresh": "Osvježi iz Mollieja",
   "refreshFailed": "Plaćanje nije bilo moguće osvježiti.",
   "editNote": "Uredi bilješku",
   "notePlaceholder": "Interna bilješka za ured; klijent je nikad ne vidi.",

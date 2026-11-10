@@ -40,7 +40,7 @@ export function setCustomPaymentNote(id: number, note: string | null): void {
 }
 
 /**
- * POST /refresh re-reads the order from Revolut; the returned row replaces the one in the list.
+ * POST /refresh re-reads the payment from Mollie; the returned row replaces the one in the list.
  * A new status or refund also reloads the list, so the status tab and "Total received" stay right.
  */
 export async function refreshCustomPayment(id: number): Promise<boolean> {

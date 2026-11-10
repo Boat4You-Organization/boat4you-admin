@@ -1,6 +1,6 @@
 import type { StatusVariant } from '@/styles/bb';
 
-/** Payments made through the secret /pay/<linkKey> page on the 7 sites (Revolut hosted checkout). */
+/** Payments made through the secret /pay/<linkKey> page on the 7 sites (Mollie hosted checkout). */
 export enum CustomPaymentStatus {
   COMPLETED = 'COMPLETED',
   PENDING = 'PENDING',

@@ -31,7 +31,7 @@ import NoteModal from './partials/NoteModal/NoteModal';
 
 /**
  * Payments made through the secret /pay/<linkKey> page on the 7 sites
- * (Revolut hosted checkout). Record only: nothing here touches reservations.
+ * (Mollie hosted checkout). Record only: nothing here touches reservations.
  * `?q=` pre-filters the list; the office notification e-mail links here
  * with the payment reference.
  */
@@ -41,6 +41,9 @@ const ALL = 'all';
 type TabId = typeof ALL | CustomPaymentStatus;
 
 const TABS: TabId[] = [ALL, ...CUSTOM_PAYMENT_STATUS_ARRAY];
+
+/** The payment in the Mollie dashboard (organisation Cusmanich d.o.o.). */
+const MOLLIE_PAYMENT_URL = 'https://my.mollie.com/dashboard/org_19333861/payments/';
 
 const COLUMNS = ['date', 'site', 'reference', 'amount', 'status', 'email', 'orderId', 'note'] as const;
 
@@ -359,7 +362,19 @@ const CustomPayments = () => {
                               fontSize: 11,
                             }}
                           >
-                            {p.providerOrderId || '—'}
+                            {p.providerOrderId ? (
+                              <Box
+                                component="a"
+                                href={`${MOLLIE_PAYMENT_URL}${encodeURIComponent(p.providerOrderId)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                sx={{ color: 'inherit' }}
+                              >
+                                {p.providerOrderId}
+                              </Box>
+                            ) : (
+                              '—'
+                            )}
                           </Box>
                           <Box component="td" sx={tdBase}>
                             <Stack direction="row" alignItems="center" gap={0.5}>

@@ -785,6 +785,7 @@ interface Resources {
     unread: 'Unread';
     viewLabel: 'View';
     viewing: 'Viewing';
+  };
   'custom-payments': {
     all: 'All';
     allSites: 'All sites';
@@ -794,7 +795,7 @@ interface Resources {
       date: 'Date';
       email: 'Payer e-mail';
       note: 'Note';
-      orderId: 'Revolut order';
+      orderId: 'Mollie payment';
       reference: 'Reference';
       site: 'Site';
       status: 'Status';
@@ -809,7 +810,7 @@ interface Resources {
     noteSaved: 'Note saved.';
     pageOf: 'Page {{page}} of {{total}}';
     prev: '← Prev';
-    refresh: 'Refresh from Revolut';
+    refresh: 'Refresh from Mollie';
     refreshFailed: 'The payment could not be refreshed.';
     refunded: 'Refunded';
     searchPlaceholder: 'Search reference or e-mail… (Enter)';
@@ -820,7 +821,7 @@ interface Resources {
       NEEDS_REVIEW: 'Needs review';
       PENDING: 'Pending';
     };
-    subtitle: 'Card payments made through the secret /pay link on the 7 sites (Revolut)';
+    subtitle: 'Card payments made through the secret /pay link on the 7 sites (Mollie)';
     title: 'Custom payments';
     totalReceived: 'Total received';
   };

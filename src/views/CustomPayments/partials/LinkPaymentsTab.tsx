@@ -32,6 +32,7 @@ import {
   TotalReceived,
   formatDateTime,
   formatMoney,
+  mutedLineSx,
   tdBase,
   thBase,
 } from './paymentsShared';
@@ -282,6 +283,7 @@ const LinkPaymentsTab = ({ onDetails }: LinkPaymentsTabProps) => {
                       </Box>
                       <Box component="td" sx={tdBase}>
                         <MollieLink paymentId={p.providerOrderId} />
+                        {p.method === 'KLARNA' && <Box sx={mutedLineSx}>Klarna</Box>}
                       </Box>
                       <Box component="td" sx={tdBase}>
                         <Stack direction="row" alignItems="center" gap={0.5}>

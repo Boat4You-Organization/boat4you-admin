@@ -56,6 +56,8 @@ export interface CustomPaymentModel {
   status: CustomPaymentStatus;
   payerEmail: string;
   providerOrderId: string | null;
+  /** 'KLARNA' or 'CARD' (cards, Apple Pay, Pay by Bank). Absent from an older backend. */
+  method?: 'CARD' | 'KLARNA';
   adminNote: string | null;
   reservationId: number | null;
   reservationNumber: string | null;

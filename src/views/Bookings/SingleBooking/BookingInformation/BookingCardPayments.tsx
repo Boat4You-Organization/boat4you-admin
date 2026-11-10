@@ -81,6 +81,7 @@ const BookingCardPayments = ({ reservationId }: { reservationId: number }) => {
                 </Box>
                 <Box component="td" sx={{ ...tdBase, color: bbColors.gray600 }}>
                   <MollieLink paymentId={p.providerOrderId} />
+                  {p.method === 'KLARNA' && <Box sx={mutedLineSx}>Klarna</Box>}
                 </Box>
                 <Box component="td" sx={{ ...tdBase, textAlign: 'right' }}>
                   <CardPaymentActions

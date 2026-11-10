@@ -1,6 +1,17 @@
 # boat4you-admin — deploy notes
 
 
+## 2026-11-10 — 💳 Plaćanja (Mollie): kartične uplate rezervacija + link za plaćanje na jednoj stranici, Mollie detalji, način plaćanja rate na bookingu — ⏳ NIJE DEPLOYANO (grana `feat/mollie-payments`, čeka Mariovo „da“; backend PRVI)
+
+- `/custom-payments` (ruta i mjesto u izborniku Chartera ista) → naslov i izbornik „Payments / Plaćanja“, dvije kartice u `?tab=bookings|link` (zadano `bookings`; stari link iz ured-maila `?q=<ref>` bez `tab` otvara karticu link).
+- „Booking payments / Uplate rezervacija“: `GET /admin/card-payments` — filtri Sve / Plaćeno / Otvoreno (PENDING+SUPERSEDED) / Nije plaćeno (FAILED+CANCELLED) / Treba provjeru, pretraga, straničenje, „Total received“; stupci datum (+ plaćeno), booking (link na detalj), klijent (mailto/tel), iznos (rata + naknada za karticu), status + oznake (povrat, chargeback, „Booking not confirmed“ kad promoteState=FAILED, reviewReason), Mollie link, Details, Refresh (`POST /admin/card-payments/{id}/refresh`).
+- „Payment link / Link za plaćanje“: postojeća lista nepromijenjena + „Details“.
+- Modal „Details“ (obje kartice + booking): `GET /admin/mollie-payments/{id}` uživo — status, kartica, regija naknade, iznosi, vremena, greška, povrati, chargebackovi, napomena da su naknada i neto isplata u Mollie dashboardu, „Open in Mollie“.
+- Booking detalj: plaćena rata pokazuje „Card · Mollie“ + tr_ link ili „Card · Stripe“ + pi_ id; ispod rata kartica „Card payments“ (`?reservationId=&size=50`), skrivena kad nema redaka ili zahtjev padne. Model rate: `paymentProvider`, `providerPaymentId`.
+- Tekstovi samo za Stripe → neutralno (CancelBookingModal, CreateReservationModal). en + hr, `resources.d.ts` regeneriran.
+- ⛔ Ovisnost: backend `feat/mollie-payments` s `/admin/card-payments`, `/admin/card-payments/{id}/refresh`, `/admin/mollie-payments/{id}` mora biti LIVE PRIJE ovog admina (inače kartica Booking payments i Details pokazuju grešku učitavanja).
+- Provjere: `yarn lint` 0 grešaka, `tsc --noEmit` 0, `yarn build` OK, `yarn test` 0 fail. Nije otvoreno u pregledniku protiv backenda.
+
 ## 2026-11-10 — 💳 Custom payments: lista kartičnih uplata s tajnog `/pay` linka (Mollie) — ⏳ NIJE DEPLOYANO (grana `feat/mollie-payments`, čeka Mariovo „da“; backend PRVI)
 
 Stranica `/custom-payments` (iza Invoices, isti pristup): datum, sajt, broj ugovora (+ link na booking kad odgovara web rezervaciji), iznos umanjen za povrate, status, e-mail platitelja, „Mollie payment“ (link na my.mollie.com), bilješka. Filtri po statusu i sajtu, pretraga, „Refresh from Mollie“ po retku, zbroj primljenog. Backend `GET /admin/custom-payments`, `PATCH …/note`, `POST …/refresh` (boat4you-backend `feat/mollie-payments`). en + hr. `yarn lint` 0 grešaka, `tsc` čist. Nije otvoreno u pregledniku protiv backenda.

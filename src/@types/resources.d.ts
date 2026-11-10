@@ -790,6 +790,37 @@ interface Resources {
     all: 'All';
     allSites: 'All sites';
     booking: 'Booking';
+    bookingCardPayments: 'Card payments';
+    bookingNotConfirmed: 'Booking not confirmed';
+    bookingNotConfirmedHint: 'Paid, but confirming the booking failed: confirm it by hand.';
+    cardColumns: {
+      amount: 'Amount';
+      booking: 'Booking';
+      client: 'Client';
+      date: 'Date';
+      orderId: 'Mollie payment';
+      status: 'Status';
+    };
+    cardEmpty: 'No booking card payments.';
+    cardFilter: {
+      all: 'All';
+      notPaid: 'Not paid';
+      open: 'Open';
+      paid: 'Paid';
+      review: 'Needs review';
+    };
+    cardLoadFailed: 'Booking card payments could not be loaded.';
+    cardSearchPlaceholder: 'Search booking no., client, e-mail or Mollie id… (Enter)';
+    cardStatus: {
+      CANCELLED: 'Cancelled by client';
+      COMPLETED: 'Paid';
+      FAILED: 'Not paid';
+      NEEDS_REVIEW: 'Needs review';
+      PENDING: 'Open';
+      SUPERSEDED: 'Replaced';
+    };
+    chargeback: 'Chargeback';
+    close: 'Close';
     columns: {
       amount: 'Amount';
       date: 'Date';
@@ -800,15 +831,45 @@ interface Resources {
       site: 'Site';
       status: 'Status';
     };
+    details: 'Details';
+    detailsFailed: 'The payment could not be read from Mollie.';
+    detailsTitle: 'Mollie payment';
     editNote: 'Edit note';
     empty: 'No custom payments.';
+    feeNote: "Mollie's fee and the net payout are shown in the Mollie dashboard.";
+    fullAmount: 'Full amount';
+    instalmentPlusFee: 'instalment {{base}} + card fee {{fee}}';
     loadFailed: 'Custom payments could not be loaded.';
     loading: 'Loading…';
+    mollie: {
+      amount: 'Amount';
+      canceledAt: 'Cancelled';
+      card: 'Card';
+      chargebacks: 'Chargebacks';
+      createdAt: 'Created';
+      description: 'Description';
+      expiredAt: 'Expired';
+      expiresAt: 'Expires';
+      failedAt: 'Failed';
+      failure: 'Failure';
+      feeRegion: 'Fee region';
+      id: 'ID';
+      method: 'Method';
+      paidAt: 'Paid';
+      reason: 'Reason';
+      refunds: 'Refunds';
+      status: 'Mollie status';
+      testMode: 'Test mode';
+    };
     next: 'Next →';
     noteFailed: 'The note could not be saved.';
     notePlaceholder: 'Internal note for the office; the client never sees it.';
     noteSaved: 'Note saved.';
+    openInMollie: 'Open in Mollie';
     pageOf: 'Page {{page}} of {{total}}';
+    paidByMollie: 'Card · Mollie';
+    paidByStripe: 'Card · Stripe';
+    paidOn: 'Paid {{date}}';
     prev: '← Prev';
     refresh: 'Refresh from Mollie';
     refreshFailed: 'The payment could not be refreshed.';
@@ -822,7 +883,10 @@ interface Resources {
       PENDING: 'Pending';
     };
     subtitle: 'Card payments made through the secret /pay link on the 7 sites (Mollie)';
-    title: 'Custom payments';
+    subtitleBookings: 'Card payments of online bookings (Mollie): every checkout attempt, paid or not';
+    tabBookings: 'Booking payments';
+    tabLink: 'Payment link';
+    title: 'Payments';
     totalReceived: 'Total received';
   };
   extras: {
@@ -1174,7 +1238,7 @@ interface Resources {
     chat: 'Chat';
     contactCenter: 'Contact Center';
     customBoats: 'Custom boats';
-    customPayments: 'Custom payments';
+    customPayments: 'Payments';
     dashboard: 'Dashboard';
     extras: 'Extras';
     heatmaps: 'Heatmaps';

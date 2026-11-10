@@ -28,8 +28,10 @@ import { generateGoogleMapsLink } from '@/utils/static/googleMapsUtils';
 import { sortByNumericProp } from '@/utils/static/sortUtils';
 import EmailClientModal from '@/views/Bookings/partials/EmailClientModal/EmailClientModal';
 
+import BookingCardPayments from './BookingCardPayments';
 import BookingInfoItem from './BookingInfoItem';
 import styles from './BookingInformation.module.scss';
+import PhasePaidBy from './PhasePaidBy';
 
 interface BookingInformationProps {
   selectedBooking: ReservationModel;
@@ -374,7 +376,8 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
       <DeskCard>
         <CardHead title={t('booking.payment-phases')} />
         <Box sx={{ p: '4px 16px 8px' }}>
-          {reservationPaymentPhases.map(({ id, paidOn, deadline, amount }, phaseIdx) => {
+          {reservationPaymentPhases.map((phase, phaseIdx) => {
+            const { id, paidOn, deadline, amount } = phase;
             // Show the wire amount the customer is actually asked for: phase
             // amount + this phase's share of the fixed bank fee (same split as
             // the wire emails / payment page).
@@ -415,6 +418,7 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
                     {DateTime.formatHR(dayjs(deadline))}
                     {feeShare > 0 && ` · ${t('booking.bank-fee-note', { fee: feeShare })}`}
                   </Typography>
+                  {paidOn && <PhasePaidBy phase={phase} />}
                 </Box>
                 <StatusChip
                   label={paidOn ? t('booking.paid') : t('booking.not-paid')}
@@ -425,6 +429,8 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
           })}
         </Box>
       </DeskCard>
+
+      <BookingCardPayments reservationId={selectedBooking.reservationId} />
 
       <DeskCard>
         <CardHead title={t('booking.price-information')} />

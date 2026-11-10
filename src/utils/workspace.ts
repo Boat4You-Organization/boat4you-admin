@@ -23,6 +23,7 @@ const PREFIXES: Record<WorkspaceId, readonly string[]> = {
     '/offers',
     '/users',
     '/invoices',
+    '/custom-payments',
     '/custom-boats',
     '/boats',
     '/agencies',

@@ -45,6 +45,13 @@ const navigation: NavigationLink[] = [
     accessLevel: [UserRoleName.SYSTEM_ADMIN, UserRoleName.MANAGER],
   },
   {
+    id: 'customPayments',
+    icon: Invoices,
+    path: '/custom-payments',
+    // Backend /admin/custom-payments/** is SYSTEM_ADMIN only; a MANAGER would only see a load error.
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
     id: 'customBoats',
     icon: Boat,
     path: '/custom-boats',

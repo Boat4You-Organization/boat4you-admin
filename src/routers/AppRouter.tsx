@@ -17,6 +17,7 @@ const CustomBoats = lazy(() => import('@/views/CustomBoats'));
 const BoatsMedia = lazy(() => import('@/views/BoatsMedia'));
 const Extras = lazy(() => import('@/views/Extras'));
 const Invoices = lazy(() => import('@/views/Invoices'));
+const CustomPayments = lazy(() => import('@/views/CustomPayments'));
 const Offers = lazy(() => import('@/views/Offers'));
 const Users = lazy(() => import('@/views/Users'));
 const ContactCenter = lazy(() => import('@/views/ContactCenter'));
@@ -155,6 +156,16 @@ const AppRouter: React.FC = () => (
               variant="protected"
               accessLevel={[UserRoleName.MANAGER, UserRoleName.SYSTEM_ADMIN]}
               component={<Invoices />}
+            />
+          }
+        />
+        <Route
+          path="/custom-payments"
+          element={
+            <AppRoute
+              variant="protected"
+              accessLevel={[UserRoleName.SYSTEM_ADMIN]}
+              component={<CustomPayments />}
             />
           }
         />

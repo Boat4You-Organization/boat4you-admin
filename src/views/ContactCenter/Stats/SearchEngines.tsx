@@ -1,7 +1,8 @@
 /* Search engines (F1, backend SearchEngineQuery): Google Search Console and Bing Webmaster Tools next to our organic visits.
- * Same range and site as the rest of Statistics; country and device filter only this section (Bing has neither). The Google
- * query table has its own order and landing page: anything but clicks for the whole site asks /search-engines/queries. */
-import { useEffect, useState } from 'react';
+ * Same range and site as the rest of Statistics; country and device filter only this section (Bing has neither). Each query
+ * table has its own site, order and (Google only) landing page: anything but clicks for all sites asks /search-engines/queries.
+ * The landing pages have their own site too, and a page opens to its Google queries with each query's own position. */
+import { Fragment, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { Box, TableSortLabel } from '@mui/material';
@@ -10,7 +11,7 @@ import dayjs from 'dayjs';
 import ContactCenterService from '@/services/contactCenter.service';
 import { CcSearchEngines, EngineTotals, SearchQuerySort, SearchQueryStat } from '@/types/contactCenter.type';
 import { siteLabel } from '@/utils/contactCenter/safeLink';
-import { Bars, Metric, barGrid, cardSx, kpiGrid } from '@/views/ContactCenter/Stats/parts';
+import { Bars, Metric, SiteSelect, barGrid, cardSx, kpiGrid } from '@/views/ContactCenter/Stats/parts';
 import { InfoIcon, LoadAlert, SectionLabel, cc, fieldSx, tableSx } from '@/views/ContactCenter/ui';
 
 const DEVICES = ['DESKTOP', 'TABLET', 'MOBILE'] as const;
@@ -50,36 +51,428 @@ const MIN_IMPRESSIONS = 10; // backend SearchEngineQuery.MIN_IMPRESSIONS
 const PATH_MAX = 1000; // backend SearchText.PATH_MAX: a longer page (our tracker's) has no Google rows anyway
 
 type Sort = { key: SearchQuerySort; asc: boolean };
+type Engine = 'GOOGLE' | 'BING';
+type Filters = { from: string; to: string; siteId?: string; country: string; device: string };
 
 const BY_CLICKS: Sort = { key: 'CLICKS', asc: false };
 
 const titleSx = { m: 0, fontSize: 14, fontWeight: 700, color: cc.ink } as const;
 const sortSx = { color: 'inherit', fontSize: 'inherit', fontWeight: 'inherit', flexDirection: 'row-reverse' } as const;
 const ellipsisSx = { maxWidth: 360, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } as const;
+const headSx = { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 14px' } as const;
+const PAGE_QUERIES = 15; // the queries an opened landing page shows
 
-const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?: string }) => {
-  const { t, i18n } = useTranslation('contactCenter');
-  const [country, setCountry] = useState('');
-  const [device, setDevice] = useState('');
-  const [data, setData] = useState<CcSearchEngines | null>(null);
-  const [failed, setFailed] = useState(false);
+/** Number formats of the section. */
+const useFormats = () => {
+  const { i18n } = useTranslation('contactCenter');
+  const fmt = new Intl.NumberFormat(i18n.language);
+  const fmt1 = new Intl.NumberFormat(i18n.language, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+  return {
+    fmt,
+    pos: (p: number | null) => (p === null ? '—' : fmt1.format(p)),
+    ctr: (x: { clicks: number; impressions: number }) =>
+      x.impressions ? `${fmt1.format((x.clicks / x.impressions) * 100)} %` : '—',
+  };
+};
+
+/**
+ * One query table (Google or Bing) with its own site, order and, for Google, landing page; [base] are the section's rows for
+ * all sites by clicks, any other choice asks the backend.
+ */
+const QueryTable = ({
+  engine,
+  title,
+  base,
+  filters,
+  pages,
+}: {
+  engine: Engine;
+  title: string;
+  base: SearchQueryStat[];
+  filters: Filters;
+  pages: Array<{ siteId: string; path: string }>;
+}) => {
+  const { t } = useTranslation('contactCenter');
+  const { fmt, pos, ctr } = useFormats();
+  const { from, to, siteId, country, device } = filters;
+  const google = engine === 'GOOGLE';
+  const [site, setSite] = useState(''); // the table's own site, '' = all (only without the section's site)
   const [page, setPage] = useState(''); // `${siteId}|${path}` of the landing page, '' = whole site
-  const [pageOf, setPageOf] = useState(siteId);
+  const [siteOf, setSiteOf] = useState(siteId);
   const [sort, setSort] = useState<Sort>(BY_CLICKS);
   // The table's own answer, tagged with the request it belongs to; failed = that request failed (the section stays).
   const [own, setOwn] = useState<{ key: string; rows: SearchQueryStat[]; failed?: boolean } | null>(null);
 
-  if (pageOf !== siteId) {
-    // A page of another site does not fit the new site filter.
-    setPageOf(siteId);
+  if (siteOf !== siteId) {
+    // A site or page of another site does not fit the new site filter.
+    setSiteOf(siteId);
+    setSite('');
     setPage('');
   }
 
   const cut = page.indexOf('|');
   const pageSite = page ? page.slice(0, cut) : undefined;
   const pagePath = page ? page.slice(cut + 1) : undefined;
-  const custom = page !== '' || sort.key !== BY_CLICKS.key || sort.asc !== BY_CLICKS.asc;
-  const ownKey = [from, to, siteId, country, device, page, sort.key, sort.asc].join('~');
+  const tableSite = pageSite ?? (siteId || site || undefined);
+  const custom = page !== '' || site !== '' || sort.key !== BY_CLICKS.key || sort.asc !== BY_CLICKS.asc;
+  const ownKey = [engine, from, to, siteId, country, device, site, page, sort.key, sort.asc].join('~');
+
+  useEffect(() => {
+    if (!custom) return undefined;
+
+    let current = true;
+
+    ContactCenterService.searchEngineQueries({
+      engine,
+      from,
+      to,
+      siteId: tableSite,
+      country: (google && country) || undefined,
+      device: (google && device) || undefined,
+      path: pagePath,
+      sort: sort.key,
+      dir: sort.asc ? 'asc' : 'desc',
+    })
+      .then(({ data: rows }) => current && setOwn({ key: ownKey, rows }))
+      .catch(() => current && setOwn({ key: ownKey, rows: [], failed: true }));
+
+    return () => {
+      current = false;
+    };
+  }, [custom, ownKey]); // eslint-disable-line react-hooks/exhaustive-deps -- ownKey carries every input
+
+  const rows = custom ? (own?.rows ?? []) : base;
+  const pending = custom && own?.key !== ownKey;
+  const broken = custom && own?.key === ownKey && !!own.failed;
+  const ariaDir = sort.asc ? 'ascending' : 'descending';
+  const onSort = (key: SearchQuerySort) =>
+    setSort(s => (s.key === key ? { key, asc: !s.asc } : { key, asc: key === 'POSITION' }));
+  const pageOptions = pages.filter(p => !site || p.siteId === site);
+
+  if (pageSite && pagePath && !pageOptions.some(p => p.siteId === pageSite && p.path === pagePath)) {
+    pageOptions.unshift({ siteId: pageSite, path: pagePath });
+  }
+
+  return (
+    <Box sx={{ ...cardSx, mb: '12px', overflowX: 'auto' }}>
+      <Box sx={headSx}>
+        <Box component="h3" sx={titleSx}>
+          {title}
+        </Box>
+        {!siteId && (
+          <SiteSelect
+            value={site}
+            onChange={v => {
+              setSite(v);
+              setPage('');
+            }}
+          />
+        )}
+        {google && (
+          <Box
+            component="select"
+            aria-label={t('searchEngines.page')}
+            value={page}
+            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPage(e.target.value)}
+            sx={{ ...fieldSx, width: { xs: '100%', sm: 340 } }}
+          >
+            <option value="">{t('searchEngines.pageAll')}</option>
+            {pageOptions.map(p => (
+              <option key={`${p.siteId}|${p.path}`} value={`${p.siteId}|${p.path}`}>
+                {siteId || site ? p.path : `${siteLabel(p.siteId)} ${p.path}`}
+              </option>
+            ))}
+          </Box>
+        )}
+      </Box>
+      <Box component="table" sx={{ ...tableSx, opacity: pending ? 0.5 : 1 }}>
+        <thead>
+          <tr>
+            <th>{t('searchEngines.query')}</th>
+            {!tableSite && <th>{t('filter.site')}</th>}
+            {SORTS.map(([key, label]) => (
+              <th key={key} className="num" aria-sort={sort.key === key ? ariaDir : undefined}>
+                <TableSortLabel
+                  active={sort.key === key}
+                  direction={(sort.key === key ? sort.asc : key === 'POSITION') ? 'asc' : 'desc'}
+                  onClick={() => onSort(key)}
+                  sx={sortSx}
+                >
+                  {t(`searchEngines.${label}`)}
+                </TableSortLabel>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(q => (
+            <tr key={q.query}>
+              <Box component="td" sx={ellipsisSx} title={q.query}>
+                {q.query}
+              </Box>
+              {!tableSite && <td className="soft">{q.siteIds.map(siteLabel).join(', ')}</td>}
+              <td className="num">{fmt.format(q.clicks)}</td>
+              <td className="num">{fmt.format(q.impressions)}</td>
+              <td className="num">{ctr(q)}</td>
+              <td className="num">{pos(q.position)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </Box>
+      {broken && <LoadAlert text={t('loadFailed')} />}
+      {!rows.length && !broken && !pending && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
+      {(sort.key === 'CTR' || sort.key === 'POSITION') && (
+        <Box sx={{ fontSize: 12, color: cc.muted, lineHeight: 1.5 }}>
+          {t('searchEngines.minImpressions', { n: MIN_IMPRESSIONS })}
+        </Box>
+      )}
+      {!google && <Box sx={{ fontSize: 12, color: cc.muted, lineHeight: 1.5 }}>{t('searchEngines.bingNoPage')}</Box>}
+    </Box>
+  );
+};
+
+/** One landing page opened: its Google queries, each with its own clicks, impressions and position. */
+const PageQueries = ({
+  filters,
+  siteId,
+  path,
+  span,
+}: {
+  filters: Filters;
+  siteId: string;
+  path: string;
+  span: number;
+}) => {
+  const { t } = useTranslation('contactCenter');
+  const { fmt, pos, ctr } = useFormats();
+  const { from, to, country, device } = filters;
+  const [rows, setRows] = useState<SearchQueryStat[] | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let current = true;
+
+    ContactCenterService.searchEngineQueries({
+      engine: 'GOOGLE',
+      from,
+      to,
+      siteId,
+      country: country || undefined,
+      device: device || undefined,
+      path,
+    })
+      .then(({ data }) => current && setRows(data))
+      .catch(() => current && setFailed(true));
+
+    return () => {
+      current = false;
+    };
+  }, [from, to, siteId, country, device, path]);
+
+  return (
+    <tr>
+      <Box component="td" colSpan={span} sx={{ bgcolor: cc.hover, py: '10px !important' }}>
+        {failed && <LoadAlert text={t('loadFailed')} />}
+        {!rows && !failed && <Box sx={{ fontSize: 12.5, color: cc.muted }}>…</Box>}
+        {rows && !rows.length && <Box sx={{ fontSize: 12.5, color: cc.muted }}>{t('searchEngines.pageNoQueries')}</Box>}
+        {rows && rows.length > 0 && (
+          <Box component="table" sx={tableSx}>
+            <thead>
+              <tr>
+                <th>{t('searchEngines.query')}</th>
+                <th className="num">{t('searchEngines.clicks')}</th>
+                <th className="num">{t('searchEngines.impressions')}</th>
+                <th className="num">{t('searchEngines.ctr')}</th>
+                <th className="num">{t('searchEngines.position')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.slice(0, PAGE_QUERIES).map(q => (
+                <tr key={q.query}>
+                  <Box component="td" sx={ellipsisSx} title={q.query}>
+                    {q.query}
+                  </Box>
+                  <td className="num">{fmt.format(q.clicks)}</td>
+                  <td className="num">{fmt.format(q.impressions)}</td>
+                  <td className="num">{ctr(q)}</td>
+                  <td className="num">{pos(q.position)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Box>
+        )}
+      </Box>
+    </tr>
+  );
+};
+
+type PageKey = 'clicks' | 'impressions' | 'position' | 'visits' | 'inquiries';
+
+/** The sortable landing page columns with their translation key; position starts best first, the rest most first. */
+const PAGE_SORTS: Array<[PageKey, string]> = [
+  ['clicks', 'clicks'],
+  ['impressions', 'impressions'],
+  ['position', 'avgPosition'],
+];
+const PAGE_SORTS_OURS: Array<[PageKey, string]> = [
+  ['visits', 'visits'],
+  ['inquiries', 'inquiries'],
+];
+
+/** The landing pages with their own site; [base] are the section's pages, another site asks /search-engines for its own. */
+const LandingPages = ({ base, filters }: { base: CcSearchEngines['pages']; filters: Filters }) => {
+  const { t } = useTranslation('contactCenter');
+  const { fmt, pos } = useFormats();
+  const { from, to, siteId, country, device } = filters;
+  const [site, setSite] = useState('');
+  const [siteOf, setSiteOf] = useState(siteId);
+  const [open, setOpen] = useState(''); // `${siteId}|${path}` of the opened page
+  const [sort, setSort] = useState<{ key: PageKey; asc: boolean }>({ key: 'clicks', asc: false });
+  const [own, setOwn] = useState<{ key: string; pages: CcSearchEngines['pages']; failed?: boolean } | null>(null);
+
+  if (siteOf !== siteId) {
+    setSiteOf(siteId);
+    setSite('');
+    setOpen('');
+  }
+
+  const ownKey = [from, to, country, device, site].join('~');
+
+  useEffect(() => {
+    if (!site) return undefined;
+
+    let current = true;
+
+    ContactCenterService.searchEngines({
+      from,
+      to,
+      siteId: site,
+      country: country || undefined,
+      device: device || undefined,
+    })
+      .then(({ data }) => current && setOwn({ key: ownKey, pages: data.pages }))
+      .catch(() => current && setOwn({ key: ownKey, pages: [], failed: true }));
+
+    return () => {
+      current = false;
+    };
+  }, [site, ownKey]); // eslint-disable-line react-hooks/exhaustive-deps -- ownKey carries every input
+
+  // Sorted here: the backend's order (clicks, then visits) breaks ties; a page Google has no position for goes last.
+  const pages = (site ? (own?.pages ?? []) : base)
+    .map((p, i) => ({ p, i }))
+    .sort((a, b) => {
+      const x = a.p[sort.key];
+      const y = b.p[sort.key];
+
+      if (x === null && y === null) return a.i - b.i;
+
+      if (x === null) return 1;
+
+      if (y === null) return -1;
+
+      return (sort.asc ? x - y : y - x) || a.i - b.i;
+    })
+    .map(({ p }) => p);
+  const onSort = (key: PageKey) =>
+    setSort(s => (s.key === key ? { key, asc: !s.asc } : { key, asc: key === 'position' }));
+  const ariaDir = sort.asc ? 'ascending' : 'descending';
+  const sortTh = ([key, label]: [PageKey, string]) => (
+    <th key={key} className="num" aria-sort={sort.key === key ? ariaDir : undefined}>
+      <TableSortLabel
+        active={sort.key === key}
+        direction={(sort.key === key ? sort.asc : key === 'position') ? 'asc' : 'desc'}
+        onClick={() => onSort(key)}
+        sx={sortSx}
+      >
+        {t(`searchEngines.${label}` as 'searchEngines.clicks')}
+      </TableSortLabel>
+    </th>
+  );
+  const pending = !!site && own?.key !== ownKey;
+  const oneSite = !!(siteId || site);
+  const span = oneSite ? 7 : 8;
+
+  return (
+    <Box sx={{ ...cardSx, overflowX: 'auto' }}>
+      <Box sx={headSx}>
+        <Box component="h3" sx={titleSx}>
+          {t('searchEngines.pages')}
+        </Box>
+        {!siteId && (
+          <SiteSelect
+            value={site}
+            onChange={v => {
+              setSite(v);
+              setOpen('');
+            }}
+          />
+        )}
+      </Box>
+      <Box component="table" sx={{ ...tableSx, opacity: pending ? 0.5 : 1 }}>
+        <thead>
+          <tr>
+            {!oneSite && <th>{t('filter.site')}</th>}
+            <th>{t('funnel.path')}</th>
+            {PAGE_SORTS.map(sortTh)}
+            <th>{t('searchEngines.topQueries')}</th>
+            {PAGE_SORTS_OURS.map(sortTh)}
+          </tr>
+        </thead>
+        <tbody>
+          {pages.map(p => {
+            const key = `${p.siteId}|${p.path}`;
+            const opens = p.path.length <= PATH_MAX;
+
+            return (
+              <Fragment key={key}>
+                <tr
+                  className={opens ? 'click' : undefined}
+                  onClick={() => opens && setOpen(o => (o === key ? '' : key))}
+                >
+                  {!oneSite && <td className="soft nowrap">{siteLabel(p.siteId)}</td>}
+                  <Box component="td" sx={ellipsisSx} title={p.path}>
+                    {opens && `${open === key ? '▾' : '▸'} `}
+                    {p.path}
+                  </Box>
+                  <td className="num">{p.impressions ? fmt.format(p.clicks) : '—'}</td>
+                  <td className="num">{p.impressions ? fmt.format(p.impressions) : '—'}</td>
+                  <td className="num">{pos(p.position)}</td>
+                  <Box component="td" className="soft" sx={ellipsisSx} title={p.queries.join(' · ')}>
+                    {p.queries.join(' · ') || '—'}
+                  </Box>
+                  <td className="num">{fmt.format(p.visits)}</td>
+                  <td className="num">{fmt.format(p.inquiries)}</td>
+                </tr>
+                {open === key && (
+                  <PageQueries
+                    key={[from, to, country, device].join('~')}
+                    filters={filters}
+                    siteId={p.siteId}
+                    path={p.path}
+                    span={span}
+                  />
+                )}
+              </Fragment>
+            );
+          })}
+        </tbody>
+      </Box>
+      {site && own?.key === ownKey && own.failed && <LoadAlert text={t('loadFailed')} />}
+      {!pages.length && !pending && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
+      <Box sx={{ fontSize: 12, color: cc.muted, lineHeight: 1.5 }}>{t('searchEngines.pagesNote')}</Box>
+    </Box>
+  );
+};
+
+const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?: string }) => {
+  const { t, i18n } = useTranslation('contactCenter');
+  const { fmt, pos, ctr } = useFormats();
+  const [country, setCountry] = useState('');
+  const [device, setDevice] = useState('');
+  const [data, setData] = useState<CcSearchEngines | null>(null);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let current = true;
@@ -98,126 +491,16 @@ const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?
     };
   }, [from, to, siteId, country, device]);
 
-  useEffect(() => {
-    if (!custom) return undefined;
-
-    let current = true;
-
-    ContactCenterService.searchEngineQueries({
-      from,
-      to,
-      siteId: pageSite ?? siteId,
-      country: country || undefined,
-      device: device || undefined,
-      path: pagePath,
-      sort: sort.key,
-      dir: sort.asc ? 'asc' : 'desc',
-    })
-      .then(({ data: rows }) => current && setOwn({ key: ownKey, rows }))
-      .catch(() => current && setOwn({ key: ownKey, rows: [], failed: true }));
-
-    return () => {
-      current = false;
-    };
-  }, [custom, ownKey]); // eslint-disable-line react-hooks/exhaustive-deps -- ownKey carries every input
-
-  const fmt = new Intl.NumberFormat(i18n.language);
-  const fmt1 = new Intl.NumberFormat(i18n.language, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const filters: Filters = { from, to, siteId, country, device };
   const countryName = (code: string) => new Intl.DisplayNames([i18n.language], { type: 'region' }).of(code) ?? code;
-  const pos = (p: number | null) => (p === null ? '—' : fmt1.format(p));
-  const ctr = (x: { clicks: number; impressions: number }) =>
-    x.impressions ? `${fmt1.format((x.clicks / x.impressions) * 100)} %` : '—';
   const dayFmt = new Intl.DateTimeFormat(i18n.language, { day: 'numeric', month: 'numeric' });
   const day = (d?: string) => (d ? dayFmt.format(dayjs(d).toDate()) : t('searchEngines.none'));
   const engine = (k: string) => t(`searchEngines.engine.${k}`, { defaultValue: k });
   const hidden =
     data && data.google.clicks ? Math.round((1 - data.googleClicksWithQuery / data.google.clicks) * 100) : null;
-
-  const ariaDir = sort.asc ? 'ascending' : 'descending';
-  const onSort = (key: SearchQuerySort) =>
-    setSort(s => (s.key === key ? { key, asc: !s.asc } : { key, asc: key === 'POSITION' }));
   const pageOptions = data
     ? data.pages.filter(p => p.path.length <= PATH_MAX).map(p => ({ siteId: p.siteId, path: p.path }))
     : [];
-
-  if (pageSite && pagePath && !pageOptions.some(p => p.siteId === pageSite && p.path === pagePath)) {
-    pageOptions.unshift({ siteId: pageSite, path: pagePath });
-  }
-
-  /** A query table; [sortable] (Google) adds the landing page choice and the column order. */
-  const queryTable = (title: string, rows: SearchQueryStat[], sortable = false, pending = false, broken = false) => (
-    <Box sx={{ ...cardSx, mb: '12px', overflowX: 'auto' }}>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px 14px' }}>
-        <Box component="h3" sx={titleSx}>
-          {title}
-        </Box>
-        {sortable && (
-          <Box
-            component="select"
-            aria-label={t('searchEngines.page')}
-            value={page}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPage(e.target.value)}
-            sx={{ ...fieldSx, width: { xs: '100%', sm: 340 } }}
-          >
-            <option value="">{t('searchEngines.pageAll')}</option>
-            {pageOptions.map(p => (
-              <option key={`${p.siteId}|${p.path}`} value={`${p.siteId}|${p.path}`}>
-                {siteId ? p.path : `${siteLabel(p.siteId)} ${p.path}`}
-              </option>
-            ))}
-          </Box>
-        )}
-      </Box>
-      <Box component="table" sx={{ ...tableSx, opacity: pending ? 0.5 : 1 }}>
-        <thead>
-          <tr>
-            <th>{t('searchEngines.query')}</th>
-            {!siteId && <th>{t('filter.site')}</th>}
-            {SORTS.map(([key, label]) =>
-              sortable ? (
-                <th key={key} className="num" aria-sort={sort.key === key ? ariaDir : undefined}>
-                  <TableSortLabel
-                    active={sort.key === key}
-                    direction={(sort.key === key ? sort.asc : key === 'POSITION') ? 'asc' : 'desc'}
-                    onClick={() => onSort(key)}
-                    sx={sortSx}
-                  >
-                    {t(`searchEngines.${label}`)}
-                  </TableSortLabel>
-                </th>
-              ) : (
-                <th key={key} className="num">
-                  {t(`searchEngines.${label}`)}
-                </th>
-              )
-            )}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map(q => (
-            <tr key={q.query}>
-              <Box component="td" sx={ellipsisSx} title={q.query}>
-                {q.query}
-              </Box>
-              {!siteId && <td className="soft">{q.siteIds.map(siteLabel).join(', ')}</td>}
-              <td className="num">{fmt.format(q.clicks)}</td>
-              <td className="num">{fmt.format(q.impressions)}</td>
-              <td className="num">{ctr(q)}</td>
-              <td className="num">{pos(q.position)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </Box>
-      {broken && <LoadAlert text={t('loadFailed')} />}
-      {!rows.length && !broken && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
-      {sortable && (sort.key === 'CTR' || sort.key === 'POSITION') && (
-        <Box sx={{ fontSize: 12, color: cc.muted, lineHeight: 1.5 }}>
-          {t('searchEngines.minImpressions', { n: MIN_IMPRESSIONS })}
-        </Box>
-      )}
-    </Box>
-  );
-
   const totals = (e: EngineTotals | null) => (e ? `${fmt.format(e.clicks)} / ${fmt.format(e.impressions)}` : '—');
 
   return (
@@ -335,53 +618,23 @@ const SearchEngines = ({ from, to, siteId }: { from: string; to: string; siteId?
               </Box>
             </Box>
           )}
-          {queryTable(
-            t('searchEngines.googleQueries'),
-            custom ? (own?.rows ?? []) : data.googleQueries,
-            true,
-            custom && own?.key !== ownKey,
-            custom && own?.key === ownKey && !!own.failed
+          <QueryTable
+            engine="GOOGLE"
+            title={t('searchEngines.googleQueries')}
+            base={data.googleQueries}
+            filters={filters}
+            pages={pageOptions}
+          />
+          {data.bing && (
+            <QueryTable
+              engine="BING"
+              title={t('searchEngines.bingQueries')}
+              base={data.bingQueries}
+              filters={filters}
+              pages={[]}
+            />
           )}
-          {data.bing && queryTable(t('searchEngines.bingQueries'), data.bingQueries)}
-          <Box sx={{ ...cardSx, overflowX: 'auto' }}>
-            <Box component="h3" sx={titleSx}>
-              {t('searchEngines.pages')}
-            </Box>
-            <Box component="table" sx={tableSx}>
-              <thead>
-                <tr>
-                  {!siteId && <th>{t('filter.site')}</th>}
-                  <th>{t('funnel.path')}</th>
-                  <th className="num">{t('searchEngines.clicks')}</th>
-                  <th className="num">{t('searchEngines.impressions')}</th>
-                  <th className="num">{t('searchEngines.position')}</th>
-                  <th>{t('searchEngines.topQueries')}</th>
-                  <th className="num">{t('searchEngines.visits')}</th>
-                  <th className="num">{t('searchEngines.inquiries')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.pages.map(p => (
-                  <tr key={`${p.siteId}|${p.path}`}>
-                    {!siteId && <td className="soft nowrap">{siteLabel(p.siteId)}</td>}
-                    <Box component="td" sx={ellipsisSx} title={p.path}>
-                      {p.path}
-                    </Box>
-                    <td className="num">{fmt.format(p.clicks)}</td>
-                    <td className="num">{fmt.format(p.impressions)}</td>
-                    <td className="num">{pos(p.position)}</td>
-                    <Box component="td" className="soft" sx={ellipsisSx} title={p.queries.join(' · ')}>
-                      {p.queries.join(' · ') || '—'}
-                    </Box>
-                    <td className="num">{fmt.format(p.visits)}</td>
-                    <td className="num">{fmt.format(p.inquiries)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Box>
-            {!data.pages.length && <Box sx={{ fontSize: 12.5, color: cc.muted }}>—</Box>}
-            <Box sx={{ fontSize: 12, color: cc.muted, lineHeight: 1.5 }}>{t('searchEngines.pagesNote')}</Box>
-          </Box>
+          <LandingPages base={data.pages} filters={filters} />
         </>
       )}
     </Box>

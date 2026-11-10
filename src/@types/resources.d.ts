@@ -674,9 +674,11 @@ interface Resources {
     savesNow: 'saves at once';
     search: 'Search';
     searchEngines: {
+      avgPosition: 'Avg. position';
       bingClicks: 'Bing clicks';
       bingImpressions: 'Bing impressions';
       bingNoFilter: 'Bing has no country or device, so it is left out with that filter.';
+      bingNoPage: 'Bing gives its queries per site only, with no landing page, country or device.';
       bingQueries: 'Top queries on Bing';
       bingShort: 'Bing clicks / impressions';
       byEngine: 'Our organic visits by search engine';
@@ -711,10 +713,12 @@ interface Resources {
       organicVisits: 'Our organic visits';
       page: 'Landing page';
       pageAll: 'Landing page: all';
+      pageNoQueries: 'Google shows no query for this page in the range: it had no impressions, or Google lists it under another address.';
       pages: 'Landing pages';
-      pagesNote: "Clicks, impressions and queries are Google's for the page. Org. visits and inquiries are our visits that came from a search engine to that page and the inquiries sent in those visits.";
+      pagesNote: "Clicks, impressions and queries are Google's for the page; — means Google has no numbers for it in the range (our visits came anyway). Avg. position is the average over all queries of the page, weighted by impressions: open a page (click its row) to see its Google queries, each with its own position. Org. visits and inquiries are our visits that came from a search engine to that page and the inquiries sent in those visits.";
       position: 'Position';
       query: 'Query';
+      siteAll: 'Site: all';
       title: 'Search engines: Google and Bing';
       topQueries: 'Main queries (Google)';
       visits: 'Org. visits';
@@ -781,6 +785,45 @@ interface Resources {
     unread: 'Unread';
     viewLabel: 'View';
     viewing: 'Viewing';
+  };
+  'custom-payments': {
+    all: 'All';
+    allSites: 'All sites';
+    booking: 'Booking';
+    columns: {
+      amount: 'Amount';
+      date: 'Date';
+      email: 'Payer e-mail';
+      note: 'Note';
+      orderId: 'Mollie payment';
+      reference: 'Reference';
+      site: 'Site';
+      status: 'Status';
+    };
+    editNote: 'Edit note';
+    empty: 'No custom payments.';
+    loadFailed: 'Custom payments could not be loaded.';
+    loading: 'Loading…';
+    next: 'Next →';
+    noteFailed: 'The note could not be saved.';
+    notePlaceholder: 'Internal note for the office; the client never sees it.';
+    noteSaved: 'Note saved.';
+    pageOf: 'Page {{page}} of {{total}}';
+    prev: '← Prev';
+    refresh: 'Refresh from Mollie';
+    refreshFailed: 'The payment could not be refreshed.';
+    refunded: 'Refunded';
+    searchPlaceholder: 'Search reference or e-mail… (Enter)';
+    status: {
+      CANCELLED: 'Cancelled';
+      COMPLETED: 'Completed';
+      FAILED: 'Failed';
+      NEEDS_REVIEW: 'Needs review';
+      PENDING: 'Pending';
+    };
+    subtitle: 'Card payments made through the secret /pay link on the 7 sites (Mollie)';
+    title: 'Custom payments';
+    totalReceived: 'Total received';
   };
   extras: {
     'adrenalin-pack': 'Adrenaline pack';
@@ -1131,6 +1174,7 @@ interface Resources {
     chat: 'Chat';
     contactCenter: 'Contact Center';
     customBoats: 'Custom boats';
+    customPayments: 'Custom payments';
     dashboard: 'Dashboard';
     extras: 'Extras';
     heatmaps: 'Heatmaps';

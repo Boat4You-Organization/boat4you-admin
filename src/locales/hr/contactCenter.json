@@ -305,7 +305,7 @@
     "minImpressions": "Po CTR-u i poziciji rangiraju se samo pojmovi s barem {{n}} pojavljivanja.",
     "pages": "Ulazne stranice",
     "topQueries": "Glavni pojmovi (Google)",
-    "pagesNote": "Klikovi, pojavljivanja i pojmovi su Googleovi za tu stranicu. Org. posjeti i upiti su naši posjeti koji su s tražilice došli na tu stranicu i upiti poslani u tim posjetima.",
+    "pagesNote": "Klikovi, pojavljivanja i pojmovi su Googleovi za tu stranicu; — znači da Google za nju u razdoblju nema brojki (naši posjeti su ipak došli). Prosj. pozicija je prosjek preko svih pojmova stranice, ponderiran pojavljivanjima: otvori stranicu (klik na red) i vidjet ćeš njezine Google pojmove, svaki sa svojom pozicijom. Org. posjeti i upiti su naši posjeti koji su s tražilice došli na tu stranicu i upiti poslani u tim posjetima.",
     "engine": {
       "GOOGLE": "Google",
       "BING": "Bing",
@@ -314,7 +314,11 @@
       "ECOSIA": "Ecosia",
       "YANDEX": "Yandex",
       "OTHER": "Ostale"
-    }
+    },
+    "siteAll": "Sajt: svi",
+    "avgPosition": "Prosj. pozicija",
+    "bingNoPage": "Bing daje pojmove samo po sajtu, bez ulazne stranice, zemlje i uređaja.",
+    "pageNoQueries": "Google za ovu stranicu u razdoblju ne pokazuje nijedan pojam: nije se pojavila u rezultatima ili je Google vodi pod drugom adresom."
   },
   "rec": {
     "note": "Snimke posjeta rade se samo uz pristanak za analitiku. Isključen sajt ne snima ništa, a poslužitelj odbija njegove pakete. Udio je postotak posjeta s pristankom koje se snimaju; na mobitelu snimanje počinje tek nakon prvog dodira, scrolla ili tipke posjetitelja.",

@@ -1,0 +1,39 @@
+{
+  "title": "Plaćanja putem linka",
+  "subtitle": "Kartična plaćanja preko tajnog /pay linka na 7 stranica (Mollie)",
+  "all": "Sve",
+  "allSites": "Sve stranice",
+  "searchPlaceholder": "Traži referencu ili e-mail… (Enter)",
+  "status": {
+    "COMPLETED": "Plaćeno",
+    "PENDING": "Na čekanju",
+    "NEEDS_REVIEW": "Treba provjeru",
+    "FAILED": "Neuspjelo",
+    "CANCELLED": "Otkazano"
+  },
+  "columns": {
+    "date": "Datum",
+    "site": "Stranica",
+    "reference": "Referenca",
+    "amount": "Iznos",
+    "status": "Status",
+    "email": "E-mail platitelja",
+    "orderId": "Mollie plaćanje",
+    "note": "Bilješka"
+  },
+  "loading": "Učitavanje…",
+  "empty": "Nema plaćanja putem linka.",
+  "loadFailed": "Plaćanja nije bilo moguće učitati.",
+  "refunded": "Povrat",
+  "booking": "Rezervacija",
+  "totalReceived": "Ukupno primljeno",
+  "refresh": "Osvježi iz Mollieja",
+  "refreshFailed": "Plaćanje nije bilo moguće osvježiti.",
+  "editNote": "Uredi bilješku",
+  "notePlaceholder": "Interna bilješka za ured; klijent je nikad ne vidi.",
+  "noteSaved": "Bilješka spremljena.",
+  "noteFailed": "Bilješku nije bilo moguće spremiti.",
+  "prev": "← Prethodna",
+  "next": "Sljedeća →",
+  "pageOf": "Stranica {{page}} od {{total}}"
+}

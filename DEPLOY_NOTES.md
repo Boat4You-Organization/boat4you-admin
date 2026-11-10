@@ -1,5 +1,9 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-10 — 💳 Custom payments: lista kartičnih uplata s tajnog `/pay` linka (Mollie) — ⏳ NIJE DEPLOYANO (grana `feat/mollie-payments`, čeka Mariovo „da“; backend PRVI)
+
+Stranica `/custom-payments` (iza Invoices, isti pristup): datum, sajt, broj ugovora (+ link na booking kad odgovara web rezervaciji), iznos umanjen za povrate, status, e-mail platitelja, „Mollie payment“ (link na my.mollie.com), bilješka. Filtri po statusu i sajtu, pretraga, „Refresh from Mollie“ po retku, zbroj primljenog. Backend `GET /admin/custom-payments`, `PATCH …/note`, `POST …/refresh` (boat4you-backend `feat/mollie-payments`). en + hr. `yarn lint` 0 grešaka, `tsc` čist. Nije otvoreno u pregledniku protiv backenda.
+
 ## 2026-11-05 — 📰 PR modul: nova stavka izbornika **PR** u radnom prostoru Marketing, iza Objava (`/pr`, samo SYSTEM_ADMIN) — mediji i novinari, istraživanja, pitchevi 1:1 s press@boat4you.com, objave i provjera linkova, spominjanja — ✅ LIVE 5.11.2026 13:08 UTC `index-D1xktjrT.js` (`28c7bfe` = `feat/pr-module` + main `2a330a0`, build iz `wt-pr-release`, VERIFIED live == new, root/deep/asset 200, `/pr` 200); backend V9_121 LIVE oba čvora 13:08/13:09 UTC (backend DEPLOY_NOTES); **slanje ISKLJUČENO** (`PR_MAIL_ENABLED=false`, press@ lozinka još nije upisana). PR admin #8 otvoren, nije mergean. Rollback: cusma1 `html.prev` swap.
 
 Mario 4.11.2026 (program digitalnog PR-a, `DIGITAL-PR-PROGRAM-2026-11.md`; plan `infra/docs/superpowers/plans/2026-11-04-pr-module.md`). Backend: boat4you-backend DEPLOY_NOTES, unos 2026-11-05 PR modul (redoslijed deploya i rollback su tamo).

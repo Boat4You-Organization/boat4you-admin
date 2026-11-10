@@ -1,0 +1,39 @@
+{
+  "title": "Custom payments",
+  "subtitle": "Card payments made through the secret /pay link on the 7 sites (Mollie)",
+  "all": "All",
+  "allSites": "All sites",
+  "searchPlaceholder": "Search reference or e-mail… (Enter)",
+  "status": {
+    "COMPLETED": "Completed",
+    "PENDING": "Pending",
+    "NEEDS_REVIEW": "Needs review",
+    "FAILED": "Failed",
+    "CANCELLED": "Cancelled"
+  },
+  "columns": {
+    "date": "Date",
+    "site": "Site",
+    "reference": "Reference",
+    "amount": "Amount",
+    "status": "Status",
+    "email": "Payer e-mail",
+    "orderId": "Mollie payment",
+    "note": "Note"
+  },
+  "loading": "Loading…",
+  "empty": "No custom payments.",
+  "loadFailed": "Custom payments could not be loaded.",
+  "refunded": "Refunded",
+  "booking": "Booking",
+  "totalReceived": "Total received",
+  "refresh": "Refresh from Mollie",
+  "refreshFailed": "The payment could not be refreshed.",
+  "editNote": "Edit note",
+  "notePlaceholder": "Internal note for the office; the client never sees it.",
+  "noteSaved": "Note saved.",
+  "noteFailed": "The note could not be saved.",
+  "prev": "← Prev",
+  "next": "Next →",
+  "pageOf": "Page {{page}} of {{total}}"
+}

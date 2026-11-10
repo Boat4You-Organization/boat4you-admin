@@ -65,8 +65,9 @@ const ContactCenterService = {
     api.get<CcFunnel>('/admin/cc/funnel', { params: params(query) }),
   searchEngines: (query: { from?: string; to?: string; siteId?: string; country?: string; device?: string }) =>
     api.get<CcSearchEngines>('/admin/cc/search-engines', { params: params(query) }),
-  /** Google's query table in its own order, for one landing page when path (of siteId) is given. */
+  /** A query table (Google by default, or Bing) in its own order; Google for one landing page when path (of siteId) is given. */
   searchEngineQueries: (query: {
+    engine?: 'GOOGLE' | 'BING';
     from?: string;
     to?: string;
     siteId?: string;

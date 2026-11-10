@@ -19,6 +19,7 @@ import {
   ReservationSysStatus,
   getEffectiveReservationSysStatus,
 } from '@/models/booking.model';
+import { UserRoleName } from '@/models/user.model';
 import { StatusTone, bbColors, bbOverlineSx, bbPillStyle } from '@/styles/bb';
 import colors from '@/styles/themes/colors';
 import DateTime from '@/utils/static/DateTime';
@@ -26,6 +27,7 @@ import { bankFeeShareForPhase } from '@/utils/static/bankTransferFee';
 import { formatPrice } from '@/utils/static/formatNumber';
 import { generateGoogleMapsLink } from '@/utils/static/googleMapsUtils';
 import { sortByNumericProp } from '@/utils/static/sortUtils';
+import { useAuthStore } from '@/valtio/auth/auth.store';
 import EmailClientModal from '@/views/Bookings/partials/EmailClientModal/EmailClientModal';
 
 import BookingCardPayments from './BookingCardPayments';
@@ -62,6 +64,8 @@ const groupHeadSx = { ...bbOverlineSx, mt: 1.25, mb: '2px' };
 
 const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
   const { t } = useTranslation();
+  const { user } = useAuthStore();
+  const isSystemAdmin = !!user?.roles?.some(role => role.roleName === UserRoleName.SYSTEM_ADMIN);
   // Fixed wire fee (BANK_TRANSFER_FIXED_FEE, e.g. 32 €) — the customer's wire
   // transfers carry per-phase shares of it, so the phases and the booking
   // total must show the fee-inclusive amounts the wire emails ask for
@@ -430,7 +434,8 @@ const BookingInformation = ({ selectedBooking }: BookingInformationProps) => {
         </Box>
       </DeskCard>
 
-      <BookingCardPayments reservationId={selectedBooking.reservationId} />
+      {/* /admin/card-payments is SYSTEM_ADMIN only: a manager would get a 403 on every booking (and a token refresh). */}
+      {isSystemAdmin && <BookingCardPayments reservationId={selectedBooking.reservationId} />}
 
       <DeskCard>
         <CardHead title={t('booking.price-information')} />

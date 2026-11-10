@@ -126,6 +126,9 @@ const BookingPaymentsTab = ({ onDetails }: BookingPaymentsTabProps) => {
     const next = new URLSearchParams(searchParams);
     const value = searchInput.trim();
 
+    // A bare ?q= is read as an old e-mail link to the payment-link list: name this tab so a search stays here.
+    next.set('tab', 'bookings');
+
     if (value) {
       next.set('q', value);
     } else {

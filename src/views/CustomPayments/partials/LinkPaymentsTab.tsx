@@ -85,6 +85,9 @@ const LinkPaymentsTab = ({ onDetails }: LinkPaymentsTabProps) => {
     const next = new URLSearchParams(searchParams);
     const value = searchInput.trim();
 
+    // Without ?q= the page falls back to the booking payments: name this tab so clearing the search stays here.
+    next.set('tab', 'link');
+
     if (value) {
       next.set('q', value);
     } else {

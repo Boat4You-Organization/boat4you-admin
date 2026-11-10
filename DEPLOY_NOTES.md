@@ -1,7 +1,7 @@
 # boat4you-admin — deploy notes
 
 
-## 2026-11-10 — 💳 Plaćanja (Mollie): kartične uplate rezervacija + link za plaćanje na jednoj stranici, Mollie detalji, način plaćanja rate na bookingu — ⏳ NIJE DEPLOYANO (grana `feat/mollie-payments`, čeka Mariovo „da“; backend PRVI)
+## 2026-11-10 — 💳 Plaćanja (Mollie): kartične uplate rezervacija + link za plaćanje na jednoj stranici, Mollie detalji, način plaćanja rate na bookingu — ✅ LIVE 10.11.2026 16:22 UTC (`d7068a2`, `assets/index-ChDPTs1s.js`, na `origin/main`; backend jar bbfa0e13 na cusma2 16:21 UTC). Sljedeće, NIJE deployano: oznaka „Klarna“ na popisima (grana `feat/mollie-klarna` `557648c`, treba backend s `method`).
 
 - `/custom-payments` (ruta i mjesto u izborniku Chartera ista) → naslov i izbornik „Payments / Plaćanja“, dvije kartice u `?tab=bookings|link` (zadano `bookings`; stari link iz ured-maila `?q=<ref>` bez `tab` otvara karticu link).
 - „Booking payments / Uplate rezervacija“: `GET /admin/card-payments` — filtri Sve / Plaćeno / Otvoreno (PENDING+SUPERSEDED) / Nije plaćeno (FAILED+CANCELLED) / Treba provjeru, pretraga, straničenje, „Total received“; stupci datum (+ plaćeno), booking (link na detalj), klijent (mailto/tel), iznos (rata + naknada za karticu), status + oznake (povrat, chargeback, „Booking not confirmed“ kad promoteState=FAILED, reviewReason), Mollie link, Details, Refresh (`POST /admin/card-payments/{id}/refresh`).

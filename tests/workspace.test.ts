@@ -64,6 +64,8 @@ describe('workspaceForPath', () => {
       '/social',
       '/social/new',
       '/social/edit/4',
+      '/call-center',
+      '/call-center/calls/10',
     ]) {
       assert.equal(workspaceForPath(path), 'marketing', path);
     }

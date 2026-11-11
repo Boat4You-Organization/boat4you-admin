@@ -5,6 +5,7 @@ import { People } from '@/components/SvgIcons/BoatFeatures';
 import Bookings from '@/components/SvgIcons/Bookings';
 import Contact from '@/components/SvgIcons/Contact';
 import Invoices from '@/components/SvgIcons/Invoices';
+import PhoneOutlined from '@/components/SvgIcons/PhoneOutlined';
 import Share from '@/components/SvgIcons/Share';
 import { UserModel, UserRoleName } from '@/models/user.model';
 
@@ -102,6 +103,13 @@ const navigation: NavigationLink[] = [
     id: 'social',
     icon: Share,
     path: '/social',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
+    // Call centar (AI call centre "Nika", 11.11.2026): calls, transcripts, recordings; backend /admin/calls/** is SYSTEM_ADMIN only.
+    id: 'callCenter',
+    icon: PhoneOutlined,
+    path: '/call-center',
     accessLevel: [UserRoleName.SYSTEM_ADMIN],
   },
 ];

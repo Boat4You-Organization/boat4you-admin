@@ -1,1702 +1,1922 @@
 interface Resources {
-  actions: {
-    accept: 'Accept';
-    add: 'Add';
-    cancel: 'Cancel';
-    cancelBooking: 'Cancel Booking';
-    cancelUpload: 'Cancel Upload';
-    changeDates: 'Change Dates';
-    changeStatus: 'Change Status';
-    clear: 'Clear';
-    'confirm-booking': 'Confirm Booking';
-    confirmInvite: 'Send the sign-up invite e-mail to {{email}}?';
-    create: 'Create';
-    'create-user': 'Create user';
-    'create-yacht': 'Create Custom Boat';
-    creating: 'Creating...';
-    delete: 'Delete';
-    'delete-booking': 'Cancel Booking';
-    'delete-custom-boat': 'Delete custom boat';
-    deleteInquiry: 'Delete Inquiry';
-    deleteInvoice: 'Delete Invoice';
-    deleteUser: 'Delete User';
-    discard: 'Discard';
-    'discard-changes': 'Discard changes';
-    download: 'Download';
-    'download-pdf': 'Download PDF';
-    'download-selected': 'Download selected';
-    edit: 'Edit';
-    'edit-notes': 'Edit notes';
-    editUser: 'Edit User';
-    filter: 'Filter';
-    'generate-invoice': 'Generate Invoice';
-    'mark-as-paid': 'Mark as Paid';
-    markAsSent: 'Mark as Sent';
-    markAsSentInvoice: 'Mark as Sent Invoice';
-    newInvoice: 'New invoice';
-    'preparing-zip': 'Preparing ZIP…';
-    reject: 'Reject';
-    resendInvite: 'Resend invite';
-    reset: 'Reset';
-    save: 'Save';
-    search: 'Search';
-    sendInvite: 'Send invite';
-    sendInvoice: 'Send Invoice';
-    sendOffer: 'Send Offer';
-    sendingInvite: 'Sending…';
-    sort: 'Sort';
-    'sync-booking': 'Sync Booking';
-    update: 'Update';
-    'update-yacht': 'Update Custom Boat';
-    updateInvoice: 'Update invoice';
-    updating: 'Updating...';
-    uploaded: 'uploaded';
-  };
-  amenities: {
-    BBQ: 'BBQ';
-    'DVD-player': 'DVD Player';
-    'air-conditioning': 'Air conditioning';
-    'audio-system': 'Audio system';
-    autopilot: 'Autopilot';
-    'bathing-platform': 'Bathing platform';
-    bicycle: 'Bicycle';
-    bimini: 'Bimini';
-    'bow-thruster': 'Bow thruster';
-    'coffee-machine': 'Coffee machine';
-    cooker: 'Cooker';
-    dinghy: 'Dinghy';
-    dishwasher: 'Dishwasher';
-    'electric-winches': 'Electric winches';
-    'fishing-set': 'Fishing set';
-    'flat-screen-TV': 'Flat screen TV';
-    flybridge: 'Flybridge';
-    freezer: 'Freezer';
-    fridge: 'Fridge';
-    'game-console': 'Game console';
-    generator: 'Generator';
-    gennaker: 'Gennaker';
-    heating: 'Heating';
-    'ice-maker': 'Ice maker';
-    'inside-speakers': 'Inside speakers';
-    inverter: 'Inverter';
-    jacuzzi: 'Jacuzzi';
-    'jet-ski': 'Jet ski';
-    karaoke: 'Karaoke';
-    kayak: 'Kayak';
-    'kitchen-utensils': 'Kitchen utensils';
-    microwave: 'Microwave';
-    'outside-GPS-plotter': 'Outside GPS plotter';
-    'outside-shower': 'Outside shower';
-    'outside-speakers': 'Outside speakers';
-    oven: 'Oven';
-    'pillows-and-blankets': 'Pillows and blankets';
-    radar: 'Radar';
-    'safety-net': 'Safety net';
-    'salon-GPS-plotter': 'Salon GPS plotter';
-    shower: 'Shower';
-    sink: 'Sink';
-    'snorkel-sets': 'Snorkel sets';
-    'solar-panels': 'Solar panels';
-    spinnaker: 'Spinnaker';
-    'stand-up-paddle': 'Stand Up Paddle';
-    'sun-pads': 'Sun pads';
-    surf: 'Surf';
-    'teak-deck': 'Teak deck';
-    towels: 'Towels';
-    wakeboard: 'Wakeboard';
-    'washing-machine': 'Washing machine';
-    'waste-tank': 'Waste tank';
-    'water-maker': 'Water maker';
-    'water-skis': 'Water skis';
-    'water-toys': 'Water toys';
-    windsurf: 'Windsurf';
-  };
-  booking: {
-    'additional-paid-at-marina': 'Additional - Paid at marina';
-    'additional-paid-now': 'Additional - Paid now';
-    'admin-notes': 'Internal notes';
-    'admin-notes-hint': 'Visible to admins only — never shown to the customer.';
-    'admin-notes-placeholder': 'e.g. Customer needs airport transfer; paid 500 EUR cash; call before check-in...';
-    'apa-description': 'Lorem ipsum';
-    'apa-text': '{{value}} price without VAT';
-    'bank-fee-note': 'incl. {{fee}} € bank transfer fee';
-    'booking-info': 'Booking Info';
-    'cancel-booking': 'Cancel Booking';
-    'cancellation-reason': 'Reason';
-    'cancellation-requested': 'Cancellation Requested';
-    'cancellation-requested-on': 'Cancellation requested on';
-    'cancelled-by-agent': 'Cancelled by agent';
-    'change-status': 'Change Status';
-    'charter-company': 'Charter company';
-    'charter-price': 'Charter price';
-    'charter-update': 'Charter update';
-    'charter-update-hint': 'Shown to the customer in My bookings';
-    'charter-update-placeholder': 'e.g. Skipper: 1470 €\nStand Up Paddle: 200 €';
-    'check-in': 'Check-in';
-    'check-out': 'Check-out';
-    'client-price': 'Client price';
-    'confirm-booking': 'Confirm Booking';
-    'crew-list-url': 'Crew list URL';
-    'crew-list-url-placeholder': 'https://...';
-    day: 'day';
-    days: 'days';
-    'deposit-insurance': 'Deposit insurance';
-    discount: 'Discount';
-    documents: {
-      'confirm-delete': 'Delete "{{filename}}"? This cannot be undone.';
-      delete: 'Delete';
-      download: 'Download';
-      'drop-now': 'Drop to upload';
-      'drop-or-click': 'Drop files here or click to upload';
-      empty: 'No documents attached yet.';
-      'internal-title': 'Internal documentation';
-      loading: 'Loading…';
-      open: 'Open document';
-      title: 'Documents';
-      'types-hint': 'PDF, DOC, DOCX up to 20 MB';
-      uploading: 'Uploading…';
-    };
-    'guest-info': 'Guest Info';
-    included: 'Included';
-    'manage-booking': 'Manage Booking';
-    'marina-total': 'Total to pay at marina';
-    'mark-as-paid': 'Mark as Paid';
-    'not-paid': 'Not paid';
-    obligatory: 'Obligatory';
-    'obligatory-included': 'Obligatory - Included in price';
-    'obligatory-paid-at-marina': 'Obligatory - Paid at marina';
-    paid: 'Paid';
-    'paid-at-marina': 'Paid at marina';
-    'paid-now': 'Paid now';
-    'payment-phases': 'Payment Phases';
-    phase: 'Phase';
-    'pickup-location': 'Pick-up location';
-    'please-dont-close-window': 'Please keep this window open while the reservation is syncing';
-    'price-information': 'Price Information';
-    'refundable-security-deposit': 'Refundable security deposit';
-    'refundable-security-deposit-hint': 'Held at pick-up, returned on damage-free return';
-    save: 'Save';
-    saving: 'Saving...';
-    'special-request': 'Special Request';
-    'sync-booking': 'Sync Booking';
-    'sync-booking-text': 'Are you sure you want to sync booking {{value}}? Doing this action cannot be reverted.';
-    total: 'Booking total';
-    'update-booking': 'Update this booking';
-    'view-boat': 'View boat';
-    'your-booking-is-sync': 'Your booking is <strong>being synced!</strong>';
-  };
-  chat: {
-    cameFrom: 'Came from';
-    close: 'Close conversation';
-    confirmDelete: 'Permanently delete this conversation?';
-    confirmDeleteMany: 'Permanently delete the selected conversations ({{count}})?';
-    delete: 'Delete';
-    deleteFailed: 'The conversation could not be deleted.';
-    deleteSelected: 'Delete selected ({{count}})';
-    direct: 'direct';
-    empty: 'No conversations yet.';
-    emptyFlagged: 'No suspicious conversations.';
-    flaggedOnly: 'Suspicious only';
-    lastSeen: 'Last seen';
-    live: 'Live on site';
-    lockReason: 'Reason';
-    lockedAt: 'Locked at';
-    needsHumanOnly: 'Needs a human only';
-    pickSession: 'Select a conversation from the list.';
-    replyPlaceholder: 'Reply to the visitor…';
-    role: {
-      ADMIN: 'Team';
-      ASSISTANT: 'AI assistant';
-      SYSTEM: 'System';
-      USER: 'Visitor';
-    };
-    selectAll: 'Select all';
-    send: 'Send';
-    status: {
-      AI: 'AI';
-      CLOSED: 'Closed';
-      HUMAN: 'With team';
-      HUMAN_REQUESTED: 'Wants a human';
-      LOCKED: 'Locked';
-    };
-    statusLabel: 'Status';
-    suspicious: 'Suspicious';
-    suspiciousBanner: 'Suspicious conversation: the AI is off and the visitor was handed over to a live agent. Kept as evidence, it cannot be deleted.';
-    suspiciousLink: 'suspicious';
-    suspiciousLinkHint: 'Not a boat4you.com path, so it is not shown as a link. Do not open it.';
-    title: 'Site chat';
-    trail: 'Recent pages';
-    viewing: 'Viewing';
-  };
-  common: {
-    accepted: 'Accepted';
-    'access-denied': 'Access Denied';
-    'access-denied-description': 'You don’t have permission to view this page. <br /> If you believe this is a mistake, contact your administrator.';
-    active: 'Active';
-    'add-more': 'Add more';
-    addUser: 'Add User';
-    agencies: 'Agencies';
-    agency: 'Agency';
-    all: 'All';
-    amenities: 'Amenities';
-    answered: 'Answered';
-    archived: 'Archived';
-    blacklisted: 'Blacklisted';
-    bookings: 'Bookings';
-    browse: 'Browse';
-    browsePdf: 'or browse for .pdf document';
-    browsePhoto: 'or browse for photos';
-    cancel: 'Cancel';
-    cancelled: 'Cancelled';
-    clear: 'Clear';
-    company: 'Company';
-    completed: 'Completed';
-    'confirm-booking-text': 'Are you sure you want to confirm booking {{value}}? Doing this action cannot be reverted.';
-    confirmed: 'Confirmed';
-    country: 'Country';
-    createInvoice: 'Create Invoice';
-    croatian: 'Croatia';
-    customBoats: 'Custom Boats';
-    customer: 'Customer';
-    dateRange: 'Date Range';
-    'delete-confirmation-text-bulk': 'Are you sure you want to delete {{value}}? This action cannot be undone.';
-    departureDate: 'Departure Date';
-    details: 'Details';
-    'discard-changes-description': 'Are you sure you want to discard your changes?';
-    'discount-not-applicable': 'The discount does not apply to the selected boats.';
-    draft: 'Draft';
-    dragAndDrop: 'Drag and drop';
-    edit: 'Edit';
-    ended: 'Ended';
-    english: 'English';
-    equipment: 'Equipment';
-    extras: 'Extras';
-    financials: 'Financials';
-    'general-info': 'General Information';
-    guests: 'Guests';
-    'high-tier': 'High Tier Pricing';
-    inCharter: 'In charter';
-    inactive: 'Inactive';
-    inquiries: 'Inquiries';
-    'inquiries-status': 'Inquiries Status';
-    'invalid-credentials': 'Incorrect email or password.';
-    'invite-send-to-email': 'An invite will be sent to user’s email to confirm the account,';
-    invited: 'Invited';
-    invoice: 'Invoice';
-    invoices: 'Invoices';
-    'low-tier': 'Low Tier Pricing';
-    'main-image': 'Main image';
-    'manual-entry-noter': "Can't find your manufacturer or model? Enter them manually below to create new entries.";
-    'mark-sent-text': 'Are you sure you want to mark as sent {{value}}? This action cannot be undone.';
-    maxDiscount: 'Maximum Discount';
-    'mid-tier': 'Mid Tier Pricing';
-    mmk: 'MMK';
-    nausys: 'Nausys';
-    new: 'New';
-    no: 'No';
-    'no-matches': 'No matches';
-    'no-records': 'No records were found.';
-    'not-found': 'Page Not Found';
-    'not-found-description': 'The page you’re looking for doesn’t exist. <br /> Check the URL or go back to the homepage.';
-    notInvited: 'Not invited';
-    option: 'Option';
-    optionWaiting: 'Option Waiting';
-    paymentStatus: 'Payment Status';
-    'pdf-upload': 'PDF Upload';
-    pending: 'Pending';
-    photos: 'Photos';
-    pricing: 'Pricing';
-    'primary-source': 'Primary source';
-    'private-person': 'Private person';
-    profile: {
-      'account-settings': 'Account Settings';
-      'card-surcharge': 'Card Payment Surcharge (%)';
-      'card-surcharge-description': 'Additional fee charged for card payments (e.g., 2.5 for 2.5%)';
-      'current-card-surcharge': 'Current Card Payment Surcharge';
-      'current-email': 'Current Email';
-      'current-password': 'Current Password';
-      'delete-account': 'Delete account';
-      email: 'Email';
-      'email-description': 'Make sure you have access to this email address.';
-      'full-name': 'Full Name';
-      'full-name-description': 'Make sure this matches the name on your ID';
-      'input-card-surcharge': 'Enter card payment surcharge';
-      'input-email': 'Input email';
-      'input-new-password': 'Input New Password';
-      'input-password': 'Input Password';
-      'last-name': 'Last Name';
-      name: 'Name';
-      'new-password': 'New Password';
-      password: 'Password';
-      'password-description': 'Change password';
-      'repeat-new-password': 'Repeat New Password';
-      'repeat-password': 'Repeat Password';
-    };
-    ready: 'Ready';
-    recipientType: 'Recipient Type';
-    reservation: 'Reservation';
-    reservationManager: 'Reservation Manager';
-    result_one: '{{count}} item';
-    result_other: '{{count}} items';
-    save: 'Save';
-    saving: 'Saving...';
-    sent: 'Sent';
-    systemAdmin: 'System Admin';
-    unknown: 'Unknown';
-    user: 'User';
-    'user-status': 'User Status';
-    users: 'Users';
-    video: 'Video';
-    yes: 'Yes';
-  };
-  contactCenter: {
-    actionFailed: 'The action failed.';
-    anonymousVisitor: 'Visitor';
-    backToList: 'List';
-    backToListLong: 'Back to the list';
-    cameFrom: 'Came from';
-    cancel: 'Cancel';
-    channel: {
-      ADS: 'Ads';
-      AI: 'AI assistants (ChatGPT, Perplexity…)';
-      DIRECT: 'Direct';
-      EMAIL: 'E-mail';
-      ORGANIC: 'Search engines (organic)';
-      OTHER: 'Other';
-      REFERRAL: 'Other site';
-      SISTER: 'Our sister site';
-      SOCIAL: 'Social';
-    };
-    chatNotOpened: 'Chat not opened';
-    clearFilters: 'Clear filters';
-    clientCard: 'Client card';
-    close: 'Close conversation';
-    closePanel: 'Close';
-    composerHint: 'Replying takes the conversation over — the AI is switched off for it.';
-    confirmDelete: 'Delete this conversation?';
-    confirmDeleteMany: 'Delete the selected conversations ({{count}})?';
-    confirmMerge: 'Merge this contact into the current one? Conversations, visits and tags move to the current contact and the merged one is deleted.';
-    contact: {
-      addTag: 'Add tag';
-      boats: 'Boats viewed';
-      conversations: 'Conversations ({{count}})';
-      duplicates: 'Possibly the same person (unverified)';
-      email: 'E-mail';
-      firstSource: 'First visit';
-      lastSource: 'Last visit';
-      name: 'Name';
-      note: 'Note';
-      phone: 'Phone';
-      searches: 'What they searched for';
-      sources: 'Source';
-      status: 'Status';
-      tags: 'Tags';
-      visits: 'Visits ({{count}})';
-    };
-    contactStatus: {
-      LOST: 'Lost';
-      NEGOTIATING: 'Negotiating';
-      NEW: 'New';
-      OFFER_SENT: 'Offer sent';
-      REPLIED: 'Replied';
-      SPAM: 'Spam';
-      WON: 'Won';
-    };
-    contactStatusAll: 'Contact status: all';
-    contactsEmpty: 'No contacts for these filters.';
-    contactsSearch: 'Search name, e-mail or phone';
-    contactsSearchLabel: 'Search contacts';
-    contactsTable: {
-      conversations: 'Conversations';
-      lastActivity: 'Last activity';
-    };
-    conversationCount_one: '{{count}} conversation';
-    conversationCount_other: '{{count}} conversations';
-    conversationLabel: 'Conversation';
-    delete: 'Delete';
-    deleteFailed: 'The conversation could not be deleted.';
-    deleteSelected: 'Delete selected ({{count}})';
-    direct: 'direct';
-    empty: 'No conversations for these filters.';
-    emptyFlagged: 'No suspicious conversations.';
-    filter: {
-      all: 'All';
-      contactStatus: 'Contact status';
-      flaggedOnly: 'Suspicious only';
-      from: 'From';
-      includeSpam: 'Include spam';
-      needsHuman: 'Needs a person';
-      site: 'Site';
-      status: 'Status';
-      tag: 'Tag';
-      to: 'To';
-    };
-    filters: 'Filters · {{count}}';
-    fromSite: 'from';
-    funnel: {
-      channelAll: 'Source: all';
-      chatOpened: 'Visits that opened the chat: {{count}}';
-      clickCount: 'Clicks';
-      clicks: 'Top clicks';
-      deviceAll: 'Device: all';
-      devices: {
-        DESKTOP: 'Desktop';
-        MOBILE: 'Mobile';
-        TABLET: 'Tablet';
-      };
-      element: 'Element';
-      exitPages: 'Exit pages';
-      exitRate: 'Exit rate';
-      exits: 'Exits';
-      exitsByType: 'Where they leave without an inquiry';
-      kind: {
-        button: 'button';
-        link: 'link';
-      };
-      navGroup: 'Navigation and galleries ({{count}})';
-      navGroupHint: 'Photo gallery, slider, menu, header and footer clicks';
-      note: 'A visit counts at its deepest step and at every step before it, so an inquiry sent from a pop-up on a sister site also counts as a form. Sent inquiries are counted from the start of this measurement.';
-      ofVisits: '{{n}} % of visits';
-      onPages: 'on {{count}} pages';
-      pageType: {
-        BLOG: 'Blog';
-        BOAT: 'Boat';
-        BOOKING: 'Form / booking';
-        DESTINATION: 'Destination';
-        HOME: 'Home';
-        ITINERARY: 'Itinerary';
-        OTHER: 'Other';
-        SEARCH: 'Search';
-      };
-      path: 'Page';
-      steps: {
-        BOAT: 'Boat page';
-        FORM: 'Inquiry or booking form';
-        INQUIRY: 'Inquiry sent';
-        VISIT: 'Visit';
-      };
-      target: 'Leads to';
-      title: 'Inquiry funnel';
-      type: 'Type';
-      views: 'Visits';
-    };
-    lastSeen: 'Last seen';
-    listLabel: 'Conversation list';
-    live: 'On the site now';
-    liveEmpty: 'No visitors with consent on the sites.';
-    liveHeader_one: '{{count}} visitor on the sites now';
-    liveHeader_other: '{{count}} visitors on the sites now';
-    liveSub: 'Refreshes every 15 s · only visitors who consented';
-    liveTable: {
-      action: 'Action';
-      chat: 'Chat';
-      country: 'Country';
-      device: 'Device';
-      onPage: 'On page';
-      page: 'Page';
-      pages: 'Pages';
-      site: 'Site';
-      source: 'Source';
-      visitor: 'Visitor';
-    };
-    loadFailed: 'Loading failed, retrying.';
-    loadMore: 'Load more';
-    lockReason: 'Reason';
-    lockedAt: 'Locked at';
-    merge: 'Merge';
-    mode: {
-      all: 'All';
-      live: 'Live now';
-    };
-    moreActions: 'More actions';
-    new: 'new';
-    next: 'Next';
-    noContact: 'This conversation has no contact yet (no name, e-mail or phone).';
-    noHistory: 'No navigation recorded on the sites.';
-    notFound: 'The conversation does not exist or was deleted.';
-    openBoatPage: 'Open the boat page';
-    pageOf: 'Page {{page}} · {{size}} per page';
-    pages: 'pages: {{count}}';
-    pagesShort_one: '{{count}} page';
-    pagesShort_other: '{{count}} pages';
-    persons: 'people: {{count}}';
-    pickSession: 'Pick a conversation from the list.';
-    prev: 'Previous';
-    proactive: {
-      BOT: 'This is a bot, the message was not sent.';
-      INVALID_TEXT: 'The message is empty or invalid.';
-      NOT_LIVE: 'The visitor is no longer on the site.';
-      QUEUED: "The message arrives with the widget's next heartbeat.";
-      QUEUE_FULL: 'Too many messages waiting, try again shortly.';
-      button: 'Send message';
-      label: 'Message';
-      placeholder: "E.g. Hello! If you need help with a boat, I'm here.";
-      title: 'Message to the visitor';
-    };
-    range: {
-      '30d': '30 days';
-      '7d': '7 days';
-      custom: 'From–to';
-      today: 'Today';
-    };
-    rangeLabel: 'Period';
-    rec: {
-      conversationLink: 'Recordings of this visit';
-      enabled: 'Recording';
-      heat: {
-        clicks: 'Clicks';
-        col: {
-          clicks: 'Clicks';
-          dead: 'Dead';
-          element: 'Element';
-          hover: 'Mouse (s)';
-          inquiryShare: 'From visits with an inquiry';
-          link: 'Goes to';
-          pageViewShare: '% of page views';
-          rage: 'Rage';
-        };
-        device: 'Device';
-        empty: 'No data for these filters.';
-        fold: 'First screen';
-        foldValue: '{{pct}} % of the page';
-        inquiries: 'Page views of visits with an inquiry';
-        loading: 'Loading the heatmap…';
-        modeClicks: 'Clicks';
-        modeHover: 'Mouse';
-        modeScroll: 'Scroll';
-        mouse: 'Page views with a mouse';
-        noBackground: 'No background for this group (its recordings are older than 60 days): only the element list is shown.';
-        noMouse: 'No mouse data for this device. Phones and tablets have no mouse, and recordings made before mouse tracking was switched on carry no element on a move.';
-        note: 'Clicks add up per element across all visits of the period; red is the most clicked. Dead click: nothing happened. Rage: the same element 3+ times within a second.';
-        noteHover: 'Where the mouse rests longest: red = longest, blue = shortest. Desktop only; each stay counts at most 2 seconds, so a parked mouse does not skew the map.';
-        pageType: 'Page type';
-        pageViews: 'Page views';
-        range90: '90 days';
-        reach: 'Reach';
-        reachValue: 'to {{pct}} % of the page: {{share}} % of page views';
-        shown: '{{pct}} % of the clicks are on the picture. The rest are on elements that appear later (a menu, dialog or gallery) and are only in the table.';
-        shownHover: '{{pct}} % of the mouse time is on the picture. The rest is on elements that appear later (a menu, dialog or gallery) and is only in the table.';
-        sortLeast: 'Least clicked';
-        sortMost: 'Most clicked';
-        watch: 'Recordings of this page';
-      };
-      ins: {
-        empty: 'No findings yet. A page type needs at least 20 page views; data is collected every day.';
-        kind: {
-          CTA_REACH: 'On the {{page}} page only {{percent}} % of page views get as far as the "{{label}}" button (at {{count}} % of the page height). Move it up or add it at the top too.';
-          DEAD: '"{{label}}" on the {{page}} page: {{count}} clicks with no reaction ({{percent}} % of its clicks). People expect it to open something: make it clickable or change it.';
-          INQUIRY_ELEMENT: 'Visitors who send an inquiry often click "{{label}}" on the {{page}} page ({{percent}} % of their page views, at least twice as often as the others). Make it stand out for everyone.';
-          LOW_REACH: 'On the {{page}} page only {{percent}} % of page views see the lower half of the page. Put important content higher.';
-          RAGE: '"{{label}}" on the {{page}} page: clicked again and again {{count}} times. It is probably slow or broken.';
-        };
-        openHeatmap: 'Open the heatmap';
-        pageViews: '{{count}} page views';
-      };
-      invalid: 'The share must be a whole number from 0 to 100.';
-      list: {
-        clearScope: 'All visits';
-        col: {
-          chat: 'Chat';
-          clicks: 'Clicks';
-          device: 'Device';
-          duration: 'Duration';
-          errors: 'Errors';
-          inquiry: 'Inquiry';
-          page: 'Page';
-          rage: 'Rage clicks';
-          site: 'Site';
-          started: 'Started';
-        };
-        conversationScope: 'Conversation #{{id}}';
-        deviceAll: 'All devices';
-        empty: 'No recordings for these filters.';
-        noInquiry: 'Only without an inquiry';
-        pageTypeAll: 'All page types';
-        rageOnly: 'Only with rage clicks';
-        visitScope: 'Visit #{{id}}';
-        watch: 'Watch';
-      };
-      mobile: 'Mobile (%)';
-      note: "Visits are recorded only with analytics consent. A site that is switched off records nothing and the server refuses its payloads. The share is the percentage of visits with consent that are recorded; on a phone recording starts only after the visitor's first touch, scroll or key.";
-      player: {
-        back: '← Back to the recordings';
-        busy: 'The recordings storage does not answer right now. Try again in a minute.';
-        failed: 'The recording could not be loaded.';
-        gone: 'This recording is no longer available (recordings are deleted after 60 days).';
-        loading: 'Loading the recording…';
-        markers: {
-          clicks: 'Clicks';
-          errors: 'Errors';
-          rage: 'Rage clicks';
-        };
-        next: 'Next page';
-        noStyles: "This page's styles were not archived: the recording plays without its design.";
-        pages: 'Pages of this visit';
-        pause: 'Pause';
-        play: 'Play';
-        privacy: 'Recordings are masked: what visitors type and their names, e-mails and phones are not shown.';
-        skipIdle: 'Skip inactivity';
-        speed: 'Speed';
-        timeline: 'Timeline';
-      };
-      sample: 'Share of visits (%)';
-      save: 'Save';
-      saveFailed: 'Saving failed.';
-      saved: 'Saved';
-      site: 'Site';
-      staffMark: 'Mark';
-      staffText: 'Open the link for each site in this browser: your visits are then not recorded and not counted in the statistics. The mark stays in this browser until you remove it.';
-      staffTitle: 'This browser as the team';
-      staffUnmark: 'Remove the mark';
-      views: {
-        heatmaps: 'Heatmaps';
-        insights: 'What to fix';
-        list: 'Recordings';
-        settings: 'Settings';
-      };
-    };
-    referrer: 'referrer';
-    removeTag: 'Remove tag {{tag}}';
-    replyLabel: 'Reply';
-    replyPlaceholder: 'Reply to the client… (Enter sends, Shift+Enter new line)';
-    results: 'results: {{count}}';
-    returnToAi: 'Back to AI';
-    returning: 'returning';
-    role: {
-      ADMIN: 'Team';
-      ASSISTANT: 'AI';
-      SYSTEM: 'System';
-      USER: 'Client';
-    };
-    save: 'Save';
-    saveChanges: 'Save changes';
-    saveFailed: 'Saving failed.';
-    savesNow: 'saves at once';
-    search: 'Search';
-    searchEngines: {
-      avgPosition: 'Avg. position';
-      bingClicks: 'Bing clicks';
-      bingImpressions: 'Bing impressions';
-      bingNoFilter: 'Bing has no country or device, so it is left out with that filter.';
-      bingNoPage: 'Bing gives its queries per site only, with no landing page, country or device.';
-      bingQueries: 'Top queries on Bing';
-      bingShort: 'Bing clicks / impressions';
-      byEngine: 'Our organic visits by search engine';
-      bySite: 'By site';
-      clicks: 'Clicks';
-      country: 'Country';
-      countryAll: 'Country: all';
-      ctr: 'CTR';
-      engine: {
-        BING: 'Bing';
-        DUCKDUCKGO: 'DuckDuckGo';
-        ECOSIA: 'Ecosia';
-        GOOGLE: 'Google';
-        OTHER: 'Other';
-        YAHOO: 'Yahoo';
-        YANDEX: 'Yandex';
-      };
-      firstImport: "The first import of Google's history (16 months) takes about 16 hours after it is switched on.";
-      googleClicks: 'Google clicks';
-      googleCtr: 'Google CTR';
-      googleImpressions: 'Google impressions';
-      googlePosition: 'Google avg. position';
-      googleQueries: 'Top queries on Google';
-      googleShort: 'Google clicks / impressions';
-      hidden: 'Google hides the query of {{n}} % of clicks, so the clicks by query are not all traffic.';
-      impressions: 'Impressions';
-      inquiries: 'Inquiries';
-      minImpressions: 'CTR and position rank only queries with at least {{n}} impressions.';
-      none: '—';
-      note: 'Google and Bing give totals per query and page only, never a single visitor. Their data is 2 to 3 days late (last imported day: Google {{google}}, Bing {{bing}}). Our organic visits count only visitors who consented.';
-      organicInquiries: 'Inquiries from organic visits';
-      organicVisits: 'Our organic visits';
-      page: 'Landing page';
-      pageAll: 'Landing page: all';
-      pageNoQueries: 'Google shows no query for this page in the range: it had no impressions, or Google lists it under another address.';
-      pages: 'Landing pages';
-      pagesNote: "Clicks, impressions and queries are Google's for the page; — means Google has no numbers for it in the range (our visits came anyway). Avg. position is the average over all queries of the page, weighted by impressions: open a page (click its row) to see its Google queries, each with its own position. Org. visits and inquiries are our visits that came from a search engine to that page and the inquiries sent in those visits.";
-      position: 'Position';
-      query: 'Query';
-      siteAll: 'Site: all';
-      title: 'Search engines: Google and Bing';
-      topQueries: 'Main queries (Google)';
-      visits: 'Org. visits';
-    };
-    searchPlaceholder: 'Search name, e-mail or message text';
-    selectAll: 'Select all';
-    selectConversation: 'Select conversation';
-    send: 'Send';
-    sendFailed: 'Sending failed. The text is still in the field.';
-    siteAll: 'Site: all';
-    spamTagHint: '(marks the contact as spam)';
-    stats: {
-      aiOnly: 'AI only';
-      byChannel: 'By source';
-      byCountry: 'By country';
-      byMonth: 'Sailing month';
-      bySite: 'By site';
-      chat: 'Chat';
-      contactsCollected: 'Contacts collected';
-      medianFirstResponse: 'Median first response';
-      missed: 'Missed';
-      newVisitors: 'New';
-      persons: 'People';
-      returningVisitors: 'Returning';
-      searches: 'Searches';
-      sisterToBoat4you: 'Sister site → Boat4You';
-      started: 'Conversations started';
-      startedByTeam: 'Started by the team';
-      takenOver: 'Taken over';
-      topCountries: 'Countries';
-      topLocations: 'Locations';
-      visitorCount: 'Visitors';
-      visitors: 'Visitors';
-      visits: 'Visits';
-    };
-    statsNote: 'Visitor numbers cover only visitors who gave consent and are not comparable with GA4. Spam and suspicious conversations are not counted.';
-    status: {
-      AI: 'AI';
-      CLOSED: 'Closed';
-      HUMAN: 'With the team';
-      HUMAN_REQUESTED: 'Wants a person';
-      LOCKED: 'Locked';
-    };
-    statusLabel: 'Status';
-    suspicious: 'Suspicious';
-    suspiciousBannerText: 'The AI is off and stays off. It is kept as evidence and cannot be deleted.';
-    suspiciousBannerTitle: 'Suspicious conversation:';
-    suspiciousLink: 'suspicious, do not open';
-    suspiciousLinkHint: "Not a path on this conversation's site, so it is not shown as a link. Do not open it.";
-    tab: {
-      contacts: 'Contacts';
-      conversations: 'Conversations';
-      live: 'Live visitors';
-      recording: 'Heatmaps';
-      stats: 'Statistics';
-    };
-    tagPlaceholder: 'e.g. vip';
-    tagSuggestions: 'Suggestions';
-    takeOver: 'Take over';
-    takeOverHint: 'The AI stops replying; the visitor sees no message';
-    title: 'Contact Center';
-    trail: 'Last pages';
-    trailTitle: 'Journey';
-    unread: 'Unread';
-    viewLabel: 'View';
-    viewing: 'Viewing';
-  };
-  'custom-payments': {
-    all: 'All';
-    allSites: 'All sites';
-    booking: 'Booking';
-    bookingCardPayments: 'Card payments';
-    bookingNotConfirmed: 'Booking not confirmed';
-    bookingNotConfirmedHint: 'Paid, but confirming the booking failed: confirm it by hand.';
-    cardColumns: {
-      amount: 'Amount';
-      booking: 'Booking';
-      client: 'Client';
-      date: 'Date';
-      fee: 'Mollie fee';
-      orderId: 'Mollie payment';
-      status: 'Status';
-    };
-    cardEmpty: 'No booking card payments.';
-    cardFilter: {
-      all: 'All';
-      notPaid: 'Not paid';
-      open: 'Open';
-      paid: 'Paid';
-      review: 'Needs review';
-    };
-    cardLoadFailed: 'Booking card payments could not be loaded.';
-    cardSearchPlaceholder: 'Search booking no., client, e-mail or Mollie id… (Enter)';
-    cardStatus: {
-      CANCELLED: 'Cancelled by client';
-      COMPLETED: 'Paid';
-      FAILED: 'Not paid';
-      NEEDS_REVIEW: 'Needs review';
-      PENDING: 'Open';
-      SUPERSEDED: 'Replaced';
-    };
-    chargeback: 'Chargeback';
-    close: 'Close';
-    columns: {
-      amount: 'Amount';
-      date: 'Date';
-      email: 'Payer e-mail';
-      fee: 'Mollie fee';
-      note: 'Note';
-      orderId: 'Mollie payment';
-      reference: 'Reference';
-      site: 'Site';
-      status: 'Status';
-    };
-    details: 'Details';
-    detailsFailed: 'The payment could not be read from Mollie.';
-    detailsTitle: 'Mollie payment';
-    editNote: 'Edit note';
-    empty: 'No custom payments.';
-    feeNote: "Mollie's fee and the net amount are in the list (a dash until known). Payouts are shown in the Mollie dashboard.";
-    fullAmount: 'Full amount';
-    instalmentPlusFee: 'instalment {{base}} + card fee {{fee}}';
-    loadFailed: 'Custom payments could not be loaded.';
-    loading: 'Loading…';
-    mollie: {
-      amount: 'Amount';
-      canceledAt: 'Cancelled';
-      card: 'Card';
-      chargebacks: 'Chargebacks';
-      createdAt: 'Created';
-      description: 'Description';
-      expiredAt: 'Expired';
-      expiresAt: 'Expires';
-      failedAt: 'Failed';
-      failure: 'Failure';
-      feeRegion: 'Fee region';
-      id: 'ID';
-      method: 'Method';
-      paidAt: 'Paid';
-      reason: 'Reason';
-      refunds: 'Refunds';
-      status: 'Mollie status';
-      testMode: 'Test mode';
-    };
-    net: 'Net';
-    next: 'Next →';
-    noteFailed: 'The note could not be saved.';
-    notePlaceholder: 'Internal note for the office; the client never sees it.';
-    noteSaved: 'Note saved.';
-    openInMollie: 'Open in Mollie';
-    pageOf: 'Page {{page}} of {{total}}';
-    paidByMollie: 'Card · Mollie';
-    paidByStripe: 'Card · Stripe';
-    paidOn: 'Paid {{date}}';
-    prev: '← Prev';
-    refresh: 'Refresh from Mollie';
-    refreshFailed: 'The payment could not be refreshed.';
-    refunded: 'Refunded';
-    searchPlaceholder: 'Search reference or e-mail… (Enter)';
-    status: {
-      CANCELLED: 'Cancelled';
-      COMPLETED: 'Completed';
-      FAILED: 'Failed';
-      NEEDS_REVIEW: 'Needs review';
-      PENDING: 'Pending';
-    };
-    subtitle: 'Card payments made through the secret /pay link on the 7 sites (Mollie)';
-    subtitleBookings: 'Card payments of online bookings (Mollie): every checkout attempt, paid or not';
-    tabBookings: 'Booking payments';
-    tabLink: 'Payment link';
-    title: 'Payments';
-    totalReceived: 'Total received';
-  };
-  extras: {
-    'adrenalin-pack': 'Adrenaline pack';
-    'adrenalin-pack-description': 'High-energy water sports equipment package';
-    'airstream-towable': 'Airstream towable';
-    'airstream-towable-description': 'Premium inflatable for high-speed towing activities';
-    apa: 'APA (advance provisioning allowance)';
-    'apa-description': 'Advance payment for fuel, food, drinks, and port fees';
-    'banana-boat': 'Banana boat';
-    'banana-boat-description': 'Fun inflatable ride for multiple passengers';
-    'beach-towels': 'Beach towels';
-    'beach-towels-description': 'Special towels for beach and water activities';
-    'coffee-machine': 'Coffee Machine';
-    'coffee-machine-description': 'Professional coffee machine for fresh coffee during your trip';
-    cook: 'Cook / Chef';
-    'cook-description': 'Professional chef to prepare meals during your charter';
-    'deposit-insurance': 'Deposit insurance';
-    'deposit-insurance-description': 'Insurance coverage to protect your security deposit';
-    'dinghy-outboard-engine': 'Dinghy with outboard engine';
-    'dinghy-outboard-engine-description': 'Motorized tender for easy transportation to shore';
-    'diving-equipment': 'Diving equipment';
-    'diving-equipment-description': 'Complete scuba diving gear including tanks and regulators';
-    donut: 'Donut tube';
-    'donut-description': 'Inflatable ring for fun water activities and relaxation';
-    'early-boarding': 'Early boarding / Check-in';
-    'early-boarding-description': 'Board the yacht before standard check-in time';
-    efoil: 'E-foil board';
-    'efoil-description': 'Electric hydrofoil board for surfing above the water';
-    'family-pack': 'Family pack';
-    'family-pack-description': 'Special package designed for families with children';
-    'fishing-equipment': 'Fishing equipment';
-    'fishing-equipment-description': 'Complete fishing gear including rods, reels, and tackle';
-    'floating-mats': 'Floating mats';
-    'floating-mats-description': 'Large floating platforms for relaxation on water';
-    grill: 'Grill / Barbecue';
-    'grill-description': 'Outdoor cooking equipment for grilling and barbecuing';
-    hostess: 'Hostess';
-    'hostess-description': 'Crew member responsible for guest services and cabin maintenance';
-    'inflatable-lifejacket': 'Inflatable lifejacket';
-    'inflatable-lifejacket-description': 'Additional safety equipment for water activities';
-    'inflatable-swimming-platform': 'Inflatable swimming platform';
-    'inflatable-swimming-platform-description': 'Additional floating platform for swimming and relaxation';
-    'jet-ski': 'Jet ski';
-    'jet-ski-description': 'Personal watercraft for high-speed water adventures';
-    kayak: 'Kayak';
-    'kayak-description': 'Single or double kayak for exploring coastlines and coves';
-    kneeboard: 'Kneeboard';
-    'kneeboard-description': 'Board for kneeboarding water sports activities';
-    'larger-rib': 'Larger RIB / Dinghy';
-    'larger-rib-description': 'Bigger tender with more capacity and better performance';
-    'late-boarding': 'Late boarding / Check-in';
-    'late-boarding-description': 'Flexible check-out time beyond standard hours';
-    'mono-skis': 'Mono skis';
-    'mono-skis-description': 'Single water ski for advanced water skiing';
-    'permit-for-montenegro': 'Permit for Montenegro';
-    'permit-for-montenegro-description': 'Required documentation for sailing in Montenegrin waters';
-    'pets-onboard': 'Pets onboard';
-    'pets-onboard-description': 'Permission and accommodation for your pets during the charter';
-    'refundable-security-deposit': 'Refundable security deposit';
-    'refundable-security-deposit-description': 'Security deposit that will be returned if no damages occur';
-    'safety-net': 'Safety net';
-    'safety-net-description': 'Safety nets installed around the yacht for enhanced security';
-    seabob: 'Seabob';
-    'seabob-description': 'High-tech underwater scooter for diving and surface riding';
-    skipper: 'Skipper service';
-    'skipper-description': 'Professional crew member who operates and navigates the yacht';
-    'snorkeling-equipment': 'Snorkeling equipment';
-    'snorkeling-equipment-description': 'Masks, fins, and snorkels for underwater exploration';
-    'stand-up-paddle-SUP': 'Stand up paddle (SUP)';
-    'stand-up-paddle-SUP-description': 'Paddleboard equipment for water sports and recreation';
-    subwing: 'Subwing board';
-    'subwing-description': 'Underwater wings for gliding beneath the surface';
-    'tourist-tax': 'Tourist tax';
-    'tourist-tax-description': 'Local government fees required for visiting certain destinations';
-    towels: 'Towels';
-    'towels-description': 'Clean towels provided for your comfort during the charter';
-    'towing-air-tube-ring': 'Towing air tube ring';
-    'towing-air-tube-ring-description': 'Inflatable ring for exciting towing activities';
-    'transit-log': 'Transit log / Final cleaning';
-    'transit-log-description': 'Charter pack including final cleaning and transit documentation';
-    'underwater-scooter': 'Underwater scooter';
-    'underwater-scooter-description': 'Motorized device for underwater exploration and fun';
-    'vip-pack': 'VIP pack';
-    'vip-pack-description': 'Premium service package with exclusive amenities';
-    wakeboard: 'Wakeboard';
-    'wakeboard-description': 'Board and equipment for wakeboarding water sports';
-    'water-skies': 'Water skis';
-    'water-skies-description': 'Equipment for water skiing behind the yacht or tender';
-    'water-tube': 'Water tube';
-    'water-tube-description': 'Inflatable tube for towing behind the yacht or tender';
-    'wi-fi': 'Wi-Fi / Internet pack';
-    'wi-fi-description': 'Internet connectivity during your charter';
-  };
-  form: {
-    agency: {
-      blacklisted: 'Blacklisted';
-      discount: 'Maximum Discount (%)';
-      email: 'Email';
-      inquiryOnly: 'Inquiry mode';
-      name: 'Name';
-      phone: 'Phone Number';
-      recommended: 'Recommended';
-      skipExternalSystem: 'MMK / NauSys bypass';
-      status: 'Status';
-    };
-    booking: {
-      email: 'Email';
-      external: 'External ID';
-      'external-system': 'External System';
-      reservation: 'Reservation';
-      'reservation-number': 'Reservation number';
-    };
-    'custom-boat': {
-      amenitiesText: 'Saloon and Cabins';
-      amenitiesTextPlaceholder: 'Paste the amenities list here, one entry per line (Fridge, BBQ, Coffee machine, Bed sizes 1.60 x 2.00 m, …). Each non-empty line shows up as a checkmark item on the public page.';
-      beam: 'Beam (m)';
-      berths: 'Berths';
-      boatModel: 'Boat model';
-      boatName: 'Boat name';
-      boatType: 'Boat Type';
-      buildYear: 'Build Year';
-      cabins: 'Cabins';
-      'choose-equipment': 'Choose Equipment';
-      country: 'Country';
-      crewCabins: 'Crew Cabins';
-      crewNumber: 'Crew Number';
-      defaultCheckin: 'Default Check in';
-      defaultCheckout: 'Default Check out';
-      descriptionDe: 'Deutschland Description';
-      descriptionEn: 'English Description';
-      descriptionEs: 'Spanish Description';
-      descriptionFr: 'French Description';
-      descriptionHr: 'Croatia Description';
-      descriptionIt: 'Italian Description';
-      descriptionNl: 'Dutch Description';
-      descriptionPl: 'Polish Description';
-      descriptionPt: 'Portuguese Description';
-      draft: 'Draft (m)';
-      enginePower: 'Engine';
-      engineText: 'Engine';
-      fuelTank: 'Fuel capacity (L)';
-      genoaArea: 'Genoa Area';
-      genoaType: 'Genoa Type';
-      'input-country': 'Choose country';
-      inputBeam: 'Input beam';
-      inputBerths: 'Input berths';
-      inputBoatModel: 'Input boat model';
-      inputBoatType: 'Input boat type';
-      inputBuildYear: 'Input build year';
-      inputCabins: 'Input cabins';
-      inputCrewCabins: 'Input crew cabins';
-      inputCrewNumber: 'Input crew number';
-      inputDefaultCheckin: 'Input default check in';
-      inputDefaultCheckout: 'Input default check out';
-      inputDescription: 'Input description';
-      inputDraft: 'Input draft';
-      inputEnginePower: 'Input engine';
-      inputEngineText: 'Free-text engine description (e.g. 2x Volvo IPS 1050)';
-      inputFuelTank: 'Input fuel capacity';
-      inputGenoaType: 'Input genoa type';
-      inputLaunchYear: 'Input launch year';
-      inputLength: 'Input lenght';
-      inputMainsailType: 'Input mainsail type';
-      inputManufacturer: 'Input manufacturer';
-      inputMarina: 'Choose marina';
-      inputMaxPersons: 'Input max persons';
-      inputPrice: 'Input Price';
-      inputPriceDescription: 'Input price description';
-      inputVideoUrl: 'Input video link';
-      inputWaterTank: 'Input water capacity';
-      launchYear: 'Launch Year';
-      length: 'Length (m)';
-      mainsailArea: 'Mainsail Area';
-      mainsailType: 'Mainsail Type';
-      manufacturer: 'Manufacturer';
-      manufacturerName: 'Manufacturer Name';
-      marina: 'Marina';
-      maxPersons: 'Max Persons (Guests + Crew)';
-      modelName: 'Model Name';
-      price: 'Price (EUR - €)';
-      priceDescription: 'Price description';
-      selectCountryFirst: 'Choose country first';
-      toysText: 'Entertainment';
-      toysTextPlaceholder: 'Paste the toys / water-sports / games list here, one entry per line (Sea bob, Wakeboard, Kayak, Fishing gear, …).';
-      videoUrl: 'Video link';
-      waterTank: 'Water capacity (L)';
-    };
-    inquiry: {
-      'choose-status': 'Choose status';
-      status: 'Status';
-    };
-    invoice: {
-      'add-new-agency': 'Add new agency';
-      agency: 'Agency';
-      'agency-name-required': 'Agency name is required';
-      'auto-number': 'Automatic (next in year)';
-      'booking-date': 'Booking date (operator)';
-      'charter-country': 'Charter country';
-      'charter-date-from': 'Charter start';
-      'charter-date-to': 'Charter end';
-      'contract-number': 'Contract number';
-      'include-vat': 'Include VAT';
-      'input-charter-country': 'e.g. Croatia';
-      'input-contract-number': 'Enter contract number';
-      'input-invoice-item': 'Input item description';
-      'input-invoice-number': 'Enter invoice number';
-      'input-price-without-vat': 'Input price without VAT';
-      'input-recipient-city': 'Input City';
-      'input-recipient-code': 'Input Zip Code';
-      'input-recipient-country': 'Select Country';
-      'input-recipient-name': 'Input Agency Name';
-      'input-recipient-street': 'Input Street';
-      'input-recipient-type': 'Select Type';
-      'input-recipient-vat-code': 'Input Recipient VAT Code';
-      'input-total-price': 'Input total price';
-      'input-vat-amount': 'Input VAT amount';
-      'input-vat-percentage': 'Input VAT percentage';
-      'invoice-date': 'Invoice date';
-      'invoice-information': 'Invoice Information';
-      'invoice-item': 'Item description';
-      'invoice-number': 'Invoice number';
-      'price-ovverride-amount': 'Price override Amount';
-      'price-without-vat': 'Price without VAT';
-      'recipient-city': 'Recipient City';
-      'recipient-code': 'Recipient Zip Code';
-      'recipient-country': 'Recipient Country';
-      'recipient-information': 'Recipient Information';
-      'recipient-name': 'Recipient Name';
-      'recipient-street': 'Recipient Street';
-      'recipient-type': 'Recipient Type';
-      'recipient-vat-code': 'Recipient VAT Code';
-      'reservation-information': 'Reservation information';
-      'save-agency': 'Save agency';
-      'search-agency': 'Search agency by name…';
-      'select-language': 'Select Language';
-      'select-status': 'Select status';
-      'total-price': 'Total price';
-      'vat-amount': 'VAT amout';
-      'vat-percentage': 'VAT (%)';
-    };
-    user: {
-      address: 'Address';
-      'address-placeholder': 'Street and number';
-      'choose-role': 'Choose Role';
-      city: 'City';
-      country: 'Country';
-      email: 'Email';
-      phone: 'Phone Number';
-      role: 'Role';
-      surname: 'Surname';
-      'user-name': 'Name';
-    };
-  };
-  inquiries: {
-    'change-status': 'Change status';
-    dates: 'Dates';
-    'dates-not-specified': 'Dates not specified';
-    email: 'Email Address';
-    'full-name': 'Full Name';
-    'manage-inquiry': 'Manage Inquiry';
-    message: 'Message';
-    phone: 'Phone Number';
-    'send-offer': 'Send Offer';
-    'user-info': 'User Info';
-  };
-  invoices: {
-    'booking-details': {
-      'booking-date': 'Booking date';
-      'booking-number': 'Booking number';
-      'charter-country': 'Charter country';
-      'charter-period': 'Charter period';
-      'client-email': 'Client email';
-      'client-name': 'Client name';
-      'client-phone': 'Client phone number';
-      'contract-number': 'Contract number';
-      'invoice-item': 'Item Description';
-      title: 'Booking Details';
-    };
-    'invoice-details': {
-      included: 'Included';
-      'invoice-date': 'Date';
-      'invoice-language': 'Language';
-      'invoice-number': 'Invoice number';
-      'invoice-vat': 'VAT';
-      title: 'Invoice Details';
-    };
-    'pricing-details': {
-      'price-without-vat': 'Price without VAT';
-      title: 'Pricing';
-      total: 'Total';
-    };
-    'recipient-details': {
-      'recipient-city': 'City';
-      'recipient-country': 'Country';
-      'recipient-name': 'Name';
-      'recipient-street': 'Street';
-      'recipient-type': 'Type';
-      'recipient-vat-code': 'VAT Code';
-      'recipient-zip': 'Zip code';
-      title: 'Recipient Details';
-    };
-  };
-  login: {
-    'back-to-login': 'Back to login';
-    'email-address': 'Email';
-    'forgotten-password': 'Forgotten password?';
-    'log-in': 'Login';
-    'logging-in': 'Logging in...';
-    password: 'Password';
-    'remember-me': 'Remember me';
-    'reset-password': {
-      button: 'Send reactivation code';
-      'check-mailbox': 'Check your mailbox!';
-      'check-mailbox-description': 'A code has been sent to email <strong>{{name}}</strong>';
-      title: 'Reset Password';
-    };
-    'setup-password': {
-      description: 'Input your new password.';
-      'glad-you-back': 'Glad to have you back!';
-      'password-reset-failed': 'Password reset code failed';
-      'password-reset-failed-description': 'We are sorry, but your password reset code is either invalid or has expired. Please check the link or request a new password reset.';
-      'repeat-password': 'Repeat password';
-      'reset-password': 'Reset Password';
-      'resetted-successfully': 'Password has been resetted successfully. Login below.';
-      title: 'Setup New Password';
-    };
-    signup: {
-      description: 'You’ve been invited to use Boat4You. Please finish up your profile below.';
-      'invite-failed': 'Invite code failed';
-      'invite-failed-description': ' We are sorry, but your invite is either invalid or has expired. Please check the link or request a new invitation.';
-      'repeat-password': 'Repeat password';
-      'sign-up': 'Sing up';
-      'sign-up-failed': 'Failed to sign up';
-      'sign-up-successfully': 'Signed up successfully';
-      'signing-up': 'Signing Up...';
-      title: 'Set up your account.';
-    };
-    title: 'Admin Panel Login';
-    'toggle-password-visibility': 'Toggle password visibility';
-  };
-  navigation: {
-    about: {
-      title: 'About';
-    };
-    agencies: 'Agencies';
-    boatsMedia: 'Boats · Media';
-    bookings: 'Bookings';
-    chat: 'Chat';
-    contactCenter: 'Contact Center';
-    customBoats: 'Custom boats';
-    customPayments: 'Payments';
-    dashboard: 'Dashboard';
-    extras: 'Extras';
-    heatmaps: 'Heatmaps';
-    inquiries: 'Inquiries';
-    invoices: 'Invoices';
-    languagePicker: {
-      languageLabel: 'Language';
-      savePreferences: 'Save Preferences';
-      title: 'Select Language';
-    };
-    live: 'Live visitors';
-    logout: 'Logout';
-    offers: 'Offers';
-    preferences: {
-      language: 'Language';
-      title: 'Preferences and profile';
-    };
-    profileSettings: 'Profile Settings';
-    social: 'Social posts';
-    stats: 'Statistics';
-    users: 'Users';
-    workspace: {
-      charter: 'Charter';
-      marketing: 'Marketing';
-      title: 'Workspace';
-    };
-  };
-  social: {
-    ai: {
-      approval: 'Wait for my approval';
-      approvalHint: 'Off: the AI schedules the post by itself.';
-      channels: 'Channels';
-      date: 'Date';
-      enabled: 'Daily post';
-      guidance: 'Notes for the AI';
-      guidancePlaceholder: 'e.g. push early booking for 2027; no gulets; mention Kornati and Vis.';
-      intro: "Every morning the AI picks a boat from the site's own fleet that was not featured lately, takes our photos of it, writes a text for each network and prepares the post. With approval on, it waits for you in Posts as a draft; otherwise it is scheduled by itself.";
-      language: 'Language';
-      loadError: 'The AI settings could not be loaded.';
-      noAi: 'The AI key is missing on the server (ANTHROPIC_API_KEY): daily posts cannot run.';
-      noChannels: "Connect this site's channels first.";
-      noHiggsfield: 'Higgsfield is not set up on the server: posts use photos only.';
-      noRuns: 'No AI posts yet.';
-      open: 'Open';
-      post: 'Post';
-      ran: 'Done: {{- status}}';
-      runError: 'The AI post failed.';
-      runNow: "Make today's post now";
-      runStatus: {
-        DONE: 'Done';
-        FAILED: 'Failed';
-        RUNNING: 'Working';
-        SKIPPED: 'Skipped';
-        WAITING_VIDEO: 'Waiting for video';
-      };
-      runs: 'Latest AI posts';
-      save: 'Save';
-      saveError: 'Saving failed.';
-      saved: 'Saved.';
-      started: "The AI is making today's post; it shows up in the list below in a few minutes.";
-      status: 'Status';
-      time: 'Publish at';
-      timeHint: 'Europe/Zagreb; the AI prepares it 3 hours earlier.';
-      topic: 'Topic';
-      video: 'Video with Higgsfield';
-      videoHint: 'A short video from the best photo, posted to TikTok and YouTube.';
-    };
-    automation: {
-      accountIds: 'Channel ids';
-      actionError: 'The action failed.';
-      apiHint: 'Header X-Api-Key; JSON in and out.';
-      apiTitle: 'Posting API';
-      confirmRevoke: 'Revoke the key {{- name}}? Anything using it stops working at once.';
-      copied: 'Copied.';
-      copy: 'Copy';
-      copyFailed: 'Copying failed: select the text and copy it by hand.';
-      create: 'Create';
-      createTitle: 'New automation key';
-      created: 'Created';
-      daily1: 'picks a boat, destination or offer from our sites and checks the last posts so it does not repeat';
-      daily2: 'writes the text in our voice, a shorter one for X and Bluesky, hashtags for Instagram and TikTok';
-      daily3: 'takes our own photos of that boat (Boats · Media) and sends the post through this API';
-      daily4: 'with a drafts-only key it waits for us: we approve it here in Posts with one click';
-      dailyHint: "A scheduled Claude task runs every morning and prepares the day's post:";
-      dailyTitle: 'Daily posts with Claude';
-      done: 'Done';
-      draftsOnly: 'Drafts only';
-      draftsOnlyHint: 'The key can only create drafts; publishing stays with us. Recommended until the posts are trusted.';
-      epAccounts: 'the connected channels and their ids';
-      epList: 'posts in a period, so the automation does not repeat itself';
-      epMedia: 'a file, or {"url": …} that our backend downloads';
-      epPosts: 'a post: text, media, channels (accountIds or platforms), optional text per platform, optional schedule';
-      full: 'Can publish';
-      intro: 'An automation key lets a scheduled Claude task (or any script) prepare posts through the API. With "Drafts only" a person still publishes every post from the admin.';
-      lastUsed: 'Last used';
-      loadError: 'The keys could not be loaded.';
-      mode: 'Mode';
-      name: 'Name';
-      namePlaceholder: 'Claude daily posts';
-      never: 'never';
-      newKey: 'New key';
-      noKeys: 'No keys yet.';
-      prefix: 'Key';
-      revoke: 'Revoke';
-      revoked: 'Key revoked.';
-      secretHint: 'It is shown only this once. Keep it as a secret of the scheduled task, never in a repository.';
-      secretTitle: 'Copy the key now';
-    };
-    channels: {
-      accountStatus: {
-        CONNECTED: 'Connected';
-        ERROR: 'Error';
-        EXPIRED: 'Expired';
-      };
-      actionError: 'The action failed.';
-      confirmDisconnect: 'Disconnect {{- name}}? Its scheduled posts will fail until it is connected again.';
-      connect: 'Connect';
-      connectAnother: 'Connect another';
-      connectError: 'Connecting {{- platform}} failed: {{- error}}';
-      connectFor: 'Connect {{- platform}}';
-      connectStartError: 'The connection could not start.';
-      connected: 'Connected: {{- platform}}.';
-      continue: 'Continue to {{- platform}}';
-      credentialsTitle: 'Connect {{- platform}}';
-      disconnect: 'Disconnect';
-      disconnected: '{{- name}} disconnected.';
-      expired: 'Access expired: connect again.';
-      expires: 'access expires {{- date}}';
-      identifier: 'Handle';
-      intro: "Connections go through each network's official API. Our backend keeps the access tokens; nobody pays a middleman.";
-      loadError: 'The channels could not be loaded.';
-      none: 'Not connected';
-      notConfigured: 'Not set up on the server';
-      overview: 'Channels per site';
-      overviewHint: 'What is connected for each of our sites.';
-      privateOnly: 'Posts land as private until the network approves our app.';
-      reconnect: 'Reconnect';
-      secret: 'App password';
-      secretHint: 'Bluesky → Settings → Privacy and security → App passwords. Never the main password.';
-      since: 'connected {{- date}}';
-      siteSaved: 'Site saved.';
-    };
-    compose: {
-      accountGone: 'no longer connected';
-      accountNotUsable: 'Connect this channel again first.';
-      channels: 'Channels';
-      chars: '{{count}} / {{max}} characters';
-      confirmPublish: 'Publish now to {{count}} channels?';
-      confirmPublishHint: 'Once it is out, a post can only be deleted on the network itself.';
-      confirmPublish_one: 'Publish now to {{count}} channel?';
-      connectChannels: 'Connect channels';
-      customText: 'Own text for this channel';
-      fixFirst: 'Fix the marked problems first.';
-      imageTooLarge: '{{- name}}: a photo can be at most 20 MB.';
-      link: 'Link (optional)';
-      linkHint: 'Pinterest destination, Google Business button, Facebook link preview.';
-      loadError: 'The post could not be loaded.';
-      media: 'Photos and video';
-      mediaDrop: 'Drop photos or a video here, or';
-      mediaHint: 'JPEG, PNG, WebP up to 20 MB · MP4, MOV up to 500 MB';
-      mediaPick: 'choose files';
-      moveLeft: 'Move left';
-      moveRight: 'Move right';
-      noChannels: 'No channel is connected yet.';
-      notEditable: 'This post already went out and cannot be changed. Duplicate it instead.';
-      note: 'Internal note (optional)';
-      noteHint: 'Only we see it, e.g. the campaign.';
-      nothingToSave: 'There is nothing to save yet.';
-      now: 'now';
-      ok: 'Ready';
-      ownText: 'own text';
-      perChannel: 'Per channel';
-      perChannelHint: 'A channel can get its own text; otherwise it uses the main text.';
-      preview: 'Preview';
-      previewEmpty: 'Pick a channel to see the preview.';
-      problems: '{{count}} to fix';
-      publishNow: 'Publish now';
-      publishing: 'Publishing started: follow the status in Posts.';
-      remove: 'Remove';
-      removeChannel: 'Remove this channel';
-      saveDraft: 'Save draft';
-      saveError: 'Saving failed.';
-      saved: 'Draft saved.';
-      schedule: 'Schedule';
-      scheduleAt: 'Publish at';
-      scheduled: 'Scheduled for {{- date}}.';
-      selectAll: 'Select all';
-      selectNone: 'Clear';
-      selectedCount: '{{count}} selected';
-      text: 'Text';
-      textPlaceholder: 'What do you want to tell everyone?';
-      timezone: 'Your local time ({{- tz}})';
-      title: 'Title';
-      titleRequired: 'Title (required)';
-      type: '{{- name}}: only JPEG, PNG, WebP, MP4 or MOV.';
-      uploadFailed: '{{- name}}: the upload failed.';
-      uploading: 'Uploading {{- name}}…';
-      videoTooLarge: '{{- name}}: a video can be at most 500 MB.';
-      waitUploads: 'Wait until the uploads finish.';
-    };
-    detail: {
-      actionError: 'The action failed.';
-      attempts: 'attempts: {{count}}';
-      cancel: 'Cancel schedule';
-      cancelled: 'Schedule cancelled.';
-      channels: 'Channels';
-      close: 'Close';
-      confirmCancel: 'Cancel this scheduled post? Nothing will be sent.';
-      confirmDelete: 'Delete this post from the list? Nothing on the networks changes.';
-      delete: 'Delete';
-      deleted: 'Post deleted.';
-      duplicate: 'Duplicate';
-      edit: 'Edit';
-      link: 'Link';
-      note: 'Note';
-      open: 'Open';
-      publishedAt: 'Published';
-      retried: 'Failed channels are being sent again.';
-      retry: 'Retry failed';
-      scheduledFor: 'Scheduled for';
-      title: 'Post #{{id}}';
-    };
-    issue: {
-      angleBrackets: 'YouTube does not allow < or > in the title or description.';
-      aspectRatio: 'Instagram takes photos from 4:5 (portrait) to 1.91:1 (landscape): crop this one.';
-      empty: 'Nothing to publish.';
-      imagesNotSupported: 'Photos are not supported here.';
-      linkInvalid: 'The link must be a full address starting with https://';
-      linkNotClickable: 'Links are not clickable here; use the link in bio or the Link field.';
-      mediaRequired: 'Needs a photo or a video.';
-      mixedMedia: 'Photos and a video cannot go in the same post.';
-      noTargets: 'Pick at least one channel.';
-      scheduleInPast: 'Pick a time at least 2 minutes from now.';
-      scheduleInvalid: 'That date does not exist.';
-      scheduleMissing: 'Pick the date and time.';
-      titleRequired: 'The title is required.';
-      titleTooLong: 'Title too long: {{count}}/{{max}}.';
-      tooLong: 'Too long: {{count}}/{{max}} characters.';
-      tooManyHashtags: 'At most {{max}} hashtags (now {{count}}).';
-      tooManyImages: 'At most {{max}} photos (now {{count}}).';
-      tooManyVideos: 'At most {{max}} video (now {{count}}).';
-      videoNotSupported: 'Video is not supported here.';
-      videoRequired: 'Needs a video.';
-    };
-    newPost: 'New post';
-    posts: {
-      addOnDay: 'New post on {{- date}}';
-      allChannels: 'All channels';
-      allStatuses: 'All statuses';
-      calendar: 'Calendar';
-      channel: 'Channel';
-      empty: 'No posts this month';
-      emptyHint: 'Write one post and send it to every channel at once.';
-      generating: 'video in progress';
-      list: 'List';
-      loadError: 'The posts could not be loaded.';
-      more: '+{{count}} more';
-      nextMonth: 'Next month';
-      noText: '(no text)';
-      prevMonth: 'Previous month';
-      site: 'Site';
-      status: 'Status';
-      today: 'Today';
-    };
-    sites: {
-      all: 'All sites';
-      pick: 'Which site is this channel for?';
-      pickHint: 'Each site has its own Facebook, Instagram and TikTok; YouTube is one for all sites.';
-      selectSite: 'Select all';
-      shared: 'All sites (shared)';
-      site: 'Site';
-    };
-    source: {
-      ADMIN: 'Admin';
-      AI: 'AI';
-      API: 'Automation';
-    };
-    status: {
-      CANCELLED: 'Cancelled';
-      DRAFT: 'Draft';
-      FAILED: 'Failed';
-      PARTIAL: 'Partly published';
-      PENDING: 'Waiting';
-      PUBLISHED: 'Published';
-      PUBLISHING: 'Publishing';
-      SCHEDULED: 'Scheduled';
-    };
-    subtitle: 'One post, every channel: publish now or schedule it.';
-    tab: {
-      ai: 'AI daily posts';
-      automation: 'Automation';
-      channels: 'Channels';
-      compose: 'New post';
-      edit: 'Edit post';
-      posts: 'Posts';
-    };
-    title: 'Social posts';
-    ui: {
-      cancel: 'Cancel';
-    };
-  };
-  table: {
-    agencies: {
-      'by-pass': 'MMK/NauSys Bypass';
-      email: 'Email';
-      'max-discount': 'Max. Discount';
-      name: 'Name';
-      'phone-number': 'Phone Number';
-      'primary-source': 'Primary Source';
-      status: 'Status';
-    };
-    bookings: {
-      'agency-price': 'Agency Price (€)';
-      boat: 'Boat';
-      'booking-date': 'Booking Date';
-      'check-in': 'Check-In';
-      'check-out': 'Check-Out';
-      dates: 'Dates';
-      ending: 'Ending';
-      'net-price': 'Net Price (€)';
-      'order-number': 'Order No.';
-      price: 'Client Price (€)';
-      route: 'Route';
-      starting: 'Starting';
-      status: 'Status';
-      user: 'Client';
-    };
-    'custom-boats': {
-      'high-price': 'High Price';
-      location: 'Location';
-      'low-price': 'Low Price';
-      'mid-price': 'Mid Price';
-      model: 'Model';
-      name: 'Name';
-    };
-    extras: {
-      description: 'Description';
-      matchKeys: 'Match Keys';
-      name: 'Name';
-    };
-    inquiries: {
-      boat: 'Boat';
-      'check-in': 'Check-In';
-      'check-out': 'Check-Out';
-      email: 'Email';
-      'inquiries-number': 'Order No.';
-      location: 'Location';
-      name: 'Name';
-      'phone-number': 'Phone Number';
-      status: 'Status';
-    };
-    invoices: {
-      client: 'Client';
-      date: 'Date';
-      email: 'Email';
-      'invoices-number': 'Invoice No.';
-      'phone-number': 'Phone Number';
-      price: 'Price';
-      'reservation-number': 'Reservation No.';
-    };
-    users: {
-      email: 'Email';
-      id: 'Client ID';
-      name: 'Name';
-      'phone-number': 'Phone Number';
-      role: 'Role';
-      status: 'Status';
-      surname: 'Surname';
-    };
-  };
-  tabs: {
-    discounted: 'Discounted Boats';
-    general: 'General';
-  };
-  'toast-messages': {
-    'check-your-mailbox': 'Check your mailbox';
-    'confirm-booking-failed': 'Failed to confirm booking';
-    'confirm-booking-successfully': 'Confirm booking successfully';
-    'create-agency-failed': 'Failed to save agency';
-    'create-agency-successfully': 'Agency saved';
-    'create-custom-boat-failed': 'Create custom boat failed';
-    'create-custom-boat-successfully': 'Create custom boat successfully';
-    'create-invoice-failed': 'Failed to create invoice';
-    'create-invoice-successfully': 'Create invoice successfully';
-    'create-user-failed': 'Failed to create user';
-    'create-user-successfully': 'Create user successful';
-    'delete-booking-failed': 'Failed to cancel reservation';
-    'delete-booking-successfully': 'Reservation cancelled successfully';
-    'delete-custom-boat-failed': 'Failed to delete custom boat';
-    'delete-custom-boat-successfully': 'Custom boat deleted successfully';
-    'delete-image-failed': 'Failed to delete image';
-    'delete-image-successfully': 'Image deleted successfully';
-    'delete-images-failed': 'Failed to delete images';
-    'delete-images-successfully': 'Images deleted successfully';
-    'delete-invoice-failed': 'Failed to delete invoice';
-    'delete-invoice-successfully': 'Delete invoice successfully';
-    'delete-pdf-failed': 'Failed to delete PDF';
-    'delete-pdf-successfully': 'PDF deleted successfully';
-    'delete-user-failed': 'Failed to delete user';
-    'delete-user-successfully': 'Delete user successful';
-    'download-selected-failed': 'Failed to prepare the ZIP download';
-    'failed-to-send-email': 'Failed to send email';
-    'invite-user-failed': 'Failed to invite user';
-    'invite-user-successfully': 'Invite user successful';
-    'login-failed': 'Login failed';
-    'login-success': 'Login successful';
-    'mark-paid-booking-failed': 'Failed to mark as paid booking';
-    'mark-paid-booking-successfully': 'Mark as paid booking successfully';
-    'mark-sent-invoice-failed': 'Failed to mark as sent invoice';
-    'mark-sent-invoice-successfully': 'Mark as Sent invoice successfully';
-    'password-updated-failed': 'Failed to update password';
-    'password-updated-successfully': 'Password updated successfully. Please log in again.';
-    'profile-updated-failed': 'Failed to update profile';
-    'profile-updated-successfully': 'Profile updated successfully';
-    'save-notes-failed': 'Failed to save notes';
-    'save-notes-successfully': 'Notes saved';
-    'surcharge-updated-failed': 'Unable to update card payment surcharge. Please try again.';
-    'surcharge-updated-successfully': 'Card payment surcharge has been updated successfully';
-    'sync-booking-failed': 'Failed to sync reservation';
-    'sync-booking-successfully': 'Reservation synced successfully';
-    'update-agency-failed': 'Update agency failed';
-    'update-agency-successfully': 'Update agency successful';
-    'update-custom-boat-failed': 'Failed to update custom boat';
-    'update-custom-boat-successfully': 'Custom boat updated successfully';
-    'update-inquiry-status-failed': 'Failed to change inquiry status';
-    'update-inquiry-status-successfully': 'Inquiry status changed successfully';
-    'update-invoice-failed': 'Failed to update invoice';
-    'update-invoice-successfully': 'Update invoice successfully';
-    'update-user-failed': 'Failed to update user';
-    'update-user-successfully': 'Update user successful';
-    'upload-image-failed': 'Failed to upload image';
-    'upload-image-successfully': 'Image uploaded successfully';
-    'upload-images-failed': 'Failed to upload images';
-    'upload-images-successfully': 'Images uploaded successfully';
-    'upload-pdf-failed': 'Failed to upload PDF';
-    'upload-pdf-successfully': 'PDF uploaded successfully';
-  };
-  yacht: {
-    allInclusive: 'All Inclusive';
-    bareboat: 'Bareboat';
-    catamaran: 'Catamaran';
-    classicMainsail: 'Classic mainsail';
-    crewed: 'Crewed';
-    furlingGenoa: 'Furling Genoa';
-    gulet: 'Gulet';
-    luxuryMotorYacht: 'Luxury Motor Yacht';
-    miniCruiser: 'Mini Cruiser';
-    motorYacht: 'Motoryacht';
-    motorboat: 'Motorboat';
-    motorsailer: 'Motorsailer';
-    powerCatamaran: 'Power Catamaran';
-    rollingMainsail: 'Rolling mainsail';
-    sailingYacht: 'Sailing Yacht';
-    standardGenoa: 'Standard Genoa';
-  };
+  "actions": {
+    "accept": "Accept",
+    "add": "Add",
+    "cancel": "Cancel",
+    "cancelBooking": "Cancel Booking",
+    "cancelUpload": "Cancel Upload",
+    "changeDates": "Change Dates",
+    "changeStatus": "Change Status",
+    "clear": "Clear",
+    "confirm-booking": "Confirm Booking",
+    "confirmInvite": "Send the sign-up invite e-mail to {{email}}?",
+    "create": "Create",
+    "create-user": "Create user",
+    "create-yacht": "Create Custom Boat",
+    "creating": "Creating...",
+    "delete": "Delete",
+    "delete-booking": "Cancel Booking",
+    "delete-custom-boat": "Delete custom boat",
+    "deleteInquiry": "Delete Inquiry",
+    "deleteInvoice": "Delete Invoice",
+    "deleteUser": "Delete User",
+    "discard": "Discard",
+    "discard-changes": "Discard changes",
+    "download": "Download",
+    "download-pdf": "Download PDF",
+    "download-selected": "Download selected",
+    "edit": "Edit",
+    "edit-notes": "Edit notes",
+    "editUser": "Edit User",
+    "filter": "Filter",
+    "generate-invoice": "Generate Invoice",
+    "mark-as-paid": "Mark as Paid",
+    "markAsSent": "Mark as Sent",
+    "markAsSentInvoice": "Mark as Sent Invoice",
+    "newInvoice": "New invoice",
+    "preparing-zip": "Preparing ZIP…",
+    "reject": "Reject",
+    "resendInvite": "Resend invite",
+    "reset": "Reset",
+    "save": "Save",
+    "search": "Search",
+    "sendInvite": "Send invite",
+    "sendInvoice": "Send Invoice",
+    "sendOffer": "Send Offer",
+    "sendingInvite": "Sending…",
+    "sort": "Sort",
+    "sync-booking": "Sync Booking",
+    "update": "Update",
+    "update-yacht": "Update Custom Boat",
+    "updateInvoice": "Update invoice",
+    "updating": "Updating...",
+    "uploaded": "uploaded"
+  },
+  "amenities": {
+    "BBQ": "BBQ",
+    "DVD-player": "DVD Player",
+    "air-conditioning": "Air conditioning",
+    "audio-system": "Audio system",
+    "autopilot": "Autopilot",
+    "bathing-platform": "Bathing platform",
+    "bicycle": "Bicycle",
+    "bimini": "Bimini",
+    "bow-thruster": "Bow thruster",
+    "coffee-machine": "Coffee machine",
+    "cooker": "Cooker",
+    "dinghy": "Dinghy",
+    "dishwasher": "Dishwasher",
+    "electric-winches": "Electric winches",
+    "fishing-set": "Fishing set",
+    "flat-screen-TV": "Flat screen TV",
+    "flybridge": "Flybridge",
+    "freezer": "Freezer",
+    "fridge": "Fridge",
+    "game-console": "Game console",
+    "generator": "Generator",
+    "gennaker": "Gennaker",
+    "heating": "Heating",
+    "ice-maker": "Ice maker",
+    "inside-speakers": "Inside speakers",
+    "inverter": "Inverter",
+    "jacuzzi": "Jacuzzi",
+    "jet-ski": "Jet ski",
+    "karaoke": "Karaoke",
+    "kayak": "Kayak",
+    "kitchen-utensils": "Kitchen utensils",
+    "microwave": "Microwave",
+    "outside-GPS-plotter": "Outside GPS plotter",
+    "outside-shower": "Outside shower",
+    "outside-speakers": "Outside speakers",
+    "oven": "Oven",
+    "pillows-and-blankets": "Pillows and blankets",
+    "radar": "Radar",
+    "safety-net": "Safety net",
+    "salon-GPS-plotter": "Salon GPS plotter",
+    "shower": "Shower",
+    "sink": "Sink",
+    "snorkel-sets": "Snorkel sets",
+    "solar-panels": "Solar panels",
+    "spinnaker": "Spinnaker",
+    "stand-up-paddle": "Stand Up Paddle",
+    "sun-pads": "Sun pads",
+    "surf": "Surf",
+    "teak-deck": "Teak deck",
+    "towels": "Towels",
+    "wakeboard": "Wakeboard",
+    "washing-machine": "Washing machine",
+    "waste-tank": "Waste tank",
+    "water-maker": "Water maker",
+    "water-skis": "Water skis",
+    "water-toys": "Water toys",
+    "windsurf": "Windsurf"
+  },
+  "booking": {
+    "additional-paid-at-marina": "Additional - Paid at marina",
+    "additional-paid-now": "Additional - Paid now",
+    "admin-notes": "Internal notes",
+    "admin-notes-hint": "Visible to admins only — never shown to the customer.",
+    "admin-notes-placeholder": "e.g. Customer needs airport transfer; paid 500 EUR cash; call before check-in...",
+    "apa-description": "Lorem ipsum",
+    "apa-text": "{{value}} price without VAT",
+    "bank-fee-note": "incl. {{fee}} € bank transfer fee",
+    "booking-info": "Booking Info",
+    "cancel-booking": "Cancel Booking",
+    "cancellation-reason": "Reason",
+    "cancellation-requested": "Cancellation Requested",
+    "cancellation-requested-on": "Cancellation requested on",
+    "cancelled-by-agent": "Cancelled by agent",
+    "change-status": "Change Status",
+    "charter-company": "Charter company",
+    "charter-price": "Charter price",
+    "charter-update": "Charter update",
+    "charter-update-hint": "Shown to the customer in My bookings",
+    "charter-update-placeholder": "e.g. Skipper: 1470 €\nStand Up Paddle: 200 €",
+    "check-in": "Check-in",
+    "check-out": "Check-out",
+    "client-price": "Client price",
+    "confirm-booking": "Confirm Booking",
+    "crew-list-url": "Crew list URL",
+    "crew-list-url-placeholder": "https://...",
+    "day": "day",
+    "days": "days",
+    "deposit-insurance": "Deposit insurance",
+    "discount": "Discount",
+    "documents": {
+      "confirm-delete": "Delete \"{{filename}}\"? This cannot be undone.",
+      "delete": "Delete",
+      "download": "Download",
+      "drop-now": "Drop to upload",
+      "drop-or-click": "Drop files here or click to upload",
+      "empty": "No documents attached yet.",
+      "internal-title": "Internal documentation",
+      "loading": "Loading…",
+      "open": "Open document",
+      "title": "Documents",
+      "types-hint": "PDF, DOC, DOCX up to 20 MB",
+      "uploading": "Uploading…"
+    },
+    "guest-info": "Guest Info",
+    "included": "Included",
+    "manage-booking": "Manage Booking",
+    "marina-total": "Total to pay at marina",
+    "mark-as-paid": "Mark as Paid",
+    "not-paid": "Not paid",
+    "obligatory": "Obligatory",
+    "obligatory-included": "Obligatory - Included in price",
+    "obligatory-paid-at-marina": "Obligatory - Paid at marina",
+    "paid": "Paid",
+    "paid-at-marina": "Paid at marina",
+    "paid-now": "Paid now",
+    "payment-phases": "Payment Phases",
+    "phase": "Phase",
+    "pickup-location": "Pick-up location",
+    "please-dont-close-window": "Please keep this window open while the reservation is syncing",
+    "price-information": "Price Information",
+    "refundable-security-deposit": "Refundable security deposit",
+    "refundable-security-deposit-hint": "Held at pick-up, returned on damage-free return",
+    "save": "Save",
+    "saving": "Saving...",
+    "special-request": "Special Request",
+    "sync-booking": "Sync Booking",
+    "sync-booking-text": "Are you sure you want to sync booking {{value}}? Doing this action cannot be reverted.",
+    "total": "Booking total",
+    "update-booking": "Update this booking",
+    "view-boat": "View boat",
+    "your-booking-is-sync": "Your booking is <strong>being synced!</strong>"
+  },
+  "callCenter": {
+    "action": {
+      "callNow": "Call now",
+      "callNowConfirm": "Nika will call this client within a minute. Continue?",
+      "callNowDone": "The call is scheduled; Nika dials within a minute.",
+      "doNotCall": "Do not call",
+      "doNotCallConfirm": "Mark this phone number as do not call? Every scheduled call to it is cancelled.",
+      "doNotCallDone": "The number will not be called again.",
+      "failed": "The action failed. Try again.",
+      "offerNote": "The offer in one sentence",
+      "offerNotePlaceholder": "E.g. Bali 5.4 from Lefkas, 19–26 June, 14,200 euros with skipper",
+      "offerSave": "Save and schedule the follow-up call",
+      "offerSent": "Offer sent",
+      "offerSentDone": "Saved. Nika calls about the offer in 48 hours.",
+      "refused": "Not possible: {{reason}}.",
+      "resolve": "Mark resolved",
+      "takeover": "I will call myself",
+      "takeoverConfirm": "Cancel Nika's scheduled calls for this inquiry?",
+      "takeoverDone": "Nika's scheduled calls are cancelled."
+    },
+    "calls": {
+      "attempt": "attempt {{n}}",
+      "client": "Client",
+      "duration": "Duration",
+      "empty": "No calls match these filters.",
+      "kind": "Kind",
+      "outcome": "Outcome",
+      "quality": "Quality",
+      "qualityHint": "Nika failed a quality criterion in this call",
+      "scheduled": "scheduled",
+      "search": "Search name, phone or e-mail",
+      "status": "Status",
+      "summary": "Summary",
+      "when": "Time"
+    },
+    "criterion": {
+      "ai_disclosure": "Said she is an AI",
+      "clear_next_step": "Clear next step",
+      "no_agency_names": "No agency or owner names, no comments on competitors",
+      "no_invented_facts": "No invented facts",
+      "recording_notice": "Said the call is recorded",
+      "transfer_rules": "Transfer rules followed"
+    },
+    "data": {
+      "boat_type": "Boat type",
+      "booked_elsewhere": "Booked elsewhere",
+      "budget_eur": "Budget (EUR)",
+      "cabins": "Cabins",
+      "callback_time": "Call back at",
+      "competitor_price_claim": "Lower price seen elsewhere",
+      "crew_wanted": "Wants crew",
+      "dates_confirmed": "Dates confirmed",
+      "dates_flexible": "Dates flexible",
+      "do_not_call": "Do not call",
+      "email_confirmed": "E-mail confirmed",
+      "email_correction": "Corrected e-mail",
+      "extras_wanted": "Extras wanted",
+      "has_licence": "Has a licence",
+      "not_interested": "Not interested",
+      "objections": "Objections",
+      "people": "People",
+      "preferred_channel": "Preferred channel",
+      "ready_to_book": "Ready to book",
+      "recording_refused": "Refused recording",
+      "skipper_wanted": "Wants a skipper",
+      "wants_changes": "Wants changes"
+    },
+    "detail": {
+      "actions": "Actions",
+      "back": "All calls",
+      "callSid": "Twilio call SID",
+      "client": "Client",
+      "collected": "Collected in the call",
+      "conversationId": "ElevenLabs conversation",
+      "cost": "Cost (credits)",
+      "dates": "Dates",
+      "email": "E-mail",
+      "inquiry": "Inquiry",
+      "missing": "This call was not found or could not be loaded.",
+      "nika": "Nika",
+      "noData": "Nothing was collected.",
+      "noTranscript": "This call has no transcript.",
+      "otherCalls": "All calls of this inquiry",
+      "phone": "Phone",
+      "quality": "Quality criteria",
+      "recording": "Call recording",
+      "recordingFailed": "The recording could not be loaded.",
+      "recordingLoad": "Play the recording",
+      "recordingLoading": "Loading the recording…",
+      "skipped": "Not dialled: {{reason}}",
+      "technical": "Technical data",
+      "termination": "How the call ended",
+      "transcript": "Transcript"
+    },
+    "filter": {
+      "from": "From date",
+      "kind": "All kinds",
+      "outcome": "All outcomes",
+      "site": "All websites",
+      "status": "All statuses",
+      "to": "To date"
+    },
+    "inq": {
+      "actions": "Actions",
+      "boat": "Boat",
+      "consent": "Consent to call",
+      "consentNo": "No consent",
+      "consentYes": "Consent",
+      "contact": "Contact",
+      "doNotCall": "Do not call",
+      "empty": "No inquiries match these filters.",
+      "lastCall": "Last call",
+      "next": "Next call",
+      "offerSent": "Offer sent",
+      "received": "Received",
+      "search": "Search e-mail, phone or name",
+      "takenOver": "Mario calls"
+    },
+    "kind": {
+      "CONFIRMATION": "Inquiry confirmation",
+      "FOLLOW_UP": "After the offer",
+      "HUMAN_CALLBACK": "Task for Mario",
+      "MANUAL": "Manual"
+    },
+    "loadFailed": "Loading failed. Check the connection and try again.",
+    "next": "Next",
+    "no": "No",
+    "outcome": {
+      "BOOKED_ELSEWHERE": "Booked elsewhere",
+      "CALL_BACK": "Call back",
+      "CONFIRMED": "Confirmed",
+      "DO_NOT_CALL": "Do not call",
+      "NOT_INTERESTED": "Not interested",
+      "NO_CONSENT_TO_RECORD": "Refused recording",
+      "READY_TO_BOOK": "Ready to book",
+      "TRANSFERRED": "Transferred to Mario",
+      "UNCLEAR": "Unclear",
+      "WANTS_CHANGES": "Wants changes"
+    },
+    "pageOf": "Page {{page}} of {{pages}} · {{total}} in total",
+    "prev": "Previous",
+    "settings": {
+      "enableConfirm": "You are switching calls ON. Nika will start calling clients. Continue?",
+      "field": {
+        "calls_attempts_max": "Attempts per call",
+        "calls_audio_retentionDays": "Keep recordings (days)",
+        "calls_enabled": "Calls",
+        "calls_first_delayMinutes": "First call after (minutes)",
+        "calls_followup_delayHours": "Follow-up after the offer (hours)",
+        "calls_limit_daily": "Calls per day",
+        "calls_limit_monthly": "Calls per month",
+        "calls_test_numbers": "Test numbers",
+        "calls_transfer_available": "Mario available",
+        "calls_transfer_days": "Transfer days",
+        "calls_transfer_end": "Transfer to",
+        "calls_transfer_number": "Transfer number",
+        "calls_transfer_start": "Transfer from",
+        "calls_window_end": "Calling window to",
+        "calls_window_start": "Calling window from"
+      },
+      "group": {
+        "general": "General",
+        "limits": "Limits and retention",
+        "transfer": "Transfer to Mario",
+        "window": "When Nika calls"
+      },
+      "hint": {
+        "calls_test_numbers": "comma separated; empty = everyone",
+        "calls_transfer_days": "e.g. MON,TUE,WED,THU,FRI",
+        "calls_transfer_end": "Croatian time",
+        "calls_transfer_start": "Croatian time",
+        "calls_window_end": "client's local time",
+        "calls_window_start": "client's local time"
+      },
+      "off": "Off",
+      "on": "On",
+      "reset": "Discard changes",
+      "save": "Save",
+      "saved": "Saved. In effect within seconds.",
+      "transferCurrent": "current {{number}}",
+      "transferNew": "New number, e.g. +385…"
+    },
+    "skip": {
+      "ARCHIVED": "Inquiry archived",
+      "BOOKED": "Already booked",
+      "CALLS_OFF": "Calls are switched off",
+      "DO_NOT_CALL": "Marked do not call",
+      "HUMAN_TAKEOVER": "Mario calls personally",
+      "INVALID_PHONE": "Invalid phone number",
+      "MAX_ATTEMPTS": "All attempts used",
+      "NOT_INTERESTED": "Not interested",
+      "NOT_ON_TEST_LIST": "Number is not on the test list",
+      "NO_CONSENT": "No consent to be called",
+      "OFFER_ALREADY_SENT": "Offer already sent",
+      "RECENT_CONFIRMATION": "Confirmed recently",
+      "SAME_PERSON": "Same person, covered by another call",
+      "STALE": "Inquiry too old",
+      "TIMEZONE_UNCLEAR": "Time zone unclear"
+    },
+    "status": {
+      "BUSY": "Busy",
+      "CANCELLED": "Cancelled",
+      "DIALING": "Dialling",
+      "DONE": "Done",
+      "FAILED": "Failed",
+      "IN_PROGRESS": "In progress",
+      "NO_ANSWER": "No answer",
+      "SCHEDULED": "Scheduled",
+      "SKIPPED": "Skipped",
+      "VOICEMAIL": "Voicemail"
+    },
+    "tab": {
+      "calls": "Calls",
+      "inquiries": "Inquiries",
+      "settings": "Settings"
+    },
+    "title": "Call centre",
+    "yes": "Yes"
+  },
+  "chat": {
+    "cameFrom": "Came from",
+    "close": "Close conversation",
+    "confirmDelete": "Permanently delete this conversation?",
+    "confirmDeleteMany": "Permanently delete the selected conversations ({{count}})?",
+    "delete": "Delete",
+    "deleteFailed": "The conversation could not be deleted.",
+    "deleteSelected": "Delete selected ({{count}})",
+    "direct": "direct",
+    "empty": "No conversations yet.",
+    "emptyFlagged": "No suspicious conversations.",
+    "flaggedOnly": "Suspicious only",
+    "lastSeen": "Last seen",
+    "live": "Live on site",
+    "lockReason": "Reason",
+    "lockedAt": "Locked at",
+    "needsHumanOnly": "Needs a human only",
+    "pickSession": "Select a conversation from the list.",
+    "replyPlaceholder": "Reply to the visitor…",
+    "role": {
+      "ADMIN": "Team",
+      "ASSISTANT": "AI assistant",
+      "SYSTEM": "System",
+      "USER": "Visitor"
+    },
+    "selectAll": "Select all",
+    "send": "Send",
+    "status": {
+      "AI": "AI",
+      "CLOSED": "Closed",
+      "HUMAN": "With team",
+      "HUMAN_REQUESTED": "Wants a human",
+      "LOCKED": "Locked"
+    },
+    "statusLabel": "Status",
+    "suspicious": "Suspicious",
+    "suspiciousBanner": "Suspicious conversation: the AI is off and the visitor was handed over to a live agent. Kept as evidence, it cannot be deleted.",
+    "suspiciousLink": "suspicious",
+    "suspiciousLinkHint": "Not a boat4you.com path, so it is not shown as a link. Do not open it.",
+    "title": "Site chat",
+    "trail": "Recent pages",
+    "viewing": "Viewing"
+  },
+  "common": {
+    "accepted": "Accepted",
+    "access-denied": "Access Denied",
+    "access-denied-description": "You don’t have permission to view this page. <br /> If you believe this is a mistake, contact your administrator.",
+    "active": "Active",
+    "add-more": "Add more",
+    "addUser": "Add User",
+    "agencies": "Agencies",
+    "agency": "Agency",
+    "all": "All",
+    "amenities": "Amenities",
+    "answered": "Answered",
+    "archived": "Archived",
+    "blacklisted": "Blacklisted",
+    "bookings": "Bookings",
+    "browse": "Browse",
+    "browsePdf": "or browse for .pdf document",
+    "browsePhoto": "or browse for photos",
+    "cancel": "Cancel",
+    "cancelled": "Cancelled",
+    "clear": "Clear",
+    "company": "Company",
+    "completed": "Completed",
+    "confirm-booking-text": "Are you sure you want to confirm booking {{value}}? Doing this action cannot be reverted.",
+    "confirmed": "Confirmed",
+    "country": "Country",
+    "createInvoice": "Create Invoice",
+    "croatian": "Croatia",
+    "customBoats": "Custom Boats",
+    "customer": "Customer",
+    "dateRange": "Date Range",
+    "delete-confirmation-text-bulk": "Are you sure you want to delete {{value}}? This action cannot be undone.",
+    "departureDate": "Departure Date",
+    "details": "Details",
+    "discard-changes-description": "Are you sure you want to discard your changes?",
+    "discount-not-applicable": "The discount does not apply to the selected boats.",
+    "draft": "Draft",
+    "dragAndDrop": "Drag and drop",
+    "edit": "Edit",
+    "ended": "Ended",
+    "english": "English",
+    "equipment": "Equipment",
+    "extras": "Extras",
+    "financials": "Financials",
+    "general-info": "General Information",
+    "guests": "Guests",
+    "high-tier": "High Tier Pricing",
+    "inCharter": "In charter",
+    "inactive": "Inactive",
+    "inquiries": "Inquiries",
+    "inquiries-status": "Inquiries Status",
+    "invalid-credentials": "Incorrect email or password.",
+    "invite-send-to-email": "An invite will be sent to user’s email to confirm the account,",
+    "invited": "Invited",
+    "invoice": "Invoice",
+    "invoices": "Invoices",
+    "low-tier": "Low Tier Pricing",
+    "main-image": "Main image",
+    "manual-entry-noter": "Can't find your manufacturer or model? Enter them manually below to create new entries.",
+    "mark-sent-text": "Are you sure you want to mark as sent {{value}}? This action cannot be undone.",
+    "maxDiscount": "Maximum Discount",
+    "mid-tier": "Mid Tier Pricing",
+    "mmk": "MMK",
+    "nausys": "Nausys",
+    "new": "New",
+    "no": "No",
+    "no-matches": "No matches",
+    "no-records": "No records were found.",
+    "not-found": "Page Not Found",
+    "not-found-description": "The page you’re looking for doesn’t exist. <br /> Check the URL or go back to the homepage.",
+    "notInvited": "Not invited",
+    "option": "Option",
+    "optionWaiting": "Option Waiting",
+    "paymentStatus": "Payment Status",
+    "pdf-upload": "PDF Upload",
+    "pending": "Pending",
+    "photos": "Photos",
+    "pricing": "Pricing",
+    "primary-source": "Primary source",
+    "private-person": "Private person",
+    "profile": {
+      "account-settings": "Account Settings",
+      "card-surcharge": "Card Payment Surcharge (%)",
+      "card-surcharge-description": "Additional fee charged for card payments (e.g., 2.5 for 2.5%)",
+      "current-card-surcharge": "Current Card Payment Surcharge",
+      "current-email": "Current Email",
+      "current-password": "Current Password",
+      "delete-account": "Delete account",
+      "email": "Email",
+      "email-description": "Make sure you have access to this email address.",
+      "full-name": "Full Name",
+      "full-name-description": "Make sure this matches the name on your ID",
+      "input-card-surcharge": "Enter card payment surcharge",
+      "input-email": "Input email",
+      "input-new-password": "Input New Password",
+      "input-password": "Input Password",
+      "last-name": "Last Name",
+      "name": "Name",
+      "new-password": "New Password",
+      "password": "Password",
+      "password-description": "Change password",
+      "repeat-new-password": "Repeat New Password",
+      "repeat-password": "Repeat Password"
+    },
+    "ready": "Ready",
+    "recipientType": "Recipient Type",
+    "reservation": "Reservation",
+    "reservationManager": "Reservation Manager",
+    "result_one": "{{count}} item",
+    "result_other": "{{count}} items",
+    "save": "Save",
+    "saving": "Saving...",
+    "sent": "Sent",
+    "systemAdmin": "System Admin",
+    "unknown": "Unknown",
+    "user": "User",
+    "user-status": "User Status",
+    "users": "Users",
+    "video": "Video",
+    "yes": "Yes"
+  },
+  "contactCenter": {
+    "actionFailed": "The action failed.",
+    "anonymousVisitor": "Visitor",
+    "backToList": "List",
+    "backToListLong": "Back to the list",
+    "cameFrom": "Came from",
+    "cancel": "Cancel",
+    "channel": {
+      "ADS": "Ads",
+      "AI": "AI assistants (ChatGPT, Perplexity…)",
+      "DIRECT": "Direct",
+      "EMAIL": "E-mail",
+      "ORGANIC": "Search engines (organic)",
+      "OTHER": "Other",
+      "REFERRAL": "Other site",
+      "SISTER": "Our sister site",
+      "SOCIAL": "Social"
+    },
+    "chatNotOpened": "Chat not opened",
+    "clearFilters": "Clear filters",
+    "clientCard": "Client card",
+    "close": "Close conversation",
+    "closePanel": "Close",
+    "composerHint": "Replying takes the conversation over — the AI is switched off for it.",
+    "confirmDelete": "Delete this conversation?",
+    "confirmDeleteMany": "Delete the selected conversations ({{count}})?",
+    "confirmMerge": "Merge this contact into the current one? Conversations, visits and tags move to the current contact and the merged one is deleted.",
+    "contact": {
+      "addTag": "Add tag",
+      "boats": "Boats viewed",
+      "conversations": "Conversations ({{count}})",
+      "duplicates": "Possibly the same person (unverified)",
+      "email": "E-mail",
+      "firstSource": "First visit",
+      "lastSource": "Last visit",
+      "name": "Name",
+      "note": "Note",
+      "phone": "Phone",
+      "searches": "What they searched for",
+      "sources": "Source",
+      "status": "Status",
+      "tags": "Tags",
+      "visits": "Visits ({{count}})"
+    },
+    "contactStatus": {
+      "LOST": "Lost",
+      "NEGOTIATING": "Negotiating",
+      "NEW": "New",
+      "OFFER_SENT": "Offer sent",
+      "REPLIED": "Replied",
+      "SPAM": "Spam",
+      "WON": "Won"
+    },
+    "contactStatusAll": "Contact status: all",
+    "contactsEmpty": "No contacts for these filters.",
+    "contactsSearch": "Search name, e-mail or phone",
+    "contactsSearchLabel": "Search contacts",
+    "contactsTable": {
+      "conversations": "Conversations",
+      "lastActivity": "Last activity"
+    },
+    "conversationCount_one": "{{count}} conversation",
+    "conversationCount_other": "{{count}} conversations",
+    "conversationLabel": "Conversation",
+    "delete": "Delete",
+    "deleteFailed": "The conversation could not be deleted.",
+    "deleteSelected": "Delete selected ({{count}})",
+    "direct": "direct",
+    "empty": "No conversations for these filters.",
+    "emptyFlagged": "No suspicious conversations.",
+    "filter": {
+      "all": "All",
+      "contactStatus": "Contact status",
+      "flaggedOnly": "Suspicious only",
+      "from": "From",
+      "includeSpam": "Include spam",
+      "needsHuman": "Needs a person",
+      "site": "Site",
+      "status": "Status",
+      "tag": "Tag",
+      "to": "To"
+    },
+    "filters": "Filters · {{count}}",
+    "fromSite": "from",
+    "funnel": {
+      "channelAll": "Source: all",
+      "chatOpened": "Visits that opened the chat: {{count}}",
+      "clickCount": "Clicks",
+      "clicks": "Top clicks",
+      "deviceAll": "Device: all",
+      "devices": {
+        "DESKTOP": "Desktop",
+        "MOBILE": "Mobile",
+        "TABLET": "Tablet"
+      },
+      "element": "Element",
+      "exitPages": "Exit pages",
+      "exitRate": "Exit rate",
+      "exits": "Exits",
+      "exitsByType": "Where they leave without an inquiry",
+      "kind": {
+        "button": "button",
+        "link": "link"
+      },
+      "navGroup": "Navigation and galleries ({{count}})",
+      "navGroupHint": "Photo gallery, slider, menu, header and footer clicks",
+      "note": "A visit counts at its deepest step and at every step before it, so an inquiry sent from a pop-up on a sister site also counts as a form. Sent inquiries are counted from the start of this measurement.",
+      "ofVisits": "{{n}} % of visits",
+      "onPages": "on {{count}} pages",
+      "pageType": {
+        "BLOG": "Blog",
+        "BOAT": "Boat",
+        "BOOKING": "Form / booking",
+        "DESTINATION": "Destination",
+        "HOME": "Home",
+        "ITINERARY": "Itinerary",
+        "OTHER": "Other",
+        "SEARCH": "Search"
+      },
+      "path": "Page",
+      "steps": {
+        "BOAT": "Boat page",
+        "FORM": "Inquiry or booking form",
+        "INQUIRY": "Inquiry sent",
+        "VISIT": "Visit"
+      },
+      "target": "Leads to",
+      "title": "Inquiry funnel",
+      "type": "Type",
+      "views": "Visits"
+    },
+    "lastSeen": "Last seen",
+    "listLabel": "Conversation list",
+    "live": "On the site now",
+    "liveEmpty": "No visitors with consent on the sites.",
+    "liveHeader_one": "{{count}} visitor on the sites now",
+    "liveHeader_other": "{{count}} visitors on the sites now",
+    "liveSub": "Refreshes every 15 s · only visitors who consented",
+    "liveTable": {
+      "action": "Action",
+      "chat": "Chat",
+      "country": "Country",
+      "device": "Device",
+      "onPage": "On page",
+      "page": "Page",
+      "pages": "Pages",
+      "site": "Site",
+      "source": "Source",
+      "visitor": "Visitor"
+    },
+    "loadFailed": "Loading failed, retrying.",
+    "loadMore": "Load more",
+    "lockReason": "Reason",
+    "lockedAt": "Locked at",
+    "merge": "Merge",
+    "mode": {
+      "all": "All",
+      "live": "Live now"
+    },
+    "moreActions": "More actions",
+    "new": "new",
+    "next": "Next",
+    "noContact": "This conversation has no contact yet (no name, e-mail or phone).",
+    "noHistory": "No navigation recorded on the sites.",
+    "notFound": "The conversation does not exist or was deleted.",
+    "openBoatPage": "Open the boat page",
+    "pageOf": "Page {{page}} · {{size}} per page",
+    "pages": "pages: {{count}}",
+    "pagesShort_one": "{{count}} page",
+    "pagesShort_other": "{{count}} pages",
+    "persons": "people: {{count}}",
+    "pickSession": "Pick a conversation from the list.",
+    "prev": "Previous",
+    "proactive": {
+      "BOT": "This is a bot, the message was not sent.",
+      "INVALID_TEXT": "The message is empty or invalid.",
+      "NOT_LIVE": "The visitor is no longer on the site.",
+      "QUEUED": "The message arrives with the widget's next heartbeat.",
+      "QUEUE_FULL": "Too many messages waiting, try again shortly.",
+      "button": "Send message",
+      "label": "Message",
+      "placeholder": "E.g. Hello! If you need help with a boat, I'm here.",
+      "title": "Message to the visitor"
+    },
+    "range": {
+      "30d": "30 days",
+      "7d": "7 days",
+      "custom": "From–to",
+      "today": "Today"
+    },
+    "rangeLabel": "Period",
+    "rec": {
+      "conversationLink": "Recordings of this visit",
+      "enabled": "Recording",
+      "heat": {
+        "clicks": "Clicks",
+        "col": {
+          "clicks": "Clicks",
+          "dead": "Dead",
+          "element": "Element",
+          "hover": "Mouse (s)",
+          "inquiryShare": "From visits with an inquiry",
+          "link": "Goes to",
+          "pageViewShare": "% of page views",
+          "rage": "Rage"
+        },
+        "device": "Device",
+        "empty": "No data for these filters.",
+        "fold": "First screen",
+        "foldValue": "{{pct}} % of the page",
+        "inquiries": "Page views of visits with an inquiry",
+        "loading": "Loading the heatmap…",
+        "modeClicks": "Clicks",
+        "modeHover": "Mouse",
+        "modeScroll": "Scroll",
+        "mouse": "Page views with a mouse",
+        "noBackground": "No background for this group (its recordings are older than 60 days): only the element list is shown.",
+        "noMouse": "No mouse data for this device. Phones and tablets have no mouse, and recordings made before mouse tracking was switched on carry no element on a move.",
+        "note": "Clicks add up per element across all visits of the period; red is the most clicked. Dead click: nothing happened. Rage: the same element 3+ times within a second.",
+        "noteHover": "Where the mouse rests longest: red = longest, blue = shortest. Desktop only; each stay counts at most 2 seconds, so a parked mouse does not skew the map.",
+        "pageType": "Page type",
+        "pageViews": "Page views",
+        "range90": "90 days",
+        "reach": "Reach",
+        "reachValue": "to {{pct}} % of the page: {{share}} % of page views",
+        "shown": "{{pct}} % of the clicks are on the picture. The rest are on elements that appear later (a menu, dialog or gallery) and are only in the table.",
+        "shownHover": "{{pct}} % of the mouse time is on the picture. The rest is on elements that appear later (a menu, dialog or gallery) and is only in the table.",
+        "sortLeast": "Least clicked",
+        "sortMost": "Most clicked",
+        "watch": "Recordings of this page"
+      },
+      "ins": {
+        "empty": "No findings yet. A page type needs at least 20 page views; data is collected every day.",
+        "kind": {
+          "CTA_REACH": "On the {{page}} page only {{percent}} % of page views get as far as the \"{{label}}\" button (at {{count}} % of the page height). Move it up or add it at the top too.",
+          "DEAD": "\"{{label}}\" on the {{page}} page: {{count}} clicks with no reaction ({{percent}} % of its clicks). People expect it to open something: make it clickable or change it.",
+          "INQUIRY_ELEMENT": "Visitors who send an inquiry often click \"{{label}}\" on the {{page}} page ({{percent}} % of their page views, at least twice as often as the others). Make it stand out for everyone.",
+          "LOW_REACH": "On the {{page}} page only {{percent}} % of page views see the lower half of the page. Put important content higher.",
+          "RAGE": "\"{{label}}\" on the {{page}} page: clicked again and again {{count}} times. It is probably slow or broken."
+        },
+        "openHeatmap": "Open the heatmap",
+        "pageViews": "{{count}} page views"
+      },
+      "invalid": "The share must be a whole number from 0 to 100.",
+      "list": {
+        "clearScope": "All visits",
+        "col": {
+          "chat": "Chat",
+          "clicks": "Clicks",
+          "device": "Device",
+          "duration": "Duration",
+          "errors": "Errors",
+          "inquiry": "Inquiry",
+          "page": "Page",
+          "rage": "Rage clicks",
+          "site": "Site",
+          "started": "Started"
+        },
+        "conversationScope": "Conversation #{{id}}",
+        "deviceAll": "All devices",
+        "empty": "No recordings for these filters.",
+        "noInquiry": "Only without an inquiry",
+        "pageTypeAll": "All page types",
+        "rageOnly": "Only with rage clicks",
+        "visitScope": "Visit #{{id}}",
+        "watch": "Watch"
+      },
+      "mobile": "Mobile (%)",
+      "note": "Visits are recorded only with analytics consent. A site that is switched off records nothing and the server refuses its payloads. The share is the percentage of visits with consent that are recorded; on a phone recording starts only after the visitor's first touch, scroll or key.",
+      "player": {
+        "back": "← Back to the recordings",
+        "busy": "The recordings storage does not answer right now. Try again in a minute.",
+        "failed": "The recording could not be loaded.",
+        "gone": "This recording is no longer available (recordings are deleted after 60 days).",
+        "loading": "Loading the recording…",
+        "markers": {
+          "clicks": "Clicks",
+          "errors": "Errors",
+          "rage": "Rage clicks"
+        },
+        "next": "Next page",
+        "noStyles": "This page's styles were not archived: the recording plays without its design.",
+        "pages": "Pages of this visit",
+        "pause": "Pause",
+        "play": "Play",
+        "privacy": "Recordings are masked: what visitors type and their names, e-mails and phones are not shown.",
+        "skipIdle": "Skip inactivity",
+        "speed": "Speed",
+        "timeline": "Timeline"
+      },
+      "sample": "Share of visits (%)",
+      "save": "Save",
+      "saveFailed": "Saving failed.",
+      "saved": "Saved",
+      "site": "Site",
+      "staffMark": "Mark",
+      "staffText": "Open the link for each site in this browser: your visits are then not recorded and not counted in the statistics. The mark stays in this browser until you remove it.",
+      "staffTitle": "This browser as the team",
+      "staffUnmark": "Remove the mark",
+      "views": {
+        "heatmaps": "Heatmaps",
+        "insights": "What to fix",
+        "list": "Recordings",
+        "settings": "Settings"
+      }
+    },
+    "referrer": "referrer",
+    "removeTag": "Remove tag {{tag}}",
+    "replyLabel": "Reply",
+    "replyPlaceholder": "Reply to the client… (Enter sends, Shift+Enter new line)",
+    "results": "results: {{count}}",
+    "returnToAi": "Back to AI",
+    "returning": "returning",
+    "role": {
+      "ADMIN": "Team",
+      "ASSISTANT": "AI",
+      "SYSTEM": "System",
+      "USER": "Client"
+    },
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "saveFailed": "Saving failed.",
+    "savesNow": "saves at once",
+    "search": "Search",
+    "searchEngines": {
+      "avgPosition": "Avg. position",
+      "bingClicks": "Bing clicks",
+      "bingImpressions": "Bing impressions",
+      "bingNoFilter": "Bing has no country or device, so it is left out with that filter.",
+      "bingNoPage": "Bing gives its queries per site only, with no landing page, country or device.",
+      "bingQueries": "Top queries on Bing",
+      "bingShort": "Bing clicks / impressions",
+      "byEngine": "Our organic visits by search engine",
+      "bySite": "By site",
+      "clicks": "Clicks",
+      "country": "Country",
+      "countryAll": "Country: all",
+      "ctr": "CTR",
+      "engine": {
+        "BING": "Bing",
+        "DUCKDUCKGO": "DuckDuckGo",
+        "ECOSIA": "Ecosia",
+        "GOOGLE": "Google",
+        "OTHER": "Other",
+        "YAHOO": "Yahoo",
+        "YANDEX": "Yandex"
+      },
+      "firstImport": "The first import of Google's history (16 months) takes about 16 hours after it is switched on.",
+      "googleClicks": "Google clicks",
+      "googleCtr": "Google CTR",
+      "googleImpressions": "Google impressions",
+      "googlePosition": "Google avg. position",
+      "googleQueries": "Top queries on Google",
+      "googleShort": "Google clicks / impressions",
+      "hidden": "Google hides the query of {{n}} % of clicks, so the clicks by query are not all traffic.",
+      "impressions": "Impressions",
+      "inquiries": "Inquiries",
+      "minImpressions": "CTR and position rank only queries with at least {{n}} impressions.",
+      "none": "—",
+      "note": "Google and Bing give totals per query and page only, never a single visitor. Their data is 2 to 3 days late (last imported day: Google {{google}}, Bing {{bing}}). Our organic visits count only visitors who consented.",
+      "organicInquiries": "Inquiries from organic visits",
+      "organicVisits": "Our organic visits",
+      "page": "Landing page",
+      "pageAll": "Landing page: all",
+      "pageNoQueries": "Google shows no query for this page in the range: it had no impressions, or Google lists it under another address.",
+      "pages": "Landing pages",
+      "pagesNote": "Clicks, impressions and queries are Google's for the page; — means Google has no numbers for it in the range (our visits came anyway). Avg. position is the average over all queries of the page, weighted by impressions: open a page (click its row) to see its Google queries, each with its own position. Org. visits and inquiries are our visits that came from a search engine to that page and the inquiries sent in those visits.",
+      "position": "Position",
+      "query": "Query",
+      "siteAll": "Site: all",
+      "title": "Search engines: Google and Bing",
+      "topQueries": "Main queries (Google)",
+      "visits": "Org. visits"
+    },
+    "searchPlaceholder": "Search name, e-mail or message text",
+    "selectAll": "Select all",
+    "selectConversation": "Select conversation",
+    "send": "Send",
+    "sendFailed": "Sending failed. The text is still in the field.",
+    "siteAll": "Site: all",
+    "spamTagHint": "(marks the contact as spam)",
+    "stats": {
+      "aiOnly": "AI only",
+      "byChannel": "By source",
+      "byCountry": "By country",
+      "byMonth": "Sailing month",
+      "bySite": "By site",
+      "chat": "Chat",
+      "contactsCollected": "Contacts collected",
+      "medianFirstResponse": "Median first response",
+      "missed": "Missed",
+      "newVisitors": "New",
+      "persons": "People",
+      "returningVisitors": "Returning",
+      "searches": "Searches",
+      "sisterToBoat4you": "Sister site → Boat4You",
+      "started": "Conversations started",
+      "startedByTeam": "Started by the team",
+      "takenOver": "Taken over",
+      "topCountries": "Countries",
+      "topLocations": "Locations",
+      "visitorCount": "Visitors",
+      "visitors": "Visitors",
+      "visits": "Visits"
+    },
+    "statsNote": "Visitor numbers cover only visitors who gave consent and are not comparable with GA4. Spam and suspicious conversations are not counted.",
+    "status": {
+      "AI": "AI",
+      "CLOSED": "Closed",
+      "HUMAN": "With the team",
+      "HUMAN_REQUESTED": "Wants a person",
+      "LOCKED": "Locked"
+    },
+    "statusLabel": "Status",
+    "suspicious": "Suspicious",
+    "suspiciousBannerText": "The AI is off and stays off. It is kept as evidence and cannot be deleted.",
+    "suspiciousBannerTitle": "Suspicious conversation:",
+    "suspiciousLink": "suspicious, do not open",
+    "suspiciousLinkHint": "Not a path on this conversation's site, so it is not shown as a link. Do not open it.",
+    "tab": {
+      "contacts": "Contacts",
+      "conversations": "Conversations",
+      "live": "Live visitors",
+      "recording": "Heatmaps",
+      "stats": "Statistics"
+    },
+    "tagPlaceholder": "e.g. vip",
+    "tagSuggestions": "Suggestions",
+    "takeOver": "Take over",
+    "takeOverHint": "The AI stops replying; the visitor sees no message",
+    "title": "Contact Center",
+    "trail": "Last pages",
+    "trailTitle": "Journey",
+    "unread": "Unread",
+    "viewLabel": "View",
+    "viewing": "Viewing"
+  },
+  "custom-payments": {
+    "all": "All",
+    "allSites": "All sites",
+    "booking": "Booking",
+    "bookingCardPayments": "Card payments",
+    "bookingNotConfirmed": "Booking not confirmed",
+    "bookingNotConfirmedHint": "Paid, but confirming the booking failed: confirm it by hand.",
+    "cardColumns": {
+      "amount": "Amount",
+      "booking": "Booking",
+      "client": "Client",
+      "date": "Date",
+      "fee": "Mollie fee",
+      "orderId": "Mollie payment",
+      "status": "Status"
+    },
+    "cardEmpty": "No booking card payments.",
+    "cardFilter": {
+      "all": "All",
+      "notPaid": "Not paid",
+      "open": "Open",
+      "paid": "Paid",
+      "review": "Needs review"
+    },
+    "cardLoadFailed": "Booking card payments could not be loaded.",
+    "cardSearchPlaceholder": "Search booking no., client, e-mail or Mollie id… (Enter)",
+    "cardStatus": {
+      "CANCELLED": "Cancelled by client",
+      "COMPLETED": "Paid",
+      "FAILED": "Not paid",
+      "NEEDS_REVIEW": "Needs review",
+      "PENDING": "Open",
+      "SUPERSEDED": "Replaced"
+    },
+    "chargeback": "Chargeback",
+    "close": "Close",
+    "columns": {
+      "amount": "Amount",
+      "date": "Date",
+      "email": "Payer e-mail",
+      "fee": "Mollie fee",
+      "note": "Note",
+      "orderId": "Mollie payment",
+      "reference": "Reference",
+      "site": "Site",
+      "status": "Status"
+    },
+    "details": "Details",
+    "detailsFailed": "The payment could not be read from Mollie.",
+    "detailsTitle": "Mollie payment",
+    "editNote": "Edit note",
+    "empty": "No custom payments.",
+    "feeNote": "Mollie's fee and the net amount are in the list (a dash until known). Payouts are shown in the Mollie dashboard.",
+    "fullAmount": "Full amount",
+    "instalmentPlusFee": "instalment {{base}} + card fee {{fee}}",
+    "loadFailed": "Custom payments could not be loaded.",
+    "loading": "Loading…",
+    "mollie": {
+      "amount": "Amount",
+      "canceledAt": "Cancelled",
+      "card": "Card",
+      "chargebacks": "Chargebacks",
+      "createdAt": "Created",
+      "description": "Description",
+      "expiredAt": "Expired",
+      "expiresAt": "Expires",
+      "failedAt": "Failed",
+      "failure": "Failure",
+      "feeRegion": "Fee region",
+      "id": "ID",
+      "method": "Method",
+      "paidAt": "Paid",
+      "reason": "Reason",
+      "refunds": "Refunds",
+      "status": "Mollie status",
+      "testMode": "Test mode"
+    },
+    "net": "Net",
+    "next": "Next →",
+    "noteFailed": "The note could not be saved.",
+    "notePlaceholder": "Internal note for the office; the client never sees it.",
+    "noteSaved": "Note saved.",
+    "openInMollie": "Open in Mollie",
+    "pageOf": "Page {{page}} of {{total}}",
+    "paidByMollie": "Card · Mollie",
+    "paidByStripe": "Card · Stripe",
+    "paidOn": "Paid {{date}}",
+    "prev": "← Prev",
+    "refresh": "Refresh from Mollie",
+    "refreshFailed": "The payment could not be refreshed.",
+    "refunded": "Refunded",
+    "searchPlaceholder": "Search reference or e-mail… (Enter)",
+    "status": {
+      "CANCELLED": "Cancelled",
+      "COMPLETED": "Completed",
+      "FAILED": "Failed",
+      "NEEDS_REVIEW": "Needs review",
+      "PENDING": "Pending"
+    },
+    "subtitle": "Card payments made through the secret /pay link on the 7 sites (Mollie)",
+    "subtitleBookings": "Card payments of online bookings (Mollie): every checkout attempt, paid or not",
+    "tabBookings": "Booking payments",
+    "tabLink": "Payment link",
+    "title": "Payments",
+    "totalReceived": "Total received"
+  },
+  "extras": {
+    "adrenalin-pack": "Adrenaline pack",
+    "adrenalin-pack-description": "High-energy water sports equipment package",
+    "airstream-towable": "Airstream towable",
+    "airstream-towable-description": "Premium inflatable for high-speed towing activities",
+    "apa": "APA (advance provisioning allowance)",
+    "apa-description": "Advance payment for fuel, food, drinks, and port fees",
+    "banana-boat": "Banana boat",
+    "banana-boat-description": "Fun inflatable ride for multiple passengers",
+    "beach-towels": "Beach towels",
+    "beach-towels-description": "Special towels for beach and water activities",
+    "coffee-machine": "Coffee Machine",
+    "coffee-machine-description": "Professional coffee machine for fresh coffee during your trip",
+    "cook": "Cook / Chef",
+    "cook-description": "Professional chef to prepare meals during your charter",
+    "deposit-insurance": "Deposit insurance",
+    "deposit-insurance-description": "Insurance coverage to protect your security deposit",
+    "dinghy-outboard-engine": "Dinghy with outboard engine",
+    "dinghy-outboard-engine-description": "Motorized tender for easy transportation to shore",
+    "diving-equipment": "Diving equipment",
+    "diving-equipment-description": "Complete scuba diving gear including tanks and regulators",
+    "donut": "Donut tube",
+    "donut-description": "Inflatable ring for fun water activities and relaxation",
+    "early-boarding": "Early boarding / Check-in",
+    "early-boarding-description": "Board the yacht before standard check-in time",
+    "efoil": "E-foil board",
+    "efoil-description": "Electric hydrofoil board for surfing above the water",
+    "family-pack": "Family pack",
+    "family-pack-description": "Special package designed for families with children",
+    "fishing-equipment": "Fishing equipment",
+    "fishing-equipment-description": "Complete fishing gear including rods, reels, and tackle",
+    "floating-mats": "Floating mats",
+    "floating-mats-description": "Large floating platforms for relaxation on water",
+    "grill": "Grill / Barbecue",
+    "grill-description": "Outdoor cooking equipment for grilling and barbecuing",
+    "hostess": "Hostess",
+    "hostess-description": "Crew member responsible for guest services and cabin maintenance",
+    "inflatable-lifejacket": "Inflatable lifejacket",
+    "inflatable-lifejacket-description": "Additional safety equipment for water activities",
+    "inflatable-swimming-platform": "Inflatable swimming platform",
+    "inflatable-swimming-platform-description": "Additional floating platform for swimming and relaxation",
+    "jet-ski": "Jet ski",
+    "jet-ski-description": "Personal watercraft for high-speed water adventures",
+    "kayak": "Kayak",
+    "kayak-description": "Single or double kayak for exploring coastlines and coves",
+    "kneeboard": "Kneeboard",
+    "kneeboard-description": "Board for kneeboarding water sports activities",
+    "larger-rib": "Larger RIB / Dinghy",
+    "larger-rib-description": "Bigger tender with more capacity and better performance",
+    "late-boarding": "Late boarding / Check-in",
+    "late-boarding-description": "Flexible check-out time beyond standard hours",
+    "mono-skis": "Mono skis",
+    "mono-skis-description": "Single water ski for advanced water skiing",
+    "permit-for-montenegro": "Permit for Montenegro",
+    "permit-for-montenegro-description": "Required documentation for sailing in Montenegrin waters",
+    "pets-onboard": "Pets onboard",
+    "pets-onboard-description": "Permission and accommodation for your pets during the charter",
+    "refundable-security-deposit": "Refundable security deposit",
+    "refundable-security-deposit-description": "Security deposit that will be returned if no damages occur",
+    "safety-net": "Safety net",
+    "safety-net-description": "Safety nets installed around the yacht for enhanced security",
+    "seabob": "Seabob",
+    "seabob-description": "High-tech underwater scooter for diving and surface riding",
+    "skipper": "Skipper service",
+    "skipper-description": "Professional crew member who operates and navigates the yacht",
+    "snorkeling-equipment": "Snorkeling equipment",
+    "snorkeling-equipment-description": "Masks, fins, and snorkels for underwater exploration",
+    "stand-up-paddle-SUP": "Stand up paddle (SUP)",
+    "stand-up-paddle-SUP-description": "Paddleboard equipment for water sports and recreation",
+    "subwing": "Subwing board",
+    "subwing-description": "Underwater wings for gliding beneath the surface",
+    "tourist-tax": "Tourist tax",
+    "tourist-tax-description": "Local government fees required for visiting certain destinations",
+    "towels": "Towels",
+    "towels-description": "Clean towels provided for your comfort during the charter",
+    "towing-air-tube-ring": "Towing air tube ring",
+    "towing-air-tube-ring-description": "Inflatable ring for exciting towing activities",
+    "transit-log": "Transit log / Final cleaning",
+    "transit-log-description": "Charter pack including final cleaning and transit documentation",
+    "underwater-scooter": "Underwater scooter",
+    "underwater-scooter-description": "Motorized device for underwater exploration and fun",
+    "vip-pack": "VIP pack",
+    "vip-pack-description": "Premium service package with exclusive amenities",
+    "wakeboard": "Wakeboard",
+    "wakeboard-description": "Board and equipment for wakeboarding water sports",
+    "water-skies": "Water skis",
+    "water-skies-description": "Equipment for water skiing behind the yacht or tender",
+    "water-tube": "Water tube",
+    "water-tube-description": "Inflatable tube for towing behind the yacht or tender",
+    "wi-fi": "Wi-Fi / Internet pack",
+    "wi-fi-description": "Internet connectivity during your charter"
+  },
+  "form": {
+    "agency": {
+      "blacklisted": "Blacklisted",
+      "discount": "Maximum Discount (%)",
+      "email": "Email",
+      "inquiryOnly": "Inquiry mode",
+      "name": "Name",
+      "phone": "Phone Number",
+      "recommended": "Recommended",
+      "skipExternalSystem": "MMK / NauSys bypass",
+      "status": "Status"
+    },
+    "booking": {
+      "email": "Email",
+      "external": "External ID",
+      "external-system": "External System",
+      "reservation": "Reservation",
+      "reservation-number": "Reservation number"
+    },
+    "custom-boat": {
+      "amenitiesText": "Saloon and Cabins",
+      "amenitiesTextPlaceholder": "Paste the amenities list here, one entry per line (Fridge, BBQ, Coffee machine, Bed sizes 1.60 x 2.00 m, …). Each non-empty line shows up as a checkmark item on the public page.",
+      "beam": "Beam (m)",
+      "berths": "Berths",
+      "boatModel": "Boat model",
+      "boatName": "Boat name",
+      "boatType": "Boat Type",
+      "buildYear": "Build Year",
+      "cabins": "Cabins",
+      "choose-equipment": "Choose Equipment",
+      "country": "Country",
+      "crewCabins": "Crew Cabins",
+      "crewNumber": "Crew Number",
+      "defaultCheckin": "Default Check in",
+      "defaultCheckout": "Default Check out",
+      "descriptionDe": "Deutschland Description",
+      "descriptionEn": "English Description",
+      "descriptionEs": "Spanish Description",
+      "descriptionFr": "French Description",
+      "descriptionHr": "Croatia Description",
+      "descriptionIt": "Italian Description",
+      "descriptionNl": "Dutch Description",
+      "descriptionPl": "Polish Description",
+      "descriptionPt": "Portuguese Description",
+      "draft": "Draft (m)",
+      "enginePower": "Engine",
+      "engineText": "Engine",
+      "fuelTank": "Fuel capacity (L)",
+      "genoaArea": "Genoa Area",
+      "genoaType": "Genoa Type",
+      "input-country": "Choose country",
+      "inputBeam": "Input beam",
+      "inputBerths": "Input berths",
+      "inputBoatModel": "Input boat model",
+      "inputBoatType": "Input boat type",
+      "inputBuildYear": "Input build year",
+      "inputCabins": "Input cabins",
+      "inputCrewCabins": "Input crew cabins",
+      "inputCrewNumber": "Input crew number",
+      "inputDefaultCheckin": "Input default check in",
+      "inputDefaultCheckout": "Input default check out",
+      "inputDescription": "Input description",
+      "inputDraft": "Input draft",
+      "inputEnginePower": "Input engine",
+      "inputEngineText": "Free-text engine description (e.g. 2x Volvo IPS 1050)",
+      "inputFuelTank": "Input fuel capacity",
+      "inputGenoaType": "Input genoa type",
+      "inputLaunchYear": "Input launch year",
+      "inputLength": "Input lenght",
+      "inputMainsailType": "Input mainsail type",
+      "inputManufacturer": "Input manufacturer",
+      "inputMarina": "Choose marina",
+      "inputMaxPersons": "Input max persons",
+      "inputPrice": "Input Price",
+      "inputPriceDescription": "Input price description",
+      "inputVideoUrl": "Input video link",
+      "inputWaterTank": "Input water capacity",
+      "launchYear": "Launch Year",
+      "length": "Length (m)",
+      "mainsailArea": "Mainsail Area",
+      "mainsailType": "Mainsail Type",
+      "manufacturer": "Manufacturer",
+      "manufacturerName": "Manufacturer Name",
+      "marina": "Marina",
+      "maxPersons": "Max Persons (Guests + Crew)",
+      "modelName": "Model Name",
+      "price": "Price (EUR - €)",
+      "priceDescription": "Price description",
+      "selectCountryFirst": "Choose country first",
+      "toysText": "Entertainment",
+      "toysTextPlaceholder": "Paste the toys / water-sports / games list here, one entry per line (Sea bob, Wakeboard, Kayak, Fishing gear, …).",
+      "videoUrl": "Video link",
+      "waterTank": "Water capacity (L)"
+    },
+    "inquiry": {
+      "choose-status": "Choose status",
+      "status": "Status"
+    },
+    "invoice": {
+      "add-new-agency": "Add new agency",
+      "agency": "Agency",
+      "agency-name-required": "Agency name is required",
+      "auto-number": "Automatic (next in year)",
+      "booking-date": "Booking date (operator)",
+      "charter-country": "Charter country",
+      "charter-date-from": "Charter start",
+      "charter-date-to": "Charter end",
+      "contract-number": "Contract number",
+      "include-vat": "Include VAT",
+      "input-charter-country": "e.g. Croatia",
+      "input-contract-number": "Enter contract number",
+      "input-invoice-item": "Input item description",
+      "input-invoice-number": "Enter invoice number",
+      "input-price-without-vat": "Input price without VAT",
+      "input-recipient-city": "Input City",
+      "input-recipient-code": "Input Zip Code",
+      "input-recipient-country": "Select Country",
+      "input-recipient-name": "Input Agency Name",
+      "input-recipient-street": "Input Street",
+      "input-recipient-type": "Select Type",
+      "input-recipient-vat-code": "Input Recipient VAT Code",
+      "input-total-price": "Input total price",
+      "input-vat-amount": "Input VAT amount",
+      "input-vat-percentage": "Input VAT percentage",
+      "invoice-date": "Invoice date",
+      "invoice-information": "Invoice Information",
+      "invoice-item": "Item description",
+      "invoice-number": "Invoice number",
+      "price-ovverride-amount": "Price override Amount",
+      "price-without-vat": "Price without VAT",
+      "recipient-city": "Recipient City",
+      "recipient-code": "Recipient Zip Code",
+      "recipient-country": "Recipient Country",
+      "recipient-information": "Recipient Information",
+      "recipient-name": "Recipient Name",
+      "recipient-street": "Recipient Street",
+      "recipient-type": "Recipient Type",
+      "recipient-vat-code": "Recipient VAT Code",
+      "reservation-information": "Reservation information",
+      "save-agency": "Save agency",
+      "search-agency": "Search agency by name…",
+      "select-language": "Select Language",
+      "select-status": "Select status",
+      "total-price": "Total price",
+      "vat-amount": "VAT amout",
+      "vat-percentage": "VAT (%)"
+    },
+    "user": {
+      "address": "Address",
+      "address-placeholder": "Street and number",
+      "choose-role": "Choose Role",
+      "city": "City",
+      "country": "Country",
+      "email": "Email",
+      "phone": "Phone Number",
+      "role": "Role",
+      "surname": "Surname",
+      "user-name": "Name"
+    }
+  },
+  "inquiries": {
+    "change-status": "Change status",
+    "dates": "Dates",
+    "dates-not-specified": "Dates not specified",
+    "email": "Email Address",
+    "full-name": "Full Name",
+    "manage-inquiry": "Manage Inquiry",
+    "message": "Message",
+    "phone": "Phone Number",
+    "send-offer": "Send Offer",
+    "user-info": "User Info"
+  },
+  "invoices": {
+    "booking-details": {
+      "booking-date": "Booking date",
+      "booking-number": "Booking number",
+      "charter-country": "Charter country",
+      "charter-period": "Charter period",
+      "client-email": "Client email",
+      "client-name": "Client name",
+      "client-phone": "Client phone number",
+      "contract-number": "Contract number",
+      "invoice-item": "Item Description",
+      "title": "Booking Details"
+    },
+    "invoice-details": {
+      "included": "Included",
+      "invoice-date": "Date",
+      "invoice-language": "Language",
+      "invoice-number": "Invoice number",
+      "invoice-vat": "VAT",
+      "title": "Invoice Details"
+    },
+    "pricing-details": {
+      "price-without-vat": "Price without VAT",
+      "title": "Pricing",
+      "total": "Total"
+    },
+    "recipient-details": {
+      "recipient-city": "City",
+      "recipient-country": "Country",
+      "recipient-name": "Name",
+      "recipient-street": "Street",
+      "recipient-type": "Type",
+      "recipient-vat-code": "VAT Code",
+      "recipient-zip": "Zip code",
+      "title": "Recipient Details"
+    }
+  },
+  "login": {
+    "back-to-login": "Back to login",
+    "email-address": "Email",
+    "forgotten-password": "Forgotten password?",
+    "log-in": "Login",
+    "logging-in": "Logging in...",
+    "password": "Password",
+    "remember-me": "Remember me",
+    "reset-password": {
+      "button": "Send reactivation code",
+      "check-mailbox": "Check your mailbox!",
+      "check-mailbox-description": "A code has been sent to email <strong>{{name}}</strong>",
+      "title": "Reset Password"
+    },
+    "setup-password": {
+      "description": "Input your new password.",
+      "glad-you-back": "Glad to have you back!",
+      "password-reset-failed": "Password reset code failed",
+      "password-reset-failed-description": "We are sorry, but your password reset code is either invalid or has expired. Please check the link or request a new password reset.",
+      "repeat-password": "Repeat password",
+      "reset-password": "Reset Password",
+      "resetted-successfully": "Password has been resetted successfully. Login below.",
+      "title": "Setup New Password"
+    },
+    "signup": {
+      "description": "You’ve been invited to use Boat4You. Please finish up your profile below.",
+      "invite-failed": "Invite code failed",
+      "invite-failed-description": " We are sorry, but your invite is either invalid or has expired. Please check the link or request a new invitation.",
+      "repeat-password": "Repeat password",
+      "sign-up": "Sing up",
+      "sign-up-failed": "Failed to sign up",
+      "sign-up-successfully": "Signed up successfully",
+      "signing-up": "Signing Up...",
+      "title": "Set up your account."
+    },
+    "title": "Admin Panel Login",
+    "toggle-password-visibility": "Toggle password visibility"
+  },
+  "navigation": {
+    "about": {
+      "title": "About"
+    },
+    "agencies": "Agencies",
+    "boatsMedia": "Boats · Media",
+    "bookings": "Bookings",
+    "callCenter": "Call centre",
+    "chat": "Chat",
+    "contactCenter": "Contact Center",
+    "customBoats": "Custom boats",
+    "customPayments": "Payments",
+    "dashboard": "Dashboard",
+    "extras": "Extras",
+    "heatmaps": "Heatmaps",
+    "inquiries": "Inquiries",
+    "invoices": "Invoices",
+    "languagePicker": {
+      "languageLabel": "Language",
+      "savePreferences": "Save Preferences",
+      "title": "Select Language"
+    },
+    "live": "Live visitors",
+    "logout": "Logout",
+    "offers": "Offers",
+    "preferences": {
+      "language": "Language",
+      "title": "Preferences and profile"
+    },
+    "profileSettings": "Profile Settings",
+    "social": "Social posts",
+    "stats": "Statistics",
+    "users": "Users",
+    "workspace": {
+      "charter": "Charter",
+      "marketing": "Marketing",
+      "title": "Workspace"
+    }
+  },
+  "social": {
+    "ai": {
+      "approval": "Wait for my approval",
+      "approvalHint": "Off: the AI schedules the post by itself.",
+      "channels": "Channels",
+      "date": "Date",
+      "enabled": "Daily post",
+      "guidance": "Notes for the AI",
+      "guidancePlaceholder": "e.g. push early booking for 2027; no gulets; mention Kornati and Vis.",
+      "intro": "Every morning the AI picks a boat from the site's own fleet that was not featured lately, takes our photos of it, writes a text for each network and prepares the post. With approval on, it waits for you in Posts as a draft; otherwise it is scheduled by itself.",
+      "language": "Language",
+      "loadError": "The AI settings could not be loaded.",
+      "noAi": "The AI key is missing on the server (ANTHROPIC_API_KEY): daily posts cannot run.",
+      "noChannels": "Connect this site's channels first.",
+      "noHiggsfield": "Higgsfield is not set up on the server: posts use photos only.",
+      "noRuns": "No AI posts yet.",
+      "open": "Open",
+      "post": "Post",
+      "ran": "Done: {{- status}}",
+      "runError": "The AI post failed.",
+      "runNow": "Make today's post now",
+      "runStatus": {
+        "DONE": "Done",
+        "FAILED": "Failed",
+        "RUNNING": "Working",
+        "SKIPPED": "Skipped",
+        "WAITING_VIDEO": "Waiting for video"
+      },
+      "runs": "Latest AI posts",
+      "save": "Save",
+      "saveError": "Saving failed.",
+      "saved": "Saved.",
+      "started": "The AI is making today's post; it shows up in the list below in a few minutes.",
+      "status": "Status",
+      "time": "Publish at",
+      "timeHint": "Europe/Zagreb; the AI prepares it 3 hours earlier.",
+      "topic": "Topic",
+      "video": "Video with Higgsfield",
+      "videoHint": "A short video from the best photo, posted to TikTok and YouTube."
+    },
+    "automation": {
+      "accountIds": "Channel ids",
+      "actionError": "The action failed.",
+      "apiHint": "Header X-Api-Key; JSON in and out.",
+      "apiTitle": "Posting API",
+      "confirmRevoke": "Revoke the key {{- name}}? Anything using it stops working at once.",
+      "copied": "Copied.",
+      "copy": "Copy",
+      "copyFailed": "Copying failed: select the text and copy it by hand.",
+      "create": "Create",
+      "createTitle": "New automation key",
+      "created": "Created",
+      "daily1": "picks a boat, destination or offer from our sites and checks the last posts so it does not repeat",
+      "daily2": "writes the text in our voice, a shorter one for X and Bluesky, hashtags for Instagram and TikTok",
+      "daily3": "takes our own photos of that boat (Boats · Media) and sends the post through this API",
+      "daily4": "with a drafts-only key it waits for us: we approve it here in Posts with one click",
+      "dailyHint": "A scheduled Claude task runs every morning and prepares the day's post:",
+      "dailyTitle": "Daily posts with Claude",
+      "done": "Done",
+      "draftsOnly": "Drafts only",
+      "draftsOnlyHint": "The key can only create drafts; publishing stays with us. Recommended until the posts are trusted.",
+      "epAccounts": "the connected channels and their ids",
+      "epList": "posts in a period, so the automation does not repeat itself",
+      "epMedia": "a file, or {\"url\": …} that our backend downloads",
+      "epPosts": "a post: text, media, channels (accountIds or platforms), optional text per platform, optional schedule",
+      "full": "Can publish",
+      "intro": "An automation key lets a scheduled Claude task (or any script) prepare posts through the API. With \"Drafts only\" a person still publishes every post from the admin.",
+      "lastUsed": "Last used",
+      "loadError": "The keys could not be loaded.",
+      "mode": "Mode",
+      "name": "Name",
+      "namePlaceholder": "Claude daily posts",
+      "never": "never",
+      "newKey": "New key",
+      "noKeys": "No keys yet.",
+      "prefix": "Key",
+      "revoke": "Revoke",
+      "revoked": "Key revoked.",
+      "secretHint": "It is shown only this once. Keep it as a secret of the scheduled task, never in a repository.",
+      "secretTitle": "Copy the key now"
+    },
+    "channels": {
+      "accountStatus": {
+        "CONNECTED": "Connected",
+        "ERROR": "Error",
+        "EXPIRED": "Expired"
+      },
+      "actionError": "The action failed.",
+      "confirmDisconnect": "Disconnect {{- name}}? Its scheduled posts will fail until it is connected again.",
+      "connect": "Connect",
+      "connectAnother": "Connect another",
+      "connectError": "Connecting {{- platform}} failed: {{- error}}",
+      "connectFor": "Connect {{- platform}}",
+      "connectStartError": "The connection could not start.",
+      "connected": "Connected: {{- platform}}.",
+      "continue": "Continue to {{- platform}}",
+      "credentialsTitle": "Connect {{- platform}}",
+      "disconnect": "Disconnect",
+      "disconnected": "{{- name}} disconnected.",
+      "expired": "Access expired: connect again.",
+      "expires": "access expires {{- date}}",
+      "identifier": "Handle",
+      "intro": "Connections go through each network's official API. Our backend keeps the access tokens; nobody pays a middleman.",
+      "loadError": "The channels could not be loaded.",
+      "none": "Not connected",
+      "notConfigured": "Not set up on the server",
+      "overview": "Channels per site",
+      "overviewHint": "What is connected for each of our sites.",
+      "privateOnly": "Posts land as private until the network approves our app.",
+      "reconnect": "Reconnect",
+      "secret": "App password",
+      "secretHint": "Bluesky → Settings → Privacy and security → App passwords. Never the main password.",
+      "since": "connected {{- date}}",
+      "siteSaved": "Site saved."
+    },
+    "compose": {
+      "accountGone": "no longer connected",
+      "accountNotUsable": "Connect this channel again first.",
+      "channels": "Channels",
+      "chars": "{{count}} / {{max}} characters",
+      "confirmPublish": "Publish now to {{count}} channels?",
+      "confirmPublishHint": "Once it is out, a post can only be deleted on the network itself.",
+      "confirmPublish_one": "Publish now to {{count}} channel?",
+      "connectChannels": "Connect channels",
+      "customText": "Own text for this channel",
+      "fixFirst": "Fix the marked problems first.",
+      "imageTooLarge": "{{- name}}: a photo can be at most 20 MB.",
+      "link": "Link (optional)",
+      "linkHint": "Pinterest destination, Google Business button, Facebook link preview.",
+      "loadError": "The post could not be loaded.",
+      "media": "Photos and video",
+      "mediaDrop": "Drop photos or a video here, or",
+      "mediaHint": "JPEG, PNG, WebP up to 20 MB · MP4, MOV up to 500 MB",
+      "mediaPick": "choose files",
+      "moveLeft": "Move left",
+      "moveRight": "Move right",
+      "noChannels": "No channel is connected yet.",
+      "notEditable": "This post already went out and cannot be changed. Duplicate it instead.",
+      "note": "Internal note (optional)",
+      "noteHint": "Only we see it, e.g. the campaign.",
+      "nothingToSave": "There is nothing to save yet.",
+      "now": "now",
+      "ok": "Ready",
+      "ownText": "own text",
+      "perChannel": "Per channel",
+      "perChannelHint": "A channel can get its own text; otherwise it uses the main text.",
+      "preview": "Preview",
+      "previewEmpty": "Pick a channel to see the preview.",
+      "problems": "{{count}} to fix",
+      "publishNow": "Publish now",
+      "publishing": "Publishing started: follow the status in Posts.",
+      "remove": "Remove",
+      "removeChannel": "Remove this channel",
+      "saveDraft": "Save draft",
+      "saveError": "Saving failed.",
+      "saved": "Draft saved.",
+      "schedule": "Schedule",
+      "scheduleAt": "Publish at",
+      "scheduled": "Scheduled for {{- date}}.",
+      "selectAll": "Select all",
+      "selectNone": "Clear",
+      "selectedCount": "{{count}} selected",
+      "text": "Text",
+      "textPlaceholder": "What do you want to tell everyone?",
+      "timezone": "Your local time ({{- tz}})",
+      "title": "Title",
+      "titleRequired": "Title (required)",
+      "type": "{{- name}}: only JPEG, PNG, WebP, MP4 or MOV.",
+      "uploadFailed": "{{- name}}: the upload failed.",
+      "uploading": "Uploading {{- name}}…",
+      "videoTooLarge": "{{- name}}: a video can be at most 500 MB.",
+      "waitUploads": "Wait until the uploads finish."
+    },
+    "detail": {
+      "actionError": "The action failed.",
+      "attempts": "attempts: {{count}}",
+      "cancel": "Cancel schedule",
+      "cancelled": "Schedule cancelled.",
+      "channels": "Channels",
+      "close": "Close",
+      "confirmCancel": "Cancel this scheduled post? Nothing will be sent.",
+      "confirmDelete": "Delete this post from the list? Nothing on the networks changes.",
+      "delete": "Delete",
+      "deleted": "Post deleted.",
+      "duplicate": "Duplicate",
+      "edit": "Edit",
+      "link": "Link",
+      "note": "Note",
+      "open": "Open",
+      "publishedAt": "Published",
+      "retried": "Failed channels are being sent again.",
+      "retry": "Retry failed",
+      "scheduledFor": "Scheduled for",
+      "title": "Post #{{id}}"
+    },
+    "issue": {
+      "angleBrackets": "YouTube does not allow < or > in the title or description.",
+      "aspectRatio": "Instagram takes photos from 4:5 (portrait) to 1.91:1 (landscape): crop this one.",
+      "empty": "Nothing to publish.",
+      "imagesNotSupported": "Photos are not supported here.",
+      "linkInvalid": "The link must be a full address starting with https://",
+      "linkNotClickable": "Links are not clickable here; use the link in bio or the Link field.",
+      "mediaRequired": "Needs a photo or a video.",
+      "mixedMedia": "Photos and a video cannot go in the same post.",
+      "noTargets": "Pick at least one channel.",
+      "scheduleInPast": "Pick a time at least 2 minutes from now.",
+      "scheduleInvalid": "That date does not exist.",
+      "scheduleMissing": "Pick the date and time.",
+      "titleRequired": "The title is required.",
+      "titleTooLong": "Title too long: {{count}}/{{max}}.",
+      "tooLong": "Too long: {{count}}/{{max}} characters.",
+      "tooManyHashtags": "At most {{max}} hashtags (now {{count}}).",
+      "tooManyImages": "At most {{max}} photos (now {{count}}).",
+      "tooManyVideos": "At most {{max}} video (now {{count}}).",
+      "videoNotSupported": "Video is not supported here.",
+      "videoRequired": "Needs a video."
+    },
+    "newPost": "New post",
+    "posts": {
+      "addOnDay": "New post on {{- date}}",
+      "allChannels": "All channels",
+      "allStatuses": "All statuses",
+      "calendar": "Calendar",
+      "channel": "Channel",
+      "empty": "No posts this month",
+      "emptyHint": "Write one post and send it to every channel at once.",
+      "generating": "video in progress",
+      "list": "List",
+      "loadError": "The posts could not be loaded.",
+      "more": "+{{count}} more",
+      "nextMonth": "Next month",
+      "noText": "(no text)",
+      "prevMonth": "Previous month",
+      "site": "Site",
+      "status": "Status",
+      "today": "Today"
+    },
+    "sites": {
+      "all": "All sites",
+      "pick": "Which site is this channel for?",
+      "pickHint": "Each site has its own Facebook, Instagram and TikTok; YouTube is one for all sites.",
+      "selectSite": "Select all",
+      "shared": "All sites (shared)",
+      "site": "Site"
+    },
+    "source": {
+      "ADMIN": "Admin",
+      "AI": "AI",
+      "API": "Automation"
+    },
+    "status": {
+      "CANCELLED": "Cancelled",
+      "DRAFT": "Draft",
+      "FAILED": "Failed",
+      "PARTIAL": "Partly published",
+      "PENDING": "Waiting",
+      "PUBLISHED": "Published",
+      "PUBLISHING": "Publishing",
+      "SCHEDULED": "Scheduled"
+    },
+    "subtitle": "One post, every channel: publish now or schedule it.",
+    "tab": {
+      "ai": "AI daily posts",
+      "automation": "Automation",
+      "channels": "Channels",
+      "compose": "New post",
+      "edit": "Edit post",
+      "posts": "Posts"
+    },
+    "title": "Social posts",
+    "ui": {
+      "cancel": "Cancel"
+    }
+  },
+  "table": {
+    "agencies": {
+      "by-pass": "MMK/NauSys Bypass",
+      "email": "Email",
+      "max-discount": "Max. Discount",
+      "name": "Name",
+      "phone-number": "Phone Number",
+      "primary-source": "Primary Source",
+      "status": "Status"
+    },
+    "bookings": {
+      "agency-price": "Agency Price (€)",
+      "boat": "Boat",
+      "booking-date": "Booking Date",
+      "check-in": "Check-In",
+      "check-out": "Check-Out",
+      "dates": "Dates",
+      "ending": "Ending",
+      "net-price": "Net Price (€)",
+      "order-number": "Order No.",
+      "price": "Client Price (€)",
+      "route": "Route",
+      "starting": "Starting",
+      "status": "Status",
+      "user": "Client"
+    },
+    "custom-boats": {
+      "high-price": "High Price",
+      "location": "Location",
+      "low-price": "Low Price",
+      "mid-price": "Mid Price",
+      "model": "Model",
+      "name": "Name"
+    },
+    "extras": {
+      "description": "Description",
+      "matchKeys": "Match Keys",
+      "name": "Name"
+    },
+    "inquiries": {
+      "boat": "Boat",
+      "check-in": "Check-In",
+      "check-out": "Check-Out",
+      "email": "Email",
+      "inquiries-number": "Order No.",
+      "location": "Location",
+      "name": "Name",
+      "phone-number": "Phone Number",
+      "status": "Status"
+    },
+    "invoices": {
+      "client": "Client",
+      "date": "Date",
+      "email": "Email",
+      "invoices-number": "Invoice No.",
+      "phone-number": "Phone Number",
+      "price": "Price",
+      "reservation-number": "Reservation No."
+    },
+    "users": {
+      "email": "Email",
+      "id": "Client ID",
+      "name": "Name",
+      "phone-number": "Phone Number",
+      "role": "Role",
+      "status": "Status",
+      "surname": "Surname"
+    }
+  },
+  "tabs": {
+    "discounted": "Discounted Boats",
+    "general": "General"
+  },
+  "toast-messages": {
+    "check-your-mailbox": "Check your mailbox",
+    "confirm-booking-failed": "Failed to confirm booking",
+    "confirm-booking-successfully": "Confirm booking successfully",
+    "create-agency-failed": "Failed to save agency",
+    "create-agency-successfully": "Agency saved",
+    "create-custom-boat-failed": "Create custom boat failed",
+    "create-custom-boat-successfully": "Create custom boat successfully",
+    "create-invoice-failed": "Failed to create invoice",
+    "create-invoice-successfully": "Create invoice successfully",
+    "create-user-failed": "Failed to create user",
+    "create-user-successfully": "Create user successful",
+    "delete-booking-failed": "Failed to cancel reservation",
+    "delete-booking-successfully": "Reservation cancelled successfully",
+    "delete-custom-boat-failed": "Failed to delete custom boat",
+    "delete-custom-boat-successfully": "Custom boat deleted successfully",
+    "delete-image-failed": "Failed to delete image",
+    "delete-image-successfully": "Image deleted successfully",
+    "delete-images-failed": "Failed to delete images",
+    "delete-images-successfully": "Images deleted successfully",
+    "delete-invoice-failed": "Failed to delete invoice",
+    "delete-invoice-successfully": "Delete invoice successfully",
+    "delete-pdf-failed": "Failed to delete PDF",
+    "delete-pdf-successfully": "PDF deleted successfully",
+    "delete-user-failed": "Failed to delete user",
+    "delete-user-successfully": "Delete user successful",
+    "download-selected-failed": "Failed to prepare the ZIP download",
+    "failed-to-send-email": "Failed to send email",
+    "invite-user-failed": "Failed to invite user",
+    "invite-user-successfully": "Invite user successful",
+    "login-failed": "Login failed",
+    "login-success": "Login successful",
+    "mark-paid-booking-failed": "Failed to mark as paid booking",
+    "mark-paid-booking-successfully": "Mark as paid booking successfully",
+    "mark-sent-invoice-failed": "Failed to mark as sent invoice",
+    "mark-sent-invoice-successfully": "Mark as Sent invoice successfully",
+    "password-updated-failed": "Failed to update password",
+    "password-updated-successfully": "Password updated successfully. Please log in again.",
+    "profile-updated-failed": "Failed to update profile",
+    "profile-updated-successfully": "Profile updated successfully",
+    "save-notes-failed": "Failed to save notes",
+    "save-notes-successfully": "Notes saved",
+    "surcharge-updated-failed": "Unable to update card payment surcharge. Please try again.",
+    "surcharge-updated-successfully": "Card payment surcharge has been updated successfully",
+    "sync-booking-failed": "Failed to sync reservation",
+    "sync-booking-successfully": "Reservation synced successfully",
+    "update-agency-failed": "Update agency failed",
+    "update-agency-successfully": "Update agency successful",
+    "update-custom-boat-failed": "Failed to update custom boat",
+    "update-custom-boat-successfully": "Custom boat updated successfully",
+    "update-inquiry-status-failed": "Failed to change inquiry status",
+    "update-inquiry-status-successfully": "Inquiry status changed successfully",
+    "update-invoice-failed": "Failed to update invoice",
+    "update-invoice-successfully": "Update invoice successfully",
+    "update-user-failed": "Failed to update user",
+    "update-user-successfully": "Update user successful",
+    "upload-image-failed": "Failed to upload image",
+    "upload-image-successfully": "Image uploaded successfully",
+    "upload-images-failed": "Failed to upload images",
+    "upload-images-successfully": "Images uploaded successfully",
+    "upload-pdf-failed": "Failed to upload PDF",
+    "upload-pdf-successfully": "PDF uploaded successfully"
+  },
+  "yacht": {
+    "allInclusive": "All Inclusive",
+    "bareboat": "Bareboat",
+    "catamaran": "Catamaran",
+    "classicMainsail": "Classic mainsail",
+    "crewed": "Crewed",
+    "furlingGenoa": "Furling Genoa",
+    "gulet": "Gulet",
+    "luxuryMotorYacht": "Luxury Motor Yacht",
+    "miniCruiser": "Mini Cruiser",
+    "motorYacht": "Motoryacht",
+    "motorboat": "Motorboat",
+    "motorsailer": "Motorsailer",
+    "powerCatamaran": "Power Catamaran",
+    "rollingMainsail": "Rolling mainsail",
+    "sailingYacht": "Sailing Yacht",
+    "standardGenoa": "Standard Genoa"
+  }
 }
 
 export default Resources;

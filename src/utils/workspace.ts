@@ -2,7 +2,7 @@
  * Admin workspaces (Mario 5.11.2026): one admin, two menus.
  *
  *   charter   – the charter desk: Bookings, Offers, Users, Invoices, Custom boats, Boats · Media, Agencies
- *   marketing – web and marketing tools: Contact Center, Social posts (later backlinks, call center)
+ *   marketing – web and marketing tools: Contact Center, Social posts, Call centar (later backlinks)
  *
  * The workspace is derived from the route, so every existing URL (offer links in e-mails, bookmarks) keeps
  * working; only the menu changes. Routes that belong to neither (profile, auth pages, 404) are neutral and
@@ -30,7 +30,7 @@ const PREFIXES: Record<WorkspaceId, readonly string[]> = {
     '/extras',
     '/inquiries',
   ],
-  marketing: ['/contact-center', '/chat', '/social'],
+  marketing: ['/contact-center', '/chat', '/social', '/call-center'],
 };
 
 /** Where a workspace opens when it is selected or when `/` lands on it. */

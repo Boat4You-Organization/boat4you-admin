@@ -112,6 +112,8 @@
     "to": "Do",
     "download": "Preuzmi PDF",
     "preparing": "Pripremam…",
-    "failed": "Izvještaj nije bilo moguće izraditi. Pokušajte ponovno."
+    "failed": "Izvještaj nije bilo moguće izraditi. Pokušajte ponovno.",
+    "rangeInvalid": "Datum „Do“ ne može biti prije datuma „Od“.",
+    "rangeTooLong": "Razdoblje može biti najviše godinu dana."
   }
 }

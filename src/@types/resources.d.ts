@@ -1104,6 +1104,8 @@ interface Resources {
       hint: 'Payments, refunds and transfers to the bank account in the period';
       lastMonth: 'Last month';
       preparing: 'Preparing…';
+      rangeInvalid: 'The “To” date cannot be before the “From” date.';
+      rangeTooLong: 'The period can be one year at most.';
       thisMonth: 'This month';
       title: 'PDF for accounting';
       to: 'To';

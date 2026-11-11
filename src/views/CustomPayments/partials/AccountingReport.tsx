@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined';
 import { Box, Button, CircularProgress, TextField, Typography } from '@mui/material';
-import dayjs from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 import { saveAs } from 'file-saver';
 
 import CardPaymentsService from '@/services/card-payments.service';
@@ -20,6 +20,8 @@ const ISO = 'YYYY-MM-DD';
 // The API accepts at most a year and a day (a full calendar year, leap or not).
 const MAX_DAYS = 366;
 
+const PROBLEM_ID = 'accounting-report-problem';
+
 const PRESETS = ['thisMonth', 'lastMonth'] as const;
 
 type Preset = (typeof PRESETS)[number];
@@ -32,6 +34,12 @@ const presetRange = (preset: Preset): [string, string] => {
   const last = today.subtract(1, 'month');
 
   return [last.startOf('month').format(ISO), last.endOf('month').format(ISO)];
+};
+
+const rangeProblem = (start: Dayjs, end: Dayjs): 'rangeInvalid' | 'rangeTooLong' | null => {
+  if (end.isBefore(start)) return 'rangeInvalid';
+
+  return end.diff(start, 'day') > MAX_DAYS ? 'rangeTooLong' : null;
 };
 
 const dateFieldSx = {
@@ -52,7 +60,9 @@ const AccountingReport = () => {
 
   const start = dayjs(from);
   const end = dayjs(to);
-  const valid = start.isValid() && end.isValid() && !end.isBefore(start) && end.diff(start, 'day') <= MAX_DAYS;
+  const complete = start.isValid() && end.isValid();
+  const problem = complete ? rangeProblem(start, end) : null;
+  const valid = complete && !problem;
   const activePreset = PRESETS.find(preset => {
     const [presetFrom, presetTo] = presetRange(preset);
 
@@ -126,7 +136,10 @@ const AccountingReport = () => {
         label={t('report.to')}
         value={to}
         onChange={e => setRange([from, e.target.value])}
-        slotProps={{ inputLabel: { shrink: true }, htmlInput: { min: from || undefined } }}
+        slotProps={{
+          inputLabel: { shrink: true },
+          htmlInput: { min: from || undefined, 'aria-describedby': problem ? PROBLEM_ID : undefined },
+        }}
         error={!valid}
         sx={dateFieldSx}
       />
@@ -143,6 +156,12 @@ const AccountingReport = () => {
       >
         {t(loading ? 'report.preparing' : 'report.download')}
       </Button>
+
+      {problem && (
+        <Typography id={PROBLEM_ID} role="status" sx={{ flexBasis: '100%', fontSize: 11, color: bbColors.red700 }}>
+          {t(`report.${problem}`)}
+        </Typography>
+      )}
     </Box>
   );
 };

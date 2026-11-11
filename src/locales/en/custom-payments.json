@@ -112,6 +112,8 @@
     "to": "To",
     "download": "Download PDF",
     "preparing": "Preparing…",
-    "failed": "The report could not be made. Try again."
+    "failed": "The report could not be made. Try again.",
+    "rangeInvalid": "The “To” date cannot be before the “From” date.",
+    "rangeTooLong": "The period can be one year at most."
   }
 }

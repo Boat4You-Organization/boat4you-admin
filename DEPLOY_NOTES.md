@@ -1,5 +1,10 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-11 — 📞 Call centar → Postavke: naslovi sekcija kažu čije vrijeme vrijedi — ✅ LIVE 11.11.2026 16:46 UTC (`6340876`, `assets/index-C6vrdQsA.js`)
+
+- „Kada Nika zove (lokalno vrijeme klijenta, svih 7 dana)“ i „Prebacivanje na Marija (hrvatsko vrijeme)“; en + hr, `resources.d.ts` regeneriran. Samo tekst, logika je u backendu (`CallClock`).
+- **Provjereno:** tsc 0, eslint 0 grešaka; novi naslov je u živom bundleu.
+
 ## 2026-11-11 — 🧾 Plaćanja: „PDF za knjigovodstvo“ (uplate, povrati i isplate na banku za razdoblje) — ✅ LIVE 11.11.2026 16:12 UTC (`43a906a`, `assets/index-CSoScuJd.js`, na `origin/main`; backend jar `2742e66e` LIVE na cusma2 16:11 UTC); tag `live/2026-11-11-payments-report`; cusma1 `html.prev` = `index-DPXpoEgC.js`
 
 - Stranica „Payments“ (`/custom-payments`), iznad kartica: blok `AccountingReport` — „Ovaj mjesec“ / „Prošli mjesec“ ili raspon Od–Do (zadano: ovaj mjesec do danas), gumb „Preuzmi PDF“ → `GET /admin/payments-report?from&to` (blob) → `boat4you-uplate-<od>-<do>.pdf`.

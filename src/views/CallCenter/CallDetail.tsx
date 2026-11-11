@@ -8,6 +8,7 @@ import { Box } from '@mui/material';
 
 import CallCenterService from '@/services/callCenter.service';
 import { CallDetail as CallDetailModel } from '@/types/callCenter.type';
+import { callSiteId } from '@/utils/callCenter/callSite';
 import { SiteChip, linkSx } from '@/views/ContactCenter/common';
 import { CcButton, Pill, SectionLabel, Sk, cc, panelSx, scrollSx, tableSx } from '@/views/ContactCenter/ui';
 
@@ -140,7 +141,7 @@ const CallDetail = ({ id }: { id: number }) => {
           <StatusChip status={call.status} />
           <OutcomeChip outcome={call.outcome} />
           {call.qualityFailed && <Pill colors={[cc.redBg, cc.red]}>{t('calls.quality')}</Pill>}
-          {call.site && <SiteChip siteId={call.site} />}
+          {call.site && <SiteChip siteId={callSiteId(call.site)} />}
           {isTask && (
             <CcButton kind="fill" disabled={resolving} onClick={resolve} sx={{ ml: 'auto' }}>
               {t('action.resolve')}

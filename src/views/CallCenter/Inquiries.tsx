@@ -7,7 +7,8 @@ import { Box } from '@mui/material';
 
 import CallCenterService from '@/services/callCenter.service';
 import { CallInquiryListItem, Paged } from '@/types/callCenter.type';
-import { SITE_IDS, siteLabel } from '@/utils/contactCenter/safeLink';
+import { CALL_SITE_KEYS, callSiteId } from '@/utils/callCenter/callSite';
+import { siteLabel } from '@/utils/contactCenter/safeLink';
 import { SiteChip } from '@/views/ContactCenter/common';
 import { CcButton, LoadAlert, Pill, SearchField, cc, fieldSx, panelSx, tableSx } from '@/views/ContactCenter/ui';
 
@@ -78,9 +79,9 @@ const Inquiries = () => {
           sx={{ ...fieldSx, flex: '0 1 220px' }}
         >
           <option value="">{t('filter.site')}</option>
-          {SITE_IDS.map(s => (
+          {CALL_SITE_KEYS.map(s => (
             <option key={s} value={s}>
-              {siteLabel(s)}
+              {siteLabel(callSiteId(s))}
             </option>
           ))}
         </Box>
@@ -114,7 +115,7 @@ const Inquiries = () => {
                       <Box component="span" className="tnum" sx={{ fontSize: 12, color: cc.text }}>
                         {i.phoneE164 ?? i.phone ?? '—'}
                       </Box>
-                      {i.site && <SiteChip siteId={i.site} small />}
+                      {i.site && <SiteChip siteId={callSiteId(i.site)} small />}
                       {i.locale && (
                         <Box component="span" sx={{ fontSize: 11.5, color: cc.muted, textTransform: 'uppercase' }}>
                           {i.locale}

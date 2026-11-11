@@ -1058,7 +1058,7 @@ interface Resources {
     detailsTitle: 'Mollie payment';
     editNote: 'Edit note';
     empty: 'No custom payments.';
-    feeNote: "Mollie's fee and the net amount are in the list (a dash until known). Payouts are shown in the Mollie dashboard.";
+    feeNote: "Mollie's fee and the net amount are in the list (a dash until known). Transfers to the bank account are in the PDF for accounting.";
     fullAmount: 'Full amount';
     instalmentPlusFee: 'instalment {{base}} + card fee {{fee}}';
     loadFailed: 'Custom payments could not be loaded.';
@@ -1097,6 +1097,17 @@ interface Resources {
     refresh: 'Refresh from Mollie';
     refreshFailed: 'The payment could not be refreshed.';
     refunded: 'Refunded';
+    report: {
+      download: 'Download PDF';
+      failed: 'The report could not be made. Try again.';
+      from: 'From';
+      hint: 'Payments, refunds and transfers to the bank account in the period';
+      lastMonth: 'Last month';
+      preparing: 'Preparing…';
+      thisMonth: 'This month';
+      title: 'PDF for accounting';
+      to: 'To';
+    };
     searchPlaceholder: 'Search reference or e-mail… (Enter)';
     status: {
       CANCELLED: 'Cancelled';

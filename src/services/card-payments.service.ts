@@ -47,6 +47,20 @@ export default class CardPaymentsService {
     }
   }
 
+  /**
+   * The accounting PDF of a period (Mollie payments, refunds, transfers to the bank); `from` / `to` are `YYYY-MM-DD`,
+   * both inclusive. Null when the API could not make it.
+   */
+  public static async getPaymentsReport(from: string, to: string): Promise<Blob | null> {
+    try {
+      const { data } = await api.get<Blob>('/admin/payments-report', { params: { from, to }, responseType: 'blob' });
+
+      return data;
+    } catch {
+      return null;
+    }
+  }
+
   /** Live read from Mollie; works for booking card payments and /pay link payments alike. */
   public static async getMolliePayment(paymentId: string): Promise<PayloadResponse<MolliePaymentDetails | null>> {
     try {

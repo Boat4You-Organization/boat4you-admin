@@ -78,7 +78,7 @@
   "detailsTitle": "Mollie plaćanje",
   "detailsFailed": "Plaćanje nije bilo moguće pročitati iz Mollieja.",
   "close": "Zatvori",
-  "feeNote": "Mollieva naknada i neto iznos su na popisu (crtica dok nisu poznati). Isplate se vide u Mollie nadzornoj ploči.",
+  "feeNote": "Mollieva naknada i neto iznos su na popisu (crtica dok nisu poznati). Isplate na bankovni račun su u PDF-u za knjigovodstvo.",
   "openInMollie": "Otvori u Mollieju",
   "mollie": {
     "status": "Mollie status",
@@ -102,5 +102,16 @@
   },
   "bookingCardPayments": "Kartična plaćanja",
   "paidByMollie": "Kartica · Mollie",
-  "paidByStripe": "Kartica · Stripe"
+  "paidByStripe": "Kartica · Stripe",
+  "report": {
+    "title": "PDF za knjigovodstvo",
+    "hint": "Uplate, povrati i isplate na bankovni račun u razdoblju",
+    "thisMonth": "Ovaj mjesec",
+    "lastMonth": "Prošli mjesec",
+    "from": "Od",
+    "to": "Do",
+    "download": "Preuzmi PDF",
+    "preparing": "Pripremam…",
+    "failed": "Izvještaj nije bilo moguće izraditi. Pokušajte ponovno."
+  }
 }

@@ -7,6 +7,7 @@ import { Box, Typography } from '@mui/material';
 import Layout from '@/components/Layout';
 import { bbColors, bbFont, bbTabSx, bbTabsTrackSx } from '@/styles/bb';
 
+import AccountingReport from './partials/AccountingReport';
 import BookingPaymentsTab from './partials/BookingPaymentsTab';
 import LinkPaymentsTab from './partials/LinkPaymentsTab';
 import MolliePaymentDetailsModal from './partials/MolliePaymentDetailsModal';
@@ -61,6 +62,10 @@ const CustomPayments = () => {
             <Typography sx={{ fontSize: 12.5, color: bbColors.gray500, mt: 0.5 }}>
               {t(tab === 'bookings' ? 'subtitleBookings' : 'subtitle')}
             </Typography>
+          </Box>
+
+          <Box sx={{ mb: 2 }}>
+            <AccountingReport />
           </Box>
 
           <Box role="tablist" sx={{ ...bbTabsTrackSx, mb: 1.75 }}>

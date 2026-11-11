@@ -78,7 +78,7 @@
   "detailsTitle": "Mollie plaćanje",
   "detailsFailed": "Plaćanje nije bilo moguće pročitati iz Mollieja.",
   "close": "Zatvori",
-  "feeNote": "Mollieva naknada i neto isplata vide se u Mollie nadzornoj ploči.",
+  "feeNote": "Mollieva naknada i neto iznos su na popisu (crtica dok nisu poznati). Isplate se vide u Mollie nadzornoj ploči.",
   "openInMollie": "Otvori u Mollieju",
   "mollie": {
     "status": "Mollie status",

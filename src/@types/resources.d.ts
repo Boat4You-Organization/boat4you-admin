@@ -838,7 +838,7 @@ interface Resources {
     detailsTitle: 'Mollie payment';
     editNote: 'Edit note';
     empty: 'No custom payments.';
-    feeNote: "Mollie's fee and the net payout are shown in the Mollie dashboard.";
+    feeNote: "Mollie's fee and the net amount are in the list (a dash until known). Payouts are shown in the Mollie dashboard.";
     fullAmount: 'Full amount';
     instalmentPlusFee: 'instalment {{base}} + card fee {{fee}}';
     loadFailed: 'Custom payments could not be loaded.';

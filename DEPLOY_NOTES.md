@@ -1,5 +1,10 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-11 — 💳 Plaćanja: stupac „Mollie naknada“ (naknada + neto) u obje liste — ✅ LIVE 11.11.2026 12:27 UTC (`003269f`, `assets/index-5mJOC7J8.js`, na `origin/main`; backend `928cfa03` LIVE 12:15 UTC)
+
+- Obje kartice stranice „Payments“ (`BookingPaymentsTab`, `LinkPaymentsTab`): novi stupac iza iznosa, `FeeNetCell` u `paymentsShared.tsx` — naknada, ispod „Net / Neto“; „—“ kad backend ne pošalje `feeMinor`/`netMinor` (nema Mollie organizacijskog tokena, uplata još nije proknjižena, ili stariji backend).
+- Modeli `feeMinor?`, `netMinor?` (centi; neto = iznos − naknada, povrati se ne oduzimaju). Napomena u modalu „Details“ sada kaže da su naknada i neto na popisu, a isplate u Mollie nadzornoj ploči. en + hr, `resources.d.ts` regeneriran (+ prettier).
+- **Provjereno:** tsc 0, eslint 0 grešaka; lokalno s lažnim API-jem obje kartice (red s naknadom „€94.50 / Net €5,155.50“, ostali „—“); uživo bundle sadrži „Mollie fee“ / „Mollie naknada“. **Nije provjereno:** s pravom prijavom u produkcijski admin (Mario) i s pravom naknadom (čeka token `MOLLIE_ORG_TOKEN`).
 
 ## 2026-11-10 — 💳 Plaćanja (Mollie): kartične uplate rezervacija + link za plaćanje na jednoj stranici, Mollie detalji, način plaćanja rate na bookingu — ✅ LIVE 10.11.2026 16:22 UTC (`d7068a2`, `assets/index-ChDPTs1s.js`, na `origin/main`; backend jar bbfa0e13 na cusma2 16:21 UTC). Oznaka „Klarna“ na popisima i na rezervaciji: ✅ LIVE 20:12 UTC (`cf8b9f2`, `assets/index-D2kqL0qF.js`, backend jar e20302a4).
 

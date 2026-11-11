@@ -1,5 +1,12 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-11 — 📰 PR stranica vraćena u admin (PR #8 spojen u main) — ✅ LIVE 11.11.2026 14:25 UTC (`20b7795`, `assets/index-DPXpoEgC.js`; cusma1 staging → test → swap, VERIFIED live == new, root/deep/asset 200, `/pr` `/pr/pitches` `/call-center/calls` `/custom-payments` 200); tag `live/2026-11-11-admin-pr`; cusma1 `html.prev` = `index-DGd41m3N.js`
+
+- Od 10.11. 16:22 UTC (deploy Plaćanja s `origin/main`) do 11.11. 14:25 UTC PR stranice nije bilo u produkcijskom adminu: admin dio PR modula (PR #8) nije bio u mainu, a admin se od 10.11. gradi s maina. Backend nije pogođen (PR #21 u mainu od 11.11., V9_121 u živom jaru); slanje novinarima i dalje isključeno (`PR_MAIL_ENABLED=false`).
+- Marketing izbornik: … Objave, Call centar, PR (kod spajanja sukob s Call centrom na istim mjestima, zadržano oboje).
+- Main sada nosi PR modul: svaki sljedeći admin build s maina ga ima, release worktree za PR više ne treba.
+- Provjere na `20b7795` (čisti worktree): `yarn lint:base` 0 grešaka, `yarn build` OK, `yarn test` 143/143. Klik-provjera prijavljenog admina nije rađena (prijava je Marijeva).
+
 ## 2026-11-11 — 📞 Call centar (AI call centar „Nika“): pozivi s transkriptom i snimkom, upiti, postavke — ✅ LIVE 11.11.2026 14:04 UTC (`b5e02bd`, `assets/index-DGd41m3N.js`, na `origin/main`; backend `/admin/calls/**` uživo od 11.11.)
 
 - Nova stavka izbornika „Call centar“ u Marketing prostoru (SYSTEM_ADMIN), rute `/call-center/calls`, `/call-center/calls/:id`, `/call-center/inquiries`, `/call-center/settings`; `/call-center` preusmjerava na Pozive. `utils/workspace.ts` + test.

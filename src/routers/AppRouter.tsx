@@ -23,6 +23,7 @@ const Users = lazy(() => import('@/views/Users'));
 const ContactCenter = lazy(() => import('@/views/ContactCenter'));
 const Social = lazy(() => import('@/views/Social'));
 const CallCenter = lazy(() => import('@/views/CallCenter'));
+const Pr = lazy(() => import('@/views/Pr'));
 const Login = lazy(() => import('@/views/Login'));
 const MyProfile = lazy(() => import('@/views/MyProfile'));
 const SignUp = lazy(() => import('@/views/SignUp'));
@@ -56,6 +57,7 @@ const CALL_CENTER_PATHS = [
   '/call-center/inquiries',
   '/call-center/settings',
 ];
+const PR_PATHS = ['/pr', '/pr/contacts', '/pr/studies', '/pr/pitches', '/pr/placements', '/pr/mentions'];
 
 const AppRouter: React.FC = () => (
   <BrowserRouter>
@@ -104,6 +106,14 @@ const AppRouter: React.FC = () => (
             element={
               <AppRoute variant="protected" accessLevel={[UserRoleName.SYSTEM_ADMIN]} component={<CallCenter />} />
             }
+          />
+        ))}
+        {/* PR (4.11.2026): SYSTEM_ADMIN only, like the backend /admin/pr/** (journalist contacts, sending from press@). */}
+        {PR_PATHS.map(path => (
+          <Route
+            key={path}
+            path={path}
+            element={<AppRoute variant="protected" accessLevel={[UserRoleName.SYSTEM_ADMIN]} component={<Pr />} />}
           />
         ))}
         <Route path="/login" element={<AppRoute variant="anonymous" component={<Login />} />} />

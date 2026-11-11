@@ -1,5 +1,7 @@
 import { ElementType } from 'react';
 
+import Campaign from '@mui/icons-material/Campaign';
+
 import Boat from '@/components/SvgIcons/Boat';
 import { People } from '@/components/SvgIcons/BoatFeatures';
 import Bookings from '@/components/SvgIcons/Bookings';
@@ -110,6 +112,13 @@ const navigation: NavigationLink[] = [
     id: 'callCenter',
     icon: PhoneOutlined,
     path: '/call-center',
+    accessLevel: [UserRoleName.SYSTEM_ADMIN],
+  },
+  {
+    // PR (5.11.2026): journalists, studies, pitches from press@; backend /admin/pr/** is SYSTEM_ADMIN only.
+    id: 'pr',
+    icon: Campaign,
+    path: '/pr',
     accessLevel: [UserRoleName.SYSTEM_ADMIN],
   },
 ];

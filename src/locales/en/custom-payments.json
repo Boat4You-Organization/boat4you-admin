@@ -16,6 +16,7 @@
     "site": "Site",
     "reference": "Reference",
     "amount": "Amount",
+    "fee": "Mollie fee",
     "status": "Status",
     "email": "Payer e-mail",
     "orderId": "Mollie payment",
@@ -25,6 +26,7 @@
   "empty": "No custom payments.",
   "loadFailed": "Custom payments could not be loaded.",
   "refunded": "Refunded",
+  "net": "Net",
   "booking": "Booking",
   "totalReceived": "Total received",
   "refresh": "Refresh from Mollie",
@@ -59,6 +61,7 @@
     "booking": "Booking",
     "client": "Client",
     "amount": "Amount",
+    "fee": "Mollie fee",
     "status": "Status",
     "orderId": "Mollie payment"
   },

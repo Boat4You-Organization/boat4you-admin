@@ -60,6 +60,10 @@ export interface CardPaymentModel {
   /** FAILED = paid, but confirming the booking failed: the office confirms it by hand. */
   promoteState: 'PENDING' | 'DONE' | 'FAILED' | null;
   lastCheckedAt: string | null;
+  /** Mollie's fee for the payment in cents; null or absent = not known (no Mollie token, or not booked yet). */
+  feeMinor?: number | null;
+  /** Amount minus Mollie's fee in cents (refunds not subtracted); null or absent while the fee is not known. */
+  netMinor?: number | null;
 }
 
 export interface CardPaymentsPage {

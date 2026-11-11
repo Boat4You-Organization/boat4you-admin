@@ -16,6 +16,7 @@
     "site": "Stranica",
     "reference": "Referenca",
     "amount": "Iznos",
+    "fee": "Mollie naknada",
     "status": "Status",
     "email": "E-mail platitelja",
     "orderId": "Mollie plaćanje",
@@ -25,6 +26,7 @@
   "empty": "Nema plaćanja putem linka.",
   "loadFailed": "Plaćanja nije bilo moguće učitati.",
   "refunded": "Povrat",
+  "net": "Neto",
   "booking": "Rezervacija",
   "totalReceived": "Ukupno primljeno",
   "refresh": "Osvježi iz Mollieja",
@@ -59,6 +61,7 @@
     "booking": "Rezervacija",
     "client": "Klijent",
     "amount": "Iznos",
+    "fee": "Mollie naknada",
     "status": "Status",
     "orderId": "Mollie plaćanje"
   },

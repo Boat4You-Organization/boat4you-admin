@@ -61,6 +61,10 @@ export interface CustomPaymentModel {
   adminNote: string | null;
   reservationId: number | null;
   reservationNumber: string | null;
+  /** Mollie's fee for the payment in cents; null or absent = not known (no Mollie token, or not booked yet). */
+  feeMinor?: number | null;
+  /** Amount minus Mollie's fee in cents (refunds not subtracted); null or absent while the fee is not known. */
+  netMinor?: number | null;
 }
 
 export interface CustomPaymentsPage {

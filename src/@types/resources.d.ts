@@ -798,6 +798,7 @@ interface Resources {
       booking: 'Booking';
       client: 'Client';
       date: 'Date';
+      fee: 'Mollie fee';
       orderId: 'Mollie payment';
       status: 'Status';
     };
@@ -825,6 +826,7 @@ interface Resources {
       amount: 'Amount';
       date: 'Date';
       email: 'Payer e-mail';
+      fee: 'Mollie fee';
       note: 'Note';
       orderId: 'Mollie payment';
       reference: 'Reference';
@@ -861,6 +863,7 @@ interface Resources {
       status: 'Mollie status';
       testMode: 'Test mode';
     };
+    net: 'Net';
     next: 'Next →';
     noteFailed: 'The note could not be saved.';
     notePlaceholder: 'Internal note for the office; the client never sees it.';

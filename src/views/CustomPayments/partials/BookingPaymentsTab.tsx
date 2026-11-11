@@ -13,6 +13,7 @@ import { showToast } from '@/valtio/global/global.actions';
 
 import CardPaymentStatusCell from './CardPaymentStatusCell';
 import {
+  FeeNetCell,
   MollieLink,
   Pager,
   SegmentTabs,
@@ -26,7 +27,7 @@ import {
 
 const FILTERS = Object.keys(CARD_PAYMENT_FILTERS) as CardPaymentFilter[];
 
-const COLUMNS = ['date', 'booking', 'client', 'amount', 'status', 'orderId'] as const;
+const COLUMNS = ['date', 'booking', 'client', 'amount', 'fee', 'status', 'orderId'] as const;
 
 const linkSx = { color: bbColors.navy700, textDecoration: 'none', fontSize: 11.5 } as const;
 
@@ -273,6 +274,9 @@ const BookingPaymentsTab = ({ onDetails }: BookingPaymentsTabProps) => {
                     </Box>
                     <Box component="td" sx={{ ...tdBase, fontVariantNumeric: 'tabular-nums' }}>
                       <AmountCell p={p} />
+                    </Box>
+                    <Box component="td" sx={{ ...tdBase, fontVariantNumeric: 'tabular-nums' }}>
+                      <FeeNetCell feeMinor={p.feeMinor} netMinor={p.netMinor} currency={p.currency} />
                     </Box>
                     <Box component="td" sx={tdBase}>
                       <CardPaymentStatusCell payment={p} />

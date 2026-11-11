@@ -150,6 +150,26 @@ export const Pager = ({ page, totalPages, onChange }: PagerProps) => {
   );
 };
 
+interface FeeNetCellProps {
+  feeMinor?: number | null;
+  netMinor?: number | null;
+  currency?: string;
+}
+
+/** Mollie's fee and what is left of the payment after it; a dash while the fee is not known. */
+export const FeeNetCell = ({ feeMinor, netMinor, currency }: FeeNetCellProps) => {
+  const { t } = useTranslation('custom-payments');
+
+  if (feeMinor == null || netMinor == null) return <>—</>;
+
+  return (
+    <>
+      {formatMoney(feeMinor, currency)}
+      <Box sx={mutedLineSx}>{`${t('net')} ${formatMoney(netMinor, currency)}`}</Box>
+    </>
+  );
+};
+
 /** Footer of a list: "Total received" (backend sum over the current filter). */
 export const TotalReceived = ({ minor }: { minor: number }) => {
   const { t } = useTranslation('custom-payments');

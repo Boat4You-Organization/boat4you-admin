@@ -1,5 +1,10 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-11 — 💳 Stripe uklonjen iz admina (oznaka „Kartica · Stripe“ uz plaćenu ratu) — ✅ LIVE 11.11.2026 17:03 UTC (`c919af5`, `assets/index-Cui88siF.js`, na `origin/main`; backend bez Stripea `c82b89d6` LIVE na cusma2 17:02 UTC); tag `live/2026-11-11-no-stripe`; cusma1 `html.prev` = `index-C6vrdQsA.js`
+
+- Mario 11.11.: „samo ostavi mollie“ → „Da, ukloni“. `PhasePaidBy` prikazuje samo „Kartica · Mollie“ s linkom; polje `stripePaymentIntentId` i ključ `paidByStripe` (en + hr) uklonjeni, `resources.d.ts` regeneriran. U produkcijskoj bazi nije bilo nijedne rate plaćene preko Stripea, pa se oznaka nije ni prikazivala.
+- **Provjereno:** tsc 0, eslint 0 grešaka; uživo entry `index-Cui88siF.js`, u njemu nema riječi „stripe“, blok „PDF za knjigovodstvo“ je i dalje tu; root/deep/asset 200.
+
 ## 2026-11-11 — 📞 Call centar → Postavke: naslovi sekcija kažu čije vrijeme vrijedi — ✅ LIVE 11.11.2026 16:46 UTC (`6340876`, `assets/index-C6vrdQsA.js`)
 
 - „Kada Nika zove (lokalno vrijeme klijenta, svih 7 dana)“ i „Prebacivanje na Marija (hrvatsko vrijeme)“; en + hr, `resources.d.ts` regeneriran. Samo tekst, logika je u backendu (`CallClock`).

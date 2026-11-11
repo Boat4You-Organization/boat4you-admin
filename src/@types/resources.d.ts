@@ -1091,7 +1091,6 @@ interface Resources {
     openInMollie: 'Open in Mollie';
     pageOf: 'Page {{page}} of {{total}}';
     paidByMollie: 'Card · Mollie';
-    paidByStripe: 'Card · Stripe';
     paidOn: 'Paid {{date}}';
     prev: '← Prev';
     refresh: 'Refresh from Mollie';

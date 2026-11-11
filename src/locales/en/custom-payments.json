@@ -102,7 +102,6 @@
   },
   "bookingCardPayments": "Card payments",
   "paidByMollie": "Card · Mollie",
-  "paidByStripe": "Card · Stripe",
   "report": {
     "title": "PDF for accounting",
     "hint": "Payments, refunds and transfers to the bank account in the period",

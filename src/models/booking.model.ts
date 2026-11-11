@@ -243,8 +243,6 @@ export interface ReservationPaymentPhase {
   deadline: string;
   amount: number;
   paidOn: string;
-  /** Old card payments (before Mollie). */
-  stripePaymentIntentId: string | null;
   /** 'MOLLIE' when the phase was paid by card through Mollie; null = bank transfer or marked paid by hand. */
   paymentProvider: string | null;
   /** Mollie payment id (tr_…) when paymentProvider is MOLLIE. */

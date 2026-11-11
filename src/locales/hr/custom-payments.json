@@ -102,7 +102,6 @@
   },
   "bookingCardPayments": "Kartična plaćanja",
   "paidByMollie": "Kartica · Mollie",
-  "paidByStripe": "Kartica · Stripe",
   "report": {
     "title": "PDF za knjigovodstvo",
     "hint": "Uplate, povrati i isplate na bankovni račun u razdoblju",

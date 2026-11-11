@@ -8,7 +8,8 @@ import dayjs from 'dayjs';
 
 import CallCenterService from '@/services/callCenter.service';
 import { CALL_KINDS, CALL_OUTCOMES, CALL_STATUSES, CallListItem, Paged } from '@/types/callCenter.type';
-import { SITE_IDS, siteLabel } from '@/utils/contactCenter/safeLink';
+import { CALL_SITE_KEYS, callSiteId } from '@/utils/callCenter/callSite';
+import { siteLabel } from '@/utils/contactCenter/safeLink';
 import { SiteChip } from '@/views/ContactCenter/common';
 import { CcButton, LoadAlert, Pill, SearchField, cc, fieldSx, panelSx, tableSx } from '@/views/ContactCenter/ui';
 
@@ -145,7 +146,7 @@ const Calls = () => {
           t('filter.site'),
           site,
           setSite,
-          SITE_IDS.map(s => ({ value: s, text: siteLabel(s) }))
+          CALL_SITE_KEYS.map(s => ({ value: s, text: siteLabel(callSiteId(s)) }))
         )}
         {date(t('filter.from'), from, setFrom)}
         {date(t('filter.to'), to, setTo)}
@@ -194,7 +195,7 @@ const Calls = () => {
                     <Box component="span" className="tnum" sx={{ fontSize: 12, color: cc.text }}>
                       {c.phone ?? '—'}
                     </Box>
-                    {c.site && <SiteChip siteId={c.site} small />}
+                    {c.site && <SiteChip siteId={callSiteId(c.site)} small />}
                     {c.language && (
                       <Box component="span" sx={{ fontSize: 11.5, color: cc.muted, textTransform: 'uppercase' }}>
                         {c.language}

@@ -179,8 +179,8 @@
   "settings": {
     "group": {
       "general": "General",
-      "window": "When Nika calls",
-      "transfer": "Transfer to Mario",
+      "window": "When Nika calls (client's local time, all 7 days)",
+      "transfer": "Transfer to Mario (Croatian time)",
       "limits": "Limits and retention"
     },
     "on": "On",

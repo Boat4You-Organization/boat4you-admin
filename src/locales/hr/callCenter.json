@@ -179,8 +179,8 @@
   "settings": {
     "group": {
       "general": "Općenito",
-      "window": "Kada Nika zove",
-      "transfer": "Prebacivanje na Marija",
+      "window": "Kada Nika zove (lokalno vrijeme klijenta, svih 7 dana)",
+      "transfer": "Prebacivanje na Marija (hrvatsko vrijeme)",
       "limits": "Limiti i čuvanje"
     },
     "on": "Uključeno",

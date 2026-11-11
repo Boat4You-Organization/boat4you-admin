@@ -349,8 +349,8 @@ interface Resources {
       group: {
         general: 'General';
         limits: 'Limits and retention';
-        transfer: 'Transfer to Mario';
-        window: 'When Nika calls';
+        transfer: 'Transfer to Mario (Croatian time)';
+        window: "When Nika calls (client's local time, all 7 days)";
       };
       hint: {
         calls_test_numbers: 'comma separated; empty = everyone';

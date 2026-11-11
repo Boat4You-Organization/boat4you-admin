@@ -1,5 +1,12 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-11 — 🧾 Plaćanja: „PDF za knjigovodstvo“ (uplate, povrati i isplate na banku za razdoblje) — ✅ LIVE 11.11.2026 16:12 UTC (`43a906a`, `assets/index-CSoScuJd.js`, na `origin/main`; backend jar `2742e66e` LIVE na cusma2 16:11 UTC); tag `live/2026-11-11-payments-report`; cusma1 `html.prev` = `index-DPXpoEgC.js`
+
+- Stranica „Payments“ (`/custom-payments`), iznad kartica: blok `AccountingReport` — „Ovaj mjesec“ / „Prošli mjesec“ ili raspon Od–Do (zadano: ovaj mjesec do danas), gumb „Preuzmi PDF“ → `GET /admin/payments-report?from&to` (blob) → `boat4you-uplate-<od>-<do>.pdf`.
+- Raspon najviše 366 dana razlike (backend prima do 367 dana); kod neispravnog raspona gumb je onemogućen i ispod piše zašto („Do“ prije „Od“ / najviše godinu dana). Greška poziva → toast.
+- Napomena u modalu „Details“: isplate na bankovni račun su u PDF-u za knjigovodstvo. en + hr, `resources.d.ts` regeneriran.
+- **Provjereno:** tsc 0, eslint 0 grešaka; lokalno s lažnim API-jem (poziv s točnim datumima, ime datoteke, poruke za neispravan raspon, 375 px bez vodoravnog pomaka); uživo: entry `index-CSoScuJd.js`, blok se prikazuje prijavljenom adminu, a poziv s pravom prijavom vraća 200 `application/pdf` (studeni, listopad, 12 mjeseci) i 400 za neispravan raspon. **Nije provjereno:** sam klik na „Preuzmi PDF“ u produkciji (spremanje datoteke je ostavljeno Mariju).
+
 ## 2026-11-11 — 📰 PR stranica vraćena u admin (PR #8 spojen u main) — ✅ LIVE 11.11.2026 14:25 UTC (`20b7795`, `assets/index-DPXpoEgC.js`; cusma1 staging → test → swap, VERIFIED live == new, root/deep/asset 200, `/pr` `/pr/pitches` `/call-center/calls` `/custom-payments` 200); tag `live/2026-11-11-admin-pr`; cusma1 `html.prev` = `index-DGd41m3N.js`
 
 - Od 10.11. 16:22 UTC (deploy Plaćanja s `origin/main`) do 11.11. 14:25 UTC PR stranice nije bilo u produkcijskom adminu: admin dio PR modula (PR #8) nije bio u mainu, a admin se od 10.11. gradi s maina. Backend nije pogođen (PR #21 u mainu od 11.11., V9_121 u živom jaru); slanje novinarima i dalje isključeno (`PR_MAIL_ENABLED=false`).

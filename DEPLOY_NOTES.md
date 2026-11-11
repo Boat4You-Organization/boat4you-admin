@@ -1,5 +1,10 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-11 — 📞 Call centar: stranice punim nazivom i u svojoj boji, filtar po stranici radi — ✅ LIVE 11.11.2026 17:08 UTC (`5b4074c`, `assets/index-PeDCUpFG.js`, na `origin/main`); tag `live/2026-11-11-call-site-names`; cusma1 `html.prev` = `index-Cui88siF.js`
+
+- **Što (Mario 11.11.: „di piše CC, stavi Catamaran Croatia i svaki web u svoju boju“):** backend sprema stranicu upita pod `CallSite` ključem (`cc`, `greece`, `italy`, `caribbean`, `ey`, `cy`, `boat4you`), a `SiteChip` i `siteLabel` rade s admin oznakama (`catamaran-croatia` …). Pozivi, Upiti i detalj poziva sada mapiraju ključ (`src/utils/callCenter/callSite.ts`) pa pišu puni naziv u boji stranice. Filtar po stranici je slao admin oznake koje backend ne sprema i nije vraćao ništa; sada šalje ključ.
+- **Provjereno:** `yarn test` 148/148 (novi `tests/call-site.test.ts`), tsc 0, eslint 0 grešaka; živi ulazni bundle = novi, root/deep/asset 200. **Nije provjereno u pregledniku** (prijava).
+
 ## 2026-11-11 — 💳 Stripe uklonjen iz admina (oznaka „Kartica · Stripe“ uz plaćenu ratu) — ✅ LIVE 11.11.2026 17:03 UTC (`c919af5`, `assets/index-Cui88siF.js`, na `origin/main`; backend bez Stripea `c82b89d6` LIVE na cusma2 17:02 UTC); tag `live/2026-11-11-no-stripe`; cusma1 `html.prev` = `index-C6vrdQsA.js`
 
 - Mario 11.11.: „samo ostavi mollie“ → „Da, ukloni“. `PhasePaidBy` prikazuje samo „Kartica · Mollie“ s linkom; polje `stripePaymentIntentId` i ključ `paidByStripe` (en + hr) uklonjeni, `resources.d.ts` regeneriran. U produkcijskoj bazi nije bilo nijedne rate plaćene preko Stripea, pa se oznaka nije ni prikazivala.

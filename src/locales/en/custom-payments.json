@@ -16,6 +16,7 @@
     "site": "Site",
     "reference": "Reference",
     "amount": "Amount",
+    "fee": "Mollie fee",
     "status": "Status",
     "email": "Payer e-mail",
     "orderId": "Mollie payment",
@@ -25,6 +26,7 @@
   "empty": "No custom payments.",
   "loadFailed": "Custom payments could not be loaded.",
   "refunded": "Refunded",
+  "net": "Net",
   "booking": "Booking",
   "totalReceived": "Total received",
   "refresh": "Refresh from Mollie",
@@ -59,6 +61,7 @@
     "booking": "Booking",
     "client": "Client",
     "amount": "Amount",
+    "fee": "Mollie fee",
     "status": "Status",
     "orderId": "Mollie payment"
   },
@@ -75,7 +78,7 @@
   "detailsTitle": "Mollie payment",
   "detailsFailed": "The payment could not be read from Mollie.",
   "close": "Close",
-  "feeNote": "Mollie's fee and the net payout are shown in the Mollie dashboard.",
+  "feeNote": "Mollie's fee and the net amount are in the list (a dash until known). Payouts are shown in the Mollie dashboard.",
   "openInMollie": "Open in Mollie",
   "mollie": {
     "status": "Mollie status",

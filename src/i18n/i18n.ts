@@ -8,6 +8,7 @@ import amenitiesEn from '@/locales/en/amenities.json';
 import bookingEn from '@/locales/en/booking.json';
 import chatEn from '@/locales/en/chat.json';
 import commonEn from '@/locales/en/common.json';
+import callCenterEn from '@/locales/en/callCenter.json';
 import contactCenterEn from '@/locales/en/contactCenter.json';
 import customPaymentsEn from '@/locales/en/custom-payments.json';
 import extrasEn from '@/locales/en/extras.json';
@@ -27,6 +28,7 @@ import amenitiesHr from '@/locales/hr/amenities.json';
 import bookingHr from '@/locales/hr/booking.json';
 import chatHr from '@/locales/hr/chat.json';
 import commonHr from '@/locales/hr/common.json';
+import callCenterHr from '@/locales/hr/callCenter.json';
 import contactCenterHr from '@/locales/hr/contactCenter.json';
 import customPaymentsHr from '@/locales/hr/custom-payments.json';
 import extrasHr from '@/locales/hr/extras.json';
@@ -62,6 +64,7 @@ i18n.use(initReactI18next).init({
       invoices: invoicesEn,
       chat: chatEn,
       contactCenter: contactCenterEn,
+      callCenter: callCenterEn,
       social: socialEn,
       pr: prEn,
       'custom-payments': customPaymentsEn,
@@ -83,6 +86,7 @@ i18n.use(initReactI18next).init({
       invoices: invoicesHr,
       chat: chatHr,
       contactCenter: contactCenterHr,
+      callCenter: callCenterHr,
       social: socialHr,
       pr: prHr,
       'custom-payments': customPaymentsHr,
@@ -108,6 +112,7 @@ i18n.use(initReactI18next).init({
     'invoices',
     'chat',
     'contactCenter',
+    'callCenter',
     'social',
     'pr',
     'custom-payments',

@@ -26,6 +26,7 @@ import { showToast } from '@/valtio/global/global.actions';
 
 import NoteModal from './NoteModal/NoteModal';
 import {
+  FeeNetCell,
   MollieLink,
   Pager,
   SegmentTabs,
@@ -50,7 +51,7 @@ type TabId = typeof ALL | CustomPaymentStatus;
 
 const TABS: TabId[] = [ALL, ...CUSTOM_PAYMENT_STATUS_ARRAY];
 
-const COLUMNS = ['date', 'site', 'reference', 'amount', 'status', 'email', 'orderId', 'note'] as const;
+const COLUMNS = ['date', 'site', 'reference', 'amount', 'fee', 'status', 'email', 'orderId', 'note'] as const;
 
 interface LinkPaymentsTabProps {
   onDetails: (paymentId: string) => void;
@@ -270,6 +271,9 @@ const LinkPaymentsTab = ({ onDetails }: LinkPaymentsTabProps) => {
                             {`${t('refunded')} ${formatMoney(refunded)}`}
                           </Typography>
                         )}
+                      </Box>
+                      <Box component="td" sx={{ ...tdBase, fontVariantNumeric: 'tabular-nums' }}>
+                        <FeeNetCell feeMinor={p.feeMinor} netMinor={p.netMinor} currency={p.currency} />
                       </Box>
                       <Box component="td" sx={tdBase}>
                         <Box component="span" sx={pill.style}>

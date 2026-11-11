@@ -22,6 +22,7 @@ const Offers = lazy(() => import('@/views/Offers'));
 const Users = lazy(() => import('@/views/Users'));
 const ContactCenter = lazy(() => import('@/views/ContactCenter'));
 const Social = lazy(() => import('@/views/Social'));
+const CallCenter = lazy(() => import('@/views/CallCenter'));
 const Pr = lazy(() => import('@/views/Pr'));
 const Login = lazy(() => import('@/views/Login'));
 const MyProfile = lazy(() => import('@/views/MyProfile'));
@@ -50,6 +51,12 @@ const SOCIAL_PATHS = [
   '/social/automation',
 ];
 
+const CALL_CENTER_PATHS = [
+  '/call-center/calls',
+  '/call-center/calls/:id',
+  '/call-center/inquiries',
+  '/call-center/settings',
+];
 const PR_PATHS = ['/pr', '/pr/contacts', '/pr/studies', '/pr/pitches', '/pr/placements', '/pr/mentions'];
 
 const AppRouter: React.FC = () => (
@@ -88,6 +95,17 @@ const AppRouter: React.FC = () => (
             key={path}
             path={path}
             element={<AppRoute variant="protected" accessLevel={[UserRoleName.SYSTEM_ADMIN]} component={<Social />} />}
+          />
+        ))}
+        {/* Call centar (AI call centre "Nika"): SYSTEM_ADMIN only, like the backend /admin/calls/** (transcripts, recordings). */}
+        <Route path="/call-center" element={<Navigate to="/call-center/calls" replace />} />
+        {CALL_CENTER_PATHS.map(path => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              <AppRoute variant="protected" accessLevel={[UserRoleName.SYSTEM_ADMIN]} component={<CallCenter />} />
+            }
           />
         ))}
         {/* PR (4.11.2026): SYSTEM_ADMIN only, like the backend /admin/pr/** (journalist contacts, sending from press@). */}
@@ -162,11 +180,7 @@ const AppRouter: React.FC = () => (
         <Route
           path="/custom-payments"
           element={
-            <AppRoute
-              variant="protected"
-              accessLevel={[UserRoleName.SYSTEM_ADMIN]}
-              component={<CustomPayments />}
-            />
+            <AppRoute variant="protected" accessLevel={[UserRoleName.SYSTEM_ADMIN]} component={<CustomPayments />} />
           }
         />
         <Route

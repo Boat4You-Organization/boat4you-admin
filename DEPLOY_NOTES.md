@@ -1,5 +1,19 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-11 — 📞 Call centar (AI call centar „Nika“): pozivi s transkriptom i snimkom, upiti, postavke — ✅ LIVE 11.11.2026 14:04 UTC (`b5e02bd`, `assets/index-DGd41m3N.js`, na `origin/main`; backend `/admin/calls/**` uživo od 11.11.)
+
+- Nova stavka izbornika „Call centar“ u Marketing prostoru (SYSTEM_ADMIN), rute `/call-center/calls`, `/call-center/calls/:id`, `/call-center/inquiries`, `/call-center/settings`; `/call-center` preusmjerava na Pozive. `utils/workspace.ts` + test.
+- **Pozivi:** filtri status / ishod / vrsta / stranica / datum, pretraga, straničenje (Spring `PagedModel`). **Detalj:** sažetak, cijeli transkript s vremenima (samo tekstualni čvorovi), snimka (blob kroz axios zbog JWT-a, učitava se na klik), prikupljeni podaci, kriteriji kvalitete, tehnički podaci, upit, svi pozivi istog upita, „Označi riješeno“ za zadatak.
+- **Upiti:** privola, zadnji i sljedeći poziv; radnje „Nazovi sad“ (409 → razlog odbijanja), „Nazvat ću sam“, „Ponuda poslana“ (rečenica o ponudi), „Ne zvati“.
+- **Postavke:** `calls.*`; šalju se samo promijenjene vrijednosti, broj za prebacivanje stiže maskiran i piše se samo kad se upiše novi; uključivanje poziva traži potvrdu.
+- Gotcha: `nsSeparator` je `.`, pa je grupa prijevoda nazvana `inq` (ključ `inquiries.x` čitao bi namespace `inquiries`).
+- **Provjereno:** tsc 0, eslint 0 grešaka, 117 testova, build; lokalno s lažnim API-jem sve tri kartice i detalj; uživo entry `index-DGd41m3N.js`, chunk sadrži `/admin/calls`, duboka ruta 200. **Nije provjereno:** s pravom prijavom u produkcijski admin na živim pozivima (Mario).
+
+## 2026-11-11 — 💳 Plaćanja: stupac „Mollie naknada“ (naknada + neto) u obje liste — ✅ LIVE 11.11.2026 12:27 UTC (`003269f`, `assets/index-5mJOC7J8.js`, na `origin/main`; backend `928cfa03` LIVE 12:15 UTC)
+
+- Obje kartice stranice „Payments“ (`BookingPaymentsTab`, `LinkPaymentsTab`): novi stupac iza iznosa, `FeeNetCell` u `paymentsShared.tsx` — naknada, ispod „Net / Neto“; „—“ kad backend ne pošalje `feeMinor`/`netMinor` (nema Mollie organizacijskog tokena, uplata još nije proknjižena, ili stariji backend).
+- Modeli `feeMinor?`, `netMinor?` (centi; neto = iznos − naknada, povrati se ne oduzimaju). Napomena u modalu „Details“ sada kaže da su naknada i neto na popisu, a isplate u Mollie nadzornoj ploči. en + hr, `resources.d.ts` regeneriran (+ prettier).
+- **Provjereno:** tsc 0, eslint 0 grešaka; lokalno s lažnim API-jem obje kartice (red s naknadom „€94.50 / Net €5,155.50“, ostali „—“); uživo bundle sadrži „Mollie fee“ / „Mollie naknada“. **Nije provjereno:** s pravom prijavom u produkcijski admin (Mario) i s pravom naknadom (čeka token `MOLLIE_ORG_TOKEN`).
 
 ## 2026-11-10 — 💳 Plaćanja (Mollie): kartične uplate rezervacija + link za plaćanje na jednoj stranici, Mollie detalji, način plaćanja rate na bookingu — ✅ LIVE 10.11.2026 16:22 UTC (`d7068a2`, `assets/index-ChDPTs1s.js`, na `origin/main`; backend jar bbfa0e13 na cusma2 16:21 UTC). Oznaka „Klarna“ na popisima i na rezervaciji: ✅ LIVE 20:12 UTC (`cf8b9f2`, `assets/index-D2kqL0qF.js`, backend jar e20302a4).
 

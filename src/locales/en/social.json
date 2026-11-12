@@ -147,7 +147,12 @@
     "fixFirst": "Fix the marked problems first.",
     "nothingToSave": "There is nothing to save yet.",
     "loadError": "The post could not be loaded.",
-    "notEditable": "This post already went out and cannot be changed. Duplicate it instead."
+    "notEditable": "This post already went out and cannot be changed. Duplicate it instead.",
+    "reelMake": "Make a Reel from these photos",
+    "reelMaking": "Making the Reel…",
+    "reelHint": "A vertical video of the photos in this order, about 3 s each. It replaces the photos in the post.",
+    "reelDone": "The Reel is ready.",
+    "reelFailed": "The Reel could not be made."
   },
   "channels": {
     "intro": "Connections go through each network's official API. Our backend keeps the access tokens; nobody pays a middleman.",
@@ -235,7 +240,6 @@
   "ai": {
     "intro": "Every morning the AI picks a boat from the site's own fleet that was not featured lately, takes our photos of it, writes a text for each network and prepares the post. With approval on, it waits for you in Posts as a draft; otherwise it is scheduled by itself.",
     "noAi": "The AI key is missing on the server (ANTHROPIC_API_KEY): daily posts cannot run.",
-    "noHiggsfield": "Higgsfield is not set up on the server: posts use photos only.",
     "enabled": "Daily post",
     "time": "Publish at",
     "timeHint": "Europe/Zagreb; the AI prepares it 3 hours earlier.",
@@ -244,8 +248,8 @@
     "noChannels": "Connect this site's channels first.",
     "approval": "Wait for my approval",
     "approvalHint": "Off: the AI schedules the post by itself.",
-    "video": "Video with Higgsfield",
-    "videoHint": "A short video from the best photo, posted to TikTok and YouTube.",
+    "video": "Daily Reel (video)",
+    "videoHint": "A vertical video of the boat: Reel on Facebook and Instagram, TikTok, YouTube Shorts. Facebook and Instagram also keep the photo post, the Reel follows 3 hours later.",
     "guidance": "Notes for the AI",
     "guidancePlaceholder": "e.g. push early booking for 2027; no gulets; mention Kornati and Vis.",
     "save": "Save",
@@ -269,6 +273,8 @@
       "DONE": "Done",
       "SKIPPED": "Skipped",
       "FAILED": "Failed"
-    }
+    },
+    "ownReel": "Video is made on our server from the boat’s photos (no outside service). With Higgsfield keys it becomes an AI video.",
+    "noVideo": "Video cannot be made on the server yet (ffmpeg is not installed): posts use photos only."
   }
 }

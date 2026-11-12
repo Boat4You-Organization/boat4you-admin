@@ -267,6 +267,7 @@ const Composer = ({ editId, accounts }: { editId: number | null; accounts: Accou
   const [loadError, setLoadError] = useState<string | null>(null);
   const [locked, setLocked] = useState(false);
   const [uploads, setUploads] = useState<Upload[]>([]);
+  const [reelBusy, setReelBusy] = useState(false);
   const [busy, setBusy] = useState<SocialPostAction | null>(null);
   const [attempted, setAttempted] = useState<SocialPostAction | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -369,6 +370,23 @@ const Composer = ({ editId, accounts }: { editId: number | null; accounts: Accou
     },
     [t]
   );
+
+  /** Our own Reel from the photos in the post: the server makes the video and it replaces the photos. */
+  const makeReel = async () => {
+    const photos = draft.media.filter(m => m.kind === 'IMAGE');
+
+    setReelBusy(true);
+    try {
+      const reel = await SocialService.makeReel(photos.map(m => m.id));
+
+      setDraft(d => ({ ...d, media: [reel] }));
+      showToast({ status: 'success', text: t('compose.reelDone') });
+    } catch (e) {
+      showToast({ status: 'error', text: errorMessage(e, t('compose.reelFailed')) });
+    } finally {
+      setReelBusy(false);
+    }
+  };
 
   const addFiles = (files: File[]) => {
     const ok = files.filter(f => {
@@ -612,6 +630,14 @@ const Composer = ({ editId, accounts }: { editId: number | null; accounts: Accou
                   />
                 ))}
               </Box>
+            )}
+            {draft.media.filter(m => m.kind === 'IMAGE').length >= 2 && !draft.media.some(m => m.kind === 'VIDEO') && (
+              <Stack direction="row" alignItems="center" gap={1.5} flexWrap="wrap">
+                <Button size="small" variant="outlined" disabled={reelBusy} onClick={makeReel}>
+                  {reelBusy ? t('compose.reelMaking') : t('compose.reelMake')}
+                </Button>
+                <Typography sx={{ fontSize: 12, color: bbColors.gray500 }}>{t('compose.reelHint')}</Typography>
+              </Stack>
             )}
           </Stack>
         </DeskCard>

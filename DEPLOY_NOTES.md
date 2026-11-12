@@ -1,5 +1,12 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-12 — 🎬 Objave: gumb „Napravi Reel od ovih fotki“, dnevni Reel bez Higgsfielda, Pinterest — ⏳ NIJE DEPLOYANO (čeka backend s iste grane)
+
+- Nova objava: uz 2+ fotki gumb koji na serveru napravi okomiti video (Reel) i zamijeni fotke u objavi (`POST /admin/social/media/reel`).
+- AI dnevne objave: prekidač „Dnevni Reel (video)“ radi i bez Higgsfielda (video od fotki broda na našem serveru); poruka kaže radi li server video (`reelUnavailable`).
+- Pinterest: pravilo 1 fotka, bez videa; spajanje radi čim backend ima ključeve.
+- tsc, eslint (0 grešaka), `tests/social.test.ts` 31/31.
+
 ## 2026-11-11 — 📞 Call centar: stranice punim nazivom i u svojoj boji, filtar po stranici radi — ✅ LIVE 11.11.2026 17:08 UTC (`5b4074c`, `assets/index-PeDCUpFG.js`, na `origin/main`); tag `live/2026-11-11-call-site-names`; cusma1 `html.prev` = `index-Cui88siF.js`
 
 - **Što (Mario 11.11.: „di piše CC, stavi Catamaran Croatia i svaki web u svoju boju“):** backend sprema stranicu upita pod `CallSite` ključem (`cc`, `greece`, `italy`, `caribbean`, `ey`, `cy`, `boat4you`), a `SiteChip` i `siteLabel` rade s admin oznakama (`catamaran-croatia` …). Pozivi, Upiti i detalj poziva sada mapiraju ključ (`src/utils/callCenter/callSite.ts`) pa pišu puni naziv u boji stranice. Filtar po stranici je slao admin oznake koje backend ne sprema i nije vraćao ništa; sada šalje ključ.

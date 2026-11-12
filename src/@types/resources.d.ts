@@ -1781,9 +1781,10 @@ interface Resources {
       loadError: 'The AI settings could not be loaded.';
       noAi: 'The AI key is missing on the server (ANTHROPIC_API_KEY): daily posts cannot run.';
       noChannels: "Connect this site's channels first.";
-      noHiggsfield: 'Higgsfield is not set up on the server: posts use photos only.';
       noRuns: 'No AI posts yet.';
+      noVideo: 'Video cannot be made on the server yet (ffmpeg is not installed): posts use photos only.';
       open: 'Open';
+      ownReel: 'Video is made on our server from the boat’s photos (no outside service). With Higgsfield keys it becomes an AI video.';
       post: 'Post';
       ran: 'Done: {{- status}}';
       runError: 'The AI post failed.';
@@ -1804,8 +1805,8 @@ interface Resources {
       time: 'Publish at';
       timeHint: 'Europe/Zagreb; the AI prepares it 3 hours earlier.';
       topic: 'Topic';
-      video: 'Video with Higgsfield';
-      videoHint: 'A short video from the best photo, posted to TikTok and YouTube.';
+      video: 'Daily Reel (video)';
+      videoHint: 'A vertical video of the boat: Reel on Facebook and Instagram, TikTok, YouTube Shorts. Facebook and Instagram also keep the photo post, the Reel follows 3 hours later.';
     };
     automation: {
       accountIds: 'Channel ids';
@@ -1918,6 +1919,11 @@ interface Resources {
       problems: '{{count}} to fix';
       publishNow: 'Publish now';
       publishing: 'Publishing started: follow the status in Posts.';
+      reelDone: 'The Reel is ready.';
+      reelFailed: 'The Reel could not be made.';
+      reelHint: 'A vertical video of the photos in this order, about 3 s each. It replaces the photos in the post.';
+      reelMake: 'Make a Reel from these photos';
+      reelMaking: 'Making the Reel…';
       remove: 'Remove';
       removeChannel: 'Remove this channel';
       saveDraft: 'Save draft';

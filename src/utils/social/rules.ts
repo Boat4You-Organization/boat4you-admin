@@ -165,7 +165,7 @@ export const PLATFORM_RULES: Record<SocialPlatform, PlatformRules> = {
     mediaRequired: true,
     videoRequired: false,
     maxImages: 1,
-    maxVideos: 1,
+    maxVideos: 0,
     allowMixed: false,
     title: 'optional',
     maxTitle: 100,

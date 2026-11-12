@@ -195,6 +195,8 @@ export interface SocialAiRun {
 export interface SocialAiOverview {
   aiConfigured: boolean;
   higgsfieldConfigured: boolean;
+  /** Why the server cannot make its own Reel from photos (no ffmpeg), or null when it can. */
+  reelUnavailable?: string | null;
   settings: SocialAiSetting[];
   runs: SocialAiRun[];
 }

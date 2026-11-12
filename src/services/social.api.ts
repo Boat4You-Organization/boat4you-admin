@@ -68,6 +68,9 @@ export const createSocialApi = (api: AxiosInstance) => ({
       })
       .then(r => r.data),
 
+  /** A Reel (vertical MP4) the backend makes from 2–10 uploaded photos, in this order. */
+  makeReel: (mediaIds: number[]) => api.post<SocialMedia>('/admin/social/media/reel', { mediaIds }).then(r => r.data),
+
   /* ---- Posts ---- */
   posts: (filter: SocialPostFilter) =>
     api.get<SocialPage<SocialPost>>('/admin/social/posts', { params: params(filter) }).then(r => r.data),

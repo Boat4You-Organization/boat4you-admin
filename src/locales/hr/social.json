@@ -146,7 +146,12 @@
     "fixFirst": "Prvo popravi označene probleme.",
     "nothingToSave": "Još nema što spremiti.",
     "loadError": "Objava se nije učitala.",
-    "notEditable": "Ova objava je već izašla i ne može se mijenjati. Dupliciraj je."
+    "notEditable": "Ova objava je već izašla i ne može se mijenjati. Dupliciraj je.",
+    "reelMake": "Napravi Reel od ovih fotki",
+    "reelMaking": "Radim Reel…",
+    "reelHint": "Okomiti video od fotki ovim redom, oko 3 s po fotki. Zamjenjuje fotke u objavi.",
+    "reelDone": "Reel je spreman.",
+    "reelFailed": "Reel se nije mogao napraviti."
   },
   "channels": {
     "intro": "Spajanje ide preko službenih API-ja svake mreže. Naš backend čuva pristupne tokene; nikome ne plaćamo posrednika.",
@@ -234,7 +239,6 @@
   "ai": {
     "intro": "Svako jutro AI odabere brod iz flote tog sajta koji nedavno nije bio u objavi, uzme naše fotke, napiše tekst za svaku mrežu i pripremi objavu. S uključenim odobravanjem čeka te u Objavama kao skica; inače se zakaže sama.",
     "noAi": "Na serveru nema AI ključa (ANTHROPIC_API_KEY): dnevne objave ne mogu raditi.",
-    "noHiggsfield": "Higgsfield nije postavljen na serveru: objave koriste samo fotke.",
     "enabled": "Dnevna objava",
     "time": "Objavi u",
     "timeHint": "Europe/Zagreb; AI je pripremi 3 sata ranije.",
@@ -243,8 +247,8 @@
     "noChannels": "Prvo spoji kanale ovog sajta.",
     "approval": "Čekaj moje odobrenje",
     "approvalHint": "Isključeno: AI sam zakaže objavu.",
-    "video": "Video s Higgsfieldom",
-    "videoHint": "Kratki video od najbolje fotke, za TikTok i YouTube.",
+    "video": "Dnevni Reel (video)",
+    "videoHint": "Okomiti video broda: Reel na Facebooku i Instagramu, TikTok, YouTube Shorts. Facebook i Instagram dobiju i objavu s fotkama, Reel ide 3 sata kasnije.",
     "guidance": "Napomene za AI",
     "guidancePlaceholder": "npr. guraj rani booking za 2027.; bez guleta; spomeni Kornate i Vis.",
     "save": "Spremi",
@@ -268,6 +272,8 @@
       "DONE": "Gotovo",
       "SKIPPED": "Preskočeno",
       "FAILED": "Neuspjelo"
-    }
+    },
+    "ownReel": "Video radimo na našem serveru od fotki broda (bez vanjskog servisa). Uz Higgsfield ključeve postaje AI video.",
+    "noVideo": "Video se još ne može raditi na serveru (ffmpeg nije instaliran): objave koriste samo fotke."
   }
 }

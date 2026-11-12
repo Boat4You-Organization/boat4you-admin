@@ -108,7 +108,7 @@ const ConnectDialog = ({
   if (!platform) return null;
 
   const credentials = CREDENTIAL_PLATFORMS.includes(platform);
-  const {label} = PLATFORM_RULES[platform];
+  const { label } = PLATFORM_RULES[platform];
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();

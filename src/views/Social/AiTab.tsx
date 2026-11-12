@@ -51,13 +51,13 @@ const RUN_TONES: Record<SocialAiRunStatus, StatusTone> = {
 const SiteCard = ({
   initial,
   accounts,
-  higgsfield,
+  videoPossible,
   aiReady,
   onSaved,
 }: {
   initial: SocialAiSetting;
   accounts: AccountsState;
-  higgsfield: boolean;
+  videoPossible: boolean;
   aiReady: boolean;
   onSaved(): void;
 }) => {
@@ -197,7 +197,7 @@ const SiteCard = ({
               control={
                 <Switch
                   checked={s.useVideo}
-                  disabled={!higgsfield}
+                  disabled={!videoPossible}
                   onChange={e => patch({ useVideo: e.target.checked })}
                 />
               }
@@ -279,14 +279,16 @@ const AiTab = ({ accounts }: { accounts: AccountsState }) => {
     <Stack gap={1.5}>
       <Alert severity="info">{t('ai.intro')}</Alert>
       {!data.aiConfigured && <Alert severity="warning">{t('ai.noAi')}</Alert>}
-      {!data.higgsfieldConfigured && <Alert severity="info">{t('ai.noHiggsfield')}</Alert>}
+      {!data.higgsfieldConfigured && (
+        <Alert severity="info">{data.reelUnavailable ? t('ai.noVideo') : t('ai.ownReel')}</Alert>
+      )}
       <Box sx={{ display: 'grid', gap: 1.5, gridTemplateColumns: { xs: '1fr', lg: '1fr 1fr' } }}>
         {data.settings.map(s => (
           <SiteCard
             key={s.site}
             initial={s}
             accounts={accounts}
-            higgsfield={data.higgsfieldConfigured}
+            videoPossible={data.higgsfieldConfigured || !data.reelUnavailable}
             aiReady={data.aiConfigured}
             onSaved={load}
           />

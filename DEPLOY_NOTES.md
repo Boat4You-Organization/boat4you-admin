@@ -1,5 +1,10 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-14 — 📞 Call centar „Ponuda poslana“: admin sam pronađe poslani e-mail i pokaže tekst koji Nika čita — ✅ LIVE 14.11.2026 ~11:24 UTC (`145dbb9`, `assets/index-BvtUjnAq.js`, na `origin/main`; backend `live/2026-11-14-nika-offer-email`)
+
+- Klik „Ponuda poslana“ → `GET /admin/calls/inquiries/{id}/offer-email`: tekst e-maila (12 redaka, najviše 9000 znakova) se može urediti prije spremanja, napomena je zasebno polje; „Traži ponovno“ kad pretraga ne uspije, spremljeni tekst se tada ne gubi. `offerSent(id, note, emailText, emailSentAt)`; ključevi `offerEmail*` en + hr, `resources.d.ts` regeneriran.
+- **Provjereno:** tsc 0, eslint 0; u pregledniku pregled upita Vanessa našao e-mail s info@boat4you.com (nije spremljeno).
+
 ## 2026-11-11 — 📞 Call centar: stranice punim nazivom i u svojoj boji, filtar po stranici radi — ✅ LIVE 11.11.2026 17:08 UTC (`5b4074c`, `assets/index-PeDCUpFG.js`, na `origin/main`); tag `live/2026-11-11-call-site-names`; cusma1 `html.prev` = `index-Cui88siF.js`
 
 - **Što (Mario 11.11.: „di piše CC, stavi Catamaran Croatia i svaki web u svoju boju“):** backend sprema stranicu upita pod `CallSite` ključem (`cc`, `greece`, `italy`, `caribbean`, `ey`, `cy`, `boat4you`), a `SiteChip` i `siteLabel` rade s admin oznakama (`catamaran-croatia` …). Pozivi, Upiti i detalj poziva sada mapiraju ključ (`src/utils/callCenter/callSite.ts`) pa pišu puni naziv u boji stranice. Filtar po stranici je slao admin oznake koje backend ne sprema i nije vraćao ništa; sada šalje ključ.

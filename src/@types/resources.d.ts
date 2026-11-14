@@ -195,6 +195,7 @@ interface Resources {
       doNotCallDone: 'The number will not be called again.';
       failed: 'The action failed. Try again.';
       offerEmail: 'Offer text Nika reads';
+      offerEmailError: 'The mailbox search failed. The box holds the text saved before; you can edit it, paste a new one or search again.';
       offerEmailFailed: 'Could not read: {{mailboxes}}';
       offerEmailFound: 'Found the e-mail "{{subject}}" from {{mailbox}}, sent {{at}}. Check the text; you can edit it before saving.';
       offerEmailNotFound: 'No sent e-mail to this client found ({{count}} mailboxes searched). Paste the offer text here or write one sentence below.';

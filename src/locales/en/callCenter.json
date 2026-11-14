@@ -123,7 +123,8 @@
     "offerEmailRemoved": "Removed from the text (Nika must not say it): {{names}}",
     "offerEmailFailed": "Could not read: {{mailboxes}}",
     "offerEmailPlaceholder": "Offer text from the e-mail (everything Nika should know)",
-    "offerEmailRetry": "Search again"
+    "offerEmailRetry": "Search again",
+    "offerEmailError": "The mailbox search failed. The box holds the text saved before; you can edit it, paste a new one or search again."
   },
   "detail": {
     "back": "All calls",

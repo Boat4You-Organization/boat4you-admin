@@ -86,11 +86,13 @@ export const InquiryActions = ({ inquiry, onDone }: { inquiry: CallInquiry; onDo
   const [emailSentAt, setEmailSentAt] = useState<string | null>(null);
   const [preview, setPreview] = useState<OfferEmailPreview | null>(null);
   const [searching, setSearching] = useState(false);
+  const [searchFailed, setSearchFailed] = useState(false);
 
   /** Looks for the offer Mario sent this client in the site mailboxes and puts its text in the box. */
   const findEmail = async () => {
     setSearching(true);
     setPreview(null);
+    setSearchFailed(false);
 
     try {
       const { data } = await CallCenterService.offerEmail(inquiry.id);
@@ -102,17 +104,8 @@ export const InquiryActions = ({ inquiry, onDone }: { inquiry: CallInquiry; onDo
         setEmailSentAt(data.sentAt);
       }
     } catch {
-      setPreview({
-        configured: true,
-        found: false,
-        mailbox: null,
-        subject: null,
-        sentAt: null,
-        text: null,
-        removed: [],
-        searchedMailboxes: 0,
-        failedMailboxes: [],
-      });
+      // The search failed: the box keeps what was saved before, never an empty text that would erase it.
+      setSearchFailed(true);
     } finally {
       setSearching(false);
     }
@@ -124,8 +117,8 @@ export const InquiryActions = ({ inquiry, onDone }: { inquiry: CallInquiry; onDo
     setOfferOpen(opening);
 
     if (opening) {
-      setEmail('');
-      setEmailSentAt(null);
+      setEmail(inquiry.offerEmailText ?? '');
+      setEmailSentAt(inquiry.offerEmailSentAt);
       findEmail();
     }
   };
@@ -207,6 +200,7 @@ export const InquiryActions = ({ inquiry, onDone }: { inquiry: CallInquiry; onDo
               !preview.found &&
               t('action.offerEmailNotFound', { count: preview.searchedMailboxes })}
           </Box>
+          {!searching && searchFailed && <Box sx={{ fontSize: 13, color: cc.red }}>{t('action.offerEmailError')}</Box>}
           {!searching && !!preview?.removed.length && (
             <Box sx={{ fontSize: 13, color: cc.muted }}>
               {t('action.offerEmailRemoved', { names: preview.removed.join(', ') })}
@@ -251,9 +245,7 @@ export const InquiryActions = ({ inquiry, onDone }: { inquiry: CallInquiry; onDo
                 run(
                   () => CallCenterService.offerSent(inquiry.id, note, email, emailSentAt),
                   t('action.offerSentDone')
-                ).then(() =>
-                  setOfferOpen(false)
-                )
+                ).then(() => setOfferOpen(false))
               }
             >
               {t('action.offerSave')}

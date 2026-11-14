@@ -123,7 +123,8 @@
     "offerEmailRemoved": "Maknuto iz teksta (Nika to ne smije reći): {{names}}",
     "offerEmailFailed": "Nisam mogao pročitati: {{mailboxes}}",
     "offerEmailPlaceholder": "Tekst ponude iz e-maila (sve što Nika treba znati)",
-    "offerEmailRetry": "Potraži ponovno"
+    "offerEmailRetry": "Potraži ponovno",
+    "offerEmailError": "Pretraga sandučića nije uspjela. U polju je ranije spremljen tekst; možeš ga urediti, zalijepiti novi ili pokušati ponovno."
   },
   "detail": {
     "back": "Svi pozivi",

@@ -114,7 +114,16 @@
     "doNotCallDone": "The number will not be called again.",
     "resolve": "Mark resolved",
     "refused": "Not possible: {{reason}}.",
-    "failed": "The action failed. Try again."
+    "failed": "The action failed. Try again.",
+    "offerEmail": "Offer text Nika reads",
+    "offerEmailSearching": "Looking for the offer you sent this client in the mailboxes…",
+    "offerEmailOff": "Mailbox reading is not switched on on the server. You can paste the offer text here.",
+    "offerEmailFound": "Found the e-mail \"{{subject}}\" from {{mailbox}}, sent {{at}}. Check the text; you can edit it before saving.",
+    "offerEmailNotFound": "No sent e-mail to this client found ({{count}} mailboxes searched). Paste the offer text here or write one sentence below.",
+    "offerEmailRemoved": "Removed from the text (Nika must not say it): {{names}}",
+    "offerEmailFailed": "Could not read: {{mailboxes}}",
+    "offerEmailPlaceholder": "Offer text from the e-mail (everything Nika should know)",
+    "offerEmailRetry": "Search again"
   },
   "detail": {
     "back": "All calls",

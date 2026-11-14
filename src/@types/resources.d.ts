@@ -194,6 +194,15 @@ interface Resources {
       doNotCallConfirm: 'Mark this phone number as do not call? Every scheduled call to it is cancelled.';
       doNotCallDone: 'The number will not be called again.';
       failed: 'The action failed. Try again.';
+      offerEmail: 'Offer text Nika reads';
+      offerEmailFailed: 'Could not read: {{mailboxes}}';
+      offerEmailFound: 'Found the e-mail "{{subject}}" from {{mailbox}}, sent {{at}}. Check the text; you can edit it before saving.';
+      offerEmailNotFound: 'No sent e-mail to this client found ({{count}} mailboxes searched). Paste the offer text here or write one sentence below.';
+      offerEmailOff: 'Mailbox reading is not switched on on the server. You can paste the offer text here.';
+      offerEmailPlaceholder: 'Offer text from the e-mail (everything Nika should know)';
+      offerEmailRemoved: 'Removed from the text (Nika must not say it): {{names}}';
+      offerEmailRetry: 'Search again';
+      offerEmailSearching: 'Looking for the offer you sent this client in the mailboxes…';
       offerNote: 'The offer in one sentence';
       offerNotePlaceholder: 'E.g. Bali 5.4 from Lefkas, 19–26 June, 14,200 euros with skipper';
       offerSave: 'Save and schedule the follow-up call';

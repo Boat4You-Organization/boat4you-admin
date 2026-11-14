@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 
 import CallCenterService from '@/services/callCenter.service';
 import { bbTones } from '@/styles/bb';
-import { CallInquiry } from '@/types/callCenter.type';
+import { CallInquiry, OfferEmailPreview } from '@/types/callCenter.type';
 import { CcButton, Pill, cc, textareaSx } from '@/views/ContactCenter/ui';
 
 type Tone = keyof typeof bbTones;
@@ -82,6 +82,53 @@ export const InquiryActions = ({ inquiry, onDone }: { inquiry: CallInquiry; onDo
   const [busy, setBusy] = useState(false);
   const [offerOpen, setOfferOpen] = useState(false);
   const [note, setNote] = useState('');
+  const [email, setEmail] = useState('');
+  const [emailSentAt, setEmailSentAt] = useState<string | null>(null);
+  const [preview, setPreview] = useState<OfferEmailPreview | null>(null);
+  const [searching, setSearching] = useState(false);
+
+  /** Looks for the offer Mario sent this client in the site mailboxes and puts its text in the box. */
+  const findEmail = async () => {
+    setSearching(true);
+    setPreview(null);
+
+    try {
+      const { data } = await CallCenterService.offerEmail(inquiry.id);
+
+      setPreview(data);
+
+      if (data.found && data.text) {
+        setEmail(data.text);
+        setEmailSentAt(data.sentAt);
+      }
+    } catch {
+      setPreview({
+        configured: true,
+        found: false,
+        mailbox: null,
+        subject: null,
+        sentAt: null,
+        text: null,
+        removed: [],
+        searchedMailboxes: 0,
+        failedMailboxes: [],
+      });
+    } finally {
+      setSearching(false);
+    }
+  };
+
+  const toggleOffer = () => {
+    const opening = !offerOpen;
+
+    setOfferOpen(opening);
+
+    if (opening) {
+      setEmail('');
+      setEmailSentAt(null);
+      findEmail();
+    }
+  };
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
 
   const run = async (action: () => Promise<unknown>, done: string) => {
@@ -128,7 +175,7 @@ export const InquiryActions = ({ inquiry, onDone }: { inquiry: CallInquiry; onDo
         >
           {t('action.takeover')}
         </CcButton>
-        <CcButton disabled={busy} onClick={() => setOfferOpen(open => !open)}>
+        <CcButton disabled={busy} onClick={toggleOffer}>
           {t('action.offerSent')}
         </CcButton>
         <CcButton
@@ -144,6 +191,48 @@ export const InquiryActions = ({ inquiry, onDone }: { inquiry: CallInquiry; onDo
       </Box>
       {offerOpen && (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <Box sx={{ fontSize: 13, fontWeight: 600 }}>{t('action.offerEmail')}</Box>
+          <Box role="status" sx={{ fontSize: 13, color: cc.muted }}>
+            {searching && t('action.offerEmailSearching')}
+            {!searching && preview && !preview.configured && t('action.offerEmailOff')}
+            {!searching &&
+              preview?.found &&
+              t('action.offerEmailFound', {
+                subject: preview.subject ?? '—',
+                mailbox: preview.mailbox ?? '—',
+                at: formatAt(preview.sentAt),
+              })}
+            {!searching &&
+              preview?.configured &&
+              !preview.found &&
+              t('action.offerEmailNotFound', { count: preview.searchedMailboxes })}
+          </Box>
+          {!searching && !!preview?.removed.length && (
+            <Box sx={{ fontSize: 13, color: cc.muted }}>
+              {t('action.offerEmailRemoved', { names: preview.removed.join(', ') })}
+            </Box>
+          )}
+          {!searching && !!preview?.failedMailboxes.length && (
+            <Box sx={{ fontSize: 13, color: cc.red }}>
+              {t('action.offerEmailFailed', { mailboxes: preview.failedMailboxes.join(', ') })}
+            </Box>
+          )}
+          <Box
+            component="textarea"
+            rows={12}
+            maxLength={9000}
+            aria-label={t('action.offerEmail')}
+            placeholder={t('action.offerEmailPlaceholder')}
+            value={email}
+            disabled={searching}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEmail(e.target.value)}
+            sx={textareaSx}
+          />
+          <Box>
+            <CcButton disabled={busy || searching} onClick={findEmail}>
+              {t('action.offerEmailRetry')}
+            </CcButton>
+          </Box>
           <Box
             component="textarea"
             rows={2}
@@ -157,9 +246,12 @@ export const InquiryActions = ({ inquiry, onDone }: { inquiry: CallInquiry; onDo
           <Box>
             <CcButton
               kind="fill"
-              disabled={busy}
+              disabled={busy || searching}
               onClick={() =>
-                run(() => CallCenterService.offerSent(inquiry.id, note), t('action.offerSentDone')).then(() =>
+                run(
+                  () => CallCenterService.offerSent(inquiry.id, note, email, emailSentAt),
+                  t('action.offerSentDone')
+                ).then(() =>
                   setOfferOpen(false)
                 )
               }

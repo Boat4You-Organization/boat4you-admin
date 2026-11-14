@@ -105,7 +105,7 @@
     "takeoverConfirm": "Otkazati Nikine zakazane pozive za ovaj upit?",
     "takeoverDone": "Nikini zakazani pozivi su otkazani.",
     "offerSent": "Ponuda poslana",
-    "offerNote": "Ponuda u jednoj rečenici",
+    "offerNote": "Ponuda u jednoj rečenici (ako nema e-maila)",
     "offerNotePlaceholder": "Npr. Bali 5.4 iz Lefkasa, 19.–26. lipnja, 14.200 eura sa skiperom",
     "offerSave": "Spremi i zakaži poziv nakon ponude",
     "offerSentDone": "Spremljeno. Nika zove o ponudi za 48 sati.",
@@ -114,7 +114,16 @@
     "doNotCallDone": "Broj se više neće zvati.",
     "resolve": "Označi riješeno",
     "refused": "Nije moguće: {{reason}}.",
-    "failed": "Radnja nije uspjela. Pokušajte ponovno."
+    "failed": "Radnja nije uspjela. Pokušajte ponovno.",
+    "offerEmail": "Tekst ponude koji Nika čita",
+    "offerEmailSearching": "Tražim ponudu koju si poslao ovom klijentu u sandučićima…",
+    "offerEmailOff": "Čitanje sandučića nije uključeno na serveru. Možeš zalijepiti tekst ponude ovdje.",
+    "offerEmailFound": "Pronađen e-mail „{{subject}}“ iz {{mailbox}}, poslan {{at}}. Provjeri tekst; možeš ga urediti prije spremanja.",
+    "offerEmailNotFound": "Nisam našao poslani e-mail ovom klijentu (pretraženo sandučića: {{count}}). Zalijepi tekst ponude ovdje ili napiši jednu rečenicu ispod.",
+    "offerEmailRemoved": "Maknuto iz teksta (Nika to ne smije reći): {{names}}",
+    "offerEmailFailed": "Nisam mogao pročitati: {{mailboxes}}",
+    "offerEmailPlaceholder": "Tekst ponude iz e-maila (sve što Nika treba znati)",
+    "offerEmailRetry": "Potraži ponovno"
   },
   "detail": {
     "back": "Svi pozivi",

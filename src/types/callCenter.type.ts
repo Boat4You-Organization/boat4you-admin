@@ -70,7 +70,22 @@ export interface CallInquiry {
   doNotCall: boolean;
   offerSentAt: string | null;
   offerNote: string | null;
+  offerEmailText: string | null;
+  offerEmailSentAt: string | null;
   humanTakeoverAt: string | null;
+}
+
+/** GET /admin/calls/inquiries/{id}/offer-email: the offer Mario sent, as Nika would get it. */
+export interface OfferEmailPreview {
+  configured: boolean;
+  found: boolean;
+  mailbox: string | null;
+  subject: string | null;
+  sentAt: string | null;
+  text: string | null;
+  removed: string[];
+  searchedMailboxes: number;
+  failedMailboxes: string[];
 }
 
 export interface TranscriptTurn {

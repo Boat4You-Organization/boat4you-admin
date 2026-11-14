@@ -7,6 +7,7 @@ import {
   CallInquiryListItem,
   CallListItem,
   CallSettings,
+  OfferEmailPreview,
   Paged,
 } from '@/types/callCenter.type';
 
@@ -27,8 +28,14 @@ const CallCenterService = {
 
   humanTakeover: (inquiryId: number) => api.post<void>(`/admin/calls/inquiries/${inquiryId}/human-takeover`),
 
-  offerSent: (inquiryId: number, note: string) =>
-    api.post<void>(`/admin/calls/inquiries/${inquiryId}/offer-sent`, { note: note.trim() || null }),
+  offerEmail: (inquiryId: number) => api.get<OfferEmailPreview>(`/admin/calls/inquiries/${inquiryId}/offer-email`),
+
+  offerSent: (inquiryId: number, note: string, emailText: string, emailSentAt: string | null) =>
+    api.post<void>(`/admin/calls/inquiries/${inquiryId}/offer-sent`, {
+      note: note.trim() || null,
+      emailText: emailText.trim() || null,
+      emailSentAt: emailText.trim() ? emailSentAt : null,
+    }),
 
   doNotCall: (inquiryId: number) => api.post<void>(`/admin/calls/inquiries/${inquiryId}/do-not-call`),
 

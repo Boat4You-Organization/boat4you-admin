@@ -43,8 +43,12 @@ const SecuritySection = () => {
       toast(ok, ok ? t('security.passkey-added') : t('security.failed'));
 
       if (ok) setLabel('');
-    } catch {
-      toast(false, t('security.passkey-cancelled'));
+    } catch (error) {
+      // InvalidStateError: this keychain already holds a passkey for the account (iCloud Keychain shares one passkey
+      // between the iPhone and the Mac, so a second one is neither possible nor needed).
+      const name = error instanceof DOMException ? error.name : '';
+
+      toast(false, name === 'InvalidStateError' ? t('security.passkey-exists') : t('security.passkey-cancelled'));
     }
 
     setBusy(false);

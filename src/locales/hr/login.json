@@ -78,6 +78,7 @@
     "devices-help": "Preglednici zapamćeni na 30 dana preskaču drugi korak.",
     "devices-forget": "Zaboravi sve zapamćene preglednike",
     "devices-forgotten": "Zapamćeni preglednici su zaboravljeni.",
-    "failed": "Nije uspjelo. Sigurnosne postavke mogu se mijenjati 15 minuta nakon prijave: odjavite se, ponovo prijavite i pokušajte opet."
+    "failed": "Nije uspjelo. Sigurnosne postavke mogu se mijenjati 15 minuta nakon prijave: odjavite se, ponovo prijavite i pokušajte opet.",
+    "passkey-exists": "Ovaj uređaj već ima passkey za ovaj račun (iCloud Keychain ga dijeli između iPhonea i Maca), pa drugi nije potreban. Prijavite se njime."
   }
 }

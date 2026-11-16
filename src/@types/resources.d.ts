@@ -1476,6 +1476,7 @@ interface Resources {
       passkey: 'Passkey';
       'passkey-added': 'Passkey added.';
       'passkey-cancelled': 'The passkey was not saved.';
+      'passkey-exists': 'This device already has a passkey for this account (iCloud Keychain shares it between your iPhone and Mac), so no second one is needed. Sign in with it.';
       'passkey-label': 'Name (e.g. iPhone)';
       passkeys: 'Passkeys (Face ID / Touch ID)';
       'passkeys-help': 'Saved in iCloud Keychain, so it works on your iPhone and Mac. On a computer without Touch ID, the browser shows a QR code to scan with your iPhone.';

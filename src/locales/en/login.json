@@ -78,6 +78,7 @@
     "devices-help": "Browsers remembered for 30 days skip the second step.",
     "devices-forget": "Forget all remembered browsers",
     "devices-forgotten": "Remembered browsers forgotten.",
-    "failed": "That did not work. Security changes are allowed within 15 minutes of signing in: sign out, sign in again and retry."
+    "failed": "That did not work. Security changes are allowed within 15 minutes of signing in: sign out, sign in again and retry.",
+    "passkey-exists": "This device already has a passkey for this account (iCloud Keychain shares it between your iPhone and Mac), so no second one is needed. Sign in with it."
   }
 }

@@ -23,6 +23,7 @@ import { showToast } from '@/valtio/global/global.actions';
 
 import styles from './MyProfile.module.scss';
 import EditableField from './partials/EditableField';
+import SecuritySection from './partials/SecuritySection/SecuritySection';
 
 const defaultValues: ProfileFormValues = {
   id: 0,
@@ -376,6 +377,8 @@ const MyProfile = () => {
             )}
           </Form>
         </Box>
+        {/* Two-step sign-in: passkeys, authenticator app, recovery codes (16.11.2026). */}
+        <SecuritySection />
       </Container>
     </Layout>
   );

@@ -1441,6 +1441,20 @@ interface Resources {
     'forgotten-password': 'Forgotten password?';
     'log-in': 'Login';
     'logging-in': 'Logging in...';
+    mfa: {
+      'confirm-code': 'Confirm';
+      failed: 'That did not work. Check the code and try again.';
+      intro: 'Confirm it is you: use your passkey (Face ID / Touch ID) or a code.';
+      'passkey-cancelled': 'The passkey was not used. Try again or use a code.';
+      'recovery-code': 'Recovery code';
+      'remember-device': 'Remember this device for 30 days';
+      'setup-required': 'Set up two-step sign-in in your profile (Security).';
+      'switch-to-recovery': 'Use a recovery code instead';
+      'switch-to-totp': 'Use the authenticator app instead';
+      title: 'Two-step sign-in';
+      'totp-code': 'Code from the authenticator app';
+      'use-passkey': 'Sign in with passkey (Face ID / Touch ID)';
+    };
     password: 'Password';
     'remember-me': 'Remember me';
     'reset-password': {
@@ -1448,6 +1462,37 @@ interface Resources {
       'check-mailbox': 'Check your mailbox!';
       'check-mailbox-description': 'A code has been sent to email <strong>{{name}}</strong>';
       title: 'Reset Password';
+    };
+    security: {
+      'add-passkey': 'Add passkey';
+      added: 'added';
+      'code-wrong': 'Wrong code. Check the time on your phone and try again.';
+      'confirm-remove': 'Remove it? Keep at least one way to sign in.';
+      'devices-forget': 'Forget all remembered browsers';
+      'devices-forgotten': 'Remembered browsers forgotten.';
+      'devices-help': 'Browsers remembered for 30 days skip the second step.';
+      failed: 'That did not work. Try again.';
+      'last-used': 'last used';
+      passkey: 'Passkey';
+      'passkey-added': 'Passkey added.';
+      'passkey-cancelled': 'The passkey was not saved.';
+      'passkey-label': 'Name (e.g. iPhone)';
+      passkeys: 'Passkeys (Face ID / Touch ID)';
+      'passkeys-help': 'Saved in iCloud Keychain, so it works on your iPhone and Mac. On a computer without Touch ID, the browser shows a QR code to scan with your iPhone.';
+      recovery: 'Recovery codes';
+      'recovery-help': 'Each code works once, if you lose your phone. Unused codes: {{count}}.';
+      'recovery-new': 'Create new recovery codes';
+      remove: 'Remove';
+      removed: 'Removed.';
+      'status-off': 'Off: add a passkey (and the authenticator app as a fallback) to turn it on.';
+      'status-on': 'On: after the password, sign-in asks for your passkey or a code.';
+      title: 'Security · two-step sign-in';
+      totp: 'Authenticator app (fallback)';
+      'totp-help': 'Google Authenticator or another app: a 6-digit code when the passkey is not at hand.';
+      'totp-key': 'Or type the key:';
+      'totp-on': 'Authenticator app is on.';
+      'totp-qr-alt': 'QR code for the authenticator app';
+      'totp-set-up': 'Set up the authenticator app';
     };
     'setup-password': {
       description: 'Input your new password.';

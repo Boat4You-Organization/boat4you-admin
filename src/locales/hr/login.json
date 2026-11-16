@@ -78,6 +78,6 @@
     "devices-help": "Preglednici zapamćeni na 30 dana preskaču drugi korak.",
     "devices-forget": "Zaboravi sve zapamćene preglednike",
     "devices-forgotten": "Zapamćeni preglednici su zaboravljeni.",
-    "failed": "Nije uspjelo. Pokušajte ponovo."
+    "failed": "Nije uspjelo. Sigurnosne postavke mogu se mijenjati 15 minuta nakon prijave: odjavite se, ponovo prijavite i pokušajte opet."
   }
 }

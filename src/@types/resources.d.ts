@@ -1471,7 +1471,7 @@ interface Resources {
       'devices-forget': 'Forget all remembered browsers';
       'devices-forgotten': 'Remembered browsers forgotten.';
       'devices-help': 'Browsers remembered for 30 days skip the second step.';
-      failed: 'That did not work. Try again.';
+      failed: 'That did not work. Security changes are allowed within 15 minutes of signing in: sign out, sign in again and retry.';
       'last-used': 'last used';
       passkey: 'Passkey';
       'passkey-added': 'Passkey added.';

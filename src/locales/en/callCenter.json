@@ -216,7 +216,7 @@
       "calls_transfer_number": "Transfer number",
       "calls_limit_daily": "Calls per day",
       "calls_limit_monthly": "Calls per month",
-      "calls_audio_retentionDays": "Keep recordings (days)"
+      "calls_audio_retentionDays": "Delete everything from a call after (days)"
     },
     "hint": {
       "calls_test_numbers": "comma separated; empty = everyone",

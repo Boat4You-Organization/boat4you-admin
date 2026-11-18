@@ -216,7 +216,7 @@
       "calls_transfer_number": "Broj za prebacivanje",
       "calls_limit_daily": "Poziva dnevno",
       "calls_limit_monthly": "Poziva mjesečno",
-      "calls_audio_retentionDays": "Čuvanje snimki (dana)"
+      "calls_audio_retentionDays": "Brisanje svega od poziva nakon (dana)"
     },
     "hint": {
       "calls_test_numbers": "odvojeni zarezom; prazno = svi",

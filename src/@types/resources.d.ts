@@ -341,7 +341,7 @@ interface Resources {
       enableConfirm: 'You are switching calls ON. Nika will start calling clients. Continue?';
       field: {
         calls_attempts_max: 'Attempts per call';
-        calls_audio_retentionDays: 'Keep recordings (days)';
+        calls_audio_retentionDays: 'Delete everything from a call after (days)';
         calls_enabled: 'Calls';
         calls_first_delayMinutes: 'First call after (minutes)';
         calls_followup_delayHours: 'Follow-up after the offer (hours)';

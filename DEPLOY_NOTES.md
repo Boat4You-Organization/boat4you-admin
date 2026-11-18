@@ -1,5 +1,9 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-18 — 📞 Call centar, postavke: polje čuvanja sada kaže „Brisanje svega od poziva nakon (dana)“ — ✅ LIVE 18.11.2026 13:23 UTC (`assets/index-B-qWrGsa.js`, tag `live/2026-11-18-retention-label`)
+
+Backend od 18.11. istom postavkom (`calls.audio.retentionDays`, zadano 20, najmanje 7) briše snimku, transkript, sažetak i podatke poziva; stari naziv „Čuvanje snimki (dana)“ je zavaravao. Samo tekst (hr, en). Prije deploya potvrđeno da je živi build = `main` (isti hash `index-D_LeR7KA.js`). Prvi deploy kroz `admin_deploy.sh` s `b4y_ssh_lib.sh` (bez programa sshpass).
+
 ## 2026-11-14 — 📞 Call centar „Ponuda poslana“: admin sam pronađe poslani e-mail i pokaže tekst koji Nika čita — ✅ LIVE 14.11.2026 ~11:24 UTC (`145dbb9`, `assets/index-BvtUjnAq.js`, na `origin/main`; backend `live/2026-11-14-nika-offer-email`)
 
 - Klik „Ponuda poslana“ → `GET /admin/calls/inquiries/{id}/offer-email`: tekst e-maila (12 redaka, najviše 9000 znakova) se može urediti prije spremanja, napomena je zasebno polje; „Traži ponovno“ kad pretraga ne uspije, spremljeni tekst se tada ne gubi. `offerSent(id, note, emailText, emailSentAt)`; ključevi `offerEmail*` en + hr, `resources.d.ts` regeneriran.

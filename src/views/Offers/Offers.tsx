@@ -60,7 +60,8 @@ import {
   cartFigureChanges,
   cartSecurityDeposit,
   catalogueHasObligatory,
-  offerLacksPartnerExtras,
+  isNauSys,
+  offerMayLackSyncedExtras,
 } from './offerCart';
 import {
   OFFER_CHARTER_COLORS,
@@ -1134,14 +1135,15 @@ const Offers = () => {
             ) || offers[0],
         };
       };
-      const partnerYacht = row.sourceSystem != null;
       let loaded = await loadDetail();
 
       // This request starts the partner sync of the yacht for these dates, but answers before it has written anything.
       // An offer that has no extras yet is asked for again once the sync has had time (3 tries, ~2.5 s apart).
       for (
         let attempt = 0;
-        attempt < 3 && loaded.matchedOffer && offerLacksPartnerExtras(partnerYacht, loaded.matchedOffer);
+        attempt < 3 &&
+        loaded.matchedOffer &&
+        offerMayLackSyncedExtras(row.sourceSystem, loaded.yachtDetails?.custom, loaded.matchedOffer);
         attempt += 1
       ) {
         // eslint-disable-next-line no-await-in-loop
@@ -1182,9 +1184,14 @@ const Offers = () => {
         return;
       }
 
-      // Still no extras on the partner's offer while the catalogue lists obligatory ones: they would have to be guessed
-      // from the catalogue (wrong period, wrong way of payment), so the yacht is not added.
-      if (offerLacksPartnerExtras(partnerYacht, matchedOffer) && catalogueHasObligatory(yachtDetails.services || [])) {
+      // Still no extras on the offer while the catalogue lists obligatory ones: on a NauSys yacht they would be guessed
+      // from the catalogue (wrong period, wrong way of payment), so it is not added. With the system unknown (MANAGER
+      // sees no partner name) the yacht is added and the broker is told to check the obligatory rows.
+      const extrasUnconfirmed =
+        offerMayLackSyncedExtras(row.sourceSystem, yachtDetails.custom, matchedOffer) &&
+        catalogueHasObligatory(yachtDetails.services || []);
+
+      if (extrasUnconfirmed && isNauSys(row.sourceSystem)) {
         showToast({
           status: 'error',
           text: `${row.modelName} | ${row.name}: the partner has not sent the obligatory extras for this period yet. Not added. Try again in a minute, or check the yacht with the operator.`,
@@ -1281,7 +1288,7 @@ const Offers = () => {
       const imageUrl: string | null =
         mainImg?.url || getBoatImageUrl(row.mainImageId, 800) || getBoatImageUrl(mainImg?.id, 800);
 
-      const extras = buildCartExtras(yachtDetails.services || [], matchedOffer, row.sourceSystem != null);
+      const extras = buildCartExtras(yachtDetails.services || [], matchedOffer);
 
       // Backend extrasKey of the Skipper / Hostess rows, if the partner synced
       // them. Sent to /calculate so NauSys re-quotes obligatory extras (Damage
@@ -1373,7 +1380,14 @@ const Offers = () => {
       };
 
       setCart(prev => [...prev, entry]);
-      showToast({ status: 'success', text: `${row.modelName} | ${row.name} added to offer` });
+      showToast(
+        extrasUnconfirmed
+          ? {
+              status: 'warning',
+              text: `${row.modelName} | ${row.name} added, but the partner's obligatory extras for this period could not be confirmed. Check them with the operator before sending.`,
+            }
+          : { status: 'success', text: `${row.modelName} | ${row.name} added to offer` }
+      );
     } catch {
       showToast({ status: 'error', text: 'Failed to fetch yacht details — try again' });
     } finally {
@@ -1493,10 +1507,12 @@ const Offers = () => {
               return toppedUp;
             }
 
-            const partnerYacht = entry.sourceSystem != null;
-
-            // The same guard as on "Add to offer": no partner extras yet -> keep the snapshot, never the catalogue.
-            if (offerLacksPartnerExtras(partnerYacht, freshOffer) && catalogueHasObligatory(data.services || [])) {
+            // The same guard as on "Add to offer": a NauSys offer without extras yet keeps the snapshot.
+            if (
+              isNauSys(entry.sourceSystem) &&
+              offerMayLackSyncedExtras(entry.sourceSystem, data.custom, freshOffer) &&
+              catalogueHasObligatory(data.services || [])
+            ) {
               changedNotes.push(
                 `${label}: the partner's obligatory extras could not be re-checked. Open the offer again in a minute.`
               );
@@ -1516,7 +1532,7 @@ const Offers = () => {
                 data.securityDeposit,
                 freshOffer.clientPriceInfo?.rate
               ),
-              extras: buildCartExtras(data.services || [], freshOffer, partnerYacht),
+              extras: buildCartExtras(data.services || [], freshOffer),
               checkin: freshOffer.checkin || data.defaultCheckin || entry.checkin,
               checkout: freshOffer.checkout || data.defaultCheckout || entry.checkout,
             };
@@ -1528,7 +1544,9 @@ const Offers = () => {
           } catch {
             // Leave entry as-is with empty amenities — failing one yacht
             // shouldn't block the whole offer preview.
-            return { ...entry, keyAmenities: entry.keyAmenities || [] };
+            changedNotes.push(`${entry.modelName} | ${entry.name}: could not be re-checked with the partner.`);
+            
+return { ...entry, keyAmenities: entry.keyAmenities || [] };
           }
         })
       );

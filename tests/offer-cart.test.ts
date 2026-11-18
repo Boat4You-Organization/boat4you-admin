@@ -8,7 +8,8 @@ import {
   cartFigureChanges,
   cartSecurityDeposit,
   catalogueHasObligatory,
-  offerLacksPartnerExtras,
+  isNauSys,
+  offerMayLackSyncedExtras,
 } from '../src/views/Offers/offerCart.ts';
 
 // the catalogue row of the night before: old amount, paid to the operator
@@ -36,11 +37,10 @@ const offerTransitLog = {
 
 describe('buildCartExtras', () => {
   test('the offer row replaces its catalogue twin: amount and way of payment are the offer`s', () => {
-    const extras = buildCartExtras(
-      [catalogueTransitLog, catalogueSup],
-      { extras: [offerTransitLog], obligatoryExtrasKeys: ['off-transit'] },
-      true
-    );
+    const extras = buildCartExtras([catalogueTransitLog, catalogueSup], {
+      extras: [offerTransitLog],
+      obligatoryExtrasKeys: ['off-transit'],
+    });
     const obligatory = extras.filter(x => x.obligatory);
 
     assert.equal(obligatory.length, 1);
@@ -49,32 +49,37 @@ describe('buildCartExtras', () => {
     assert.ok(extras.some(x => x.name === 'SUP' && !x.obligatory));
   });
 
-  test('a partner yacht never takes an obligatory row from the catalogue', () => {
-    const extras = buildCartExtras([catalogueTransitLog, catalogueSup], { extras: [] }, true);
+  test('a catalogue obligatory row the offer does not carry stays, as in the checkout', () => {
+    const other = { key: 'cat-clean', name: 'Final cleaning', priceEur: 200, obligatory: true, unit: 'PER_BOOKING' };
+    const extras = buildCartExtras([catalogueTransitLog, other], { extras: [offerTransitLog] });
 
     assert.deepEqual(
-      extras.map(x => x.name),
-      ['SUP']
+      extras
+        .filter(x => x.obligatory)
+        .map(x => `${x.name} ${x.priceEur}`)
+        .sort(),
+      ['Final cleaning 200', 'Transit log 480']
     );
-  });
-
-  test('an own (non-partner) yacht keeps its catalogue obligatory rows: there is no partner offer to read', () => {
-    const extras = buildCartExtras([catalogueTransitLog], { extras: [] }, false);
-
-    assert.equal(extras.length, 1);
-    assert.equal(extras[0].obligatory, true);
   });
 });
 
 describe('waiting for the partner sync', () => {
-  test('only a partner yacht whose offer has no extras is asked for again', () => {
-    assert.equal(offerLacksPartnerExtras(true, { extras: [] }), true);
-    assert.equal(offerLacksPartnerExtras(true, {}), true);
-    assert.equal(offerLacksPartnerExtras(true, { extras: [offerTransitLog] }), false);
-    assert.equal(offerLacksPartnerExtras(false, { extras: [] }), false);
+  test('an empty offer is asked for again on NauSys and on an unknown system, never on MMK or an own yacht', () => {
+    assert.equal(offerMayLackSyncedExtras('NAUSYS', false, { extras: [] }), true);
+    assert.equal(offerMayLackSyncedExtras(null, undefined, {}), true);
+    assert.equal(offerMayLackSyncedExtras('MMK', false, { extras: [] }), false);
+    assert.equal(offerMayLackSyncedExtras(null, true, { extras: [] }), false);
+    assert.equal(offerMayLackSyncedExtras('NAUSYS', false, { extras: [offerTransitLog] }), false);
   });
 
-  test('the yacht is refused only when the catalogue would have to supply obligatory rows', () => {
+  test('only a yacht known to be NauSys is refused', () => {
+    assert.equal(isNauSys('NAUSYS'), true);
+    assert.equal(isNauSys('NauSys'), true);
+    assert.equal(isNauSys('MMK'), false);
+    assert.equal(isNauSys(null), false);
+  });
+
+  test('the guard applies only when the catalogue would have to supply obligatory rows', () => {
     assert.equal(catalogueHasObligatory([catalogueTransitLog, catalogueSup]), true);
     assert.equal(catalogueHasObligatory([catalogueSup]), false);
   });

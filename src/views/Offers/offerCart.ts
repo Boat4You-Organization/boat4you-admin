@@ -1,9 +1,9 @@
 // Cart figures of one yacht in the Offers workspace: its extras list and its security deposit, built from the public
 // yacht detail. Kept free of React so `yarn test` can run it (tests/offer-cart.test.ts).
 //
-// Rule (Mario): prices and obligatory items of a partner yacht come from the partner's OFFER for the period, never from
-// the yacht catalogue. 16.11.2026 a two-week offer had no extras yet (the per-yacht sync runs after the response), the
-// catalogue filled in for it, and the client was sent an old amount under "payable separately" with last year's deposit.
+// 16.11.2026 a two-week NauSys offer had no extras yet (the per-yacht sync runs after the response), so the catalogue
+// alone supplied the obligatory rows, and the client was sent an old amount under "payable separately" with the
+// yacht-level deposit. An offer in that state is now waited for, and a NauSys yacht still without extras is not added.
 import type { CartExtra, ExtraPaymentType } from './offerHtml';
 
 export interface ExtraResponse {
@@ -48,12 +48,21 @@ export const UNIT_LABEL: Record<string, string> = {
   PERCENTAGE: '%',
 };
 
+/** The admin search row names the partner system for SYSTEM_ADMIN only; a MANAGER gets null ("unknown"). */
+export const isNauSys = (sourceSystem: string | null | undefined): boolean =>
+  (sourceSystem || '').toUpperCase() === 'NAUSYS';
+
 /**
- * True when a partner yacht's offer came back without a single extra: the per-yacht partner sync has not written them
- * yet (it runs in the background of the very request that returned this offer). The caller waits and asks again.
+ * True when the offer came back without a single extra and that may only mean "not synced yet": the per-yacht partner
+ * sync runs in the background of the very request that returned this offer. The caller waits and asks again.
+ * Never for an own (custom) yacht, and never for MMK, whose offers carry obligatory rows only and are legitimately
+ * empty when the period has none. An unknown system (MANAGER) is treated like NauSys here: waiting costs seconds.
  */
-export const offerLacksPartnerExtras = (partnerYacht: boolean, offer: CartOfferSource): boolean =>
-  partnerYacht && (offer.extras || []).length === 0;
+export const offerMayLackSyncedExtras = (
+  sourceSystem: string | null | undefined,
+  custom: boolean | null | undefined,
+  offer: CartOfferSource
+): boolean => custom !== true && (sourceSystem || '').toUpperCase() !== 'MMK' && (offer.extras || []).length === 0;
 
 /** Obligatory rows of the yacht catalogue: what would have to stand in for a partner offer that carries no extras. */
 export const catalogueHasObligatory = (services: ExtraResponse[]): boolean => services.some(s => s.obligatory === true);
@@ -73,15 +82,13 @@ export const cartSecurityDeposit = (
 };
 
 /**
+ * The merge of catalogue and offer rows is the one the checkout makes (PriceCalculationService.mergeYachtAndOfferExtras):
+ * an offer row replaces its catalogue twin, a catalogue row the offer does not carry stays.
+ *
  * @param services      yacht-level catalogue rows (`yachtDetails.services`)
  * @param matchedOffer  the offer of the period
- * @param partnerYacht  synced from a partner (MMK / NauSys): its obligatory rows are taken from the offer only
  */
-export const buildCartExtras = (
-  services: ExtraResponse[],
-  matchedOffer: CartOfferSource,
-  partnerYacht: boolean
-): CartExtra[] => {
+export const buildCartExtras = (services: ExtraResponse[], matchedOffer: CartOfferSource): CartExtra[] => {
   // Build the cart extras list from BOTH sources:
   //   1. offer.extras   — obligatory/extras the partner attached to THIS
   //                       offer (APA, tourist tax, hostess on crewed)
@@ -246,14 +253,6 @@ export const buildCartExtras = (
 
     extrasMap.set(key, value);
   });
-
-  // A partner yacht's obligatory charges are the ones on its offer. A catalogue row that is flagged obligatory but that
-  // the offer does not carry belongs to another period or is out of date, so it is not shown at all.
-  if (partnerYacht) {
-    Array.from(extrasMap.entries())
-      .filter(([k, v]) => v.obligatory && !offerRowKeys.has(k))
-      .forEach(([k]) => extrasMap.delete(k));
-  }
 
   return Array.from(extrasMap.values());
 };

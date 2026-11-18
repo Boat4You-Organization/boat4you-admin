@@ -1,5 +1,17 @@
 # boat4you-admin — deploy notes
 
+## 2026-11-18 — 📨 Ponude: obvezne stavke i depozit s ponude partnera, košarica se ponovno čita prije e-maila — ✅ LIVE 18.11.2026 17:40 UTC (`fcad2c6`, `assets/index-D-88bsRA.js`, na `origin/main`; tag `live/2026-11-18-offers-partner-extras`; backend `live/2026-11-18-offer-extras-search-wipe`)
+
+Povod: ponuda za Hannu (14 noći) poslana 16.11. s krivim Transit logom („payable separately“, stari iznos) i depozitom broda umjesto depozita razdoblja. Mario 18.11.: „Da, pregled i deploy“.
+
+- **Add to offer:** GET broda s datumima pokrene sinkronizaciju s partnerom, ali odgovori prije nje. Ponuda bez ijedne stavke pita se ponovno (3 × 2,5 s), osim za MMK i vlastite brodove. Ako NauSys brod i dalje nema stavke, a katalog ima obvezne, brod se ne dodaje. Kad je sustav nepoznat (MANAGER ne vidi `sourceSystem`), brod se doda uz upozorenje.
+- **Depozit:** `OfferDto.securityDeposit` (depozit razdoblja), inače depozit broda.
+- **Pregled ponude:** svaki brod iz košarice se ponovno čita; cijena, obvezne stavke, depozit i check-in/out zamijene se novima, a broker dobije poruku što se promijenilo ili što se nije moglo provjeriti.
+- `offerCart.ts` (novo, 9 testova u `tests/offer-cart.test.ts`): graditelj stavki premješten iz `Offers.tsx` bez promjene ponašanja. Spajanje kataloga i ponude ostaje kao u checkoutu (obvezna stavka koja je samo u katalogu se i dalje prikazuje).
+- Pregled: 1 neovisni agent (Opus); nalazi (MANAGER bez zaštite, MMK brodovi odbijeni, skrivanje stavki koje checkout naplaćuje) popravljeni prije deploya. tsc 0, eslint 0 grešaka, 157 testova.
+- **Nije provjereno u pregledniku:** tijek čekanja i poruke u samom adminu (provjera = build uživo, `index-D-88bsRA.js`).
+- Otvoreno: pregled ne gleda je li ponuda u međuvremenu postala opcija/rezervacija; kod valute koja nije EUR sama promjena tečaja javlja „price updated“.
+
 ## 2026-11-18 — 📞 Call centar, postavke: polje čuvanja sada kaže „Brisanje svega od poziva nakon (dana)“ — ✅ LIVE 18.11.2026 13:23 UTC (`assets/index-B-qWrGsa.js`, tag `live/2026-11-18-retention-label`)
 
 Backend od 18.11. istom postavkom (`calls.audio.retentionDays`, zadano 20, najmanje 7) briše snimku, transkript, sažetak i podatke poziva; stari naziv „Čuvanje snimki (dana)“ je zavaravao. Samo tekst (hr, en). Prije deploya potvrđeno da je živi build = `main` (isti hash `index-D_LeR7KA.js`). Prvi deploy kroz `admin_deploy.sh` s `b4y_ssh_lib.sh` (bez programa sshpass).

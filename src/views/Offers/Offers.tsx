@@ -53,6 +53,15 @@ import {
   RegionMultiSelect,
   VesselTypeDropdown,
 } from './filters';
+import type { ExtraResponse } from './offerCart';
+import {
+  UNIT_LABEL,
+  buildCartExtras,
+  cartFigureChanges,
+  cartSecurityDeposit,
+  catalogueHasObligatory,
+  offerLacksPartnerExtras,
+} from './offerCart';
 import {
   OFFER_CHARTER_COLORS,
   OFFER_CHARTER_LABEL,
@@ -96,20 +105,6 @@ const API_URL = import.meta.env.VITE_BOAT_API_URL || '';
 // converted ones, so hydration-backfill can't repair them — discard.
 const CART_STORAGE_KEY = 'b4y-admin-offers-cart-v3';
 const CURRENCY_STORAGE_KEY = 'b4y-admin-offers-currency-v1';
-
-// Maps the backend ExtrasUnitType enum to the human label shown in the offer.
-// Module-scoped so both the add-to-cart extras builder and the live /calculate
-// effect (skipper -> Damage Waiver) format units identically.
-const UNIT_LABEL: Record<string, string> = {
-  PER_WEEK: 'per week',
-  PER_WEEK_PERSON: 'per week / person',
-  PER_BOOKING: 'per booking',
-  PER_BOOKING_PERSON: 'per booking / person',
-  PER_NIGHT: 'per night',
-  PER_NIGHT_PERSON: 'per person / night',
-  PER_BOAT: 'per boat',
-  PERCENTAGE: '%',
-};
 
 const getBoatImageUrl = (id: number | null | undefined, width = 200): string | null =>
   id == null ? null : `${API_URL}/public/image/${id}?width=${width}`;
@@ -369,24 +364,6 @@ interface AmenityResponse {
   label?: string;
   labelCode?: string;
 }
-interface ExtraResponse {
-  id?: number;
-  externalId?: number | string | null;
-  key?: string;
-  name?: string;
-  priceEur?: number | null;
-  // Currency-converted amount when the request carried ?currency= — priceEur
-  // ALWAYS stays EUR (29.7.2026: a GBP offer showed "250.00 £" for a 250 €
-  // service — symbol swapped, amount not). Cart snapshots priceInfo.amount.
-  priceInfo?: { amount: number; currency?: string; rate?: number } | null;
-  obligatory?: boolean;
-  payableInBase?: boolean;
-  // How the client pays it (WITH_BOOKING = charged online with the charter).
-  paymentType?: ExtraPaymentType | null;
-  unit?: string | null;
-  description?: string | null;
-  extras?: { labelCode?: string };
-}
 interface OfferResponse {
   id?: number;
   dateFrom: string;
@@ -407,6 +384,8 @@ interface OfferResponse {
   extras?: ExtraResponse[];
   checkin?: string;
   checkout?: string;
+  // The partner's deposit for this period, EUR (backend from 18.11.2026).
+  securityDeposit?: number | null;
 }
 interface YachtDetailsResponse {
   manufacturerName?: string | null;
@@ -1141,13 +1120,39 @@ const Offers = () => {
 
     setAddingSlug(row.slug);
     try {
-      const { data: yachtDetails } = await api.get<YachtDetailsResponse>(
-        `/public/yachts/${encodeURIComponent(row.slug)}?dateFrom=${startDate.format('YYYY-MM-DD')}&dateTo=${endDate.format('YYYY-MM-DD')}&currency=${currency}`
-      );
-      const offers: OfferResponse[] = yachtDetails?.offers || [];
-      const matchedOffer =
-        offers.find(o => o.dateFrom === startDate.format('YYYY-MM-DD') && o.dateTo === endDate.format('YYYY-MM-DD')) ||
-        offers[0];
+      const loadDetail = async () => {
+        const { data } = await api.get<YachtDetailsResponse>(
+          `/public/yachts/${encodeURIComponent(row.slug)}?dateFrom=${startDate.format('YYYY-MM-DD')}&dateTo=${endDate.format('YYYY-MM-DD')}&currency=${currency}`
+        );
+        const offers: OfferResponse[] = data?.offers || [];
+
+        return {
+          yachtDetails: data,
+          matchedOffer:
+            offers.find(
+              o => o.dateFrom === startDate.format('YYYY-MM-DD') && o.dateTo === endDate.format('YYYY-MM-DD')
+            ) || offers[0],
+        };
+      };
+      const partnerYacht = row.sourceSystem != null;
+      let loaded = await loadDetail();
+
+      // This request starts the partner sync of the yacht for these dates, but answers before it has written anything.
+      // An offer that has no extras yet is asked for again once the sync has had time (3 tries, ~2.5 s apart).
+      for (
+        let attempt = 0;
+        attempt < 3 && loaded.matchedOffer && offerLacksPartnerExtras(partnerYacht, loaded.matchedOffer);
+        attempt += 1
+      ) {
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise(resolve => {
+          setTimeout(resolve, 2500);
+        });
+        // eslint-disable-next-line no-await-in-loop
+        loaded = await loadDetail();
+      }
+
+      const { yachtDetails, matchedOffer } = loaded;
 
       if (!matchedOffer) {
         // No single partner offer spans the searched period (long charters:
@@ -1173,6 +1178,17 @@ const Offers = () => {
           // hint is best-effort only
         }
         showToast({ status: 'error', text: `No single partner offer spans the selected period.${hint}` });
+
+        return;
+      }
+
+      // Still no extras on the partner's offer while the catalogue lists obligatory ones: they would have to be guessed
+      // from the catalogue (wrong period, wrong way of payment), so the yacht is not added.
+      if (offerLacksPartnerExtras(partnerYacht, matchedOffer) && catalogueHasObligatory(yachtDetails.services || [])) {
+        showToast({
+          status: 'error',
+          text: `${row.modelName} | ${row.name}: the partner has not sent the obligatory extras for this period yet. Not added. Try again in a minute, or check the yacht with the operator.`,
+        });
 
         return;
       }
@@ -1265,172 +1281,7 @@ const Offers = () => {
       const imageUrl: string | null =
         mainImg?.url || getBoatImageUrl(row.mainImageId, 800) || getBoatImageUrl(mainImg?.id, 800);
 
-      // Build the cart extras list from BOTH sources:
-      //   1. offer.extras   — obligatory/extras the partner attached to THIS
-      //                       offer (APA, tourist tax, hostess on crewed)
-      //   2. yacht.services — full yacht-level catalogue (SEABOB, FUN PACK,
-      //                       scooters, etc.) synced from the partner yacht
-      //                       details endpoint. Most of the 30+ optional
-      //                       extras from partner pages live ONLY here.
-      // Key by a stable identifier (label-code / external-id / name) so an
-      // item present on both levels (e.g. APA) doesn't appear twice. Prefer
-      // offer-level data where both exist — it carries period-specific price.
-      const toCartExtra = (
-        e: ExtraResponse,
-        forceObligatory: boolean
-      ): {
-        key: string;
-        value: {
-          name: string;
-          priceEur: number | null;
-          included: boolean;
-          obligatory: boolean;
-          description?: string | null;
-          unit?: string | null;
-          paymentType?: ExtraPaymentType | null;
-        };
-      } => {
-        // Converted amount first (active currency), EUR as fallback — priceEur
-        // is ALWAYS EUR while the card renders with the cart currency symbol.
-        const priceNum = e.priceInfo?.amount ?? (e.priceEur != null ? Number(e.priceEur) : null);
-        const name = e.name || e.extras?.labelCode || e.key || 'Extra';
-        // Stable de-dup key: partner row id (`e.key`), then catalogue labelCode,
-        // then name+price. The partner row id wins over labelCode because the
-        // same partner row appears on BOTH yacht.services (with labelCode
-        // mapped) and offer.extras (with labelCode null) — keying on labelCode
-        // broke the merge and rendered "Charter package" twice.
-        // obligatoryExtrasKeys uses `e.key` too. NOT externalId: NauSys
-        // obligatory offer rows carry synthetic per-offer ids, so keying on it
-        // split catalogue/offer twins; the partner id (sent to admins only, as a
-        // string) is used below only to drop a renamed catalogue twin, like the
-        // price calc's mergeYachtAndOfferExtras.
-        const key = String(e.key ?? e.extras?.labelCode ?? `${name.toLowerCase().trim()}-${priceNum ?? '-'}`);
-
-        return {
-          key,
-          value: {
-            name,
-            priceEur: priceNum,
-            included: priceNum != null && priceNum === 0,
-            obligatory:
-              forceObligatory ||
-              e.obligatory === true ||
-              (e.key != null && (matchedOffer.obligatoryExtrasKeys || []).includes(e.key)),
-            description: e.description ?? null,
-            unit: e.unit ? (UNIT_LABEL[e.unit] ?? null) : null,
-            // Same fallback as the checkout (foldedIntoOurPayment): an unclassified
-            // row not payable in base is charged online with the charter.
-            paymentType: e.paymentType ?? (e.payableInBase === false ? 'WITH_BOOKING' : null),
-          },
-        };
-      };
-
-      const extrasMap = new Map<string, ReturnType<typeof toCartExtra>['value']>();
-
-      // Partner models ONE obligatory charge as duration siblings ("Comfort
-      // Pack" / "… 2 weeks" / "… 3 weeks"), all flagged obligatory on the yacht;
-      // the offer carries the one that applies. The backend lists the others as
-      // supersededExtrasKeys — never show them (LUNA Lagoon 46 card stacked all
-      // three, Mario 23.8.2026).
-      const supersededKeys = new Set(matchedOffer.supersededExtrasKeys || []);
-
-      // Catalogue row key by partner id: the partner renames a charge in place
-      // ("Premium Line Pack (… Outboard Engine)" -> "(… Outboard Engine; 1 SUP)",
-      // same id); an older offer keeps the old name while the catalogue has the
-      // new one, and the client e-mail listed the pack twice (29.9.2026).
-      const catalogueKeyByExternalId = new Map<string, string>();
-
-      (yachtDetails.services || []).forEach(s => {
-        if (s.key != null && supersededKeys.has(s.key)) return;
-
-        const { key, value } = toCartExtra(s, false);
-
-        extrasMap.set(key, value);
-
-        if (s.externalId != null) catalogueKeyByExternalId.set(String(s.externalId), key);
-      });
-
-      // Offer-level data wins where the partner sent period-specific values,
-      // but DO NOT force-flag every offer.extras row as obligatory — trust the
-      // partner-side `obligatory` boolean instead. Forcing it caused yachts with
-      // large optional services lists (Excess 11: Extra towels, Crew change,
-      // Transfer, etc.) to dominate the offer card while yachts with leaner
-      // partner data (Bali 4.3) looked clean — visually inconsistent across
-      // the same offer. obligatoryExtrasKeys still pins items the partner
-      // explicitly tagged.
-      // The partner often names the SAME obligatory charge differently on the
-      // yacht catalogue vs the offer feed ("Comfort Pack 39/40/42 (…, OB)" vs
-      // "Comfort Pack 38/39/40/42 (…)") — strict keys can't unify those and
-      // the card showed the pack twice (Mario 26.7.2026, Master Yachting
-      // LUNA). Normalize away the size-group digits and parentheticals so an
-      // offer-level obligatory row supersedes its catalogue twin.
-      const normalizeExtraName = (n: string): string =>
-        n
-          .toLowerCase()
-          .replace(/\(.*?\)/g, '')
-          .replace(/[\d/]+/g, '')
-          .replace(/\s+/g, ' ')
-          .trim();
-
-      // The offer's extras list is already one row per partner charge (backend
-      // Offer.filterDuplicateExtras): two obligatory rows under one catalogue
-      // key ("Skipper" + "Skipper's liability insurance") are two charges and
-      // the checkout bills both since 26.9.2026 — so a later offer row must not
-      // overwrite an earlier one that shares its key.
-      const offerRowKeys = new Set<string>();
-
-      (matchedOffer.extras || []).forEach(e => {
-        const converted = toCartExtra(e, false);
-        const { value } = converted;
-        const key =
-          value.obligatory && offerRowKeys.has(converted.key)
-            ? `${converted.key}#${e.id ?? value.name.toLowerCase().trim()}`
-            : converted.key;
-
-        offerRowKeys.add(key);
-
-        // Same partner charge under another catalogue name: the offer row replaces
-        // it (mirrors PriceCalculationService.mergeYachtAndOfferExtras). Never a row
-        // another offer charge already holds.
-        const renamedTwinKey = e.externalId != null ? catalogueKeyByExternalId.get(String(e.externalId)) : undefined;
-
-        if (renamedTwinKey != null && renamedTwinKey !== key && !offerRowKeys.has(renamedTwinKey)) {
-          const twin = extrasMap.get(renamedTwinKey);
-
-          if (twin && !value.description && twin.description) value.description = twin.description;
-
-          extrasMap.delete(renamedTwinKey);
-        }
-
-        // Merge: keep richer description when offer-level lacks one.
-        const existing = extrasMap.get(key);
-
-        if (existing && !value.description && existing.description) {
-          value.description = existing.description;
-        }
-
-        // Supersede a catalogue OBLIGATORY twin (same normalized name +
-        // price + unit) — the offer row carries the period-specific truth.
-        if (value.obligatory) {
-          const norm = normalizeExtraName(value.name);
-
-          Array.from(extrasMap.entries())
-            .filter(
-              ([k, v]) =>
-                k !== key &&
-                !offerRowKeys.has(k) && // only catalogue (yacht) twins — never another offer charge
-                v.obligatory &&
-                v.priceEur === value.priceEur &&
-                v.unit === value.unit &&
-                normalizeExtraName(v.name) === norm
-            )
-            .forEach(([k]) => extrasMap.delete(k));
-        }
-
-        extrasMap.set(key, value);
-      });
-
-      const extras = Array.from(extrasMap.values());
+      const extras = buildCartExtras(yachtDetails.services || [], matchedOffer, row.sourceSystem != null);
 
       // Backend extrasKey of the Skipper / Hostess rows, if the partner synced
       // them. Sent to /calculate so NauSys re-quotes obligatory extras (Damage
@@ -1496,10 +1347,12 @@ const Offers = () => {
         // Backend sends securityDeposit ONLY in EUR (no *Info variant) — convert
         // with the same FX snapshot the offer prices used so the whole card is
         // one currency (29.7.2026: GBP offer showed the EUR deposit as "£").
-        securityDepositEur:
-          yachtDetails.securityDeposit != null
-            ? Math.round(Number(yachtDetails.securityDeposit) * (matchedOffer.clientPriceInfo?.rate ?? 1) * 100) / 100
-            : null,
+        // The offer's own deposit when the backend sends it (it differs by period), else the yacht-level one.
+        securityDepositEur: cartSecurityDeposit(
+          matchedOffer.securityDeposit,
+          yachtDetails.securityDeposit,
+          matchedOffer.clientPriceInfo?.rate
+        ),
         // Snapshot the currency at add-time. Keeps the HTML output stable
         // even if the broker later flips the global currency selector.
         // handleCurrencyChange empties the cart on a global switch, so a
@@ -1532,12 +1385,9 @@ const Offers = () => {
     setCart(prev => prev.filter(c => !(c.yachtId === yachtId && c.dateFrom === dateFrom)));
   };
 
-  // Before opening the preview modal, top up any cart entries persisted
-  // from older sessions that pre-date fields added later (currently just
-  // `keyAmenities`, added 23.4.2026). We intentionally DO NOT reset prices
-  // / extras / equipment — those were snapshotted at add-time in the
-  // currency the broker had active, and the partner may have changed
-  // prices or catalogue since. Only the missing new field is hydrated.
+  // Before opening the preview modal every cart entry is read again: fields added after an entry was saved are topped
+  // up, and price, obligatory extras and security deposit are replaced by the partner offer's current figures (see
+  // handleOpenOfferModal).
   const KEY_AMENITY_LABEL_CODES_GLOBAL = new Set([
     'air-conditioning',
     'autopilot',
@@ -1561,40 +1411,23 @@ const Offers = () => {
     // Top up entries that pre-date a field added later — keyAmenities
     // (23.4.2026) or imageUrl (28.5.2026; older carts cached a null image
     // before the /public/image fallback landed, so the offer rendered the
-    // "Yacht photo" placeholder). Only the missing field is re-fetched;
-    // prices / extras stay snapshotted at add-time.
+    // "Yacht photo" placeholder).
     // paymentType (26.9.2026): carts saved before it existed would put every
     // obligatory service under "payable separately" in the client e-mail.
-    const lacksPaymentType = (c: CartYacht): boolean => c.extras.some(x => x.obligatory && x.paymentType === undefined);
     // capacity (6.10.2026): carts saved before it existed lack max. people,
     // crew, the partner notes and the sail / engine lines. null too: an entry
     // added while the backend did not send the block yet is topped up once it
     // does (the detail always carries it from then on).
     const lacksCapacity = (c: CartYacht): boolean => c.capacity == null;
-    const missing = cart.filter(
-      c => !c.keyAmenities || c.keyAmenities.length === 0 || !c.imageUrl || lacksPaymentType(c) || lacksCapacity(c)
-    );
-
-    if (missing.length === 0) {
-      setOfferModalOpen(true);
-
-      return;
-    }
+    // Every entry is read again before the e-mail is built (18.11.2026): the cart is a snapshot, taken from a response
+    // that came back BEFORE the partner sync of that request had written anything. Price, obligatory extras and deposit
+    // are replaced by what the partner's offer says now, and the broker is told which yachts changed.
+    const changedNotes: string[] = [];
 
     setOpeningModal(true);
     try {
       const hydrated = await Promise.all(
         cart.map(async entry => {
-          if (
-            entry.keyAmenities &&
-            entry.keyAmenities.length > 0 &&
-            entry.imageUrl &&
-            !lacksPaymentType(entry) &&
-            !lacksCapacity(entry)
-          ) {
-            return entry;
-          }
-
           try {
             const { data } = await api.get<YachtDetailsResponse>(
               `/public/yachts/${encodeURIComponent(entry.slug)}?dateFrom=${entry.dateFrom}&dateTo=${entry.dateTo}&currency=${entry.currency}`
@@ -1642,13 +1475,56 @@ const Offers = () => {
               x.paymentType !== undefined ? x : { ...x, paymentType: paymentTypeByName.get(normName(x.name)) ?? null }
             );
 
-            return {
+            const toppedUp: CartYacht = {
               ...entry,
               ...(lacksCapacity(entry) ? cartCapacityFields(data) : {}),
               extras,
               keyAmenities: entry.keyAmenities?.length ? entry.keyAmenities : keyAccum.slice(0, 4),
               imageUrl,
             };
+            const freshOffer =
+              (data.offers || []).find(o => entry.offerId != null && o.id === entry.offerId) ||
+              (data.offers || []).find(o => o.dateFrom === entry.dateFrom && o.dateTo === entry.dateTo);
+            const label = `${entry.modelName} | ${entry.name}`;
+
+            if (!freshOffer) {
+              changedNotes.push(`${label}: the partner no longer lists this period. Check it before sending.`);
+
+              return toppedUp;
+            }
+
+            const partnerYacht = entry.sourceSystem != null;
+
+            // The same guard as on "Add to offer": no partner extras yet -> keep the snapshot, never the catalogue.
+            if (offerLacksPartnerExtras(partnerYacht, freshOffer) && catalogueHasObligatory(data.services || [])) {
+              changedNotes.push(
+                `${label}: the partner's obligatory extras could not be re-checked. Open the offer again in a minute.`
+              );
+
+              return toppedUp;
+            }
+
+            const fresh = {
+              clientPriceEur:
+                freshOffer.clientPriceInfo?.amount ?? (Number(freshOffer.clientPriceEur) || entry.clientPriceEur),
+              listPriceEur:
+                freshOffer.listPriceInfo?.amount ??
+                (freshOffer.listPriceEur != null ? Number(freshOffer.listPriceEur) : entry.listPriceEur),
+              discountEur: freshOffer.totalDiscountEur != null ? Number(freshOffer.totalDiscountEur) : null,
+              securityDepositEur: cartSecurityDeposit(
+                freshOffer.securityDeposit,
+                data.securityDeposit,
+                freshOffer.clientPriceInfo?.rate
+              ),
+              extras: buildCartExtras(data.services || [], freshOffer, partnerYacht),
+              checkin: freshOffer.checkin || data.defaultCheckin || entry.checkin,
+              checkout: freshOffer.checkout || data.defaultCheckout || entry.checkout,
+            };
+            const changed = cartFigureChanges(entry, fresh);
+
+            if (changed.length > 0) changedNotes.push(`${label}: ${changed.join(', ')} updated from the partner.`);
+
+            return { ...toppedUp, ...fresh };
           } catch {
             // Leave entry as-is with empty amenities — failing one yacht
             // shouldn't block the whole offer preview.
@@ -1658,6 +1534,8 @@ const Offers = () => {
       );
 
       setCart(hydrated);
+
+      if (changedNotes.length > 0) showToast({ status: 'warning', text: changedNotes.join(' ') });
     } finally {
       setOpeningModal(false);
       setOfferModalOpen(true);
